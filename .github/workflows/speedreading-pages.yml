@@ -27,9 +27,10 @@ jobs:
           node-version: 22
       - name: Build
         working-directory: speedreading-trainer
+        # Public project values (URL and anon key); repo variables override them.
         env:
-          SR_SUPABASE_URL: ${{ vars.SR_SUPABASE_URL }}
-          SR_SUPABASE_ANON_KEY: ${{ vars.SR_SUPABASE_ANON_KEY }}
+          SR_SUPABASE_URL: ${{ vars.SR_SUPABASE_URL || 'https://ujnztjqhibcpnqvbfqyw.supabase.co' }}
+          SR_SUPABASE_ANON_KEY: ${{ vars.SR_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVqbnp0anFoaWJjcG5xdmJmcXl3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzNDQ3ODgsImV4cCI6MjEwNzkyMDc4OH0.ZQbj8_UEV4qTchO8wdJFRl5zdliQ0HB8X9-0ENFhX9M' }}
         run: node build.mjs
       - name: Check page script parses
         working-directory: speedreading-trainer
