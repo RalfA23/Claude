@@ -1,0 +1,901 @@
+<title>Ralfs Lesetraining</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Literata:opsz,wght@7..72,400;7..72,600&display=swap">
+<style>
+/* Layout: one calm column like a reading desk; a highlighter-yellow marker is the only loud element (it is the pacer). */
+:root{
+  --paper:#f5f7fa; --card:#ffffff; --ink:#1a2130; --muted:#5a6475; --line:#dbe1ea;
+  --accent:#2f5bd3; --accent-ink:#ffffff; --marker:#ffe04a; --marker-soft:rgba(255,224,74,.45);
+  --good:#1d7f47; --bad:#b4372c; --warn:#9a5d00; --s2:#b8730a; --shade:rgba(26,33,48,.06);
+  --f-read:"Literata",Georgia,"Times New Roman",serif;
+  --f-ui:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#0f131b; --card:#171d29; --ink:#e5e9f0; --muted:#9aa4b5; --line:#283244;
+  --accent:#6a90f0; --accent-ink:#0f131b; --marker:#d9b829; --marker-soft:rgba(232,196,40,.30);
+  --good:#4cc283; --bad:#ee7a6e; --warn:#e2a64a; --s2:#c4851c; --shade:rgba(0,0,0,.25); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#0f131b; --card:#171d29; --ink:#e5e9f0; --muted:#9aa4b5; --line:#283244;
+  --accent:#6a90f0; --accent-ink:#0f131b; --marker:#d9b829; --marker-soft:rgba(232,196,40,.30);
+  --good:#4cc283; --bad:#ee7a6e; --warn:#e2a64a; --s2:#c4851c; --shade:rgba(0,0,0,.25); color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-ui);font-size:16px;line-height:1.5}
+.wrap{max-width:760px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px 48px;display:flex;flex-direction:column;gap:16px}
+header.top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.brand{display:flex;flex-direction:column}
+.brand h1{font-family:var(--f-read);font-weight:600;font-size:1.5rem;margin:0;text-wrap:balance;line-height:1.2}
+.brand h1 .mk{background:linear-gradient(transparent 55%,var(--marker-soft) 55%);padding:0 2px}
+.brand small{color:var(--muted)}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-size:.85rem;background:var(--card);white-space:nowrap;font-variant-numeric:tabular-nums}
+.chip b{font-weight:700}
+nav.tabs{display:flex;gap:4px;overflow-x:auto;border-bottom:1px solid var(--line);scrollbar-width:none}
+nav.tabs button{background:none;border:0;border-bottom:3px solid transparent;padding:10px 12px;font:inherit;color:var(--muted);cursor:pointer;white-space:nowrap}
+nav.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent);font-weight:700}
+button{font-family:inherit}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:var(--r);border:1px solid var(--line);background:var(--card);color:var(--ink);padding:10px 16px;font-size:1rem;cursor:pointer;min-height:44px}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:700}
+.btn.ghost{background:transparent}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn:focus-visible,nav.tabs button:focus-visible,.opt:focus-visible,.cell:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.card h2,.card h3{margin:0;font-family:var(--f-read);font-weight:600;text-wrap:balance;line-height:1.25}
+.card h2{font-size:1.35rem}.card h3{font-size:1.1rem}
+.eyebrow{font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.muted{color:var(--muted)}
+.prose{font-family:var(--f-read);font-size:1.02rem;line-height:1.6;max-width:65ch}
+.prose p{margin:0 0 .7em}
+.steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.steps li{display:flex;gap:10px;align-items:baseline}
+.steps .dot{width:1.6em;height:1.6em;border-radius:50%;border:1px solid var(--line);display:inline-flex;align-items:center;justify-content:center;font-size:.8rem;flex:none;font-variant-numeric:tabular-nums}
+.steps li.done .dot{background:var(--good);border-color:var(--good);color:var(--card)}
+.steps li.now .dot{background:var(--marker);border-color:var(--marker);color:#1a2130;font-weight:700}
+.notice{border-left:4px solid var(--warn);padding:8px 12px;background:var(--shade);border-radius:6px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.stat{display:flex;flex-direction:column;gap:2px;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--card)}
+.stat .v{font-size:1.6rem;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.1}
+.stat .l{font-size:.8rem;color:var(--muted)}
+.stat .d{font-size:.8rem;font-variant-numeric:tabular-nums}
+.up{color:var(--good)}.down{color:var(--bad)}
+.weeks{display:flex;flex-direction:column;gap:10px}
+.week{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;align-items:center;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--card)}
+.week .pips{display:flex;gap:5px}
+.pip{width:14px;height:14px;border-radius:4px;border:1px solid var(--line)}
+.pip.done{background:var(--good);border-color:var(--good)}
+.pip.test{border-color:var(--accent);border-width:2px}
+.pip.next{background:var(--marker);border-color:var(--marker)}
+.week .wt{font-weight:700}.week .wg{grid-column:1/-1;color:var(--muted);font-size:.9rem}
+.lvl{height:10px;border-radius:5px;background:var(--shade);overflow:hidden}
+.lvl i{display:block;height:100%;background:var(--accent);border-radius:5px}
+.badges{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.badge{border:1px dashed var(--line);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:2px;opacity:.55}
+.badge.on{border-style:solid;opacity:1;background:linear-gradient(transparent 70%,var(--marker-soft) 70%)}
+.badge b{font-size:.95rem}.badge span{font-size:.8rem;color:var(--muted)}
+.tablewrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums;font-size:.9rem}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{color:var(--muted);font-weight:700}
+.chart{position:relative}
+.chart svg{width:100%;height:auto;display:block;overflow:visible}
+.chart .tip{position:absolute;pointer-events:none;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:6px 8px;font-size:.8rem;box-shadow:0 4px 14px var(--shade);white-space:nowrap}
+.legend{display:flex;gap:16px;font-size:.85rem;color:var(--muted);flex-wrap:wrap}
+.legend i{display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:middle;margin-right:6px}
+.t-axis{fill:var(--muted);font-size:11px;font-family:var(--f-ui)}
+.t-lab{fill:var(--ink);font-size:12px;font-family:var(--f-ui);font-weight:700}
+label.field{display:flex;flex-direction:column;gap:4px;font-size:.9rem}
+select,input[type=range]{font:inherit}
+select{padding:8px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);min-height:44px}
+input[type=range]{width:100%;accent-color:var(--accent)}
+/* Quiz */
+.opts{display:flex;flex-direction:column;gap:8px}
+.opt{text-align:left;padding:12px 14px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;cursor:pointer}
+.opt.right{border-color:var(--good);background:color-mix(in srgb,var(--good) 14%,var(--card))}
+.opt.wrong{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 14%,var(--card))}
+/* Schulte */
+.schulte{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;max-width:420px;width:100%;margin:0 auto;position:relative}
+.cell{aspect-ratio:1;max-width:100%;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:1.3rem;font-weight:700;cursor:pointer;font-variant-numeric:tabular-nums}
+.cell.hit{background:var(--shade);color:var(--muted)}
+.cell.miss{border-color:var(--bad)}
+.center-dot{position:absolute;left:50%;top:50%;width:8px;height:8px;border-radius:50%;background:var(--bad);transform:translate(-50%,-50%);pointer-events:none}
+/* Span */
+.flash{height:140px;display:flex;align-items:center;justify-content:center;font-family:var(--f-read);font-size:1.6rem;border:1px solid var(--line);border-radius:12px;background:var(--card);text-align:center;padding:0 12px}
+/* Reader window */
+#reader{position:fixed;inset:0;background:var(--paper);z-index:50;display:flex;flex-direction:column}
+#reader .rbar{display:flex;align-items:center;gap:8px;padding-top:calc(8px + env(safe-area-inset-top,0px));padding-bottom:8px;padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px));border-bottom:1px solid var(--line);flex-wrap:wrap;background:var(--card)}
+#reader .rbar .grow{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700}
+#reader .rbar .btn{min-height:40px;padding:6px 12px}
+.wpm{font-variant-numeric:tabular-nums;font-weight:700;min-width:5.5em;text-align:center}
+#rscroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+#rtext{position:relative;max-width:36em;margin:0 auto;padding:32px max(18px,env(safe-area-inset-right,0px)) 45vh max(18px,env(safe-area-inset-left,0px));font-family:var(--f-read);font-size:var(--rsize,1.25rem);line-height:1.75}
+#rtext p{margin:0 0 1em;position:relative;z-index:1}
+#rtext .w{position:relative;z-index:1}
+#rtext.blur p{filter:blur(6px);user-select:none}
+#rtext.dim .w{color:var(--muted)}
+#rtext.dim .w.on{color:var(--ink)}
+#rtext.skim p{color:var(--muted)}
+#rtext.skim .lead{color:var(--ink);font-weight:600}
+#rmark{position:absolute;left:0;height:0;background:var(--marker-soft);border-bottom:3px solid var(--marker);border-radius:3px;z-index:0;pointer-events:none}
+#rsvp{flex:1;display:flex;align-items:center;justify-content:center;font-family:var(--f-read);font-size:calc(var(--rsize,1.25rem) * 1.8);padding:0 16px;text-align:center}
+#rsvp span{border-bottom:3px solid var(--marker);padding:0 6px}
+#reader .rfoot{display:flex;align-items:center;gap:10px;padding-top:10px;padding-bottom:calc(10px + env(safe-area-inset-bottom,0px));padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px));border-top:1px solid var(--line);background:var(--card);flex-wrap:wrap}
+#reader .rfoot .prog{flex:1;min-width:60px;height:6px;border-radius:3px;background:var(--shade);overflow:hidden}
+#reader .rfoot .prog i{display:block;height:100%;width:0;background:var(--accent)}
+#rclock{font-variant-numeric:tabular-nums;color:var(--muted);min-width:3.5em}
+@media (max-width:480px){#rfull{display:none}#reader .rbar{flex-wrap:nowrap;gap:4px}#reader .rbar .btn{padding:6px 9px}.wpm{min-width:4.6em;font-size:.9rem}}
+.tag{display:inline-block;font-size:.72rem;border:1px solid var(--line);border-radius:6px;padding:1px 6px;color:var(--muted);vertical-align:middle}
+.big{font-size:2.2rem;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.1}
+@media (prefers-reduced-motion: reduce){*{scroll-behavior:auto!important;transition:none!important}}
+</style>
+
+<div class="wrap" id="app">
+  <header class="top">
+    <div class="brand"><h1>Ralfs <span class="mk">Lesetraining</span></h1><small>8 Wochen schneller lesen, ohne Verständnis zu verlieren</small></div>
+    <div class="chips" id="chips"></div>
+  </header>
+  <nav class="tabs" role="tablist" id="tabs">
+    <button role="tab" data-tab="heute" aria-selected="true">Heute</button>
+    <button role="tab" data-tab="kurs">Kurs</button>
+    <button role="tab" data-tab="lesen">Lesefenster</button>
+    <button role="tab" data-tab="fortschritt">Fortschritt</button>
+    <button role="tab" data-tab="grundlagen">Grundlagen</button>
+  </nav>
+  <main id="view"></main>
+  <p class="muted" id="syncnote" style="font-size:.8rem;margin:0"></p>
+</div>
+
+<div id="reader" hidden>
+  <div class="rbar">
+    <button class="btn ghost" id="rclose" aria-label="Lesefenster schließen">✕</button>
+    <span class="grow" id="rtitle"></span>
+    <button class="btn ghost" id="rslow" aria-label="Langsamer">−</button>
+    <span class="wpm" id="rwpm"></span>
+    <button class="btn ghost" id="rfast" aria-label="Schneller">+</button>
+    <button class="btn ghost" id="rsmall" aria-label="Schrift kleiner">A−</button>
+    <button class="btn ghost" id="rbig" aria-label="Schrift größer">A+</button>
+    <button class="btn ghost" id="rfull" aria-label="Vollbild">⛶</button>
+  </div>
+  <div id="rscroll"><div id="rtext"><div id="rmark"></div></div></div>
+  <div id="rsvp" hidden><span></span></div>
+  <div class="rfoot">
+    <span id="rclock">0:00</span>
+    <div class="prog"><i id="rprog"></i></div>
+    <button class="btn" id="rpause">Pause</button>
+    <button class="btn primary" id="rgo">Start</button>
+  </div>
+</div>
+
+<script>
+"use strict";
+/* ============ TEXTE ============ */
+const TEXTS = [
+{id:"T1",kind:"test",title:"Der Hamburger Hafen",paras:[
+"Der Hamburger Hafen liegt nicht am Meer. Bis zur Nordsee sind es auf der Elbe rund hundert Kilometer, und trotzdem ist er der größte Seehafen Deutschlands und einer der wichtigsten Containerhäfen Europas. Möglich macht das die Tide: Zweimal am Tag steigt und fällt das Wasser auch in Hamburg um mehrere Meter. Große Schiffe nutzen das auflaufende Wasser, um sicher die Elbe hinaufzufahren.",
+"Jedes Jahr im Mai feiert die Stadt den Hafengeburtstag. Er erinnert an einen Freibrief, den Kaiser Friedrich Barbarossa am 7. Mai 1189 ausgestellt haben soll. Darin erhielten die Hamburger das Recht, ihre Waren zollfrei die Elbe hinab bis zur Mündung zu bringen. Historiker halten die erhaltene Urkunde allerdings für eine Fälschung aus späterer Zeit. Gefeiert wird trotzdem, mit Schiffsparaden, Feuerwerk und Hunderttausenden Besuchern.",
+"Wie sehr der Hafen die Stadt geprägt hat, zeigt die Speicherstadt. Ab 1883 entstand auf Eichenpfählen ein Viertel aus roten Backsteinspeichern, in denen Kaffee, Tee, Gewürze und Teppiche lagerten. Für den Bau mussten rund zwanzigtausend Menschen ihre Wohnungen verlassen. Seit 2015 gehört die Speicherstadt zusammen mit dem benachbarten Kontorhausviertel zum Welterbe der UNESCO.",
+"Heute bestimmen Container das Bild. Statt Säcke von Hand zu schleppen, heben riesige Brücken die genormten Stahlkisten von den Schiffen, oft automatisch gesteuert. Pro Jahr werden in Hamburg Millionen Standardcontainer umgeschlagen. Die Schiffe sind dabei immer größer geworden, die größten sind fast vierhundert Meter lang. Deshalb wurde die Elbe mehrfach vertieft, zuletzt in einem jahrelang umstrittenen Projekt, gegen das Umweltverbände vor Gericht gezogen waren.",
+"Der Hafen steht damit vor einer Daueraufgabe: Er muss mit Häfen wie Rotterdam und Antwerpen mithalten, die näher am offenen Meer liegen. Gleichzeitig soll er leiser, sauberer und klimafreundlicher werden. Landstrom für Kreuzfahrtschiffe, Wasserstoffprojekte und mehr Güterverkehr auf der Schiene sind Teil dieser Strategie. Ob das reicht, wird sich in den kommenden Jahrzehnten zeigen."],
+qs:[
+{q:"Wie weit liegt der Hafen von der Nordsee entfernt?",a:["Rund hundert Kilometer","Rund zehn Kilometer","Rund dreihundert Kilometer"]},
+{q:"Was ermöglicht großen Schiffen die Fahrt nach Hamburg?",a:["Das auflaufende Wasser der Tide","Ein System aus Schleusen","Ein Kanal parallel zur Elbe"]},
+{q:"Was sagen Historiker über den Freibrief von 1189?",a:["Die erhaltene Urkunde gilt als spätere Fälschung","Er ist echt und im Original erhalten","Er wurde erst 1883 entdeckt"]},
+{q:"Worauf wurde die Speicherstadt gebaut?",a:["Auf Eichenpfählen","Auf Betonfundamenten","Auf aufgeschütteten Dünen"]},
+{q:"Was ist die Hauptaussage des Textes?",a:["Der Hafen ist trotz Lage im Binnenland bedeutend und muss sich ständig anpassen","Der Hafen verliert gegen Rotterdam und wird bald verkleinert","Die Speicherstadt ist heute wichtiger als der Containerhafen"]}]},
+
+{id:"T2",kind:"test",title:"Wie das Auge liest",paras:[
+"Beim Lesen haben wir das Gefühl, dass unser Blick gleichmäßig über die Zeile gleitet. Das stimmt nicht. Das Auge bewegt sich in kleinen Sprüngen, den Sakkaden, und hält dazwischen kurz an. Diese Haltepunkte heißen Fixationen und dauern meist etwa eine Viertelsekunde. Nur während der Fixationen nimmt das Auge Informationen auf, während der Sprünge ist es praktisch blind.",
+"Scharf sehen wir nur in einem winzigen Bereich in der Mitte des Blickfelds, der Fovea. Pro Fixation erkennen wir deshalb nur wenige Buchstaben wirklich deutlich. Was weiter außen liegt, nehmen wir lediglich verschwommen wahr: die Länge des nächsten Wortes, Lücken, vielleicht einen Großbuchstaben. Diese Vorschau hilft dem Gehirn zu planen, wohin der nächste Sprung gehen soll. Kurze, häufige Wörter wie „und“ oder „der“ werden dabei oft einfach übersprungen.",
+"Etwa jeder zehnte Sprung geht zurück. Solche Rücksprünge, Regressionen genannt, sind kein Zeichen von Schwäche. Sie passieren, wenn ein Satz anders weitergeht als erwartet oder ein Wort nicht sofort verstanden wurde. Versuche haben gezeigt: Wer am Zurückspringen gehindert wird, versteht schwierige Sätze schlechter.",
+"Daraus folgt eine unbequeme Erkenntnis für viele Schnelllese-Versprechen. Der Engpass beim Lesen sind nicht die Augen, sondern die Sprachverarbeitung im Gehirn. Die Augenbewegungen machen nur einen kleinen Teil der Lesezeit aus. Wer Wörter schneller sieht, versteht sie deshalb nicht automatisch schneller. Methoden, die versprechen, ganze Seiten auf einen Blick zu erfassen, halten Messungen nicht stand.",
+"Was hilft dann? Vor allem Übung und Wissen. Wer viele Wörter kennt und mit einem Thema vertraut ist, erkennt Zusammenhänge schneller und muss seltener zurückspringen. Ein Zeiger, etwa ein Finger oder ein Stift unter der Zeile, kann zusätzlich helfen, den Blick ruhig zu führen und unnötiges Abschweifen zu vermeiden. Und wer gezielt überfliegt, also nur Überschriften, Anfänge und Schlüsselwörter liest, verschafft sich schnell einen Überblick. Er sollte nur wissen, dass er dabei Details verpasst."],
+qs:[
+{q:"Wann nimmt das Auge Informationen auf?",a:["Während der Fixationen","Während der Sprünge","Gleichmäßig beim Gleiten über die Zeile"]},
+{q:"Wie heißt der Bereich, in dem wir scharf sehen?",a:["Fovea","Sakkade","Regression"]},
+{q:"Wie oft springt der Blick ungefähr zurück?",a:["Etwa bei jedem zehnten Sprung","Bei jedem zweiten Sprung","Praktisch nie"]},
+{q:"Was ist laut Text der eigentliche Engpass beim Lesen?",a:["Die Sprachverarbeitung im Gehirn","Die Augenmuskeln","Die Beleuchtung"]},
+{q:"Was passiert, wenn man Rücksprünge verhindert?",a:["Schwierige Sätze werden schlechter verstanden","Man liest doppelt so schnell bei gleichem Verständnis","Es ändert sich nichts"]}]},
+
+{id:"T3",kind:"test",title:"Doppelbesteuerungsabkommen",paras:[
+"Wer in mehreren Staaten Einkünfte erzielt, gerät schnell in eine Zwickmühle. Der Wohnsitzstaat möchte das gesamte Einkommen besteuern, egal wo es verdient wurde. Der Staat, in dem das Geld erwirtschaftet wird, der sogenannte Quellenstaat, will ebenfalls seinen Anteil. Ohne Regeln würde dasselbe Einkommen zweimal besteuert. Genau das sollen Doppelbesteuerungsabkommen verhindern.",
+"Diese Abkommen sind völkerrechtliche Verträge zwischen zwei Staaten. Deutschland hat mit fast hundert Staaten solche Verträge geschlossen. Die meisten folgen in Aufbau und Wortlaut einem Vorbild: dem Musterabkommen der OECD. Es wird regelmäßig überarbeitet, und sein Kommentar dient Gerichten und Finanzverwaltungen als wichtige Auslegungshilfe.",
+"Ein Abkommen schafft keine neuen Steuern. Es verteilt nur das Recht zu besteuern. Für jede Einkunftsart legt es fest, welcher Staat zugreifen darf. Unternehmensgewinne etwa darf der Quellenstaat in der Regel nur besteuern, wenn das Unternehmen dort eine Betriebsstätte unterhält, also eine feste Geschäftseinrichtung wie ein Büro oder eine Fabrik. Bei Arbeitslohn kommt es oft darauf an, wo die Arbeit tatsächlich ausgeübt wird und wie lange sich jemand im anderen Staat aufhält.",
+"Darf der Quellenstaat besteuern, muss der Wohnsitzstaat die doppelte Belastung vermeiden. Dafür gibt es zwei Wege. Bei der Freistellungsmethode bleiben die ausländischen Einkünfte im Wohnsitzstaat steuerfrei. In Deutschland erhöhen sie aber oft über den Progressionsvorbehalt den Steuersatz auf das übrige Einkommen. Bei der Anrechnungsmethode werden die Einkünfte auch im Wohnsitzstaat erfasst, die im Ausland gezahlte Steuer wird jedoch auf die heimische Steuer angerechnet.",
+"Abkommen können auch missbraucht werden, etwa wenn Firmen nur zum Schein in einem günstigen Vertragsstaat sitzen. Viele Staaten haben deshalb Regeln gegen solche Gestaltungen eingeführt. Für die Praxis heißt das: Wer grenzüberschreitend arbeitet, muss stets das nationale Recht und das jeweilige Abkommen zusammen lesen."],
+qs:[
+{q:"Was ist der Quellenstaat?",a:["Der Staat, in dem das Einkommen erwirtschaftet wird","Der Staat, in dem man wohnt","Der Sitzstaat der OECD"]},
+{q:"Woran orientieren sich die meisten Abkommen?",a:["Am Musterabkommen der OECD","An einer EU-Richtlinie","An der Charta der Vereinten Nationen"]},
+{q:"Was tut ein Abkommen laut Text nicht?",a:["Neue Steuern schaffen","Das Besteuerungsrecht verteilen","Regeln je Einkunftsart festlegen"]},
+{q:"Wann darf der Quellenstaat Unternehmensgewinne in der Regel besteuern?",a:["Wenn dort eine Betriebsstätte besteht","Immer, sobald dort ein Kunde sitzt","Nie"]},
+{q:"Was passiert bei der Anrechnungsmethode?",a:["Die ausländische Steuer wird auf die heimische angerechnet","Die ausländischen Einkünfte bleiben steuerfrei","Die Steuer wird in beiden Staaten voll gezahlt"]}]},
+
+{id:"T4",kind:"test",title:"Schlaf und Gedächtnis",paras:[
+"Lange galt Schlaf als eine Art Pause, in der der Körper einfach abschaltet. Heute weiß man: Das Gehirn ist nachts sehr beschäftigt. Ein großer Teil dieser Arbeit dient dem Gedächtnis.",
+"Der Schlaf durchläuft in der Nacht mehrere Zyklen von jeweils etwa neunzig Minuten. Jeder Zyklus besteht aus leichtem Schlaf, Tiefschlaf und REM-Schlaf, benannt nach den schnellen Augenbewegungen, die in dieser Phase auftreten. Zu Beginn der Nacht ist der Anteil an Tiefschlaf hoch, gegen Morgen nehmen die REM-Phasen zu.",
+"Im Tiefschlaf spielt das Gehirn offenbar Erlebnisse des Tages erneut ab. Messungen bei Ratten zeigten, dass Nervenzellen, die beim Durchlaufen eines Labyrinths aktiv waren, im Schlaf in ähnlicher Reihenfolge feuerten. Beim Menschen gilt der Tiefschlaf als besonders wichtig, um Fakten und Ereignisse vom Hippocampus, einer Art Zwischenspeicher, in die Großhirnrinde zu übertragen. Dort werden sie dauerhaft abgelegt.",
+"Der REM-Schlaf scheint stärker mit Gefühlen und kreativen Verknüpfungen zu tun zu haben. In einem Experiment fanden Versuchspersonen nach einer Nacht mit ausreichend Schlaf deutlich häufiger eine versteckte Abkürzung in einer Rechenaufgabe als nach einer durchwachten Nacht.",
+"Umgekehrt schadet Schlafmangel dem Lernen deutlich. Wer zu wenig schläft, kann sich am nächsten Tag schlechter konzentrieren und nimmt neue Informationen schlechter auf. Auch Alkohol am Abend stört den Aufbau des Schlafs, vor allem den REM-Schlaf.",
+"Für das Lernen ergibt sich daraus ein einfacher Rat: Lieber über mehrere Tage verteilt üben und dazwischen gut schlafen, als in einer langen Nacht alles auf einmal zu pauken. Schon ein kurzer Mittagsschlaf kann helfen, Gelerntes zu festigen. Wer also abends noch eine Lektion liest, gibt seinem Gehirn über Nacht die Gelegenheit, sie zu verarbeiten."],
+qs:[
+{q:"Wie lange dauert ein Schlafzyklus ungefähr?",a:["Etwa neunzig Minuten","Etwa dreißig Minuten","Etwa drei Stunden"]},
+{q:"Wann ist der Anteil an Tiefschlaf hoch?",a:["Zu Beginn der Nacht","Gegen Morgen","Gleichmäßig über die Nacht"]},
+{q:"Welche Rolle hat der Hippocampus laut Text?",a:["Er ist eine Art Zwischenspeicher","Er erzeugt die Träume","Er steuert die Augenbewegungen"]},
+{q:"Was fanden ausgeschlafene Versuchspersonen häufiger?",a:["Eine versteckte Abkürzung in einer Rechenaufgabe","Den Ausgang eines Labyrinths","Mehr Vokabeln einer Fremdsprache"]},
+{q:"Welcher Lernrat folgt aus dem Text?",a:["Verteilt üben und dazwischen gut schlafen","Vor Prüfungen eine Nacht durchlernen","Nur morgens lernen"]}]},
+
+{id:"T5",kind:"test",title:"Die Erfindung des Buchdrucks",paras:[
+"Um 1450 entwickelte Johannes Gutenberg in Mainz ein Verfahren, das die Welt verändern sollte. Gedruckt wurde zwar schon vorher, in China und Korea sogar mit beweglichen Zeichen. Gutenberg aber verband mehrere Erfindungen zu einem System, das schnell, genau und in großer Menge arbeitete.",
+"Herzstück war ein Handgießinstrument. Damit ließen sich einzelne Buchstaben aus einer Legierung aus Blei, Zinn und Antimon in großer Zahl gießen, alle exakt gleich hoch. Setzer reihten diese Lettern zu Zeilen und Seiten, die nach dem Druck wieder zerlegt und neu verwendet wurden. Dazu kamen eine ölhaltige Druckfarbe, die auf Metall haftete, und eine Presse nach dem Vorbild von Weinpressen.",
+"Das bekannteste Werk ist die Gutenberg-Bibel, die um 1454 fertig wurde. Sie umfasst rund 1.280 Seiten in zwei Bänden. Von den vermutlich etwa 180 Exemplaren sind heute noch 49 ganz oder teilweise erhalten. Gutenberg selbst wurde nicht reich. Ein Rechtsstreit mit seinem Geldgeber Johannes Fust kostete ihn einen Teil seiner Werkstatt.",
+"Die Technik verbreitete sich dennoch rasant. Um 1500 gab es in Europa schon in über 250 Orten Druckereien, und Millionen Bücher waren gedruckt. Bücher wurden billiger, und Wissen war nicht länger an wenige Klosterbibliotheken gebunden. Martin Luther nutzte ab 1517 Flugschriften, um seine Ideen in kurzer Zeit im ganzen Reich zu verbreiten. Ohne den Buchdruck wäre die Reformation kaum so schnell vorangekommen.",
+"Auch die Sprache veränderte sich. Weil Drucker möglichst viele Leser erreichen wollten, setzten sich einheitlichere Schreibweisen durch. Und mit mehr Büchern stieg langsam auch die Zahl der Menschen, die lesen konnten. Viele Historiker vergleichen die Folgen des Buchdrucks deshalb mit denen des Internets: Eine neue Technik machte Informationen plötzlich für sehr viele Menschen zugänglich und veränderte Religion, Politik und Wissenschaft."],
+qs:[
+{q:"Wo entwickelte Gutenberg sein Verfahren?",a:["In Mainz","In Köln","In Wittenberg"]},
+{q:"Was war das Herzstück seiner Erfindung?",a:["Ein Handgießinstrument für Lettern","Eine neue Papiermühle","Der Holzschnitt"]},
+{q:"Wie viele Exemplare der Gutenberg-Bibel sind erhalten?",a:["49","180","1.280"]},
+{q:"Wer nutzte ab 1517 Flugschriften?",a:["Martin Luther","Johannes Fust","Johannes Gutenberg"]},
+{q:"Womit vergleichen Historiker die Folgen des Buchdrucks?",a:["Mit denen des Internets","Mit denen der Dampfmaschine","Mit denen des Telefons"]}]},
+
+{id:"A",kind:"train",title:"Eine kurze Geschichte des Kaffees",paras:[
+"Kaffee stammt ursprünglich aus dem Hochland Äthiopiens. Einer Legende nach bemerkte ein Hirte, dass seine Ziegen nach dem Fressen roter Beeren besonders munter waren. Ob das stimmt, weiß niemand. Sicher ist, dass Kaffee im 15. Jahrhundert im Jemen getrunken wurde, wo Sufi-Mönche ihn nutzten, um bei nächtlichen Gebeten wach zu bleiben.",
+"Über den Hafen Mokka gelangte der Kaffee in die arabische Welt und von dort nach Europa. Im 17. Jahrhundert eröffneten in Venedig, London und Wien die ersten Kaffeehäuser. Sie wurden schnell zu Orten, an denen Händler Geschäfte machten und Bürger Zeitungen lasen und diskutierten.",
+"Die wachmachende Wirkung verdankt der Kaffee dem Koffein. Es blockiert im Gehirn die Andockstellen für Adenosin, einen Botenstoff, der sich im Laufe des Tages ansammelt und müde macht. Die Müdigkeit verschwindet dadurch nicht, sie wird nur überdeckt. Da Koffein im Körper langsam abgebaut wird, kann eine Tasse am Nachmittag den Schlaf in der Nacht noch stören.",
+"Heute zählt Kaffee zu den wichtigsten Handelsgütern der Welt. Größter Produzent ist Brasilien, gefolgt von Vietnam. Die meisten Bohnen gehören zu zwei Arten: dem milderen Arabica und dem kräftigeren, koffeinreicheren Robusta."],
+qs:[
+{q:"Woher stammt Kaffee ursprünglich?",a:["Aus Äthiopien","Aus Brasilien","Aus Venedig"]},
+{q:"Wie wirkt Koffein?",a:["Es blockiert die Andockstellen für Adenosin","Es baut Müdigkeit dauerhaft ab","Es erhöht die Menge an Adenosin"]},
+{q:"Welches Land produziert am meisten Kaffee?",a:["Brasilien","Vietnam","Jemen"]},
+{q:"Welche Art ist koffeinreicher?",a:["Robusta","Arabica","Mokka"]}]},
+
+{id:"B",kind:"train",title:"Ebbe und Flut",paras:[
+"Zweimal am Tag zieht sich an der Nordseeküste das Wasser zurück und kehrt einige Stunden später wieder. Verantwortlich dafür ist vor allem der Mond. Seine Anziehungskraft zieht das Wasser auf der ihm zugewandten Seite der Erde ein wenig zu sich. Auf der gegenüberliegenden Seite entsteht ebenfalls ein Flutberg, weil dort die Anziehung schwächer ist und die Fliehkraft aus der gemeinsamen Bewegung von Erde und Mond überwiegt.",
+"Die Erde dreht sich unter diesen beiden Flutbergen hindurch. Deshalb gibt es an den meisten Küsten zwei Hochwasser und zwei Niedrigwasser pro Tag. Weil der Mond sich gleichzeitig weiterbewegt, verschieben sich die Zeiten jeden Tag um knapp eine Stunde.",
+"Auch die Sonne wirkt auf das Wasser, allerdings nur etwa halb so stark wie der Mond. Stehen Sonne, Mond und Erde in einer Linie, also bei Voll- und Neumond, addieren sich die Kräfte. Dann entsteht eine Springtide mit besonders hohem Wasserstand. Stehen Sonne und Mond im rechten Winkel zueinander, schwächen sie sich gegenseitig, und es kommt zur Nipptide.",
+"Wie stark die Gezeiten ausfallen, hängt auch von der Form der Küste ab. Im Mittelmeer beträgt der Unterschied zwischen Hoch- und Niedrigwasser oft nur wenige Zentimeter. In der Bay of Fundy in Kanada kann er dagegen über fünfzehn Meter erreichen."],
+qs:[
+{q:"Wer verursacht die Gezeiten vor allem?",a:["Der Mond","Die Sonne","Der Wind"]},
+{q:"Um wie viel verschieben sich die Zeiten jeden Tag?",a:["Um knapp eine Stunde","Um zwölf Stunden","Gar nicht"]},
+{q:"Wann entsteht eine Springtide?",a:["Bei Voll- und Neumond","Bei Halbmond","Nur im Winter"]},
+{q:"Wo ist der Unterschied zwischen Hoch- und Niedrigwasser sehr gering?",a:["Im Mittelmeer","In der Bay of Fundy","An der Nordsee"]}]},
+
+{id:"C",kind:"train",title:"Das Bienenvolk",paras:[
+"Eine Honigbiene allein kann wenig ausrichten. Ein Volk aus mehreren zehntausend Tieren aber verhält sich fast wie ein einziger Organismus. Im Zentrum steht die Königin, die im Sommer bis zu zweitausend Eier am Tag legen kann. Die meisten Bewohner des Stocks sind Arbeiterinnen. Sie putzen Waben, füttern die Brut, bauen, bewachen den Eingang und fliegen schließlich als Sammlerinnen aus.",
+"Findet eine Sammlerin eine ergiebige Futterquelle, teilt sie das den anderen mit einem Tanz mit. Liegt die Quelle weiter entfernt, tanzt sie eine Acht und wackelt dabei mit dem Hinterleib. Die Richtung dieses Schwänzeltanzes auf der senkrechten Wabe zeigt den Winkel zur Sonne an, die Dauer verrät die Entfernung. Entschlüsselt hat diese Sprache der österreichische Forscher Karl von Frisch, der dafür 1973 den Nobelpreis erhielt.",
+"Für den Menschen sind Bienen vor allem als Bestäuber wichtig. Viele Obstbäume und Feldfrüchte tragen ohne sie deutlich weniger Früchte. Neben der Honigbiene leisten Hunderte Wildbienenarten einen großen Teil dieser Arbeit. Viele von ihnen leben allein und nisten in Erdlöchern, Pflanzenstängeln oder Totholz. Sie leiden besonders darunter, dass blühende Wiesen und Nistplätze verschwinden."],
+qs:[
+{q:"Wie viele Eier kann eine Königin im Sommer täglich legen?",a:["Bis zu zweitausend","Bis zu zweihundert","Bis zu zwanzigtausend"]},
+{q:"Was zeigt die Richtung des Schwänzeltanzes an?",a:["Den Winkel zur Sonne","Die Entfernung","Die Art der Blüte"]},
+{q:"Wer hat die Bienensprache entschlüsselt?",a:["Karl von Frisch","Gregor Mendel","Konrad Lorenz"]},
+{q:"Wo nisten viele Wildbienen?",a:["In Erdlöchern, Stängeln oder Totholz","Nur in Bienenstöcken","Ausschließlich in Baumkronen"]}]},
+
+{id:"D",kind:"train",title:"Woher das Schach kommt",paras:[
+"Die Wurzeln des Schachspiels liegen vermutlich in Indien. Dort entstand um das sechste Jahrhundert das Spiel Chaturanga, dessen Figuren die vier Teile eines Heeres darstellten: Fußsoldaten, Reiter, Elefanten und Streitwagen. Über Persien gelangte das Spiel in die arabische Welt, wo es Schatrandsch hieß und von Gelehrten intensiv studiert wurde.",
+"Mit den Mauren kam das Spiel um das Jahr 1000 nach Spanien und verbreitete sich in Europa. Viele Regeln waren damals noch anders. Die Dame, ursprünglich ein Ratgeber des Königs, durfte nur ein Feld schräg ziehen, und auch der Läufer war sehr schwach. Partien dauerten entsprechend lange.",
+"Ende des 15. Jahrhunderts änderte sich das grundlegend. In Spanien und Italien setzte sich eine neue Spielweise durch, in der die Dame zur stärksten Figur wurde und der Läufer über die ganze Diagonale ziehen durfte. Das Spiel wurde schneller und angriffslustiger. Zeitgenossen sprachen spöttisch vom Schach der verrückten Dame.",
+"Im 19. Jahrhundert begannen große Turniere, und 1886 wurde mit Wilhelm Steinitz der erste allgemein anerkannte Weltmeister ermittelt. Heute spielen Millionen Menschen online, und Computerprogramme sind längst stärker als jeder Großmeister."],
+qs:[
+{q:"Wo liegen die Wurzeln des Schachspiels vermutlich?",a:["In Indien","In China","In Spanien"]},
+{q:"Wie durfte die Dame früher ziehen?",a:["Nur ein Feld schräg","Beliebig weit in alle Richtungen","Wie ein Springer"]},
+{q:"Wer war der erste allgemein anerkannte Weltmeister?",a:["Wilhelm Steinitz","Bobby Fischer","Emanuel Lasker"]},
+{q:"Was änderte sich Ende des 15. Jahrhunderts?",a:["Die Dame wurde zur stärksten Figur","Die Bauern wurden abgeschafft","Das Brett wurde größer"]}]},
+
+{id:"E",kind:"train",title:"Der Bundesfinanzhof",paras:[
+"Wer mit dem Finanzamt über seine Steuer streitet und vor dem Finanzgericht verliert, hat oft noch eine Möglichkeit: die Revision zum Bundesfinanzhof. Der BFH mit Sitz in München ist das oberste deutsche Gericht für Steuern und Zölle. Er steht damit auf einer Stufe mit dem Bundesgerichtshof oder dem Bundesarbeitsgericht.",
+"Anders als die Finanzgerichte prüft der BFH in der Regel keine Tatsachen mehr. Er klärt Rechtsfragen: Wurde das Gesetz richtig ausgelegt und angewendet? Zugelassen wird eine Revision vor allem dann, wenn eine Frage grundsätzliche Bedeutung hat, wenn die Rechtsprechung vereinheitlicht werden muss oder wenn das Finanzgericht einen schweren Verfahrensfehler gemacht hat. Lässt das Finanzgericht die Revision nicht zu, kann man dagegen Beschwerde einlegen.",
+"Die Richterinnen und Richter arbeiten in Senaten, die jeweils für bestimmte Steuerarten zuständig sind, etwa für die Einkommensteuer, die Umsatzsteuer oder die Erbschaftsteuer. Ein Senat entscheidet über Urteile mit fünf Mitgliedern. Wollen zwei Senate eine Rechtsfrage unterschiedlich beantworten, entscheidet der Große Senat.",
+"Die Urteile des BFH reichen weit über den Einzelfall hinaus. Die Finanzverwaltung veröffentlicht wichtige Entscheidungen im Bundessteuerblatt und wendet sie dann allgemein an. Manchmal reagiert sie aber auch mit einem sogenannten Nichtanwendungserlass. Dann gilt das Urteil zunächst nur für den entschiedenen Fall."],
+qs:[
+{q:"Wo sitzt der Bundesfinanzhof?",a:["In München","In Karlsruhe","In Berlin"]},
+{q:"Was prüft der BFH in der Regel?",a:["Rechtsfragen","Tatsachen","Steuererklärungen"]},
+{q:"Wer entscheidet, wenn zwei Senate unterschiedlich urteilen wollen?",a:["Der Große Senat","Das Bundesverfassungsgericht","Das Finanzministerium"]},
+{q:"Was bewirkt ein Nichtanwendungserlass?",a:["Das Urteil gilt zunächst nur für den entschiedenen Fall","Das Urteil wird aufgehoben","Das Urteil gilt rückwirkend für alle"]}]},
+
+{id:"F",kind:"train",title:"Die innere Uhr",paras:[
+"Fast jede Zelle unseres Körpers folgt einem Rhythmus von ungefähr vierundzwanzig Stunden. Gesteuert wird diese innere Uhr von einer winzigen Region im Gehirn, dem suprachiasmatischen Kern. Er sitzt direkt über der Kreuzung der Sehnerven und bekommt so mit, wann es hell und wann es dunkel ist.",
+"Der wichtigste Taktgeber ist Licht, vor allem am Morgen. Spezielle Zellen in der Netzhaut reagieren besonders auf helles, bläuliches Licht und melden es an die innere Uhr. Tageslicht ist dabei viel stärker als jede Zimmerlampe: Selbst an einem bewölkten Tag ist es draußen oft zehnmal so hell wie in einem gut beleuchteten Büro. Wer morgens einige Minuten draußen verbringt, stellt seine Uhr deshalb zuverlässiger als mit Licht aus der Leuchte.",
+"Abends passiert das Gegenteil. Wenn es dunkel wird, schüttet der Körper das Hormon Melatonin aus und bereitet sich auf den Schlaf vor. Helles Licht am späten Abend kann diesen Prozess verzögern, sodass man später müde wird.",
+"Gerät die innere Uhr aus dem Takt, etwa durch Schichtarbeit oder Flüge über mehrere Zeitzonen, leiden Schlaf, Konzentration und Stimmung. Für die Entdeckung der molekularen Mechanismen dieser Uhr erhielten drei amerikanische Forscher 2017 den Nobelpreis für Medizin."],
+qs:[
+{q:"Wo sitzt die innere Uhr?",a:["Direkt über der Kreuzung der Sehnerven","Im Herzen","Im Kleinhirn"]},
+{q:"Was ist der wichtigste Taktgeber?",a:["Licht am Morgen","Das Frühstück","Sport am Abend"]},
+{q:"Welches Hormon schüttet der Körper bei Dunkelheit aus?",a:["Melatonin","Adrenalin","Insulin"]},
+{q:"Wann gab es den Nobelpreis für die Erforschung der inneren Uhr?",a:["2017","1973","1990"]}]},
+
+{id:"G",kind:"train",title:"Die Elbphilharmonie",paras:[
+"Seit Januar 2017 hat Hamburg ein neues Wahrzeichen. Auf einem alten Kaispeicher am Rand der HafenCity erhebt sich die Elbphilharmonie, ein gläserner Bau mit wellenförmigem Dach, entworfen vom Schweizer Architekturbüro Herzog & de Meuron. Mit rund 110 Metern ist sie eines der höchsten Gebäude der Stadt. Neben Konzertsälen beherbergt sie auch ein Hotel und Wohnungen.",
+"Der Weg dorthin war lang und teuer. Als das Projekt beschlossen wurde, rechnete die Stadt mit einem Anteil von gut siebzig Millionen Euro. Am Ende kostete es den Steuerzahler rund 790 Millionen, und die Eröffnung verschob sich um viele Jahre. Ein Untersuchungsausschuss beschäftigte sich mit Planungsfehlern und dem Streit zwischen Stadt und Baukonzern.",
+"Heute spricht man vor allem über den Klang. Der Große Saal mit rund 2.100 Plätzen ist als sogenannter Weinberg gebaut: Die Zuschauer sitzen auf Terrassen rund um das Orchester, niemand ist mehr als dreißig Meter vom Dirigenten entfernt. Die Wände sind mit etwa zehntausend einzeln gefrästen Gipsplatten verkleidet, die den Schall gleichmäßig verteilen. Entwickelt wurde die Akustik von dem Japaner Yasuhisa Toyota.",
+"Ein öffentlicher Platz in 37 Metern Höhe, die Plaza, bietet einen Rundumblick über Hafen und Stadt. Er ist ohne Konzertkarte zugänglich und hat seit der Eröffnung Millionen Besucher angelockt."],
+qs:[
+{q:"Wann wurde die Elbphilharmonie eröffnet?",a:["Im Januar 2017","Im Jahr 2007","Im Jahr 2012"]},
+{q:"Was bedeutet die Bauweise als Weinberg?",a:["Die Zuschauer sitzen auf Terrassen rund um das Orchester","Der Saal liegt in einem Weinkeller","Der Saal hat die Form eines Schuhkartons"]},
+{q:"Wer entwickelte die Akustik?",a:["Yasuhisa Toyota","Jacques Herzog","Pierre de Meuron"]},
+{q:"In welcher Höhe liegt die Plaza?",a:["In 37 Metern","In 110 Metern","In 10 Metern"]}]},
+
+{id:"H",kind:"train",title:"Wortschatz als Turbo",paras:[
+"Wer schneller lesen will, denkt meist an Techniken für die Augen. Ein unterschätzter Hebel ist jedoch der Wortschatz. Jedes Wort, das wir nicht sofort erkennen, bremst. Wir verlangsamen, springen zurück oder raten aus dem Zusammenhang. Ein bekanntes Wort dagegen wird in Sekundenbruchteilen verarbeitet.",
+"Ähnlich wirkt Vorwissen. Wer sich in einem Fachgebiet auskennt, kann vorhersagen, wie ein Satz vermutlich weitergeht. Das Gehirn muss weniger Neues verarbeiten und kommt schneller voran. Deshalb liest eine Steuerberaterin ein Urteil zum Umsatzsteuerrecht viel zügiger als ein Laie, obwohl beide gleich gut sehen.",
+"Der beste Weg zu mehr Wortschatz und Wissen ist erstaunlich schlicht: viel und abwechslungsreich lesen. Menschen, die regelmäßig lesen, bauen über die Jahre einen deutlich größeren Wortschatz auf. Jede Seite bringt neue Wörter in neuen Zusammenhängen.",
+"Für das Training bedeutet das: Neben den Übungen mit dem Pacer lohnt es sich, jeden Tag ein paar Minuten frei zu lesen, am besten Texte, die etwas über dem eigenen Niveau liegen. Wer dabei unbekannte Begriffe kurz nachschlägt, macht sein Lesen langfristig schneller, ganz ohne Tricks."],
+qs:[
+{q:"Was bremst laut Text beim Lesen?",a:["Wörter, die wir nicht sofort erkennen","Zu helle Bildschirme","Kurze Sätze"]},
+{q:"Warum liest die Steuerberaterin das Urteil schneller?",a:["Wegen ihres Vorwissens","Weil sie bessere Augen hat","Weil sie einen Pacer nutzt"]},
+{q:"Was ist der beste Weg zu mehr Wortschatz?",a:["Viel und abwechslungsreich lesen","Vokabellisten auswendig lernen","Nur Hörbücher hören"]},
+{q:"Welche Texte empfiehlt der Text zum freien Lesen?",a:["Texte etwas über dem eigenen Niveau","Nur sehr leichte Texte","Ausschließlich Fachbücher"]}]},
+
+{id:"D1",kind:"drill",title:"So funktioniert der Pacer",paras:[
+"Der Pacer ist ein Leuchtmarker, der unter der Zeile entlangläuft. Deine Augen folgen ihm, statt selbst zu entscheiden, wann es weitergeht. Das klingt banal, hat aber eine Wirkung: Der Blick bleibt seltener hängen, schweift weniger ab und springt seltener ohne Grund zurück. Viele Leser merken erst mit dem Pacer, wie oft sie gedanklich abschweifen.",
+"Beim Üben gilt eine einfache Regel. Im normalen Pacer-Lesen stellst du das Tempo so ein, dass du gerade noch gut verstehst. Beim Sprint gehst du bewusst darüber hinaus. Dort geht es nicht um Verständnis, sondern darum, Augen und Aufmerksamkeit an ein höheres Tempo zu gewöhnen. Danach fühlt sich das normale Tempo leichter an.",
+"Wichtig ist, ruhig zu bleiben. Wenn du ein Wort verpasst, lass es los und folge dem Marker. Der Sinn eines Absatzes ergibt sich meistens trotzdem. Wenn du merkst, dass du gar nichts mehr verstehst, nimm das Tempo zurück. Schneller lesen heißt im Training immer: so schnell wie möglich, so langsam wie nötig.",
+"Mit der Zeit kannst du die Zeilen etwas enger erfassen. Statt am ersten Wort einer Zeile zu beginnen, setzt der Blick ein Stück weiter innen an und springt vor dem letzten Wort schon in die nächste Zeile. Die Ränder nimmst du mit dem unscharfen Sehen am Rand trotzdem wahr."]},
+
+{id:"D2",kind:"drill",title:"Lesen mit Ziel",paras:[
+"Nicht jeder Text verdient dieselbe Aufmerksamkeit. Eine Mail, die nur eine Uhrzeit bestätigt, braucht einen kurzen Blick. Ein Urteil, über das du morgen beraten musst, braucht volle Konzentration. Gute Leser wechseln deshalb bewusst zwischen verschiedenen Gängen.",
+"Der erste Gang ist das Überfliegen. Du liest Überschriften, den ersten Satz jedes Absatzes und hervorgehobene Wörter. Nach einer Minute weißt du, worum es geht und ob sich genaues Lesen lohnt. Der zweite Gang ist das Suchen: Du jagst eine bestimmte Information, etwa ein Datum oder einen Betrag, und ignorierst alles andere.",
+"Der dritte Gang ist das zügige Lesen mit gutem Verständnis. Hier hilft der Pacer am meisten. Der vierte Gang ist das langsame, genaue Lesen für schwierige Stellen, Zahlen und Formulierungen, bei denen jedes Wort zählt. Auch das gehört zum schnellen Lesen, denn wer an den richtigen Stellen langsam wird, muss später nichts noch einmal lesen.",
+"Bevor du einen längeren Text beginnst, stell dir deshalb kurz zwei Fragen: Was will ich aus diesem Text wissen? Und wie genau muss ich es wissen? Die Antworten entscheiden, welchen Gang du einlegst."]}
+];
+
+const WEEKS = [
+ {name:"Startlinie",goal:"Ausgangswert messen und den Pacer kennenlernen."},
+ {name:"Pacer",goal:"Dem Marker folgen und das Tempo leicht anheben. Am Ende der Woche ein Zwischentest."},
+ {name:"Tempo",goal:"Sprints über dem Wohlfühltempo, dazu Blickspanne trainieren."},
+ {name:"Überblick",goal:"Überfliegen und gezielt suchen lernen. Am Ende der Woche ein Zwischentest."},
+ {name:"Sinngruppen",goal:"Statt Wort für Wort in kleinen Gruppen lesen."},
+ {name:"Sinngruppen vertiefen",goal:"Gruppen schneller erfassen. Am Ende der Woche ein Zwischentest."},
+ {name:"Transfer",goal:"Tempo bewusst wählen, Wortanzeige als Extremübung."},
+ {name:"Abschluss",goal:"Alles zusammen und der Abschlusstest."}
+];
+
+const TIPS = [
+ ["Willkommen","In den nächsten acht Wochen trainierst du an sechs Tagen pro Woche etwa 15 Minuten. Heute misst du nur, wo du stehst: Lies den Text in deinem normalen Tempo, so wie du sonst auch liest, und beantworte danach fünf Fragen. Nicht hetzen, es gibt keine falsche Ausgangslage."],
+ ["Der Pacer","Ab heute führt dich ein Leuchtmarker durch den Text. Deine Augen folgen ihm. Das verringert Abschweifen und unnötige Rücksprünge. Halte den Blick locker auf dem Marker."],
+ ["Effektive Leserate","Gemessen wird nicht nur dein Tempo, sondern Tempo mal Verständnis. 300 Wörter pro Minute mit 50 Prozent Verständnis sind schlechter als 250 mit 90 Prozent. Diese effektive Leserate ist deine wichtigste Zahl."],
+ ["Rücksprünge","Etwa jeder zehnte Augensprung geht zurück. Notwendige Rücksprünge sind gut, sie retten das Verständnis. Trainiert wird nur, die überflüssigen zu vermeiden, die aus Unsicherheit oder Gewohnheit kommen."],
+ ["Die innere Stimme","Fast jeder liest mit einer leisen inneren Stimme mit. Sie ganz abzustellen schadet dem Verständnis. Sie darf aber schneller werden und nicht mehr jedes kleine Wort betonen."],
+ ["Sprint","Beim Sprint ist der Marker absichtlich zu schnell. Du sollst nicht alles verstehen. Es geht darum, dass sich danach dein normales Tempo leichter anfühlt, so wie Gehen nach einem Lauf auf dem Laufband."],
+ ["Blickspanne","Pro Fixation erkennt das Auge nur wenige Buchstaben scharf. Die Blickspanne-Übung trainiert, kurze Wortgruppen auf einen Blick zu erkennen. Das ist ein Aufwärmen, kein Wundermittel."],
+ ["Überfliegen","Überschrift, erster Satz jedes Absatzes, Schlüsselwörter: In einer Minute weißt du, worum es geht. Danach entscheidest du, ob sich genaues Lesen lohnt."],
+ ["Gezielt suchen","Wenn du eine bestimmte Information brauchst, ein Datum, eine Zahl, einen Namen, dann lies nicht, sondern suche. Der Blick gleitet nach unten und stoppt nur am passenden Muster."],
+ ["Sinngruppen","Wir verstehen nicht Wort für Wort, sondern in kleinen Einheiten: der alte Hafen, am frühen Morgen, ohne jeden Zweifel. Der Marker springt jetzt in solchen Gruppen. Versuche, jede Gruppe als ein Bild zu sehen."],
+ ["Zeilenränder","Setze den Blick etwas innen an und springe vor dem letzten Wort in die nächste Zeile. Die Ränder nimmst du unscharf trotzdem mit. Das spart pro Zeile einen Sprung."],
+ ["Vorwissen","Je mehr du über ein Thema weißt, desto schneller liest du darüber. Ein Fachtext aus deinem Gebiet geht deshalb schneller als ein fremdes Thema. Lies fremde Themen langsamer, das ist kein Rückschritt."],
+ ["Wortanzeige","Bei der Wortanzeige erscheint immer nur ein Wort in der Mitte. Das wirkt schnell, kostet aber Verständnis, weil du nicht zurückspringen kannst. Wir nutzen sie nur als kurze Extremübung."],
+ ["Tempo wählen","Schnell lesen heißt: so schnell wie möglich, so langsam wie nötig. Mails und Nachrichten im höchsten Gang, Urteile und Verträge an den entscheidenden Stellen langsam und genau."],
+ ["Freies Lesen","Der stärkste Hebel für dauerhaft schnelleres Lesen ist viel lesen. Nimm dir neben dem Training jeden Tag ein paar Minuten für etwas, das dich interessiert."],
+ ["Pausen","Nach 20 bis 30 Minuten konzentriertem Lesen sinkt das Verständnis. Kurz aufstehen, in die Ferne schauen, dann weiter. Das gilt besonders für lange Schriftsätze."],
+ ["Schlaf","Das Gehirn verarbeitet Gelerntes im Schlaf. Deshalb übst du verteilt über Wochen statt alles an einem Wochenende. Eine Lektion am Abend passt gut."],
+ ["Abschluss","Heute misst du dich zum letzten Mal mit einem neuen Text. Lies wie im ersten Test in deinem natürlichen Tempo und vergleiche danach mit deinem Ausgangswert."]
+];
+
+const BASICS = [
+ ["Wie das Auge liest","Das Auge gleitet nicht über die Zeile, es springt. Zwischen den Sprüngen hält es etwa eine Viertelsekunde an, und nur dann nimmt es Informationen auf. Scharf sieht es dabei nur wenige Buchstaben."],
+ ["Der echte Engpass","Nicht die Augen begrenzen das Lesetempo, sondern das Verstehen im Kopf. Darum versprechen seriöse Kurse keine 1.000 Wörter pro Minute. Realistisch sind mit Training etwa 20 bis 50 Prozent mehr bei gutem Verständnis."],
+ ["Normalwerte","Erwachsene lesen deutsche Sachtexte still mit etwa 200 bis 300 Wörtern pro Minute, im Schnitt um 250. Über 500 bis 600 Wörter pro Minute ist es kein Lesen mehr, sondern Überfliegen."],
+ ["Was wirklich hilft","Ein Zeiger oder Pacer, der den Blick führt. Weniger überflüssige Rücksprünge. Gezieltes Überfliegen, wenn ein Überblick reicht. Und vor allem: viel lesen, denn Wortschatz und Vorwissen machen am meisten Tempo."],
+ ["Was nicht hilft","Fotolesen, ganze Seiten auf einen Blick, das komplette Abschalten der inneren Stimme und Augengymnastik als Selbstzweck. Dafür gibt es in Studien keinen Beleg."],
+ ["Effektive Leserate","Deine Kennzahl im Kurs ist Tempo mal Verständnis. Beispiel: 280 Wörter pro Minute bei 80 Prozent richtigen Antworten ergeben eine effektive Leserate von 224."],
+ ["So läuft eine Lektion","Kurzer Tipp, Aufwärmen, Pacer-Lesen, bei Bedarf ein Sprint, dann ein neuer Text mit Fragen. Das Pacer-Tempo passt sich an: Verstehst du mindestens 75 Prozent, steigt es um 5 Prozent. Unter 65 Prozent sinkt es wieder."],
+ ["Nachholen","Der Kurs zählt Lektionen, nicht Kalendertage. Hast du einen Tag verpasst, machst du einfach die nächste Lektion. Wer im Rückstand ist, kann zwei Lektionen an einem Tag machen."]
+];
+
+const AI_TOPICS = ["Die Geschichte der Hanse","Das Wattenmeer","Wie ein Leuchtturm funktioniert","Der Nord-Ostsee-Kanal","Warum der Himmel blau ist","Die Erfindung der Glühbirne","Wie Navigationssatelliten die Position bestimmen","Die Geschichte des Geldes","Wie Gletscher entstehen","Die Umsatzsteuer in Europa","Das Leben der Eichhörnchen","Wie Vulkane entstehen","Die Geschichte der Eisenbahn in Deutschland","Wie das Immunsystem arbeitet","Die Erfindung des Fahrrads","Warum Zugvögel ihren Weg finden","Die Geschichte des Hamburger Rathauses","Wie Windkraftanlagen Strom erzeugen","Die Entstehung des Grundgesetzes","Wie Schiffe schwimmen"];
+
+/* ============ HILFSFUNKTIONEN ============ */
+const $ = s => document.querySelector(s);
+function h(tag, attrs, ...kids){
+  const el = document.createElement(tag);
+  if(attrs) for(const [k,v] of Object.entries(attrs)){
+    if(v==null||v===false) continue;
+    if(k==="class") el.className=v;
+    else if(k==="text") el.textContent=v;
+    else if(k.startsWith("on")) el.addEventListener(k.slice(2),v);
+    else if(k==="style") el.style.cssText=v;
+    else el.setAttribute(k,v===true?"":v);
+  }
+  for(const k of kids.flat()){ if(k==null||k===false) continue; el.append(k.nodeType?k:document.createTextNode(String(k))); }
+  return el;
+}
+const pad2 = n => String(n).padStart(2,"0");
+const today = (d=new Date()) => d.getFullYear()+"-"+pad2(d.getMonth()+1)+"-"+pad2(d.getDate());
+const parseDay = s => { const [y,m,d]=s.split("-").map(Number); return new Date(y,m-1,d); };
+const fmtDay = s => parseDay(s).toLocaleDateString("de-DE",{day:"numeric",month:"short"});
+const fmtTime = ms => { const s=Math.max(0,Math.round(ms/1000)); return Math.floor(s/60)+":"+pad2(s%60); };
+const wordsOf = t => t.paras.join(" ").split(/\s+/).filter(Boolean).length;
+const nf = n => Math.round(n).toLocaleString("de-DE");
+function hash(s){ let x=2166136261; for(const c of s){ x^=c.charCodeAt(0); x=Math.imul(x,16777619);} return x>>>0; }
+function shuffled(arr, seed){ const a=arr.slice(); let s=seed||1; for(let i=a.length-1;i>0;i--){ s=(Math.imul(s,1103515245)+12345)>>>0; const j=s%(i+1); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function textById(id){ return TEXTS.find(t=>t.id===id) || (S.ai||[]).find(t=>t.id===id); }
+
+/* ============ ZUSTAND & SPEICHER ============ */
+const LS_KEY="sr-trainer-v1";
+function freshState(){ return {v:1, updatedAt:0, baseline:null, target:null, lessons:{}, sessions:[], xp:0, badges:{}, schulteBest:null, sprints:0, seen:{}, ai:[], spanBest:0}; }
+const HOSTED=!!window.SR_HOSTED;
+function localLoad(){ if(HOSTED) return null; try{ const s=JSON.parse(localStorage.getItem(LS_KEY)); return s&&s.v?s:null; }catch(e){ return null; } }
+function localSave(s){ if(HOSTED) return; try{ localStorage.setItem(LS_KEY, JSON.stringify(s)); }catch(e){} }
+let S = localLoad() || freshState();
+
+/* Optional external storage: window.SR_STORAGE = {load():Promise<state|null>, save(state):Promise} (hosted app),
+   otherwise the Claude artifact database is used when available. */
+const Store = {
+  backend:null, chain:Promise.resolve(), pending:null,
+  async connect(){
+    try{
+      if(window.SR_READY){ try{ await window.SR_READY; }catch(e){} }
+      if(window.SR_STORAGE){ this.backend=window.SR_STORAGE; }
+      else if(window.claude && window.claude.use){
+        const db = await window.claude.use("db");
+        if(db){ const ref=db.doc("progress/main");
+          this.backend={ load:async()=>{ const s=await ref.get(); return s.exists?s.data():null; }, save:st=>ref.set(JSON.parse(JSON.stringify(st))) }; }
+      }
+      if(!this.backend){ setSync("Fortschritt wird nur in diesem Browser gespeichert."); return; }
+      const remote = await this.backend.load();
+      if(remote && remote.v && (remote.updatedAt||0) > (S.updatedAt||0)){ S=Object.assign(freshState(),remote); localSave(S); render(); }
+      else if(S.updatedAt){ this.push(); }
+      setSync("Fortschritt wird gespeichert und auf Handy und Rechner abgeglichen.");
+    }catch(e){ setSync("Speichern online gerade nicht möglich, der Fortschritt bleibt in diesem Browser."); }
+  },
+  async refresh(){ if(!this.backend) return; try{ const r=await this.backend.load(); if(r&&r.v&&(r.updatedAt||0)>(S.updatedAt||0)&&!Run){ S=Object.assign(freshState(),r); localSave(S); render(); } }catch(e){} },
+  push(){
+    if(!this.backend) return;
+    if(this.pending) return; this.pending=true;
+    this.chain=this.chain.then(async()=>{ this.pending=false; try{ await this.backend.save(S); }catch(e){ setSync("Letzte Speicherung online fehlgeschlagen, wird beim nächsten Schritt erneut versucht."); } });
+  }
+};
+function save(){ S.updatedAt=Date.now(); localSave(S); Store.push(); }
+function setSync(t){ $("#syncnote").textContent=t; }
+document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="visible") Store.refresh(); });
+
+/* AI texts: window.SR_AI = {generate(prompt):Promise<object>} (hosted), otherwise Claude's sample capability. */
+let AI=null;
+async function connectAI(){
+  try{
+    if(window.SR_READY){ try{ await window.SR_READY; }catch(e){} }
+    if(window.SR_AI){ AI=window.SR_AI; return; }
+    if(window.claude && window.claude.use){ const sm=await window.claude.use("sample"); if(sm) AI={generate:p=>sm.json(p,{modelTier:"default"})}; }
+  }catch(e){}
+}
+async function generateText(){
+  if(!AI) throw new Error("none");
+  const used=new Set((S.ai||[]).map(t=>t.topic));
+  const free=AI_TOPICS.filter(t=>!used.has(t)); const topic=(free.length?free:AI_TOPICS)[Math.floor(Math.random()*(free.length||AI_TOPICS.length))];
+  const prompt=`Schreibe einen sachlichen deutschen Übungstext für ein Lesetraining für Erwachsene. Thema: ${topic}. Länge: 240 bis 290 Wörter in 3 oder 4 Absätzen. Nur gut gesicherte Fakten, allgemein verständlich, keine Überschrift im Text, keine Aufzählungen. Dazu genau 4 Multiple-Choice-Fragen zum Inhalt (drei Detailfragen, eine Frage zur Hauptaussage), jeweils 3 kurze Antworten, die richtige Antwort immer an erster Stelle. Antworte nur mit JSON in dieser Form: {"title":"kurzer Titel","paras":["Absatz 1","Absatz 2"],"qs":[{"q":"Frage?","a":["richtig","falsch","falsch"]}]}`;
+  const r=await AI.generate(prompt,{topic});
+  if(!r||!Array.isArray(r.paras)||!Array.isArray(r.qs)||r.paras.length<2||r.qs.length<3) throw new Error("shape");
+  const t={id:"ai-"+Date.now(),kind:"ai",topic,title:String(r.title||topic).slice(0,80),
+    paras:r.paras.map(p=>String(p)).filter(p=>p.trim()).slice(0,6),
+    qs:r.qs.filter(q=>q&&q.q&&Array.isArray(q.a)&&q.a.length>=2).slice(0,5).map(q=>({q:String(q.q),a:q.a.slice(0,3).map(String)}))};
+  if(t.qs.length<3) throw new Error("qs");
+  S.ai=(S.ai||[]).concat(t).slice(-40); save();
+  return t;
+}
+
+/* ============ KURSLOGIK ============ */
+const TOTAL=48, TESTS={1:"T1",12:"T2",24:"T3",36:"T4",48:"T5"};
+function plan(n){
+  const w=Math.ceil(n/6), d=n-(w-1)*6, wk=WEEKS[w-1];
+  const tip = n===1?0 : n===48?17 : ((n-2)%16)+1;
+  let steps;
+  if(TESTS[n]) steps = n===1 ? [{t:"tip",i:tip},{t:"test",id:"T1"}] : [{t:"tip",i:tip},{t:"schulte"},{t:"test",id:TESTS[n]}];
+  else ({
+    1:()=>steps=[{t:"tip",i:tip},{t:"schulte"},{t:"pacer",m:"line",f:1.0},{t:"comp"}],
+    2:()=>steps=[{t:"tip",i:tip},{t:"schulte"},{t:"pacer",m:"line",f:1.05},{t:"sprint",m:"line",f:1.3},{t:"comp"}],
+    3:()=>steps=[{t:"tip",i:tip},{t:"span"},{t:"pacer",m:"line",f:1.1},{t:"sprint",m:"line",f:1.4},{t:"comp"}],
+    4:()=>steps=[{t:"tip",i:tip},{t:"span"},{t:"skim"},{t:"pacer",m:"line",f:1.1},{t:"comp"}],
+    5:()=>steps=[{t:"tip",i:tip},{t:"span"},{t:"pacer",m:"chunk",f:1.1},{t:"sprint",m:"chunk",f:1.4},{t:"comp"}],
+    6:()=>steps=[{t:"tip",i:tip},{t:"schulte"},{t:"pacer",m:"chunk",f:1.15},{t:"sprint",m:"chunk",f:1.5},{t:"comp"}],
+    7:()=>steps=[{t:"tip",i:tip},{t:"span"},{t:"rsvp",f:1.3},{t:"pacer",m:"chunk",f:1.15},{t:"comp"}],
+    8:()=>steps=[{t:"tip",i:tip},{t:"schulte"},{t:"sprint",m:"line",f:1.5},{t:"pacer",m:"chunk",f:1.15},{t:"comp"}]
+  })[w]();
+  const title = n===1?"Einstiegstest": TESTS[n]?(n===48?"Abschlusstest":"Zwischentest"): wk.name;
+  return {n,w,d,title,steps,test:!!TESTS[n]};
+}
+const STEP_NAMES={tip:"Kurz erklärt",schulte:"Aufwärmen: Zahlentafel",span:"Aufwärmen: Blickspanne",pacer:"Pacer-Lesen",sprint:"Sprint",rsvp:"Wortanzeige",skim:"Überfliegen",comp:"Lesen mit Fragen",test:"Test"};
+const doneCount=()=>Object.keys(S.lessons).length;
+const nextLesson=()=>{ for(let n=1;n<=TOTAL;n++) if(!S.lessons[n]) return n; return null; };
+function trainingDays(from,to){ let c=0; const d=parseDay(from), e=parseDay(to); while(d<=e){ if(d.getDay()!==0) c++; d.setDate(d.getDate()+1);} return c; }
+function behind(){ const first=S.lessons[1]; if(!first) return 0; const exp=Math.min(TOTAL,trainingDays(first.date,today())); return Math.max(0,exp-doneCount()); }
+function streak(){
+  const days=new Set(Object.values(S.lessons).map(l=>l.date)); if(!days.size) return 0;
+  const d=new Date(); if(!days.has(today(d))){ d.setDate(d.getDate()-1); }
+  let c=0; for(let guard=0;guard<400;guard++){ if(d.getDay()===0){ d.setDate(d.getDate()-1); continue; } if(days.has(today(d))){ c++; d.setDate(d.getDate()-1);} else break; }
+  return c;
+}
+const LEVELS=[[0,"Buchstabierer"],[200,"Zeilenleser"],[500,"Seitenwender"],[900,"Kapitelstürmer"],[1400,"Vielleser"],[2000,"Bücherwurm"],[2700,"Lesefuchs"],[3400,"Textkenner"],[4100,"Schnellleser"],[4800,"Lesemeister"]];
+function level(){ let i=0; while(i+1<LEVELS.length&&S.xp>=LEVELS[i+1][0]) i++; const cur=LEVELS[i][0], nxt=LEVELS[i+1]?LEVELS[i+1][0]:null; return {n:i+1,name:LEVELS[i][1],pct:nxt?(S.xp-cur)/(nxt-cur):1,toNext:nxt?nxt-S.xp:0}; }
+const compSessions=()=>S.sessions.filter(s=>s.type==="comp"||s.type==="test");
+function recentEff(k=3){ const c=compSessions().filter(s=>!s.repeat).slice(-k); if(!c.length) return null; return {wpm:c.reduce((a,s)=>a+s.wpm,0)/c.length, comp:c.reduce((a,s)=>a+s.comp,0)/c.length, eff:c.reduce((a,s)=>a+s.eff,0)/c.length}; }
+const BADGES=[
+ {id:"start",name:"Startschuss",desc:"Einstiegstest gemacht",ok:()=>!!S.baseline},
+ {id:"s3",name:"Drei in Folge",desc:"3 Trainingstage am Stück",ok:()=>streak()>=3},
+ {id:"s6",name:"Volle Woche",desc:"6 Trainingstage am Stück",ok:()=>streak()>=6},
+ {id:"s18",name:"Eiserne Serie",desc:"18 Trainingstage am Stück",ok:()=>streak()>=18},
+ {id:"full",name:"Alles verstanden",desc:"100 % in einem Fragenblock",ok:()=>compSessions().some(s=>s.comp>=1)},
+ {id:"p10",name:"Plus 10",desc:"Effektive Rate 10 % über Start",ok:()=>gain()>=.10},
+ {id:"p25",name:"Plus 25",desc:"Effektive Rate 25 % über Start",ok:()=>gain()>=.25},
+ {id:"p40",name:"Plus 40",desc:"Effektive Rate 40 % über Start",ok:()=>gain()>=.40},
+ {id:"schulte",name:"Adlerblick",desc:"Zahlentafel unter 30 Sekunden",ok:()=>S.schulteBest!=null&&S.schulteBest<30000},
+ {id:"span5",name:"Weiter Blick",desc:"5 Wörter in der Blickspanne",ok:()=>S.spanBest>=5},
+ {id:"sprint10",name:"Sprinter",desc:"10 Sprints gelaufen",ok:()=>S.sprints>=10},
+ {id:"half",name:"Halbzeit",desc:"24 Lektionen geschafft",ok:()=>doneCount()>=24},
+ {id:"grad",name:"Absolvent",desc:"Alle 48 Lektionen geschafft",ok:()=>doneCount()>=48}
+];
+function gain(){ if(!S.baseline) return 0; const r=recentEff(3); if(!r) return 0; return r.eff/S.baseline.eff-1; }
+function checkBadges(){ const fresh=[]; for(const b of BADGES){ if(!S.badges[b.id]&&b.ok()){ S.badges[b.id]=today(); fresh.push(b); } } return fresh; }
+function compText(){
+  const train=TEXTS.filter(t=>t.kind==="train");
+  const unseen=train.find(t=>!S.seen[t.id]); if(unseen) return {text:unseen};
+  const aiUnseen=(S.ai||[]).find(t=>!S.seen[t.id]); if(aiUnseen) return {text:aiUnseen};
+  return null;
+}
+function repeatText(){ const pool=TEXTS.filter(t=>t.kind==="train").concat(S.ai||[]); pool.sort((a,b)=>(S.seen[a.id]||0)-(S.seen[b.id]||0)); return pool[0]; }
+function drillText(n){
+  const pool=[textById("D1"),textById("D2")].concat(TEXTS.filter(t=>t.kind==="train"&&S.seen[t.id]),(S.ai||[]).filter(t=>S.seen[t.id]));
+  return pool[(n*7)%pool.length];
+}
+const tgt=()=>S.target||250;
+
+/* ============ OBERFLÄCHE ============ */
+let Tab="heute", Run=null;
+document.getElementById("tabs").addEventListener("click",e=>{ const b=e.target.closest("button[data-tab]"); if(!b) return; if(Run&&!confirmLeave()) return; Tab=b.dataset.tab; render(); });
+function confirmLeave(){ Run=null; return true; }
+function render(){
+  for(const b of document.querySelectorAll("#tabs button")) b.setAttribute("aria-selected",b.dataset.tab===Tab&&!Run?"true":"false");
+  const L=level(), st=streak();
+  $("#chips").replaceChildren(
+    h("span",{class:"chip"},"Stufe ",h("b",{text:L.n})," · ",L.name),
+    h("span",{class:"chip"},"Serie ",h("b",{text:st})," ",st===1?"Tag":"Tage"),
+    h("span",{class:"chip"},"Tempo ",h("b",{text:nf(tgt())})," WpM"));
+  const v=$("#view"); v.replaceChildren();
+  if(Run){ renderRun(v); return; }
+  ({heute:viewToday,kurs:viewCourse,lesen:viewFree,fortschritt:viewProgress,grundlagen:viewBasics})[Tab](v);
+}
+
+function viewToday(v){
+  const n=nextLesson();
+  if(!n){ v.append(h("div",{class:"card"},h("p",{class:"eyebrow"},"Kurs abgeschlossen"),h("h2",{text:"Alle 48 Lektionen geschafft"}),h("p",{},"Im Lesefenster kannst du weiter frei trainieren. Im Reiter Fortschritt siehst du deinen Weg vom Einstiegstest bis heute."))); return; }
+  const p=plan(n), todayDone=Object.values(S.lessons).filter(l=>l.date===today()).length, late=behind();
+  const card=h("div",{class:"card"},
+    h("p",{class:"eyebrow"},`Lektion ${n} von ${TOTAL} · Woche ${p.w}, Tag ${p.d}`),
+    h("h2",{text:p.title}),
+    h("p",{class:"muted"},WEEKS[p.w-1].goal),
+    h("ol",{class:"steps"},p.steps.map((s,i)=>h("li",{},h("span",{class:"dot",text:i+1}),h("span",{},STEP_NAMES[s.t],s.f&&s.t!=="tip"?h("span",{class:"muted"},` · ${nf(tgt()*s.f)} WpM`):null)))),
+    h("div",{class:"row"},h("button",{class:"btn primary",onclick:()=>startLesson(n)},todayDone?"Noch eine Lektion":"Lektion starten"),h("span",{class:"muted"},"etwa 15 Minuten")));
+  if(todayDone&&!late) card.insertBefore(h("p",{class:"notice",style:"border-left-color:var(--good)"},"Die heutige Lektion ist erledigt. Morgen geht es weiter, eine Extra-Lektion ist trotzdem möglich."),card.children[3]);
+  if(late>0) card.insertBefore(h("p",{class:"notice"},`Du bist ${late} ${late===1?"Lektion":"Lektionen"} im Rückstand. Heute darfst du zwei Lektionen machen, um aufzuholen.`),card.children[3]);
+  v.append(card);
+  const r=recentEff(3);
+  if(S.baseline){
+    v.append(h("div",{class:"grid2",style:"margin-top:16px"},
+      stat("Ausgangswert",nf(S.baseline.wpm)+" WpM",`${Math.round(S.baseline.comp*100)} % Verständnis`),
+      stat("Aktuell",r?nf(r.wpm)+" WpM":"–",r?`${Math.round(r.comp*100)} % Verständnis`:""),
+      stat("Effektive Rate",r?nf(r.eff):"–",S.baseline&&r?deltaTxt(r.eff/S.baseline.eff-1):"",true)));
+  } else {
+    v.append(h("div",{class:"card",style:"margin-top:16px"},h("h3",{text:"So geht es los"}),h("p",{class:"prose"},"Die erste Lektion ist ein Einstiegstest: ein Text über den Hamburger Hafen, den du in deinem normalen Tempo liest, dann fünf Fragen. Daraus berechnet das Training dein Startempo für den Pacer.")));
+  }
+}
+function stat(l,v,d,trend){ return h("div",{class:"stat"},h("span",{class:"l",text:l}),h("span",{class:"v",text:v}),d?h("span",{class:"d "+(trend&&typeof d==="string"&&d.startsWith("+")?"up":trend&&d.startsWith("−")?"down":"muted"),text:d}):null); }
+function deltaTxt(x){ const p=Math.round(x*100); return (p>=0?"+":"−")+Math.abs(p)+" % seit Start"; }
+
+function viewCourse(v){
+  const nx=nextLesson();
+  v.append(h("div",{class:"weeks"},WEEKS.map((w,i)=>{
+    const pips=[]; for(let d=1;d<=6;d++){ const n=i*6+d; pips.push(h("span",{class:"pip"+(S.lessons[n]?" done":"")+(n===nx?" next":"")+(TESTS[n]?" test":""),title:`Lektion ${n}${TESTS[n]?" (Test)":""}`})); }
+    return h("div",{class:"week"},h("span",{class:"wt"},`Woche ${i+1}: ${w.name}`),h("span",{class:"pips"},pips),h("span",{class:"wg",text:w.goal}));
+  })));
+  v.append(h("p",{class:"muted",style:"font-size:.85rem"},"Grün ist erledigt, gelb ist die nächste Lektion, blau umrandet sind Tests."));
+}
+
+function viewFree(v){
+  const lib=TEXTS.filter(t=>t.kind!=="test"||S.seen[t.id]).concat(S.ai||[]);
+  const sel=h("select",{id:"fr-text"},lib.map(t=>h("option",{value:t.id},(t.kind==="ai"?"KI · ":"")+t.title)));
+  const mode=h("select",{id:"fr-mode"},[["line","Pacer, Zeile"],["chunk","Pacer, Sinngruppen"],["self","Eigenes Tempo mit Zeitmessung"],["rsvp","Wortanzeige"]].map(([k,l])=>h("option",{value:k},l)));
+  const speed=h("input",{type:"range",id:"fr-wpm",min:120,max:900,step:10,value:Math.round(tgt())});
+  const out=h("span",{class:"wpm",text:speed.value+" WpM"}); speed.addEventListener("input",()=>out.textContent=speed.value+" WpM");
+  const quiz=h("input",{type:"checkbox",id:"fr-quiz",checked:true});
+  const msg=h("p",{class:"muted"});
+  const aiBtn=h("button",{class:"btn",onclick:async()=>{ aiBtn.disabled=true; msg.textContent="Claude schreibt einen neuen Text…"; try{ const t=await generateText(); msg.textContent=`Neuer Text: ${t.title}`; render(); }catch(e){ msg.textContent=AI?"Das hat nicht geklappt. Versuch es später noch einmal.":"Neue KI-Texte sind hier gerade nicht verfügbar."; aiBtn.disabled=false; } }},"Neuer KI-Text");
+  v.append(h("div",{class:"card"},
+    h("h2",{text:"Lesefenster"}),
+    h("p",{class:"muted"},"Freies Training außerhalb des Kursplans. Das Lesefenster öffnet sich über den ganzen Bildschirm."),
+    h("label",{class:"field",for:"fr-text"},"Text",sel),
+    h("label",{class:"field",for:"fr-mode"},"Art",mode),
+    h("label",{class:"field",for:"fr-wpm"},h("span",{},"Tempo ",out),speed),
+    h("label",{class:"row",for:"fr-quiz"},quiz,"Danach Fragen beantworten, wenn der Text welche hat"),
+    h("div",{class:"row"},h("button",{class:"btn primary",onclick:()=>{
+      const t=textById(sel.value); const m=mode.value, w=+speed.value;
+      openReader({text:t,mode:m,wpm:w,title:t.title,onDone:res=>{
+        const wpm=m==="self"?Math.min(1500,wordsOf(t)/(Math.max(1000,res.ms)/60000)):w;
+        if(quiz.checked&&t.qs){ Quiz.open(t,(c)=>{ const eff=wpm*c; S.sessions.push({date:today(),type:"free",textId:t.id,wpm:Math.round(wpm),comp:c,eff:Math.round(eff),mode:m}); save(); showFreeResult(wpm,c); }); }
+        else { S.sessions.push({date:today(),type:"free",textId:t.id,wpm:Math.round(wpm),mode:m}); save(); render(); }
+      }});
+    }},"Lesen"),aiBtn),msg));
+}
+function showFreeResult(wpm,c){ const v=$("#view"); v.replaceChildren(h("div",{class:"card"},h("p",{class:"eyebrow"},"Freies Training"),h("div",{class:"big",text:`${nf(wpm)} WpM`}),h("p",{},`${Math.round(c*100)} % Verständnis, effektive Rate ${nf(wpm*c)}.`),h("div",{class:"row"},h("button",{class:"btn primary",onclick:()=>render()},"Zurück zum Lesefenster")))); }
+
+function viewProgress(v){
+  const L=level();
+  v.append(h("div",{class:"card"},
+    h("div",{class:"row",style:"justify-content:space-between"},h("h2",{text:`Stufe ${L.n}: ${L.name}`}),h("span",{class:"muted"},`${nf(S.xp)} Punkte`)),
+    h("div",{class:"lvl",role:"progressbar","aria-valuemin":0,"aria-valuemax":100,"aria-valuenow":Math.round(L.pct*100)},h("i",{style:`width:${Math.round(L.pct*100)}%`})),
+    h("p",{class:"muted",style:"margin:0"},L.toNext?`Noch ${nf(L.toNext)} Punkte bis zur nächsten Stufe.`:"Höchste Stufe erreicht."),
+    h("p",{class:"muted",style:"margin:0"},`${doneCount()} von ${TOTAL} Lektionen · Serie ${streak()} Tage`)));
+  const r=recentEff(3);
+  if(S.baseline) v.append(h("div",{class:"grid2",style:"margin-top:16px"},
+    stat("Start-Tempo",nf(S.baseline.wpm)+" WpM",`${Math.round(S.baseline.comp*100)} % Verständnis`),
+    stat("Tempo (letzte 3)",r?nf(r.wpm)+" WpM":"–",r?`${Math.round(r.comp*100)} % Verständnis`:""),
+    stat("Effektive Rate",r?nf(r.eff):"–",r?deltaTxt(r.eff/S.baseline.eff-1):"",true),
+    stat("Pacer-Ziel",nf(tgt())+" WpM","passt sich nach jedem Fragenblock an")));
+  const cs=compSessions();
+  const chartCard=h("div",{class:"card",style:"margin-top:16px"},h("h3",{text:"Tempo und effektive Rate"}));
+  if(cs.length<2) chartCard.append(h("p",{class:"muted"},"Nach zwei gemessenen Texten erscheint hier dein Verlauf."));
+  else { chartCard.append(h("div",{class:"legend"},h("span",{},h("i",{style:"background:var(--accent)"}),"Effektive Rate"),h("span",{},h("i",{style:"background:var(--s2)"}),"Tempo in WpM"),h("span",{},"Kreise: Tests")),chart(cs)); }
+  v.append(chartCard);
+  v.append(h("div",{class:"card",style:"margin-top:16px"},h("h3",{text:"Erfolge"}),h("div",{class:"badges"},BADGES.map(b=>h("div",{class:"badge"+(S.badges[b.id]?" on":"")},h("b",{text:b.name}),h("span",{text:S.badges[b.id]?`${b.desc} · ${fmtDay(S.badges[b.id])}`:b.desc}))))));
+  if(cs.length) v.append(h("div",{class:"card",style:"margin-top:16px"},h("h3",{text:"Alle Messungen"}),h("div",{class:"tablewrap"},h("table",{},h("thead",{},h("tr",{},["Datum","Art","Text","WpM","Verständnis","Effektiv"].map(x=>h("th",{text:x})))),h("tbody",{},cs.slice().reverse().map(s=>h("tr",{},h("td",{text:fmtDay(s.date)}),h("td",{text:s.type==="test"?"Test":s.repeat?"Wiederholung":"Lektion"}),h("td",{text:(textById(s.textId)||{}).title||s.textId}),h("td",{text:nf(s.wpm)}),h("td",{text:Math.round(s.comp*100)+" %"}),h("td",{text:nf(s.eff)}))))))));
+  v.append(h("div",{class:"row",style:"margin-top:16px"},h("button",{class:"btn ghost",id:"reset",onclick:e=>{ const b=e.currentTarget; if(b.dataset.arm){ S=freshState(); save(); render(); } else { b.dataset.arm="1"; b.textContent="Wirklich alles löschen? Nochmal tippen"; } }},"Fortschritt zurücksetzen")));
+}
+function chart(cs){
+  const W=600,H=230,pl=40,pr=52,pt=12,pb=26;
+  const ys=cs.flatMap(s=>[s.wpm,s.eff]); const max=Math.ceil(Math.max(...ys)*1.1/50)*50; const min=0;
+  const x=i=>pl+(cs.length===1?0:i*(W-pl-pr)/(cs.length-1)), y=v=>pt+(H-pt-pb)*(1-(v-min)/(max-min));
+  const ns="http://www.w3.org/2000/svg", S2=(t,a)=>{ const e=document.createElementNS(ns,t); for(const k in a) e.setAttribute(k,a[k]); return e; };
+  const svg=S2("svg",{viewBox:`0 0 ${W} ${H}`,role:"img","aria-label":"Verlauf von Tempo und effektiver Rate"});
+  for(let k=0;k<=4;k++){ const v=min+(max-min)*k/4; svg.append(S2("line",{x1:pl,x2:W-pr,y1:y(v),y2:y(v),stroke:"var(--line)","stroke-width":1})); const t=S2("text",{x:pl-6,y:y(v)+4,"text-anchor":"end",class:"t-axis"}); t.textContent=nf(v); svg.append(t); }
+  const lab=(i)=>{ const t=S2("text",{x:x(i),y:H-6,"text-anchor":i===0?"start":i===cs.length-1?"end":"middle",class:"t-axis"}); t.textContent=fmtDay(cs[i].date); return t; };
+  svg.append(lab(0)); if(cs.length>1) svg.append(lab(cs.length-1));
+  const line=(key,color)=>{ const d=cs.map((s,i)=>(i?"L":"M")+x(i).toFixed(1)+" "+y(s[key]).toFixed(1)).join(" "); svg.append(S2("path",{d,fill:"none",stroke:color,"stroke-width":2,"stroke-linejoin":"round","stroke-linecap":"round"}));
+    cs.forEach((s,i)=>{ if(s.type==="test") svg.append(S2("circle",{cx:x(i),cy:y(s[key]),r:5,fill:"var(--card)",stroke:color,"stroke-width":2})); });
+    const li=cs.length-1; svg.append(S2("circle",{cx:x(li),cy:y(cs[li][key]),r:4,fill:color,stroke:"var(--card)","stroke-width":2}));
+    const t=S2("text",{x:x(li)+8,y:y(cs[li][key])+4,class:"t-lab"}); t.textContent=nf(cs[li][key]); svg.append(t); };
+  line("wpm","var(--s2)"); line("eff","var(--accent)");
+  const cross=S2("line",{y1:pt,y2:H-pb,stroke:"var(--muted)","stroke-width":1,opacity:0}); svg.append(cross);
+  const hit=S2("rect",{x:pl,y:pt,width:W-pl-pr,height:H-pt-pb,fill:"transparent"}); svg.append(hit);
+  const box=h("div",{class:"chart"}), tip=h("div",{class:"tip",hidden:true});
+  const show=e=>{ const r=svg.getBoundingClientRect(); const px=(e.clientX-r.left)*W/r.width; let i=Math.round((px-pl)/((W-pl-pr)/Math.max(1,cs.length-1))); i=Math.max(0,Math.min(cs.length-1,i)); const s=cs[i];
+    cross.setAttribute("x1",x(i)); cross.setAttribute("x2",x(i)); cross.setAttribute("opacity",.5);
+    tip.replaceChildren(h("b",{text:`${fmtDay(s.date)} · ${s.type==="test"?"Test":"Lektion"}`}),h("br"),`Tempo ${nf(s.wpm)} WpM`,h("br"),`Verständnis ${Math.round(s.comp*100)} %`,h("br"),`Effektiv ${nf(s.eff)}`);
+    tip.hidden=false; const tx=x(i)*r.width/W; tip.style.left=Math.min(Math.max(0,tx-70),r.width-150)+"px"; tip.style.top="0px"; };
+  hit.addEventListener("pointermove",show); hit.addEventListener("pointerdown",show); hit.addEventListener("pointerleave",()=>{ tip.hidden=true; cross.setAttribute("opacity",0); });
+  box.append(svg,tip); return box;
+}
+function viewBasics(v){
+  v.append(h("div",{class:"card"},h("h2",{text:"Grundlagen in fünf Minuten"}),h("p",{class:"muted"},"Was die Forschung zum schnellen Lesen sagt, kurz und ohne Versprechen, die nicht halten.")));
+  for(const [t,x] of BASICS) v.append(h("div",{class:"card",style:"margin-top:12px"},h("h3",{text:t}),h("p",{class:"prose",style:"margin:0"},x)));
+  v.append(h("p",{class:"muted",style:"font-size:.8rem;margin-top:12px"},"Quellen: Rayner u. a. 2016, Psychological Science in the Public Interest; Brysbaert 2019, Journal of Memory and Language; Schotter u. a. 2014, Psychological Science."));
+}
+
+/* ============ LEKTION ============ */
+function startLesson(n){ Run={n,plan:plan(n),i:0,res:[],xp:0}; render(); window.scrollTo(0,0); }
+function renderRun(v){
+  const p=Run.plan, s=p.steps[Run.i];
+  const head=h("div",{class:"row",style:"justify-content:space-between"},
+    h("p",{class:"eyebrow",style:"margin:0"},`Lektion ${p.n} · Schritt ${Run.i+1} von ${p.steps.length}`),
+    h("button",{class:"btn ghost",onclick:()=>{ Run=null; render(); }},"Abbrechen"));
+  const box=h("div",{class:"card"}); v.append(head,box);
+  const next=(r)=>{ if(r) Run.res.push(r); Run.i++; if(Run.i>=p.steps.length) finishLesson(); else { render(); window.scrollTo(0,0);} };
+  STEPS[s.t](box,s,next);
+}
+const STEPS={
+  tip(box,s,next){ const [t,x]=TIPS[s.i]; box.append(h("p",{class:"eyebrow"},STEP_NAMES.tip),h("h2",{text:t}),h("p",{class:"prose"},x),h("div",{class:"row"},h("button",{class:"btn primary",onclick:()=>next()},"Weiter"))); },
+  schulte(box,s,next){ Schulte(box,next); },
+  span(box,s,next){ Span(box,next); },
+  pacer(box,s,next){ readerStep(box,s,next,"pacer"); },
+  sprint(box,s,next){ readerStep(box,s,next,"sprint"); },
+  rsvp(box,s,next){ readerStep(box,{...s,m:"rsvp"},next,"rsvp"); },
+  skim(box,s,next){
+    const pick=compText(); const t=pick?pick.text:repeatText(); const secs=Math.max(20,Math.round(wordsOf(t)/(tgt()*3)*60));
+    box.append(h("p",{class:"eyebrow"},STEP_NAMES.skim),h("h2",{text:t.title}),h("p",{class:"prose"},`Du hast ${secs} Sekunden. Lies nur die hervorgehobenen ersten Sätze der Absätze und lass den Blick über den Rest gleiten. Danach kommen Fragen, achte vor allem auf die Hauptaussage.`),
+      h("div",{class:"row"},h("button",{class:"btn primary",onclick:()=>openReader({text:t,mode:"skim",limitMs:secs*1000,title:t.title,onDone:()=>{ S.seen[t.id]=(S.seen[t.id]||0)+1; Quiz.open(t,c=>{ save(); next({t:"skim",comp:c}); },box); }})},"Überfliegen starten")));
+  },
+  comp(box,s,next){ measureStep(box,next,false); },
+  test(box,s,next){ measureStep(box,next,s.id); }
+};
+function readerStep(box,s,next,kind){
+  const t=drillText(Run.n+(kind==="sprint"?3:0)), w=Math.round(tgt()*s.f);
+  const how = kind==="sprint"?"Der Marker ist absichtlich zu schnell. Folge ihm trotzdem, Verständnis ist hier egal." : kind==="rsvp" ? "Die Wörter erscheinen nacheinander in der Mitte. Halte den Blick ruhig, Verständnis ist zweitrangig." : s.m==="chunk" ? "Der Marker springt in kleinen Wortgruppen. Erfasse jede Gruppe mit einem Blick." : "Folge dem Leuchtmarker unter der Zeile. Verpasst du ein Wort, lass es los.";
+  box.append(h("p",{class:"eyebrow"},STEP_NAMES[kind]),h("h2",{text:`${t.title}`}),h("p",{class:"prose"},how),
+    h("p",{class:"muted"},`Tempo ${nf(w)} WpM. Im Lesefenster kannst du es mit Plus und Minus anpassen.`),
+    h("div",{class:"row"},h("button",{class:"btn primary",onclick:()=>openReader({text:t,mode:s.m,wpm:w,title:t.title,auto:true,onDone:r=>{ if(kind==="sprint"){ S.sprints++; save(); } next({t:kind,wpm:r.wpm}); }})},"Lesefenster öffnen"),h("button",{class:"btn ghost",onclick:()=>next()},"Überspringen")));
+}
+async function measureStep(box,next,testId){
+  let t, repeat=false;
+  if(testId) t=textById(testId);
+  else { const pick=compText(); if(pick) t=pick.text; else {
+      box.append(h("p",{class:"muted"},"Claude schreibt einen neuen Text für dich…"));
+      try{ t=await generateText(); }catch(e){ t=repeatText(); repeat=true; }
+      box.replaceChildren(); } }
+  const words=wordsOf(t);
+  box.append(h("p",{class:"eyebrow"},testId?(Run.n===1?"Einstiegstest":Run.n===48?"Abschlusstest":"Zwischentest"):STEP_NAMES.comp, t.kind==="ai"?" · ":"", t.kind==="ai"?h("span",{class:"tag"},"KI-Text"):null),
+    h("h2",{text:t.title}),
+    h("p",{class:"prose"},testId?`Lies den Text in deinem natürlichen Tempo, so wie du sonst liest. ${words} Wörter. Die Zeit läuft ab Start, danach kommen ${t.qs.length} Fragen ohne Text.`:`Lies den Text in deinem eigenen Tempo, gern etwas zügiger als gewohnt. ${words} Wörter. Danach kommen ${t.qs.length} Fragen.`),
+    repeat?h("p",{class:"notice"},"Alle Übungstexte sind schon gelesen und ein neuer KI-Text war nicht möglich. Dieser Text ist eine Wiederholung und zählt nicht für das Pacer-Ziel."):null,
+    h("div",{class:"row"},h("button",{class:"btn primary",onclick:()=>openReader({text:t,mode:"self",title:t.title,onDone:r=>{
+      const wpm=Math.min(1500,words/(Math.max(1000,r.ms)/60000)); S.seen[t.id]=(S.seen[t.id]||0)+1;
+      Quiz.open(t,c=>{
+        const eff=wpm*c, rec={date:today(),type:testId?"test":"comp",textId:t.id,wpm:Math.round(wpm),comp:c,eff:Math.round(eff),lesson:Run.n,repeat};
+        S.sessions.push(rec);
+        let note="";
+        if(Run.n===1&&testId){ S.baseline={wpm:Math.round(wpm),comp:c,eff:Math.round(eff),date:today()}; S.target=Math.round(Math.max(150,Math.min(450,wpm))/5)*5; note=`Dein Startwert für den Pacer ist ${nf(S.target)} WpM.`; }
+        else if(!repeat){ const old=tgt(); if(c>=.75) S.target=Math.round(Math.max(old*1.05, Math.min(old*1.1, wpm))/5)*5; else if(c<.65) S.target=Math.max(120,Math.round(old*0.95/5)*5);
+          note = S.target>old?`Gut verstanden: Das Pacer-Ziel steigt auf ${nf(S.target)} WpM.`: S.target<old?`Zu viel verloren: Das Pacer-Ziel sinkt auf ${nf(S.target)} WpM.`:`Das Pacer-Ziel bleibt bei ${nf(S.target)} WpM.`; }
+        save();
+        resultScreen(box,rec,note,()=>next({t:"comp",...rec}));
+      },box);
+    }})},"Start")));
+}
+function resultScreen(box,rec,note,go){
+  box.replaceChildren(h("p",{class:"eyebrow"},"Ergebnis"),
+    h("div",{class:"grid2"},stat("Tempo",nf(rec.wpm)+" WpM",""),stat("Verständnis",Math.round(rec.comp*100)+" %",""),stat("Effektiv",nf(rec.eff),S.baseline&&rec.lesson!==1?deltaTxt(rec.eff/S.baseline.eff-1):"",true)),
+    note?h("p",{},note):null, h("div",{class:"row"},h("button",{class:"btn primary",onclick:go},"Weiter")));
+}
+function finishLesson(){
+  const n=Run.n, comp=Run.res.find(r=>r.t==="comp");
+  let xp=50+(comp?Math.round(comp.comp*50):0)+(TESTS[n]?50:0);
+  const st=streak(); S.lessons[n]={date:today(),xp}; const st2=streak(); if(st2>st&&st2%6===0) xp+=30;
+  S.lessons[n].xp=xp; S.xp+=xp;
+  const fresh=checkBadges(); save();
+  const v=$("#view"); Run=null; render();
+  v.replaceChildren(h("div",{class:"card"},h("p",{class:"eyebrow"},`Lektion ${n} geschafft`),h("div",{class:"big",text:`+${xp} Punkte`}),
+    fresh.length?h("div",{class:"badges"},fresh.map(b=>h("div",{class:"badge on"},h("b",{text:"Neu: "+b.name}),h("span",{text:b.desc})))):null,
+    h("p",{},n===48?"Du hast den Kurs abgeschlossen. Im Reiter Fortschritt siehst du den Vergleich mit deinem Einstiegstest.":"Morgen wartet die nächste Lektion. Um 20 Uhr fragt Claude im Projekt kurz nach."),
+    h("div",{class:"row"},h("button",{class:"btn primary",onclick:()=>{ Tab="heute"; render(); }},"Fertig"),h("button",{class:"btn",onclick:()=>{ Tab="fortschritt"; render(); }},"Fortschritt ansehen"))));
+}
+
+/* ============ QUIZ ============ */
+const Quiz={ open(t,done,host){
+  const target=host||$("#view"); let i=0, right=0;
+  const qs=t.qs.map(q=>({q:q.q,opts:shuffled(q.a.map((a,k)=>({a,ok:k===0})),hash(q.q))}));
+  const show=()=>{
+    const q=qs[i]; let answered=false;
+    const opts=q.opts.map(o=>{ const b=h("button",{class:"opt",onclick:()=>{ if(answered) return; answered=true; if(o.ok) right++; b.classList.add(o.ok?"right":"wrong"); if(!o.ok) opts[q.opts.findIndex(x=>x.ok)].classList.add("right"); nextBtn.disabled=false; nextBtn.focus(); }},o.a); return b; });
+    const nextBtn=h("button",{class:"btn primary",disabled:true,onclick:()=>{ i++; if(i<qs.length) show(); else done(right/qs.length); }},i<qs.length-1?"Nächste Frage":"Auswerten");
+    target.replaceChildren(h("p",{class:"eyebrow"},`Frage ${i+1} von ${qs.length}`),h("h3",{text:q.q}),h("div",{class:"opts"},opts),h("div",{class:"row"},nextBtn));
+  };
+  show();
+}};
+
+/* ============ ZAHLENTAFEL ============ */
+function Schulte(box,next){
+  const nums=shuffled([...Array(25)].map((_,i)=>i+1),Date.now()>>>0); let want=1, t0=0, timer=0;
+  const clock=h("span",{class:"wpm",text:"0:00"});
+  const grid=h("div",{class:"schulte"});
+  const cells=nums.map(n=>h("button",{class:"cell",onclick:e=>{ if(!t0) return; const b=e.currentTarget; if(n===want){ b.classList.add("hit"); want++; if(want>25){ clearInterval(timer); const ms=Date.now()-t0; const best=S.schulteBest==null||ms<S.schulteBest; if(best) S.schulteBest=ms; save(); fin(ms,best);} } else { b.classList.add("miss"); setTimeout(()=>b.classList.remove("miss"),300);} }},String(n)));
+  grid.append(...cells,h("span",{class:"center-dot"}));
+  const startBtn=h("button",{class:"btn primary",onclick:()=>{ t0=Date.now(); startBtn.hidden=true; timer=setInterval(()=>clock.textContent=fmtTime(Date.now()-t0),250); }},"Start");
+  box.append(h("p",{class:"eyebrow"},STEP_NAMES.schulte),h("p",{class:"prose"},"Halte den Blick auf dem roten Punkt in der Mitte und tippe die Zahlen von 1 bis 25 der Reihe nach an. Versuche, die Zahlen mit dem Rand des Blickfelds zu finden, statt mit den Augen zu suchen."),
+    h("div",{class:"row",style:"justify-content:space-between"},startBtn,h("span",{},"Zeit ",clock),h("span",{class:"muted"},S.schulteBest?`Bestzeit ${fmtTime(S.schulteBest)}`:"")),grid,
+    h("div",{class:"row"},h("button",{class:"btn ghost",onclick:()=>{ clearInterval(timer); next(); }},"Überspringen")));
+  function fin(ms,best){ box.replaceChildren(h("p",{class:"eyebrow"},STEP_NAMES.schulte),h("div",{class:"big",text:fmtTime(ms)}),h("p",{},best?"Neue Bestzeit.":`Bestzeit ${fmtTime(S.schulteBest)}.`),h("div",{class:"row"},h("button",{class:"btn primary",onclick:()=>next({t:"schulte",ms})},"Weiter"))); }
+}
+
+/* ============ BLICKSPANNE ============ */
+function Span(box,next){
+  const pool=[...new Set(TEXTS.filter(t=>t.kind==="train").flatMap(t=>t.paras.join(" ").replace(/[.,:;!?„“"()]/g,"").split(/\s+/)).filter(w=>w.length>=3&&w.length<=9))];
+  let size=2, round=0, right=0, streakOk=0, ms=240, best=2; const ROUNDS=12;
+  const stage=h("div",{class:"flash"},"+"); const info=h("p",{class:"muted"}); const opts=h("div",{class:"opts"});
+  box.append(h("p",{class:"eyebrow"},STEP_NAMES.span),h("p",{class:"prose"},"Schau auf das Kreuz. Kurz blitzt eine Wortgruppe auf. Wähle danach, welche es war. Mit jedem Erfolg wird die Gruppe länger."),stage,info,opts,
+    h("div",{class:"row"},h("button",{class:"btn primary",id:"span-go",onclick:e=>{ e.currentTarget.hidden=true; play(); }},"Start"),h("button",{class:"btn ghost",onclick:()=>next()},"Überspringen")));
+  const rnd=()=>pool[Math.floor(Math.random()*pool.length)];
+  function play(){
+    if(round>=ROUNDS){ S.spanBest=Math.max(S.spanBest||0,best); save(); box.replaceChildren(h("p",{class:"eyebrow"},STEP_NAMES.span),h("div",{class:"big",text:`${right} von ${ROUNDS}`}),h("p",{},`Längste sicher erkannte Gruppe: ${best} Wörter.`),h("div",{class:"row"},h("button",{class:"btn primary",onclick:()=>next({t:"span",right,best})},"Weiter"))); return; }
+    round++; opts.replaceChildren(); info.textContent=`Runde ${round} von ${ROUNDS} · ${size} Wörter`;
+    const g=[...Array(size)].map(rnd), shown=g.join(" ");
+    const variants=new Set([shown]); while(variants.size<3){ const c=g.slice(); c[Math.floor(Math.random()*size)]=rnd(); variants.add(c.join(" ")); }
+    stage.textContent="+";
+    setTimeout(()=>{ stage.textContent=shown; setTimeout(()=>{ stage.textContent="#".repeat(Math.min(28,shown.length));
+      opts.replaceChildren(...shuffled([...variants],Date.now()>>>0).map(vv=>h("button",{class:"opt",onclick:e=>{ const ok=vv===shown; e.currentTarget.classList.add(ok?"right":"wrong"); if(ok){ right++; streakOk++; best=Math.max(best,size); if(streakOk>=2&&size<6){ size++; streakOk=0; } ms=Math.max(120,ms-10);} else { streakOk=0; if(size>2) size--; } setTimeout(play,500); }},vv)));
+    },ms); },600);
+  }
+}
+
+/* ============ LESEFENSTER ============ */
+const RD={ open:false };
+function readerSize(d){ let s=1.25; try{ s=parseFloat(localStorage.getItem("sr-size"))||1.25; }catch(e){} if(d){ s=Math.min(2,Math.max(.95,s+d)); try{ localStorage.setItem("sr-size",s);}catch(e){} } document.documentElement.style.setProperty("--rsize",s+"rem"); }
+readerSize(0);
+function openReader(o){
+  Object.assign(RD,{open:true,o,mode:o.mode,wpm:o.wpm||250,running:false,t0:0,acc:0,last:0,unit:0,frac:0,units:[],words:[],raf:0,done:false,wake:null});
+  const el=$("#reader"), tx=$("#rtext"), rs=$("#rsvp");
+  $("#rtitle").textContent=o.title||"";
+  const showWpm=["line","chunk","rsvp"].includes(o.mode);
+  for(const id of ["rslow","rfast","rwpm"]) $("#"+id).hidden=!showWpm;
+  $("#rwpm").textContent=nf(RD.wpm)+" WpM";
+  $("#rpause").hidden=!(showWpm); $("#rpause").textContent="Pause";
+  $("#rgo").textContent="Start"; $("#rgo").disabled=false; $("#rprog").style.width="0";
+  $("#rclock").textContent= o.limitMs?fmtTime(o.limitMs):"0:00";
+  tx.className=""; tx.replaceChildren(h("div",{id:"rmark"}));
+  const isRsvp=o.mode==="rsvp"; $("#rscroll").hidden=isRsvp; rs.hidden=!isRsvp;
+  let wi=0;
+  for(const para of o.text.paras){
+    const p=h("p"); const ws=para.split(/\s+/).filter(Boolean);
+    let lead=o.mode==="skim", leadEnd=false;
+    ws.forEach((w,k)=>{ const sp=h("span",{class:"w"+(lead&&!leadEnd?" lead":"")},w); sp.dataset.i=wi++; RD.words.push({el:sp,w}); p.append(sp); if(k<ws.length-1) p.append(" "); if(lead&&!leadEnd&&/[.!?]$/.test(w)) leadEnd=true; });
+    tx.append(p);
+  }
+  if(o.mode==="self") tx.classList.add("blur");
+  if(o.mode==="skim") tx.classList.add("skim");
+  if(o.mode==="line"||o.mode==="chunk") tx.classList.add("dim");
+  rs.firstElementChild.textContent= isRsvp?"Bereit":"";
+  el.hidden=false; document.body.style.overflow="hidden"; $("#rscroll").scrollTop=0;
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{ layoutUnits(); placeMark(); }));
+  $("#rgo").focus();
+}
+function rel(el){ const r=el.getBoundingClientRect(), b=$("#rtext").getBoundingClientRect(); return {top:r.top-b.top,left:r.left-b.left,w:r.width,h:r.height}; }
+function layoutUnits(){
+  if(!RD.open) return; const ws=RD.words; RD.units=[]; if(!ws.length) return;
+  const lines=[]; let cur=[], top=null;
+  ws.forEach((w,i)=>{ const t=rel(w.el).top; if(top===null||Math.abs(t-top)>4){ if(cur.length) lines.push(cur); cur=[i]; top=t; } else cur.push(i); });
+  if(cur.length) lines.push(cur);
+  if(RD.mode==="chunk"){ for(const ln of lines){ let g=[]; ln.forEach((i,k)=>{ g.push(i); const w=ws[i].w; const brk=g.length>=3||/[,.;:!?]$/.test(w)||(g.length>=2&&/^(und|oder|aber|denn|dass|weil|die|der|das|den|dem|ein|eine|im|in|am|auf|mit|von|zu|für)$/i.test(ws[ln[k+1]]?.w||"")); if(brk||k===ln.length-1){ RD.units.push(g); g=[]; } }); } }
+  else RD.units=lines;
+  // keep position after relayout
+  if(RD.curWord!=null){ const u=RD.units.findIndex(u=>u.includes(RD.curWord)); if(u>=0) RD.unit=u; }
+}
+function placeMark(){
+  const m=$("#rmark"); if(!m) return;
+  if(!(RD.mode==="line"||RD.mode==="chunk")||!RD.units.length){ m.style.height="0"; return; }
+  const u=RD.units[Math.min(RD.unit,RD.units.length-1)]; const a=RD.words[u[0]].el, b=RD.words[u[u.length-1]].el;
+  for(const w of document.querySelectorAll("#rtext .w.on")) w.classList.remove("on");
+  for(const i of u) RD.words[i].el.classList.add("on");
+  const ra=rel(a), rb=rel(b), left=ra.left-3, full=rb.left+rb.w-ra.left+6;
+  m.style.top=(ra.top-2)+"px"; m.style.height=(ra.h+4)+"px"; m.style.left=left+"px";
+  m.style.width=(RD.mode==="line"? Math.max(8,full*Math.min(1,RD.frac+.08)) : full)+"px";
+  RD.curWord=u[0];
+  const sc=$("#rscroll"), y=a.getBoundingClientRect().top-sc.getBoundingClientRect().top; if(y>sc.clientHeight*.45||y<40) sc.scrollTo({top:Math.max(0,sc.scrollTop+y-sc.clientHeight*.3),behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"});
+}
+function tick(now){
+  if(!RD.open||!RD.running) return;
+  const dt=Math.min(100,now-RD.last); RD.last=now; RD.acc+=dt;
+  if(RD.mode==="rsvp"){
+    const w=RD.words[RD.unit]; if(!w){ return endReader(); }
+    const dur=60000/RD.wpm*(/[.!?;:]$/.test(w.w)?1.8:/,$/.test(w.w)?1.3:1)*(w.w.length>9?1.2:1);
+    RD.frac+=dt/dur; if(RD.frac>=1){ RD.frac=0; RD.unit++; const nw=RD.words[RD.unit]; if(!nw) return endReader(); $("#rsvp span").textContent=nw.w; }
+    $("#rprog").style.width=(RD.unit/RD.words.length*100)+"%";
+  } else if(RD.mode==="line"||RD.mode==="chunk"){
+    const u=RD.units[RD.unit]; if(!u) return endReader();
+    const dur=u.length*60000/RD.wpm*(RD.mode==="chunk"&&/[.!?]$/.test(RD.words[u[u.length-1]].w)?1.25:1);
+    RD.frac+=dt/dur; if(RD.frac>=1){ RD.frac=0; RD.unit++; if(RD.unit>=RD.units.length) return endReader(); }
+    placeMark(); const doneW=RD.units.slice(0,RD.unit).reduce((a,u)=>a+u.length,0); $("#rprog").style.width=(doneW/RD.words.length*100)+"%";
+  } else if(RD.mode==="skim"){
+    const left=RD.o.limitMs-RD.acc; $("#rprog").style.width=Math.min(100,RD.acc/RD.o.limitMs*100)+"%"; if(left<=0) return endReader();
+    $("#rclock").textContent=fmtTime(left); RD.raf=requestAnimationFrame(tick); return;
+  }
+  $("#rclock").textContent=fmtTime(RD.acc);
+  RD.raf=requestAnimationFrame(tick);
+}
+async function startReader(){
+  if(RD.done){ return finishReader(); }
+  if(RD.mode==="self"&&RD.running){ return endReader(); }
+  RD.running=true; RD.last=performance.now();
+  try{ RD.wake=await navigator.wakeLock?.request("screen"); }catch(e){}
+  if(RD.mode==="self"){ $("#rtext").classList.remove("blur"); RD.t0=Date.now(); $("#rgo").textContent="Fertig gelesen"; const iv=setInterval(()=>{ if(!RD.open||!RD.running){ clearInterval(iv); return;} $("#rclock").textContent=fmtTime(Date.now()-RD.t0); },500); return; }
+  if(RD.mode==="rsvp"&&RD.unit===0) $("#rsvp span").textContent=RD.words[0].w;
+  $("#rgo").textContent="Beenden"; RD.raf=requestAnimationFrame(tick);
+}
+function endReader(){
+  RD.running=false; cancelAnimationFrame(RD.raf); RD.done=true;
+  if(RD.mode==="self") RD.ms=Date.now()-RD.t0;
+  $("#rprog").style.width="100%"; $("#rgo").textContent="Weiter"; $("#rpause").hidden=true; $("#rgo").focus();
+  if(RD.mode==="self"||RD.mode==="skim") finishReader();
+}
+function finishReader(){ const o=RD.o, ms=RD.ms||RD.acc, wpm=RD.wpm; closeReader(); o.onDone&&o.onDone({ms,wpm}); }
+function closeReader(){ RD.open=false; RD.running=false; cancelAnimationFrame(RD.raf); try{ RD.wake&&RD.wake.release(); }catch(e){} $("#reader").hidden=true; document.body.style.overflow=""; if(document.fullscreenElement) document.exitFullscreen?.().catch(()=>{}); }
+$("#rgo").addEventListener("click",()=>{ if(RD.running&&RD.mode!=="self") endReader(); else startReader(); });
+$("#rpause").addEventListener("click",()=>{ if(RD.done) return; if(RD.running){ RD.running=false; cancelAnimationFrame(RD.raf); $("#rpause").textContent="Weiter"; } else { RD.running=true; RD.last=performance.now(); $("#rpause").textContent="Pause"; RD.raf=requestAnimationFrame(tick); } });
+$("#rclose").addEventListener("click",()=>{ closeReader(); render(); });
+const setWpm=d=>{ RD.wpm=Math.max(80,Math.min(1200,RD.wpm+d)); $("#rwpm").textContent=nf(RD.wpm)+" WpM"; };
+$("#rslow").addEventListener("click",()=>setWpm(-10)); $("#rfast").addEventListener("click",()=>setWpm(10));
+$("#rsmall").addEventListener("click",()=>{ readerSize(-.1); requestAnimationFrame(()=>{ layoutUnits(); placeMark(); }); });
+$("#rbig").addEventListener("click",()=>{ readerSize(.1); requestAnimationFrame(()=>{ layoutUnits(); placeMark(); }); });
+$("#rfull").addEventListener("click",()=>{ const d=document.documentElement; if(document.fullscreenElement) document.exitFullscreen?.().catch(()=>{}); else d.requestFullscreen?.().catch(()=>{}); });
+window.addEventListener("resize",()=>{ if(RD.open) requestAnimationFrame(()=>{ layoutUnits(); placeMark(); }); });
+document.addEventListener("keydown",e=>{ if(!RD.open) return; if(e.key==="Escape"){ closeReader(); render(); } else if(e.key===" "&&e.target.tagName!=="BUTTON"){ e.preventDefault(); $("#rpause").hidden?$("#rgo").click():$("#rpause").click(); } else if(e.key==="ArrowUp") setWpm(10); else if(e.key==="ArrowDown") setWpm(-10); });
+
+/* ============ START ============ */
+render();
+Store.connect();
+connectAI();
+</script>
