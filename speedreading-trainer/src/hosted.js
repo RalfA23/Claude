@@ -43,24 +43,37 @@
     overlay.setAttribute("role", "dialog");
     overlay.setAttribute("aria-modal", "true");
     overlay.style.cssText = "position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;background:var(--paper,#f5f7fa)";
+    const field = "font:inherit;padding:10px;border-radius:8px;border:1px solid var(--line,#dbe1ea);background:var(--card,#fff);color:var(--ink,#1a2130)";
     overlay.innerHTML =
       '<form id="sr-login" style="max-width:380px;width:100%;display:flex;flex-direction:column;gap:12px;background:var(--card,#fff);border:1px solid var(--line,#dbe1ea);border-radius:14px;padding:20px;font-family:var(--f-ui,system-ui)">' +
       '<h2 style="margin:0;font-family:var(--f-read,Georgia,serif)">Anmelden</h2>' +
-      '<p style="margin:0;color:var(--muted,#5a6475)">Der Trainer ist nur für eingeladene Personen. Gib deine E-Mail-Adresse ein, du bekommst einen Link, mit dem du dich ohne Passwort anmeldest. Dein Fortschritt wird dann auf allen Geräten gespeichert.</p>' +
-      '<label for="sr-email" style="display:flex;flex-direction:column;gap:4px">E-Mail<input id="sr-email" type="email" required autocomplete="email" style="font:inherit;padding:10px;border-radius:8px;border:1px solid var(--line,#dbe1ea);background:var(--card,#fff);color:var(--ink,#1a2130)"></label>' +
+      '<p style="margin:0;color:var(--muted,#5a6475)">Der Trainer ist nur für eingeladene Personen. Dein Fortschritt wird auf allen Geräten gespeichert.</p>' +
+      '<label for="sr-email" style="display:flex;flex-direction:column;gap:4px">E-Mail<input id="sr-email" type="email" required autocomplete="username" style="' + field + '"></label>' +
+      '<label for="sr-pass" style="display:flex;flex-direction:column;gap:4px">Passwort<input id="sr-pass" type="password" autocomplete="current-password" style="' + field + '"></label>' +
       '<label style="display:flex;gap:8px;align-items:flex-start;font-size:.9rem"><input id="sr-consent" type="checkbox" required> <span>Ich habe die <a href="datenschutz.html" target="_blank">Datenschutzerklärung</a> gelesen und bin mindestens 16 Jahre alt.</span></label>' +
-      '<button class="btn primary" type="submit">Anmeldelink schicken</button>' +
+      '<button class="btn primary" type="submit">Anmelden</button>' +
+      '<button class="btn ghost" type="button" id="sr-mail">Stattdessen Anmeldelink per Mail</button>' +
       '<p id="sr-login-msg" style="margin:0;color:var(--muted,#5a6475)" aria-live="polite"></p>' +
       "</form>";
     document.body.appendChild(overlay);
+    const msg = overlay.querySelector("#sr-login-msg");
+    const email = () => overlay.querySelector("#sr-email").value.trim();
+    // Sign-ups are invite-only, so Supabase rejects unknown addresses.
     overlay.querySelector("#sr-login").addEventListener("submit", async (e) => {
       e.preventDefault();
-      const email = overlay.querySelector("#sr-email").value.trim();
-      const msg = overlay.querySelector("#sr-login-msg");
+      const password = overlay.querySelector("#sr-pass").value;
+      if (!password) return void (msg.textContent = "Bitte gib dein Passwort ein oder nutze den Anmeldelink per Mail.");
       msg.textContent = "Einen Moment…";
-      const { error } = await sb.auth.signInWithOtp({ email, options: { emailRedirectTo: location.origin + location.pathname, shouldCreateUser: false } });
-      // Sign-ups are invite-only, so an unknown address is rejected by Supabase.
+      const { error } = await sb.auth.signInWithPassword({ email: email(), password });
+      if (error) msg.textContent = /invalid login/i.test(error.message) ? "E-Mail oder Passwort stimmt nicht." : "Das hat nicht geklappt: " + error.message;
+    });
+    overlay.querySelector("#sr-mail").addEventListener("click", async () => {
+      const addr = email();
+      if (!addr || !overlay.querySelector("#sr-consent").checked) return void (msg.textContent = "Bitte gib deine E-Mail an und bestätige die Datenschutzerklärung.");
+      msg.textContent = "Einen Moment…";
+      const { error } = await sb.auth.signInWithOtp({ email: addr, options: { emailRedirectTo: location.origin + location.pathname, shouldCreateUser: false } });
       msg.textContent = !error ? "Der Link ist unterwegs. Öffne ihn auf diesem Gerät."
+        : /rate limit/i.test(error.message) ? "Es wurden gerade zu viele Mails verschickt. Bitte melde dich mit Passwort an oder warte etwa eine Stunde."
         : /signup|not allowed|not found/i.test(error.message) ? "Diese E-Mail-Adresse ist nicht eingeladen."
         : "Das hat nicht geklappt: " + error.message;
     });
