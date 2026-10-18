@@ -17,6 +17,10 @@ Gemessen wird die **effektive Leserate**: Wörter pro Minute mal Anteil richtige
 
 Speicher und KI sind austauschbar: Die App nutzt `window.SR_STORAGE` und `window.SR_AI`, wenn vorhanden, sonst die Claude-Artifact-Funktionen, sonst nur den Browser.
 
+## Zugang nur per Link
+
+Die Seite öffnet sich nur mit dem Schlüssel aus dem Einladungslink (`…/Claude/#k=SCHLÜSSEL`) und merkt ihn sich danach auf dem Gerät. In `src/shell.html` steht nur der SHA-256-Wert des Schlüssels. Neuer Schlüssel: zufällige Zeichenfolge aus Buchstaben und Ziffern wählen, `printf %s SCHLÜSSEL | sha256sum` rechnen und den Wert bei `HASH` eintragen; alte Links gelten dann nicht mehr. Das hält die Seite von Zufallsbesuchern und Suchmaschinen fern, ist aber kein echter Zugriffsschutz, solange das Repository öffentlich ist.
+
 ## Lokal starten
 
 ```bash

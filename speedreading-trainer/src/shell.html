@@ -5,6 +5,36 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#2f5bd3">
 <meta name="description" content="Speedreading-Trainer: in 8 Wochen schneller lesen, ohne Verständnis zu verlieren.">
+<meta name="robots" content="noindex,nofollow">
+<script>
+// Link-only access: the page opens only with the key from the invite link (#k=...), which is then remembered on this device.
+// Only the key's SHA-256 is stored here. This keeps the page out of casual reach, it is not real access control.
+(function () {
+  var HASH = "bac072f7e1b65cc71673dcd1a870aab38dde5fdd32a086bb1cdec1666197c9b1", STORE = "sr-access";
+  var root = document.documentElement;
+  root.style.visibility = "hidden";
+  var m = location.hash.match(/k=([A-Za-z0-9]+)/), key = m ? m[1] : null;
+  if (!key) try { key = localStorage.getItem(STORE); } catch (e) {}
+  function deny() {
+    window.SR_DENIED = true;
+    // Opening the invite link in the same tab only changes the hash, so reload to check it.
+    window.addEventListener("hashchange", function () { if (/k=/.test(location.hash)) location.reload(); });
+    function show() {
+      document.body.innerHTML = '<p style="font:18px system-ui,sans-serif;padding:48px 16px;text-align:center">Kein Zugang. Bitte öffne die Seite über deinen Einladungslink.</p>';
+      root.style.visibility = "";
+    }
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", show); else show();
+  }
+  if (!key || !window.crypto || !crypto.subtle) return deny();
+  crypto.subtle.digest("SHA-256", new TextEncoder().encode(key)).then(function (buf) {
+    var hex = Array.from(new Uint8Array(buf), function (b) { return b.toString(16).padStart(2, "0"); }).join("");
+    if (hex !== HASH) return deny();
+    try { localStorage.setItem(STORE, key); } catch (e) {}
+    if (m) history.replaceState(null, "", location.pathname + location.search);
+    root.style.visibility = "";
+  }, deny);
+})();
+</script>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon-192.png">
