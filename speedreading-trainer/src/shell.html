@@ -6,11 +6,14 @@
 <meta name="theme-color" content="#2f5bd3">
 <meta name="description" content="Speedreading-Trainer: in 8 Wochen schneller lesen, ohne Verständnis zu verlieren.">
 <meta name="robots" content="noindex,nofollow">
+<script src="config.js"></script>
 <script>
 // Link-only access: the page opens only with the key from the invite link (#k=...), which is then remembered on this device.
 // Only the key's SHA-256 is stored here. This keeps the page out of casual reach, it is not real access control.
+// Once accounts are configured (config.js has a Supabase URL) the login is the access control and this gate is skipped.
 (function () {
   var HASH = "bac072f7e1b65cc71673dcd1a870aab38dde5fdd32a086bb1cdec1666197c9b1", STORE = "sr-access";
+  if (window.SR_CONFIG && window.SR_CONFIG.supabaseUrl) return;
   var root = document.documentElement;
   root.style.visibility = "hidden";
   var m = location.hash.match(/(?:^#|&)k=([A-Za-z0-9]+)/), key = m ? m[1] : null;
@@ -43,7 +46,6 @@
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon-192.png">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}</style>
-<script src="config.js"></script>
 <script>window.SR_HOSTED = !!(window.SR_CONFIG && window.SR_CONFIG.supabaseUrl && window.SR_CONFIG.supabaseAnonKey);</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script src="hosted.js"></script>
