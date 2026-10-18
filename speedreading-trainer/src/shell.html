@@ -13,8 +13,12 @@
   var HASH = "bac072f7e1b65cc71673dcd1a870aab38dde5fdd32a086bb1cdec1666197c9b1", STORE = "sr-access";
   var root = document.documentElement;
   root.style.visibility = "hidden";
-  var m = location.hash.match(/k=([A-Za-z0-9]+)/), key = m ? m[1] : null;
+  var m = location.hash.match(/(?:^#|&)k=([A-Za-z0-9]+)/), key = m ? m[1] : null;
   if (!key) try { key = localStorage.getItem(STORE); } catch (e) {}
+  // Invited users arrive from the login mail (auth tokens in the URL) or are already signed in on this device.
+  var signedIn = false;
+  try { signedIn = Object.keys(localStorage).some(function (k) { return /^sb-.*-auth-token$/.test(k); }); } catch (e) {}
+  if (!key && (signedIn || /access_token=|[?&]code=|error_description=/.test(location.href))) { root.style.visibility = ""; return; }
   function deny() {
     window.SR_DENIED = true;
     // Opening the invite link in the same tab only changes the hash, so reload to check it.

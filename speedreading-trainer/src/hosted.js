@@ -46,22 +46,24 @@
     overlay.innerHTML =
       '<form id="sr-login" style="max-width:380px;width:100%;display:flex;flex-direction:column;gap:12px;background:var(--card,#fff);border:1px solid var(--line,#dbe1ea);border-radius:14px;padding:20px;font-family:var(--f-ui,system-ui)">' +
       '<h2 style="margin:0;font-family:var(--f-read,Georgia,serif)">Anmelden</h2>' +
-      '<p style="margin:0;color:var(--muted,#5a6475)">Gib deine E-Mail-Adresse ein. Du bekommst einen Link, mit dem du dich ohne Passwort anmeldest. Dein Fortschritt wird dann auf allen Geräten gespeichert.</p>' +
+      '<p style="margin:0;color:var(--muted,#5a6475)">Der Trainer ist nur für eingeladene Personen. Gib deine E-Mail-Adresse ein, du bekommst einen Link, mit dem du dich ohne Passwort anmeldest. Dein Fortschritt wird dann auf allen Geräten gespeichert.</p>' +
       '<label for="sr-email" style="display:flex;flex-direction:column;gap:4px">E-Mail<input id="sr-email" type="email" required autocomplete="email" style="font:inherit;padding:10px;border-radius:8px;border:1px solid var(--line,#dbe1ea);background:var(--card,#fff);color:var(--ink,#1a2130)"></label>' +
       '<label style="display:flex;gap:8px;align-items:flex-start;font-size:.9rem"><input id="sr-consent" type="checkbox" required> <span>Ich habe die <a href="datenschutz.html" target="_blank">Datenschutzerklärung</a> gelesen und bin mindestens 16 Jahre alt.</span></label>' +
       '<button class="btn primary" type="submit">Anmeldelink schicken</button>' +
       '<p id="sr-login-msg" style="margin:0;color:var(--muted,#5a6475)" aria-live="polite"></p>' +
-      '<button class="btn ghost" type="button" id="sr-skip">Ohne Konto ausprobieren</button></form>';
+      "</form>";
     document.body.appendChild(overlay);
     overlay.querySelector("#sr-login").addEventListener("submit", async (e) => {
       e.preventDefault();
       const email = overlay.querySelector("#sr-email").value.trim();
       const msg = overlay.querySelector("#sr-login-msg");
       msg.textContent = "Einen Moment…";
-      const { error } = await sb.auth.signInWithOtp({ email, options: { emailRedirectTo: location.origin + location.pathname } });
-      msg.textContent = error ? "Das hat nicht geklappt: " + error.message : "Der Link ist unterwegs. Öffne ihn auf diesem Gerät.";
+      const { error } = await sb.auth.signInWithOtp({ email, options: { emailRedirectTo: location.origin + location.pathname, shouldCreateUser: false } });
+      // Sign-ups are invite-only, so an unknown address is rejected by Supabase.
+      msg.textContent = !error ? "Der Link ist unterwegs. Öffne ihn auf diesem Gerät."
+        : /signup|not allowed|not found/i.test(error.message) ? "Diese E-Mail-Adresse ist nicht eingeladen."
+        : "Das hat nicht geklappt: " + error.message;
     });
-    overlay.querySelector("#sr-skip").addEventListener("click", hideLogin);
   }
   function hideLogin() {
     if (overlay) overlay.remove();
