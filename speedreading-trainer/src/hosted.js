@@ -50,8 +50,10 @@
       '<p style="margin:0;color:var(--muted,#5a6475)">Der Trainer ist nur für eingeladene Personen. Dein Fortschritt wird auf allen Geräten gespeichert.</p>' +
       '<label for="sr-email" style="display:flex;flex-direction:column;gap:4px">E-Mail<input id="sr-email" type="email" required autocomplete="username" style="' + field + '"></label>' +
       '<label for="sr-pass" style="display:flex;flex-direction:column;gap:4px">Passwort<input id="sr-pass" type="password" autocomplete="current-password" style="' + field + '"></label>' +
+      '<label id="sr-code-row" for="sr-code" hidden style="flex-direction:column;gap:4px">Einladungscode<input id="sr-code" type="text" autocomplete="off" autocapitalize="off" style="' + field + '"></label>' +
       '<label style="display:flex;gap:8px;align-items:flex-start;font-size:.9rem"><input id="sr-consent" type="checkbox" required> <span>Ich habe die <a href="datenschutz.html" target="_blank">Datenschutzerklärung</a> gelesen und bin mindestens 16 Jahre alt.</span></label>' +
-      '<button class="btn primary" type="submit">Anmelden</button>' +
+      '<button class="btn primary" type="submit" id="sr-submit">Anmelden</button>' +
+      '<button class="btn ghost" type="button" id="sr-toggle">Neu hier? Mit Einladungscode registrieren</button>' +
       '<button class="btn ghost" type="button" id="sr-mail">Stattdessen Anmeldelink per Mail</button>' +
       '<p id="sr-login-msg" style="margin:0;color:var(--muted,#5a6475)" aria-live="polite"></p>' +
       "</form>";
@@ -59,9 +61,31 @@
     const msg = overlay.querySelector("#sr-login-msg");
     const email = () => overlay.querySelector("#sr-email").value.trim();
     // Sign-ups are invite-only, so Supabase rejects unknown addresses.
+    // Registration needs an invite code that the database checks (see supabase/migrations/0002_invite_code.sql).
+    let signup = false;
+    overlay.querySelector("#sr-toggle").addEventListener("click", () => {
+      signup = !signup;
+      overlay.querySelector("#sr-code-row").hidden = !signup;
+      overlay.querySelector("#sr-code-row").style.display = signup ? "flex" : "";
+      overlay.querySelector("#sr-submit").textContent = signup ? "Registrieren" : "Anmelden";
+      overlay.querySelector("#sr-toggle").textContent = signup ? "Schon registriert? Anmelden" : "Neu hier? Mit Einladungscode registrieren";
+      overlay.querySelector("#sr-pass").autocomplete = signup ? "new-password" : "current-password";
+      msg.textContent = "";
+    });
     overlay.querySelector("#sr-login").addEventListener("submit", async (e) => {
       e.preventDefault();
       const password = overlay.querySelector("#sr-pass").value;
+      if (signup) {
+        const code = overlay.querySelector("#sr-code").value.trim();
+        if (!code) return void (msg.textContent = "Bitte gib deinen Einladungscode ein.");
+        if (password.length < 8) return void (msg.textContent = "Das Passwort braucht mindestens 8 Zeichen.");
+        msg.textContent = "Einen Moment…";
+        const { error } = await sb.auth.signUp({ email: email(), password, options: { data: { invite_code: code } } });
+        if (error) msg.textContent = /already registered/i.test(error.message) ? "Diese E-Mail ist schon registriert. Bitte melde dich an."
+          : /database error|invite|not allowed|signups/i.test(error.message) ? "Der Einladungscode stimmt nicht oder ist abgelaufen."
+          : "Das hat nicht geklappt: " + error.message;
+        return;
+      }
       if (!password) return void (msg.textContent = "Bitte gib dein Passwort ein oder nutze den Anmeldelink per Mail.");
       msg.textContent = "Einen Moment…";
       const { error } = await sb.auth.signInWithPassword({ email: email(), password });
