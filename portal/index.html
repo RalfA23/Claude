@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#1E241F">
+<title>Lernportal</title>
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<style>
+:root{--bg:#F3F4EF;--surface:#fff;--ink:#1E241F;--muted:#5E6A61;--line:#D9DDD3;--accent:#B3261E;--accent-ink:#fff}
+@media (prefers-color-scheme:dark){:root{--bg:#151916;--surface:#1E2420;--ink:#E7EBE4;--muted:#9AA69C;--line:#323A34;--accent:#E0574C;--accent-ink:#1A0E0D}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+.wrap{max-width:960px;margin:0 auto;padding:20px 16px 48px}
+header{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;justify-content:space-between;border-bottom:2px solid var(--ink);padding-bottom:10px}
+h1{margin:0;font-size:2rem;line-height:1.1}
+h1 small{display:block;font-size:.9rem;font-weight:400;color:var(--muted);margin-top:4px}
+h2{font-size:1.1rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:28px 0 12px}
+.acct{font-size:.85rem;color:var(--muted)}
+button,.btn{font:inherit;font-weight:600;padding:10px 16px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;text-decoration:none;display:inline-block}
+button.primary,.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+button.sm{padding:4px 10px;font-size:.85rem;font-weight:500}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:8px}
+.card .ic{font-size:2rem;line-height:1}
+.card h3{margin:0;font-size:1.25rem}
+.card p{margin:0;color:var(--muted);font-size:.95rem;flex:1}
+.card .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:4px}
+.empty{color:var(--muted)}
+footer{margin-top:40px;text-align:center;font-size:.8rem;color:var(--muted)}
+footer a{color:inherit}
+#login{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:16px;background:var(--bg);z-index:10}
+#login form{max-width:380px;width:100%;display:flex;flex-direction:column;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px}
+#login h2{margin:0;font-size:1.4rem;text-transform:none;letter-spacing:0;color:var(--ink)}
+#login p{margin:0;color:var(--muted)}
+label{display:flex;flex-direction:column;gap:4px}
+input{font:inherit;padding:10px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+label.chk{flex-direction:row;gap:8px;align-items:flex-start;font-size:.9rem}
+label.chk input{width:auto;margin-top:4px}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap" id="app" hidden>
+  <header>
+    <h1>Lernportal<small>Deine Kurse an einem Ort</small></h1>
+    <div class="acct"><span id="who"></span> <button class="sm" id="out" type="button">Abmelden</button></div>
+  </header>
+  <h2>Meine Kurse</h2>
+  <div class="grid" id="mine"></div>
+  <h2>Weitere Kurse</h2>
+  <div class="grid" id="more"></div>
+  <footer><a href="../impressum.html">Impressum</a> · <a href="../datenschutz.html">Datenschutz</a></footer>
+</div>
+<div id="login" hidden>
+  <form id="lf">
+    <h2>Anmelden</h2>
+    <p>Das Lernportal ist nur für eingeladene Personen. Ein Konto gilt für alle Kurse.</p>
+    <label>E-Mail<input id="em" type="email" required autocomplete="username"></label>
+    <label>Passwort<input id="pw" type="password" autocomplete="current-password"></label>
+    <label id="coderow" hidden>Einladungscode<input id="code" type="text" autocomplete="off" autocapitalize="off"></label>
+    <label class="chk"><input id="consent" type="checkbox" required><span>Ich habe die <a href="../datenschutz.html" target="_blank">Datenschutzerklärung</a> gelesen und bin mindestens 16 Jahre alt.</span></label>
+    <button class="primary" type="submit" id="go">Anmelden</button>
+    <button type="button" id="tg" style="border-color:transparent">Neu hier? Mit Einladungscode registrieren</button>
+    <p id="msg" aria-live="polite"></p>
+  </form>
+</div>
+<script>
+// Kursliste: neue Kurse hier eintragen. Der Pfad ist relativ zum Portal.
+var COURSES = [
+  {id: "lesen", icon: "📖", title: "Lesetraining", text: "8 Wochen schneller lesen: feste Lektionen, Lesefenster mit Pacer, Tests und Fortschritt.", href: "../"},
+  {id: "schach", icon: "♞", title: "Schachtraining", text: "Auf dem Weg zu 1500 Elo: Tagesaufgabe, Woodpecker-Methode, Smirnov-Lektionen, tägliche Abfrage.", href: "../schach/"}
+];
+(function () {
+  "use strict";
+  var $ = function (id) { return document.getElementById(id); };
+  var cfg = window.SR_CONFIG || {};
+  if (!cfg.supabaseUrl || !cfg.supabaseAnonKey || !window.supabase) { $("login").hidden = false; $("lf").innerHTML = "<h2>Nicht eingerichtet</h2><p>Das Portal ist ohne Anmeldung nicht verfügbar.</p>"; return; }
+  var sb = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+  var user = null;
+
+  function mine() { var c = (user && user.user_metadata && user.user_metadata.courses) || []; return Array.isArray(c) ? c.filter(function (x) { return COURSES.some(function (k) { return k.id === x; }); }) : []; }
+  async function setMine(list) {
+    var r = await sb.auth.updateUser({data: {courses: list}});
+    if (r.error) { alert("Das Speichern hat nicht geklappt: " + r.error.message); return; }
+    user = r.data.user; render();
+  }
+  function card(c, own) {
+    var d = document.createElement("div"); d.className = "card";
+    d.innerHTML = '<div class="ic"></div><h3></h3><p></p><div class="row"></div>';
+    d.children[0].textContent = c.icon; d.children[1].textContent = c.title; d.children[2].textContent = c.text;
+    var row = d.children[3];
+    if (own) {
+      var a = document.createElement("a"); a.className = "btn primary"; a.href = c.href; a.textContent = "Öffnen"; row.appendChild(a);
+      var rm = document.createElement("button"); rm.type = "button"; rm.className = "sm"; rm.textContent = "Entfernen";
+      rm.addEventListener("click", function () { setMine(mine().filter(function (x) { return x !== c.id; })); }); row.appendChild(rm);
+    } else {
+      var ad = document.createElement("button"); ad.type = "button"; ad.className = "primary"; ad.textContent = "Zu meinen Kursen";
+      ad.addEventListener("click", function () { setMine(mine().concat([c.id])); }); row.appendChild(ad);
+    }
+    return d;
+  }
+  function render() {
+    var m = mine(), mi = $("mine"), mo = $("more");
+    mi.replaceChildren(); mo.replaceChildren();
+    COURSES.filter(function (c) { return m.indexOf(c.id) >= 0; }).forEach(function (c) { mi.appendChild(card(c, true)); });
+    if (!mi.children.length) { var e = document.createElement("p"); e.className = "empty"; e.textContent = "Noch kein Kurs ausgewählt. Wähle unten deine Kurse."; mi.appendChild(e); }
+    var rest = COURSES.filter(function (c) { return m.indexOf(c.id) < 0; });
+    rest.forEach(function (c) { mo.appendChild(card(c, false)); });
+    if (!rest.length) { var e2 = document.createElement("p"); e2.className = "empty"; e2.textContent = "Du hast alle Kurse ausgewählt."; mo.appendChild(e2); }
+    $("who").textContent = user.email || "";
+  }
+  function enter(u) { user = u; $("login").hidden = true; $("app").hidden = false; render(); }
+  $("out").addEventListener("click", async function () { await sb.auth.signOut(); location.reload(); });
+
+  var signup = false, msg = $("msg");
+  $("tg").addEventListener("click", function () {
+    signup = !signup; $("coderow").hidden = !signup; $("go").textContent = signup ? "Registrieren" : "Anmelden";
+    $("tg").textContent = signup ? "Schon registriert? Anmelden" : "Neu hier? Mit Einladungscode registrieren";
+    $("pw").autocomplete = signup ? "new-password" : "current-password"; msg.textContent = "";
+  });
+  $("lf").addEventListener("submit", async function (e) {
+    e.preventDefault();
+    var email = $("em").value.trim(), pw = $("pw").value;
+    if (signup) {
+      var code = $("code").value.trim();
+      if (!code) { msg.textContent = "Bitte gib deinen Einladungscode ein."; return; }
+      if (pw.length < 8) { msg.textContent = "Das Passwort braucht mindestens 8 Zeichen."; return; }
+      msg.textContent = "Einen Moment…";
+      var r = await sb.auth.signUp({email: email, password: pw, options: {data: {invite_code: code}}});
+      if (r.error) msg.textContent = /already registered/i.test(r.error.message) ? "Diese E-Mail ist schon registriert. Bitte melde dich an."
+        : /database error|invite|not allowed|signups/i.test(r.error.message) ? "Der Einladungscode stimmt nicht oder ist abgelaufen." : "Das hat nicht geklappt: " + r.error.message;
+      return;
+    }
+    if (!pw) { msg.textContent = "Bitte gib dein Passwort ein."; return; }
+    msg.textContent = "Einen Moment…";
+    var s = await sb.auth.signInWithPassword({email: email, password: pw});
+    if (s.error) msg.textContent = /invalid login/i.test(s.error.message) ? "E-Mail oder Passwort stimmt nicht." : "Das hat nicht geklappt: " + s.error.message;
+  });
+  sb.auth.onAuthStateChange(function (_e, session) { if (session && session.user && !user) enter(session.user); });
+  sb.auth.getSession().then(function (r) { if (r.data.session) enter(r.data.session.user); else $("login").hidden = false; });
+})();
+</script>
+</body>
+</html>
