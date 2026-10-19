@@ -831,6 +831,7 @@ function viewCourse(v){
   v.append(h("p",{class:"muted",style:"font-size:.85rem"},"Grün ist erledigt, gelb ist die nächste Lektion, blau umrandet sind Tests."));
 }
 
+let FR_NEW=null; // frisch geholter Text: nach dem Neuzeichnen vorwählen und bestätigen
 function viewFree(v){
   const lib=TEXTS.filter(t=>t.kind!=="test"||S.seen[t.id]).concat(S.ai||[]);
   const sel=h("select",{id:"fr-text"},lib.map(t=>h("option",{value:t.id},(t.src?(t.src.name.startsWith("Wikipedia")?"Wikipedia · ":"Klassiker · "):t.kind==="ai"?"KI · ":"")+t.title)));
@@ -838,13 +839,21 @@ function viewFree(v){
   const speed=h("input",{type:"range",id:"fr-wpm",min:120,max:900,step:10,value:Math.round(tgt())});
   const out=h("span",{class:"wpm",text:speed.value+" WpM"}); speed.addEventListener("input",()=>out.textContent=speed.value+" WpM");
   const quiz=h("input",{type:"checkbox",id:"fr-quiz",checked:true});
+  if(FR_NEW){ const t=textById(FR_NEW.id); FR_NEW=null;
+    if(t){ sel.value=t.id;
+      const how=t.src?`Quelle: ${t.src.name}, Lizenz ${t.src.license}`:"von Claude geschrieben";
+      const ok=h("div",{id:"fr-ok",role:"status",style:"border:1px solid var(--good);border-left-width:6px;border-radius:10px;padding:12px 14px;margin-bottom:16px;background:var(--card)"},
+        h("strong",{style:"color:var(--good)"},"✓ Text übernommen"),
+        h("div",{},`„${t.title}“, ${nf(wordsOf(t))} Wörter, ${t.qs.length} Fragen. ${how}.`),
+        h("div",{class:"muted"},"Er ist unten im Feld „Text“ schon ausgewählt. Jetzt auf „Lesen“ drücken."));
+      v.append(ok); setTimeout(()=>{ try{ ok.scrollIntoView({block:"nearest"}); }catch(_){} },0); } }
   const msg=h("p",{class:"muted"});
   const srcNote=h("p",{class:"muted",id:"fr-src",style:"margin:0;font-size:.9em"});
   const showSrc=()=>{ const t=textById(sel.value), s=t&&t.src; srcNote.replaceChildren(); if(!s) return;
     srcNote.append("Quelle: ",h("a",{href:s.url,target:"_blank",rel:"noopener noreferrer"},s.name)," · Lizenz: ",s.licenseUrl?h("a",{href:s.licenseUrl,target:"_blank",rel:"noopener noreferrer"},s.license):s.license,". Auszug unverändert."); };
   sel.addEventListener("change",showSrc); showSrc();
   const wish=h("input",{type:"text",class:"txt",id:"fr-topic",maxlength:80,placeholder:"Thema (leer = aus deinen Themen)"});
-  const aiBtn=h("button",{class:"btn",onclick:async()=>{ aiBtn.disabled=true; msg.textContent="Claude schreibt einen neuen Text…"; try{ const t=await generateText(wish.value); msg.textContent=`Neuer Text: ${t.title}`; render(); }catch(e){ msg.textContent=AI?"Das hat nicht geklappt. Versuch es später noch einmal.":"Neue KI-Texte sind hier gerade nicht verfügbar."; aiBtn.disabled=false; } }},"Neuer KI-Text");
+  const aiBtn=h("button",{class:"btn",onclick:async()=>{ aiBtn.disabled=true; msg.textContent="Claude schreibt einen neuen Text…"; try{ const t=await generateText(wish.value); FR_NEW={id:t.id}; render(); }catch(e){ msg.textContent=AI?"Das hat nicht geklappt. Versuch es später noch einmal.":"Neue KI-Texte sind hier gerade nicht verfügbar."; aiBtn.disabled=false; } }},"Neuer KI-Text");
   v.append(h("div",{class:"card"},
     h("h2",{text:"Lesefenster"}),
     h("p",{class:"muted"},"Freies Training außerhalb des Kursplans. Das Lesefenster öffnet sich über den ganzen Bildschirm."),
@@ -867,7 +876,7 @@ function viewFree(v){
     const ERR={not_found:"Dazu habe ich nichts gefunden. Versuch ein anderes Stichwort.",not_public_domain:"Dieses Werk ist noch nicht gemeinfrei und darf nicht verwendet werden.",too_short:"Der Text ist zu kurz oder passt nicht für das Lesetraining.",daily_limit:"Das Tageslimit ist erreicht. Morgen geht es weiter.",fetch_failed:"Die Quelle ist gerade nicht erreichbar.",busy:"Gerade zu viel los. Versuch es gleich noch einmal."};
     const go=h("button",{class:"btn",onclick:async()=>{ if(q.value.trim().length<2){ om.textContent="Bitte gib ein Stichwort ein."; return; }
       go.disabled=true; om.textContent="Ich hole den Text…";
-      try{ const t=await generateText(q.value,kind.value); om.textContent=`Neuer Text: ${t.title}`; render(); }
+      try{ const t=await generateText(q.value,kind.value); FR_NEW={id:t.id}; render(); }
       catch(e){ let c="",d=""; try{ const b=e&&e.context&&e.context.json?await e.context.json():null; c=b&&b.error||""; d=b&&b.detail||""; }catch(_){} om.textContent=(ERR[c]||"Das hat nicht geklappt. Versuch es später noch einmal.")+(d?` (${d})`:""); go.disabled=false; } }},"Text holen");
     v.append(h("div",{class:"card",style:"margin-top:16px"},h("h3",{text:"Originaltext holen"}),
       h("p",{class:"muted",style:"margin:0"},"Ein Auszug aus Wikipedia oder einem gemeinfreien Klassiker, unverändert. Die Fragen schreibt Claude. Quelle und Lizenz stehen im Lesefenster."),
