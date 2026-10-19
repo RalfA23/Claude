@@ -69,7 +69,8 @@ const UA = "Speedreading-Trainer/1.0 (Lesetraining; Kontakt über die App)";
 class SourceError extends Error {
   code: string;
   status: number;
-  constructor(code: string, status = 404) { super(code); this.code = code; this.status = status; }
+  detail: string;
+  constructor(code: string, status = 404, detail = "") { super(code); this.code = code; this.status = status; this.detail = detail; }
 }
 
 const wc = (s: string) => s.split(/\s+/).filter(Boolean).length;
@@ -100,10 +101,28 @@ function pickPassage(paras: string[], start: number) {
   return words >= 150 ? out : null;
 }
 
+// One retry, generous timeout; the failing host and status end up in `detail` so a failure can be diagnosed.
+async function fetchOk(url: string, accept: string, timeoutMs: number) {
+  let detail = "";
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const r = await fetch(url, { headers: { "User-Agent": UA, Accept: accept }, redirect: "follow", signal: AbortSignal.timeout(timeoutMs) });
+      if (r.ok) return r;
+      detail = `${new URL(url).host} HTTP ${r.status}`;
+    } catch (e) {
+      detail = `${new URL(url).host} ${(e as Error).name}`;
+    }
+  }
+  throw new SourceError("fetch_failed", 502, detail);
+}
+
 async function getJson(url: string) {
-  const r = await fetch(url, { headers: { "User-Agent": UA, Accept: "application/json" }, signal: AbortSignal.timeout(9000) });
-  if (!r.ok) throw new SourceError("fetch_failed", 502);
-  return await r.json();
+  const r = await fetchOk(url, "application/json", 20000);
+  try {
+    return await r.json();
+  } catch {
+    throw new SourceError("fetch_failed", 502, `${new URL(url).host} kein JSON`);
+  }
 }
 
 async function fromWikipedia(query: string) {
@@ -140,8 +159,12 @@ async function fromGutenberg(query: string) {
   );
   if (!book) throw new SourceError("not_public_domain", 422);
   const key = Object.keys(book.formats).find((k) => k.startsWith("text/plain"))!;
-  const r = await fetch(book.formats[key], { headers: { "User-Agent": UA }, redirect: "follow", signal: AbortSignal.timeout(15000) });
-  if (!r.ok) throw new SourceError("fetch_failed", 502);
+  let r: Response;
+  try {
+    r = await fetchOk(book.formats[key], "text/plain", 25000);
+  } catch {
+    r = await fetchOk(`https://www.gutenberg.org/cache/epub/${book.id}/pg${book.id}.txt`, "text/plain", 25000);
+  }
   let raw = (await r.text()).replace(/\r\n?/g, "\n");
   const a = raw.search(/\*\*\* ?START OF[^\n]*\n/);
   if (a >= 0) raw = raw.slice(raw.indexOf("\n", a) + 1);
@@ -190,8 +213,9 @@ Deno.serve(async (req) => {
     try {
       original = source === "wikipedia" ? await fromWikipedia(topic) : await fromGutenberg(topic);
     } catch (e) {
-      if (e instanceof SourceError) return json({ error: e.code }, e.status);
-      return json({ error: "fetch_failed" }, 502);
+      console.error("source failed", source, topic, e);
+      if (e instanceof SourceError) return json({ error: e.code, detail: e.detail }, e.status);
+      return json({ error: "fetch_failed", detail: String((e as Error)?.message ?? e).slice(0, 120) }, 502);
     }
   }
 
