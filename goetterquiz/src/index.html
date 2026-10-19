@@ -375,18 +375,38 @@ function pool(){
   return q.concat(ownQuestions());
 }
 let POOL = [];
+// Gedächtnis über alle Spiele: Welche Frage wurde zuletzt wann gestellt (laufende Nummer)?
+const Seen = {
+  KEY: "gq-seen", MAX: 3000, m: null,
+  load(){ return this.m || (this.m = LS.get(this.KEY, {n:0, q:{}})); },
+  mark(q){
+    const m = this.load(); m.q[q] = ++m.n;
+    const keys = Object.keys(m.q);
+    if (keys.length > this.MAX) keys.sort((a, b) => m.q[a] - m.q[b]).slice(0, keys.length - this.MAX).forEach(k => delete m.q[k]);
+    LS.set(this.KEY, m);
+  }
+};
 function pickQuestion(cat, level, used){
   used = used || G.used || (G.used = {});
-  const free = x => !used[x.q];
+  const seen = Seen.load().q;
   const inCat = POOL.filter(x => x.c === cat);
-  // Erst die passende Stufe, dann die nächstgelegenen Stufen, zuletzt wieder von vorn.
-  for (const d of [0, -1, 1, -2, 2, -3, 3]) {
-    const list = inCat.filter(x => x.l === level + d && free(x));
-    if (list.length) { const q = list[rnd(list.length)]; used[q.q] = 1; return q; }
+  let free = inCat.filter(x => !used[x.q]);
+  if (!free.length) { inCat.forEach(x => delete used[x.q]); free = inCat.length ? inCat : POOL; }
+  const dist = x => Math.abs(x.l - level);
+  const pick = list => list[rnd(list.length)];
+  // Erst nie gestellte Fragen der passenden Stufe, dann der Nachbarstufen; erst wenn alle schon dran waren,
+  // die am längsten nicht mehr gestellten.
+  let q = null;
+  for (const d of [0, 1, 2, 3]) {
+    const list = free.filter(x => dist(x) === d && !seen[x.q]);
+    if (list.length) { q = pick(list); break; }
   }
-  inCat.forEach(x => delete used[x.q]);
-  const q = inCat[rnd(inCat.length)] || POOL[rnd(POOL.length)];
-  used[q.q] = 1; return q;
+  if (!q) {
+    const near = free.filter(x => dist(x) <= 1);
+    const old = (near.length ? near : free).slice().sort((a, b) => (seen[a.q] || 0) - (seen[b.q] || 0));
+    q = pick(old.slice(0, Math.max(1, Math.ceil(old.length / 4))));
+  }
+  used[q.q] = 1; Seen.mark(q.q); return q;
 }
 
 /* ============ Spielzustand ============ */
@@ -992,6 +1012,7 @@ const Online = {
   },
   async accept(d){
     const arena = ARENAS.find(a => a.id === d.arena) || ARENAS[0];
+    d.questions.forEach(x => Seen.mark(x.q));
     const res = await Online.play(d.questions, arena, `${d.challenger_name} hat dich herausgefordert.`);
     const r = await Online.sb.rpc("gq_answer", {duel:d.id, name:Online.name(), result:res});
     if (r.error || !r.data) { Online.done("Das hat nicht geklappt" + (r.error ? ": " + r.error.message : ", jemand war schneller.")); await Online.load(); Online.render(); return; }
@@ -1085,7 +1106,7 @@ function renderStart(){
     h("div", {class:"stat"}, h("b", {text:STATS.wins}), "Siege gegen den Computer"),
     ...CATS.map((c, i) => h("div", {class:"stat"}, h("b", {style:`color:${c.c}`, text:STATS.total[i] ? Math.round(STATS.right[i] / STATS.total[i] * 100) + " %" : "–"}), `${c.s} (${STATS.right[i]}/${STATS.total[i]})`)));
   const all = ALLQ.length, les = ALLQ.filter(x => x.src).length, ow = ownQuestions().length;
-  $("poolInfo").textContent = `Im Spiel: ${all - les} Wissensfragen, ${les} Fragen aus dem Lesetraining` + (ow ? ` und ${ow} eigene Fragen.` : ".");
+  $("poolInfo").textContent = `Im Spiel: ${all - les} Wissensfragen, ${les} Fragen aus dem Lesetraining` + (ow ? ` und ${ow} eigene Fragen.` : ".") + ` Davon schon gestellt: ${ALLQ.concat(ownQuestions()).filter(x => Seen.load().q[x.q]).length}.`;
   const saved = LS.get("gq-game", null);
   $("resumeCard").hidden = !saved;
   if (saved) $("resumeTxt").textContent = `Laufendes Spiel: ${saved.players.map(p => GODS[p.god].n).join(", ")}, Runde ${saved.round}.`;
