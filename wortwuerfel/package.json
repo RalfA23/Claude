@@ -1,0 +1,10 @@
+{
+  "name": "wortwuerfel",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "serve": "node build.mjs && npx --yes serve@14.2.4 dist",
+    "wortliste": "node wortliste.mjs"
+  }
+}
