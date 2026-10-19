@@ -1,11 +1,12 @@
 // Builds dist/ for the Götterquiz: the page with all questions embedded, plus manifest and icon.
-// Questions: the own catalogue (src/fragen.mjs) and the quiz questions of the Lesetraining texts and the Nerd-Ecke,
+// Questions: the own catalogues (src/fragen.mjs, src/fragen-mehr.mjs) and the quiz questions of the Lesetraining texts and the Nerd-Ecke,
 // read straight from ../speedreading-trainer/src so that new texts there land in the quiz with the next build.
 import { readFileSync, writeFileSync, mkdirSync, cpSync, rmSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import vm from "node:vm";
 import { FRAGEN } from "./src/fragen.mjs";
+import { MEHR } from "./src/fragen-mehr.mjs";
 
 const root = dirname(fileURLToPath(import.meta.url));
 const dist = join(root, "dist");
@@ -32,7 +33,7 @@ vm.runInNewContext(readFileSync(join(sr, "nerd-data.js"), "utf8"), sandbox);
 const nerd = (sandbox.window.NERD && sandbox.window.NERD.texts) || [];
 
 const Q = [];
-for (const [c, levels] of Object.entries(FRAGEN))
+for (const [c, levels] of Object.entries(FRAGEN).concat(Object.entries(MEHR)))
   levels.forEach((list, i) => list.forEach(([q, ...ans]) => Q.push({ c: +c, l: i + 1, q, a: ans })));
 const own = Q.length;
 let lesen = 0;

@@ -14,6 +14,7 @@ So wird gespielt:
 - Götterduell online: asynchrone Duelle gegen andere angemeldete Nutzer (sieben gleiche Fragen), mit Ruhmeshalle. Braucht die Tabelle aus `supabase/migrations/0001_goetterquiz.sql`, einmal im SQL-Editor ausführen. Die Anmeldung kommt aus dem Lernportal (gleiche Supabase-Sitzung).
 - Gewonnen hat, wer als letzter Krieger hat, mit Rundenlimit der Gott mit der meisten Macht.
 - Eigene Fragen lassen sich auf der Startseite eintragen (wie der Fragen-Compiler des Originals).
+- Das Spiel merkt sich im Browser, welche Fragen schon dran waren (`gq-seen`), über alle Spiele hinweg. Erst wenn alle Fragen eines Bereichs gestellt sind, kommen die am längsten zurückliegenden wieder.
 
 ## Aufbau
 
@@ -21,6 +22,7 @@ So wird gespielt:
 |---|---|
 | `src/index.html` | Das ganze Spiel. Der Platzhalter `__FRAGEN__` wird beim Bauen gefüllt. |
 | `src/fragen.mjs` | Eigener Fragenkatalog: vier Bereiche, je vier Stufen. |
+| `src/fragen-mehr.mjs` | Zweiter Katalog im gleichen Format (480 Fragen, je Bereich und Stufe 30). |
 | `build.mjs` | Liest zusätzlich die Fragen der Lesetexte und der Nerd-Ecke aus `../speedreading-trainer/src` und baut `dist/`. |
 | `public/` | Manifest und Icons. |
 
