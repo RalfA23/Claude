@@ -294,7 +294,7 @@ nav.tabs.dragging button{cursor:grabbing}
             <div class="inline" style="justify-content:space-between;margin-bottom:8px"><span class="label">Diese Aufgabe</span><span class="timer" id="tPuz">0:00</span></div>
             <div class="fb" id="fb" hidden></div>
             <div class="btns" id="playBtns"><button class="b" id="bGiveUp" type="button">Lösung zeigen (zählt als falsch)</button></div>
-            <div class="btns" id="fallbackBtns" hidden><button class="b primary" id="bShow" type="button">Lösung zeigen</button></div>
+            <div class="btns" id="fallbackBtns" hidden><button class="b primary" id="bShow" type="button">Lösung zeigen</button><button class="b" id="bUndo" type="button">Zug zurück</button></div>
             <div id="solBox" hidden style="margin-top:12px">
               <div class="solution" id="solTxt"></div>
               <p class="note" id="solNote" style="margin:8px 0">◆ markiert Züge, die einen Punkt geben.</p>
@@ -1192,11 +1192,12 @@ function showPuzzle(n,mode){
   puzMode=mode;
   if(mode==='idle'){boardLocked=true}
   else if(line.length){boardLocked=false;$('playBtns').hidden=false;setFb('hint',mode==='review'?'Wiederholung, ohne Wertung. Du bist dran.':'Du bist dran. Finde den stärksten Zug.')}
-  else{boardLocked=true;puzMode='fallback';$('fallbackBtns').hidden=false;setFb('hint','Diese Lösung ist Prosa ohne feste Zugfolge. Denk sie durch und bewerte dich selbst.')}
+  else{boardLocked=false;puzMode='fallback';$('fallbackBtns').hidden=false;setFb('hint','Zu dieser Aufgabe gibt es im Buch keine feste Zugfolge. Du kannst die Figuren frei ziehen, um die Stellung durchzudenken, dann Lösung zeigen und dich selbst bewerten.')}
   drawBoard();puzStart=Date.now();
 }
 function sanOf(uci){const m=game.moves({verbose:true}).find(m=>m.from+m.to+(m.promotion||'')===uci);return m?figurine(m.san):uci}
 function userMove(from,to){
+  if(puzMode==='fallback'){const m=game.moves({square:from,verbose:true}).find(m=>m.to===to);if(!m)return;game.move({from,to,promotion:m.promotion?'q':undefined});lastMove=[from,to];drawBoard();return}
   const exp=line[step];
   const cands=game.moves({square:from,verbose:true}).filter(m=>m.to===to);if(!cands.length)return;
   let promo;if(cands[0].promotion)promo=(exp&&exp.slice(0,4)===from+to&&exp[4])?exp[4]:'q';
@@ -1241,6 +1242,7 @@ $('bStart').addEventListener('click',()=>{
   $('sessInfo').textContent='Uhr läuft. Figur antippen, Zielfeld antippen.';
   showPuzzle(stand.naechste||1,'play');startTick();
 });
+$('bUndo').addEventListener('click',()=>{if(puzMode==='fallback'&&game.undo()){lastMove=null;selected=null;legalTargets=[];drawBoard()}});
 $('bShow').addEventListener('click',()=>{$('solBox').hidden=false;$('solTxt').hidden=false;$('fallbackBtns').hidden=true;$('rateBtns').hidden=puzMode==='review';if(puzMode==='review'){$('doneBtns').hidden=false;$('bNext').dataset.review='1'}});
 async function answer(ok){
   if(!sess)return;
