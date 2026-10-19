@@ -156,6 +156,14 @@ input[type=text].txt{padding:8px 10px;border-radius:8px;border:1px solid var(--l
   body.noside .wrap>.side{display:none}
   body.noside .wrap{display:flex;max-width:760px}
 }
+.arr{position:relative}
+.arr>h2,.arr>h3,.arr>.eyebrow{padding-right:38px}
+.cgrip{position:absolute;top:8px;right:8px;width:30px;height:30px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--muted);cursor:grab;touch-action:none;display:flex;align-items:center;justify-content:center;padding:0;-webkit-user-select:none;user-select:none}
+.cgrip::before{content:"";width:10px;height:16px;opacity:.7;background:radial-gradient(circle,currentColor 1.3px,transparent 1.7px) 0 0/5px 5px}
+.cgrip:hover{border-color:var(--accent)}
+.cgrip:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.arr.carrying{outline:2px dashed var(--accent);outline-offset:3px;box-shadow:0 8px 24px var(--shade);z-index:2}
+body.carrying,body.carrying *{cursor:grabbing!important;-webkit-user-select:none;user-select:none}
 .tchip{border:1px solid var(--line);border-radius:999px;padding:6px 12px;background:var(--card);color:var(--ink);font:inherit;font-size:.9rem;cursor:pointer}
 .tchip[aria-pressed="true"]{background:color-mix(in srgb,var(--accent) 15%,var(--card));border-color:var(--accent);font-weight:700}
 .tchips{display:flex;gap:8px;flex-wrap:wrap}
@@ -417,7 +425,7 @@ const QUOTES = [
 ];
 function quoteCard(){
   const q=QUOTES[Math.floor(Date.now()/864e5)%QUOTES.length];
-  return h("figure",{class:"quote",style:"margin:0 0 16px;padding:4px 0 4px 16px;border-left:4px solid var(--accent,var(--line))"},
+  return h("figure",{class:"quote","data-k":"zitat",style:"margin:0 0 16px;padding:4px 0 4px 16px;border-left:4px solid var(--accent,var(--line))"},
     h("blockquote",{style:"margin:0;font-family:var(--f-read);font-size:1.1rem;line-height:1.45"},`„${q[0]}“`),
     h("figcaption",{class:"muted",style:"margin-top:4px;font-size:.9rem"},`${q[1]} · Zitat des Tages`));
 }
@@ -729,9 +737,16 @@ function topicsCard(){
       d.addEventListener("toggle",()=>{ if(d.open) OpenGroups.add(g); else OpenGroups.delete(g); });
       return d; }),
     h("label",{class:"field"},"Eigenes Thema hinzufügen",h("div",{class:"row",style:"flex-wrap:nowrap"},inp,h("button",{class:"btn",onclick:add},"Hinzufügen"))),
-    custom.length?h("div",{class:"tchips"},custom.map(t=>h("button",{class:"tchip","aria-pressed":"true",title:"Entfernen",onclick:()=>flip(t)},t+" ✕"))):null);
+    custom.length?h("details",{class:"tg",open:true},h("summary",{},`Meine eigenen Themen · ${custom.length}`),h("div",{class:"tchips"},custom.map(t=>h("button",{class:"tchip","aria-pressed":"true",title:"Zum Entfernen anklicken",onclick:()=>flip(t)},t+" ✕"))),h("p",{class:"muted",style:"margin:4px 0 0;font-size:.85rem"},"Antippen entfernt ein Thema.")):null);
 }
 function viewCustomize(v){
+  v.append(h("div",{class:"card pref"},h("h3",{text:"So machst du die Oberfläche zu deiner"}),
+    h("ol",{class:"prose",style:"margin:0;padding-left:1.2em"},
+      h("li",{},"Reiter oben: am Punktegriff ziehen, am Handy gedrückt halten und ziehen."),
+      h("li",{},"Karten in jedem Reiter: am Punktegriff oben rechts auf der Karte ziehen. Mit der Tastatur geht es mit Pfeil hoch und runter, wenn der Griff markiert ist."),
+      h("li",{},"Weiter unten: Name, Farben, Schrift, Reiter ein- und ausblenden und eigene Themen."),
+      h("li",{},"Alles wird in deinem Konto gespeichert und gilt auf jedem Gerät.")),
+    h("div",{class:"row"},h("button",{class:"btn ghost",onclick:()=>{ S.prefs=Object.assign({},S.prefs,{cards:{}}); save(); render(); }},"Kartenanordnung zurücksetzen"))));
   const p=prefs();
   const colorIn=(label,key,fallback)=>h("label",{class:"field"},label,h("input",{type:"color",value:HEX.test(p[key]||"")?p[key]:fallback,oninput:e=>livePref(key,e.target.value),onchange:()=>save()}));
   const rootCs=getComputedStyle(document.documentElement);
@@ -818,7 +833,54 @@ function render(){
   const v=$("#view"); v.replaceChildren();
   if(Run){ renderRun(v); return; }
   ({heute:viewToday,kurs:viewCourse,lesen:viewFree,fortschritt:viewProgress,grundlagen:viewBasics,anpassen:viewCustomize})[Tab](v);
+  arrangeCards(v);
 }
+
+/* Karten in jedem Reiter selbst anordnen: Griff oben rechts ziehen (auch am Handy) oder mit Pfeil hoch/runter. Reihenfolge je Reiter in S.prefs.cards. */
+const cardKey=(el,i)=>el.dataset.k||("t:"+((el.querySelector("h2,h3")||{}).textContent||"").trim().slice(0,40))||("i"+i);
+function cardBlocks(v){ return [...v.children].filter(e=>e.matches&&e.matches(".card,.grid2,figure.quote,.weeks")); }
+function arrangeCards(v){
+  if(Run) return;
+  const bl=cardBlocks(v); if(bl.length<2) return;
+  bl.forEach((el,i)=>{ el.dataset.k=cardKey(el,i); });
+  const saved=((prefs().cards||{})[Tab])||[], rank=k=>{ const i=saved.indexOf(k); return i<0?1e6:i; };
+  if(saved.length){
+    const kids=[...v.children], slots=kids.map((e,i)=>bl.includes(e)?i:-1).filter(i=>i>=0);
+    const sorted=bl.map((e,i)=>[e,i]).sort((a,b)=>(rank(a[0].dataset.k)-rank(b[0].dataset.k))||(a[1]-b[1])).map(x=>x[0]);
+    const out=kids.slice(); slots.forEach((pos,i)=>{ out[pos]=sorted[i]; }); v.replaceChildren(...out);
+  }
+  const fin=cardBlocks(v);
+  fin.forEach((el,i)=>{
+    el.classList.add("arr"); el.style.marginTop=i?"16px":"0";
+    el.append(h("button",{type:"button",class:"cgrip","aria-label":"Karte verschieben (ziehen oder Pfeil hoch und runter)",title:"Zum Verschieben ziehen"}));
+  });
+}
+function saveCards(v){ const keys=cardBlocks(v).map(e=>e.dataset.k); setPref("cards",Object.assign({},prefs().cards,{[Tab]:keys}),false); }
+(function(){
+  const view=document.getElementById("view"); let st=null;
+  const fix=()=>cardBlocks(view).forEach((el,i)=>{ el.style.marginTop=i?"16px":"0"; });
+  view.addEventListener("pointerdown",e=>{
+    const g=e.target.closest(".cgrip"); if(!g||e.button>0) return;
+    const card=g.closest(".arr"); st={card,id:e.pointerId}; card.classList.add("carrying"); document.body.classList.add("carrying");
+    try{ g.setPointerCapture(e.pointerId); }catch(_){} e.preventDefault();
+  });
+  view.addEventListener("pointermove",e=>{
+    if(!st||e.pointerId!==st.id) return; e.preventDefault();
+    const me=st.card, others=cardBlocks(view).filter(o=>o!==me); let before=null;
+    for(const o of others){ const r=o.getBoundingClientRect(); if(e.clientY<r.top+r.height/2){ before=o; break; } }
+    if(before!==me.nextElementSibling&&!(before===null&&me===cardBlocks(view).pop())){ const last=others[others.length-1]; view.insertBefore(me,before||(last?last.nextSibling:null)); fix(); }
+    if(e.clientY<70) window.scrollBy(0,-14); else if(e.clientY>window.innerHeight-70) window.scrollBy(0,14);
+  });
+  const end=e=>{ if(!st||(e&&e.pointerId!==st.id)) return; st.card.classList.remove("carrying"); document.body.classList.remove("carrying"); st=null; saveCards(view); };
+  view.addEventListener("pointerup",end); view.addEventListener("pointercancel",end);
+  view.addEventListener("keydown",e=>{
+    const g=e.target.closest&&e.target.closest(".cgrip"); if(!g||(e.key!=="ArrowUp"&&e.key!=="ArrowDown")) return;
+    e.preventDefault(); const me=g.closest(".arr"), bl=cardBlocks(view), i=bl.indexOf(me), j=i+(e.key==="ArrowUp"?-1:1);
+    if(j<0||j>=bl.length) return;
+    if(j<i) view.insertBefore(me,bl[j]); else view.insertBefore(me,bl[j].nextSibling);
+    fix(); saveCards(view); g.focus();
+  });
+})();
 
 function viewToday(v){
   v.append(quoteCard());
@@ -833,10 +895,10 @@ function viewToday(v){
     h("div",{class:"row"},h("button",{class:"btn primary",onclick:()=>startLesson(n)},todayDone?"Noch eine Lektion":"Lektion starten"),h("span",{class:"muted"},"etwa 15 Minuten")));
   if(todayDone&&!late) card.insertBefore(h("p",{class:"notice",style:"border-left-color:var(--good)"},"Die heutige Lektion ist erledigt. Morgen geht es weiter, eine Extra-Lektion ist trotzdem möglich."),card.children[3]);
   if(late>0) card.insertBefore(h("p",{class:"notice"},`Du bist ${late} ${late===1?"Lektion":"Lektionen"} im Rückstand. Heute darfst du zwei Lektionen machen, um aufzuholen.`),card.children[3]);
-  v.append(card);
+  card.dataset.k="lektion"; v.append(card);
   const r=recentEff(3);
   if(S.baseline){
-    v.append(h("div",{class:"grid2",style:"margin-top:16px"},
+    v.append(h("div",{class:"grid2",style:"margin-top:16px","data-k":"werte"},
       stat("Ausgangswert",nf(S.baseline.wpm)+" WpM",`${Math.round(S.baseline.comp*100)} % Verständnis`),
       stat("Aktuell",r?nf(r.wpm)+" WpM":"–",r?`${Math.round(r.comp*100)} % Verständnis`:""),
       stat("Effektive Rate",r?nf(r.eff):"–",S.baseline&&r?deltaTxt(r.eff/S.baseline.eff-1):"",true)));
@@ -922,13 +984,13 @@ function showFreeResult(wpm,c){ const v=$("#view"); v.replaceChildren(h("div",{c
 
 function viewProgress(v){
   const L=level();
-  v.append(h("div",{class:"card"},
+  v.append(h("div",{class:"card","data-k":"stufe"},
     h("div",{class:"row",style:"justify-content:space-between"},h("h2",{text:`Stufe ${L.n}: ${L.name}`}),h("span",{class:"muted"},`${nf(S.xp)} Punkte`)),
     h("div",{class:"lvl",role:"progressbar","aria-valuemin":0,"aria-valuemax":100,"aria-valuenow":Math.round(L.pct*100)},h("i",{style:`width:${Math.round(L.pct*100)}%`})),
     h("p",{class:"muted",style:"margin:0"},L.toNext?`Noch ${nf(L.toNext)} Punkte bis zur nächsten Stufe.`:"Höchste Stufe erreicht."),
     h("p",{class:"muted",style:"margin:0"},`${doneCount()} von ${TOTAL} Lektionen · Serie ${streak()} Tage`)));
   const r=recentEff(3);
-  if(S.baseline) v.append(h("div",{class:"grid2",style:"margin-top:16px"},
+  if(S.baseline) v.append(h("div",{class:"grid2",style:"margin-top:16px","data-k":"start"},
     stat("Start-Tempo",nf(S.baseline.wpm)+" WpM",`${Math.round(S.baseline.comp*100)} % Verständnis`),
     stat("Tempo (letzte 3)",r?nf(r.wpm)+" WpM":"–",r?`${Math.round(r.comp*100)} % Verständnis`:""),
     stat("Effektive Rate",r?nf(r.eff):"–",r?deltaTxt(r.eff/S.baseline.eff-1):"",true),
