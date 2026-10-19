@@ -28,13 +28,13 @@ const json = (body: unknown, status = 200) =>
 // ---------- Encryption (AES-256-GCM, one IV per section) ----------
 type Chunk = { f: string; l: string; h: string; t: string; g: number | null; k: "text" | "always" | "terms" };
 const b64 = (u: Uint8Array) => btoa(String.fromCharCode(...u));
-const unb64 = (s: string) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
+const unb64 = (s: string): Uint8Array<ArrayBuffer> => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
 let keyPromise: Promise<CryptoKey> | null = null;
 // GEVT_DATA_KEY is either 32 random bytes in base64 or a long passphrase (at least 20 characters), stretched with PBKDF2.
 async function makeKey() {
   const raw = (Deno.env.get("GEVT_DATA_KEY") ?? "").trim();
   if (!raw) throw new Error("GEVT_DATA_KEY fehlt");
-  let bytes: Uint8Array | null = null;
+  let bytes: Uint8Array<ArrayBuffer> | null = null;
   try { bytes = /^[A-Za-z0-9+/]{43}=$/.test(raw) ? unb64(raw) : null; } catch { bytes = null; }
   if (bytes && bytes.length === 32) return crypto.subtle.importKey("raw", bytes, "AES-GCM", false, ["encrypt", "decrypt"]);
   if (raw.length < 20) throw new Error("GEVT_DATA_KEY ist zu kurz (mindestens 20 Zeichen)");
