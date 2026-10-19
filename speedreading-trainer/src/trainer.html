@@ -730,7 +730,7 @@ function topicsCard(){
   const add=()=>{ const t=inp.value.trim(); if(!t) return; const a=chosenTopics(); if(!a.includes(t)) a.push(t); setPref("topics",a,true); };
   inp.addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); add(); } });
   return h("div",{class:"card pref",style:"margin-top:16px"},h("h3",{text:"Meine Themen"}),
-    h("p",{class:"muted",style:"margin:0"},"Neue Übungstexte schreibt Claude zu den Themen, die du hier wählst. Ist nichts gewählt, kommt alles gemischt. Dazu kannst du eigene Themen eintragen, auch Klassiker der Literatur oder ein Wikipedia-Stichwort."),
+    h("p",{class:"muted",style:"margin:0"},"Neue Übungstexte entstehen zu den Themen, die du hier wählst. Ist nichts gewählt, kommt alles gemischt. Dazu kannst du eigene Themen eintragen, auch Klassiker der Literatur oder ein Wikipedia-Stichwort."),
     ...Object.entries(TOPIC_GROUPS).map(([g,list])=>{
       const d=h("details",{class:"tg"},h("summary",{},`${g}${list.some(t=>sel.has(t))?" · "+list.filter(t=>sel.has(t)).length+" gewählt":""}`),h("div",{class:"tchips"},list.map(t=>h("button",{class:"tchip","aria-pressed":String(sel.has(t)),onclick:()=>flip(t)},t))));
       if(OpenGroups.has(g)||list.some(t=>sel.has(t))) d.open=true;
@@ -928,7 +928,7 @@ function viewFree(v){
   const quiz=h("input",{type:"checkbox",id:"fr-quiz",checked:true});
   if(FR_NEW){ const t=textById(FR_NEW.id); FR_NEW=null;
     if(t){ sel.value=t.id;
-      const how=t.src?`Quelle: ${t.src.name}, Lizenz ${t.src.license}`:"von Claude geschrieben";
+      const how=t.src?`Quelle: ${t.src.name}, Lizenz ${t.src.license}`:"von der KI geschrieben";
       const ok=h("div",{id:"fr-ok",role:"status",style:"border:1px solid var(--good);border-left-width:6px;border-radius:10px;padding:12px 14px;margin-bottom:16px;background:var(--card)"},
         h("strong",{style:"color:var(--good)"},"✓ Text übernommen"),
         h("div",{},`„${t.title}“, ${nf(wordsOf(t))} Wörter, ${t.qs.length} Fragen. ${how}.`),
@@ -940,7 +940,7 @@ function viewFree(v){
     srcNote.append("Quelle: ",h("a",{href:s.url,target:"_blank",rel:"noopener noreferrer"},s.name)," · Lizenz: ",s.licenseUrl?h("a",{href:s.licenseUrl,target:"_blank",rel:"noopener noreferrer"},s.license):s.license,". Auszug unverändert."); };
   sel.addEventListener("change",showSrc); showSrc();
   const wish=h("input",{type:"text",class:"txt",id:"fr-topic",maxlength:80,placeholder:"Thema (leer = aus deinen Themen)"});
-  const aiBtn=h("button",{class:"btn",onclick:async()=>{ aiBtn.disabled=true; msg.textContent="Claude schreibt einen neuen Text…"; try{ const t=await generateText(wish.value); FR_NEW={id:t.id}; render(); }catch(e){ msg.textContent=AI?"Das hat nicht geklappt. Versuch es später noch einmal.":"Neue KI-Texte sind hier gerade nicht verfügbar."; aiBtn.disabled=false; } }},"Neuer KI-Text");
+  const aiBtn=h("button",{class:"btn",onclick:async()=>{ aiBtn.disabled=true; msg.textContent="Ein neuer Text wird geschrieben…"; try{ const t=await generateText(wish.value); FR_NEW={id:t.id}; render(); }catch(e){ msg.textContent=AI?"Das hat nicht geklappt. Versuch es später noch einmal.":"Neue KI-Texte sind hier gerade nicht verfügbar."; aiBtn.disabled=false; } }},"Neuer KI-Text");
   v.append(h("div",{class:"card"},
     h("h2",{text:"Lesefenster"}),
     h("p",{class:"muted"},"Freies Training außerhalb des Kursplans. Das Lesefenster öffnet sich über den ganzen Bildschirm."),
@@ -966,7 +966,7 @@ function viewFree(v){
       try{ const t=await generateText(q.value,kind.value); FR_NEW={id:t.id}; render(); }
       catch(e){ let c="",d=""; try{ const b=e&&e.context&&e.context.json?await e.context.json():null; c=b&&b.error||""; d=b&&b.detail||""; }catch(_){} om.textContent=(ERR[c]||"Das hat nicht geklappt. Versuch es später noch einmal.")+(d?` (${d})`:""); go.disabled=false; } }},"Text holen");
     v.append(h("div",{class:"card",style:"margin-top:16px"},h("h3",{text:"Originaltext holen"}),
-      h("p",{class:"muted",style:"margin:0"},"Ein Auszug aus Wikipedia oder einem gemeinfreien Klassiker, unverändert. Die Fragen schreibt Claude. Quelle und Lizenz stehen im Lesefenster."),
+      h("p",{class:"muted",style:"margin:0"},"Ein Auszug aus Wikipedia oder einem gemeinfreien Klassiker, unverändert. Die Fragen schreibt die KI. Quelle und Lizenz stehen im Lesefenster."),
       h("label",{class:"field"},"Art",kind),h("label",{class:"field"},"Stichwort",h("div",{class:"row",style:"flex-wrap:nowrap"},q,go)),om));
   }
   const own=h("textarea",{class:"own",id:"fr-own",maxlength:20000,placeholder:"Text hier einfügen, zum Beispiel ein Artikel, ein Urteil oder ein Kapitel aus einem Buch."});
@@ -1071,7 +1071,7 @@ async function measureStep(box,next,testId){
   let t, repeat=false;
   if(testId) t=textById(testId);
   else { const pick=compText(); if(pick) t=pick.text; else {
-      box.append(h("p",{class:"muted"},"Claude schreibt einen neuen Text für dich…"));
+      box.append(h("p",{class:"muted"},"Ein neuer Text wird für dich geschrieben…"));
       try{ t=await generateText(); }catch(e){ t=repeatText(); repeat=true; }
       box.replaceChildren(); } }
   const words=wordsOf(t);
