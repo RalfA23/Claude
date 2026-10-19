@@ -138,10 +138,10 @@ button.chip:hover,button.chip.sel{border-color:var(--accent)}
       <details>
         <summary>So wird gespielt</summary>
         <p>Wische mit dem Finger über benachbarte Würfel, waagerecht, senkrecht oder schräg, und lass los, wenn das Wort fertig ist. Du kannst die Würfel auch nacheinander antippen und zum Abschicken den letzten Würfel noch einmal tippen. Am Rechner tippst du das Wort einfach auf der Tastatur und drückst Enter.</p>
-        <p>Jeder Würfel darf pro Wort nur einmal vorkommen. Erlaubt sind alle Formen, die im Wörterbuch stehen, also auch Mehrzahl, gebeugte Formen und Verben. Namen und Abkürzungen zählen nicht. „Qu“ liegt auf einem Würfel und zählt als zwei Buchstaben, ß schreibst du als SS.</p>
+        <p>Jeder Würfel darf pro Wort nur einmal vorkommen. Erlaubt sind alle Formen, die im Wörterbuch stehen, also auch Mehrzahl, gebeugte Formen und Verben. Namen und Abkürzungen zählen nicht. Seltene Wörter zählen auch, in der Auswertung zeigt das Spiel aber nur gebräuchliche Wörter als „was noch drin war“. „Qu“ liegt auf einem Würfel und zählt als zwei Buchstaben, ß schreibst du als SS.</p>
         <table class="pts small"><tr><td>3 und 4 Buchstaben</td><td>1 Punkt</td></tr><tr><td>5 Buchstaben</td><td>2 Punkte</td></tr><tr><td>6 Buchstaben</td><td>3 Punkte</td></tr><tr><td>7 Buchstaben</td><td>5 Punkte</td></tr><tr><td>ab 8 Buchstaben</td><td>11 Punkte</td></tr></table>
         <p>Zu zweit spielt ihr nacheinander auf demselben Brett. Wörter, die beide gefunden haben, streicht ihr wie im Original, es zählen nur die eigenen.</p>
-        <p class="muted small">Wörterbuch: deutsche Wortliste für Wortspiele von Jan Enz (gemeinfrei, CC0), über 600.000 Wortformen.</p>
+        <p class="muted small">Wörterbuch: <a href="https://github.com/enz/german-wordlist">deutsche Wortliste für Wortspiele</a> von Jan Enz (CC0), über 600.000 Wortformen. Gebräuchliche Wörter nach der <a href="https://github.com/hermitdave/FrequencyWords">Häufigkeitsliste</a> von Hermit Dave aus OpenSubtitles (CC BY-SA 4.0).</p>
       </details>
     </div>
   </section>
@@ -220,7 +220,7 @@ button.chip:hover,button.chip.sel{border-color:var(--accent)}
 "use strict";
 // 16 Würfel mit je sechs Seiten, nach deutscher Buchstabenhäufigkeit verteilt. "q" steht für die Seite "Qu".
 const DICE = ["EEINRS","EANSTV","EAILRT","ENOSTÜ","EHNRTU","EDHIMÄ","EADLNC","ECHIST","EAGKLU","BDNOWÖ","EFGIRZ","ACHMSU","EDNPRT","AEGLNJ","IMRSUq","BEFKOW"];
-const MIN_WORDS = 40;           // Bretter mit weniger möglichen Wörtern werden neu gewürfelt
+const MIN_WORDS = 30;           // Bretter mit weniger gebräuchlichen Wörtern werden neu gewürfelt
 const PTS = (n) => n <= 4 ? 1 : n === 5 ? 2 : n === 6 ? 3 : n === 7 ? 5 : 11;
 const $ = (id) => document.getElementById(id);
 const store = {
@@ -229,13 +229,15 @@ const store = {
 };
 
 // ---------- Wörterbuch ----------
-let WORDS = [], DICT = new Set();
+// DICT: alle erlaubten Wörter. COMMON: gebräuchliche Wörter (mit "*" markiert), nur sie zeigt die Auswertung als "was noch drin war".
+let WORDS = [], DICT = new Set(), COMMON = new Set();
 function decode(txt){
   const out = []; let prev = "";
-  for (const line of txt.split("\n")) {
+  for (let line of txt.split("\n")) {
     if (!line) continue;
+    const c = line[0] === "*"; if (c) line = line.slice(1);
     const w = prev.slice(0, parseInt(line[0], 36)) + line.slice(1);
-    out.push(w); prev = w;
+    out.push(w); prev = w; if (c) COMMON.add(w);
   }
   return out;
 }
@@ -269,13 +271,13 @@ const NB = [];
 for (let i = 0; i < 16; i++) { NB[i] = []; for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) {
   const r = (i >> 2) + dr, c = (i & 3) + dc; if ((dr || dc) && r >= 0 && r < 4 && c >= 0 && c < 4) NB[i].push(r * 4 + c); } }
 const adj = (a, b) => NB[a].includes(b);
-// Alle Wörter des Bretts mit Weg: Map Wort -> Liste der Würfel.
+// Alle gebräuchlichen Wörter des Bretts mit Weg: Map Wort -> Liste der Würfel.
 function solve(cells, min){
   const res = new Map(), used = new Array(16).fill(false), path = [];
   function go(i, s){
     s += cells[i]; if (!hasPrefix(s)) return;
     used[i] = true; path.push(i);
-    if (s.length >= min && DICT.has(s) && !res.has(s)) res.set(s, path.slice());
+    if (s.length >= min && COMMON.has(s) && !res.has(s)) res.set(s, path.slice());
     for (const j of NB[i]) if (!used[j]) go(j, s);
     used[i] = false; path.pop();
   }
@@ -432,7 +434,7 @@ function submit(path){
   if (cur.words.has(w)) { setWord(w, "dup", "schon gefunden"); beep(300, 0.08); flashChip(w); return; }
   if (!DICT.has(w)) { setWord(w, "bad", "kein Wort"); beep(180, 0.15, "sawtooth", 0.04); buzz(60); return; }
   const p = PTS(w.length); cur.words.set(w, p);
-  setWord(w, "ok", "+" + p); beep(520 + 80 * Math.min(w.length, 8), 0.12); buzz(25);
+  setWord(w, "ok", "+" + p + (COMMON.has(w) ? "" : " selten")); beep(520 + 80 * Math.min(w.length, 8), 0.12); buzz(25);
   const pts = [...cur.words.values()].reduce((a, b) => a + b, 0);
   $("score").textContent = pts; $("count").textContent = cur.words.size + (cur.words.size === 1 ? " Wort" : " Wörter");
   renderFound(w);
@@ -514,7 +516,9 @@ function finish(){
     const p = G.players[0];
     head.innerHTML = '<div class="muted">Deine Punkte</div><div class="big"></div><div class="muted small"></div>';
     head.children[1].textContent = p.score;
-    head.children[2].textContent = p.words.length + " von " + all.size + " möglichen Wörtern, " + Math.round(100 * p.words.length / Math.max(1, all.size)) + " Prozent";
+    const hit = p.words.filter((w) => all.has(w)).length, rare = p.words.length - hit;
+    head.children[2].textContent = hit + " von " + all.size + " gebräuchlichen Wörtern, " + Math.round(100 * hit / Math.max(1, all.size)) + " Prozent"
+      + (rare ? ", dazu " + rare + (rare === 1 ? " seltenes" : " seltene") : "");
     saveStats(p);
   } else {
     const best = Math.max(...G.players.map((p) => p.score)), tie = G.players.every((p) => p.score === best);
@@ -545,8 +549,8 @@ function finish(){
   // Übersehene Wörter
   const missed = [...all.keys()].filter((w) => !count.has(w)).sort((a, b) => b.length - a.length || a.localeCompare(b, "de"));
   $("missInfo").textContent = missed.length
-    ? "Auf dem Brett lagen " + all.size + " Wörter mit zusammen " + total + " Punkten. Tippe ein Wort an, um seinen Weg zu sehen."
-    : "Ihr habt alle " + all.size + " Wörter gefunden. Respekt!";
+    ? "Auf dem Brett lagen " + all.size + " gebräuchliche Wörter mit zusammen " + total + " Punkten. Tippe ein Wort an, um seinen Weg zu sehen."
+    : "Alle " + all.size + " gebräuchlichen Wörter gefunden. Respekt!";
   const SHOW = 60, m = $("missed"); m.replaceChildren(...missed.slice(0, SHOW).map((w) => chip(w, PTS(w.length), "miss", "button")));
   $("missMore").hidden = missed.length <= SHOW;
   $("missMore").textContent = "Alle " + missed.length + " zeigen";
