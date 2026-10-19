@@ -130,8 +130,16 @@ var GEVT = {id: "gevt", icon: "🥋", title: "Ving Tsun Wissen", text: "Frag dei
     user = u; $("login").hidden = true; $("app").hidden = false; render();
     // Accounts from before this feature: what they already chose counts as known, the rest is new. Brand-new accounts know everything.
     if (!seen()) setSeen(mine().length ? mine() : allIds());
+    // Merken, ob das Konto freigeschaltet ist, damit die Kachel beim nächsten Öffnen gleich mit den anderen erscheint. Die Abfrage bestätigt oder entfernt sie danach.
+    var gk = "portal-gevt-" + u.id, had = false;
+    try { had = localStorage.getItem(gk) === "1"; } catch (e) {}
+    if (had && COURSES.indexOf(GEVT) < 0) { COURSES.push(GEVT); render(); }
     sb.from("gevt_members").select("role").limit(1).then(function (r) {
-      if (r.data && r.data.length && COURSES.indexOf(GEVT) < 0) { COURSES.push(GEVT); render(); }
+      if (r.error) return;
+      var ok = !!(r.data && r.data.length), i = COURSES.indexOf(GEVT);
+      try { if (ok) localStorage.setItem(gk, "1"); else localStorage.removeItem(gk); } catch (e) {}
+      if (ok && i < 0) { COURSES.push(GEVT); render(); }
+      if (!ok && i >= 0) { COURSES.splice(i, 1); render(); }
     });
   }
   $("out").addEventListener("click", async function () { await sb.auth.signOut(); location.reload(); });
