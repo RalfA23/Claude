@@ -14,7 +14,7 @@ Web-App für Handy und Rechner, mit der Ralf seiner GEVT-Wissensdatenbank (GE Vi
 ## Einrichten (einmal)
 
 1. SQL aus `supabase/migrations/0001_gevt.sql` im SQL-Editor ausführen und das eigene Konto als `admin` in `gevt_members` eintragen (Befehl steht oben in der Datei).
-2. Secret setzen: `GEVT_DATA_KEY` = 32 Zufallsbytes in Base64 (`openssl rand -base64 32`). `ANTHROPIC_API_KEY` ist schon für `generate-text` gesetzt.
+2. Secret setzen: `GEVT_DATA_KEY` = 32 Zufallsbytes in Base64 (`openssl rand -base64 32`) oder eine lange Passphrase (mindestens 20 Zeichen). `ANTHROPIC_API_KEY` ist schon für `generate-text` gesetzt.
 3. Edge Function `gevt-ask` aus `supabase/functions/gevt-ask/index.ts` deployen (`supabase functions deploy gevt-ask`).
 4. Inhalte einlesen: Seite öffnen, Einstellungen › Inhalte einlesen, Datei `gevt-import.json` wählen.
 

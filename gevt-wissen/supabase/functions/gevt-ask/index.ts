@@ -1,6 +1,7 @@
 // GEVT-Wissensdatenbank: answers questions from the encrypted knowledge base (Sifu Göksel's teaching and Ralf's own notes).
 // The texts never leave this function: the page only gets the answer and the headings of the sections that were used.
-// Secrets: ANTHROPIC_API_KEY (shared with generate-text), GEVT_DATA_KEY (32 random bytes, base64; encrypts the sections).
+// Secrets: ANTHROPIC_API_KEY (shared with generate-text), GEVT_DATA_KEY (encrypts the sections: 32 random bytes in base64
+// or a passphrase of at least 20 characters).
 // Optional: GEVT_DAILY_LIMIT (default 150 questions per person and day).
 // Actions (POST JSON, signed in): {action:"status"}, {action:"ask", frage, verlauf}, {action:"import", reset, start, chunks} (admin only).
 import Anthropic from "npm:@anthropic-ai/sdk";
@@ -29,14 +30,21 @@ type Chunk = { f: string; l: string; h: string; t: string; g: number | null; k: 
 const b64 = (u: Uint8Array) => btoa(String.fromCharCode(...u));
 const unb64 = (s: string) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
 let keyPromise: Promise<CryptoKey> | null = null;
+// GEVT_DATA_KEY is either 32 random bytes in base64 or a long passphrase (at least 20 characters), stretched with PBKDF2.
+async function makeKey() {
+  const raw = (Deno.env.get("GEVT_DATA_KEY") ?? "").trim();
+  if (!raw) throw new Error("GEVT_DATA_KEY fehlt");
+  let bytes: Uint8Array | null = null;
+  try { bytes = /^[A-Za-z0-9+/]{43}=$/.test(raw) ? unb64(raw) : null; } catch { bytes = null; }
+  if (bytes && bytes.length === 32) return crypto.subtle.importKey("raw", bytes, "AES-GCM", false, ["encrypt", "decrypt"]);
+  if (raw.length < 20) throw new Error("GEVT_DATA_KEY ist zu kurz (mindestens 20 Zeichen)");
+  const base = await crypto.subtle.importKey("raw", new TextEncoder().encode(raw), "PBKDF2", false, ["deriveKey"]);
+  return crypto.subtle.deriveKey({ name: "PBKDF2", hash: "SHA-256", salt: new TextEncoder().encode("gevt-wissen-v1"), iterations: 210000 },
+    base, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]);
+}
 function dataKey() {
-  if (!keyPromise) {
-    const raw = Deno.env.get("GEVT_DATA_KEY");
-    if (!raw) throw new Error("GEVT_DATA_KEY fehlt");
-    const bytes = unb64(raw);
-    if (bytes.length !== 32) throw new Error("GEVT_DATA_KEY muss 32 Bytes (base64) haben");
-    keyPromise = crypto.subtle.importKey("raw", bytes, "AES-GCM", false, ["encrypt", "decrypt"]);
-  }
+  if (!keyPromise) keyPromise = makeKey();
+  keyPromise.catch(() => { keyPromise = null; });
   return keyPromise;
 }
 async function seal(c: Chunk) {
