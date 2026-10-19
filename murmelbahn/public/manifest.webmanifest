@@ -1,0 +1,14 @@
+{
+  "name": "Murmelbahn",
+  "short_name": "Murmelbahn",
+  "description": "Bei jedem Start eine neue, zufällig gebaute Murmelbahn. Zum Zuschauen und Abschalten.",
+  "lang": "de",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#1D1712",
+  "theme_color": "#1D1712",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}

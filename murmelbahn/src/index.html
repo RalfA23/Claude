@@ -1,0 +1,430 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#1D1712">
+<meta name="description" content="Murmelbahn: bei jedem Start eine neue, zufällig gebaute Bahn mit Rampen, Stiften, Schaufelrädern und Pilzen. Zum Zuschauen und Abschalten.">
+<title>Murmelbahn</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<style>
+:root{--bg:#1D1712;--panel:rgba(0,0,0,.35);--ink:#F3E9DC;--muted:#C7B49C;--accent:#E2B07A;--line:rgba(255,255,255,.18)}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font:15px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif;overflow:hidden;overscroll-behavior:none}
+body{display:flex;flex-direction:column;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+header{display:flex;align-items:center;gap:8px;padding:8px 12px;flex-wrap:wrap;background:var(--panel);border-bottom:1px solid var(--line);position:relative;z-index:2}
+header a.back{color:var(--muted);text-decoration:none;font-size:.9rem;white-space:nowrap}
+header h1{margin:0;font-size:1.15rem;color:var(--accent);white-space:nowrap}
+header .info{color:var(--muted);font-size:.8rem;flex:1;min-width:90px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.btns{display:flex;gap:6px;flex-wrap:wrap}
+button{font:inherit;color:var(--ink);background:transparent;border:1px solid var(--line);border-radius:10px;min-height:38px;min-width:40px;padding:6px 10px;cursor:pointer;white-space:nowrap}
+button:hover{border-color:var(--muted)}
+button.on{background:var(--accent);color:var(--bg);border-color:var(--accent);font-weight:600}
+button.primary{background:var(--accent);color:var(--bg);border-color:var(--accent);font-weight:700}
+#stage{flex:1;position:relative;min-height:0}
+canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:manipulation;cursor:crosshair}
+#toast{position:absolute;left:50%;top:14px;transform:translateX(-50%);max-width:min(92%,440px);background:var(--panel);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border:1px solid var(--line);border-radius:12px;padding:10px 14px;text-align:center;font-size:.9rem;transition:opacity .8s;pointer-events:none}
+#toast.off{opacity:0}
+@media (max-width:560px){header .lbl{display:none}header .info{order:5;flex-basis:100%}}
+</style>
+</head>
+<body>
+<header>
+  <a class="back" href="../">← Portal</a>
+  <h1>Murmelbahn</h1>
+  <span class="info" id="info"></span>
+  <div class="btns">
+    <button class="primary" id="neu" type="button" title="Neue Bahn bauen">🔀<span class="lbl"> Neue Bahn</span></button>
+    <button id="mehr" type="button" title="Zehn Murmeln dazu">＋10</button>
+    <button id="slow" type="button" title="Zeitlupe">🐢<span class="lbl"> Zeitlupe</span></button>
+    <button id="ton" type="button" title="Klang an oder aus">🔇</button>
+    <button id="pause" type="button" title="Anhalten">⏸</button>
+  </div>
+</header>
+<div id="stage">
+  <canvas id="cv" aria-label="Murmelbahn"></canvas>
+  <div id="toast">Jede Bahn wird beim Start neu gebaut. Tippe auf die Bahn, um eine Murmel fallen zu lassen.</div>
+</div>
+<script>
+(function () {
+  "use strict";
+  // Welt: 1000 Einheiten breit, Höhe passt sich dem Bildschirm an. Die Physik rechnet nur in Welt-Einheiten.
+  var W = 1000, H = 1600, L = 12, RW = 905, PW = RW - L, G = 1250, MAXM = 90;
+  var cv = document.getElementById("cv"), ctx = cv.getContext("2d");
+  var stage = document.getElementById("stage");
+  var segs = [], pegs = [], bumpers = [], wheels = [], marbles = [], pending = 0, spawnT = 0;
+  var seed = 0, rng = Math.random, theme = null, palette = [], chute = null;
+  var scale = 1, ox = 0, oy = 0, dpr = 1, staticCv = document.createElement("canvas");
+  var T = 0, paused = false, slow = false, soundOn = false;
+  var stats = {lifted: 0, respawned: 0, nudged: 0};
+
+  function mulberry(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; var t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+  function rr(a, b) { return a + rng() * (b - a); }
+  function pick(a) { return a[Math.floor(rng() * a.length)]; }
+
+  var THEMES = [
+    {name: "Holz", bg: ["#2B2119", "#15100C"], rail: "#B9824A", hi: "#EBC08C", sh: "rgba(0,0,0,.45)", peg: "#D8AE55", bump: "#C8553D", bumpHi: "#FFB199", wheel: "#9A6838", ink: "#F3E9DC", muted: "#C7B49C", accent: "#E2B07A", glass: "rgba(255,240,220,", dots: "rgba(255,255,255,.035)"},
+    {name: "Neon", bg: ["#16123E", "#07051A"], rail: "#2FD9FF", hi: "#C9F6FF", sh: "rgba(0,0,0,0)", peg: "#FF4FD8", bump: "#FFE14F", bumpHi: "#FFFBD0", wheel: "#7CFF6B", ink: "#EDEBFF", muted: "#A7A2E0", accent: "#2FD9FF", glass: "rgba(180,240,255,", dots: "rgba(120,140,255,.06)", glow: true, trails: true},
+    {name: "Pastell", bg: ["#F7F1E8", "#E7E0F0"], rail: "#86AEDB", hi: "#E3F0FF", sh: "rgba(60,50,90,.18)", peg: "#E39AB2", bump: "#F2C063", bumpHi: "#FFF1C9", wheel: "#9BCB9B", ink: "#2E2A3A", muted: "#6D6780", accent: "#7B6CC4", glass: "rgba(90,80,140,", dots: "rgba(90,80,140,.06)", light: true},
+    {name: "Wald", bg: ["#1D3B2D", "#0C1C15"], rail: "#D9C79C", hi: "#FFF6DC", sh: "rgba(0,0,0,.4)", peg: "#9FD18B", bump: "#F29E38", bumpHi: "#FFD9A8", wheel: "#C49A6C", ink: "#EEF2EA", muted: "#A9C2B3", accent: "#F2C46B", glass: "rgba(220,255,230,", dots: "rgba(255,255,255,.035)"},
+    {name: "Nachtgold", bg: ["#1C2744", "#0A0F1E"], rail: "#C9A34E", hi: "#FFE7A8", sh: "rgba(0,0,0,.45)", peg: "#E8E1CF", bump: "#5E9BFF", bumpHi: "#D2E3FF", wheel: "#C9A34E", ink: "#ECEFF7", muted: "#9FA9C4", accent: "#E6C36A", glass: "rgba(220,230,255,", dots: "rgba(255,255,255,.03)"},
+    {name: "Glut", bg: ["#3A1414", "#120606"], rail: "#FF8A3D", hi: "#FFD2A8", sh: "rgba(0,0,0,.45)", peg: "#FFD45E", bump: "#FF4F6D", bumpHi: "#FFC2CC", wheel: "#FFB03D", ink: "#FFEDE3", muted: "#E0A99A", accent: "#FF9F5A", glass: "rgba(255,220,200,", dots: "rgba(255,200,150,.04)", glow: true}
+  ];
+
+  // Murmelfarben: jede Bahn bekommt eine eigene Farbfamilie.
+  function hsl(h, s, l, a) { return "hsla(" + ((h % 360 + 360) % 360).toFixed(0) + "," + s + "%," + l + "%," + (a == null ? 1 : a) + ")"; }
+  function makePalette() {
+    var scheme = pick(["bunt", "bunt", "verwandt", "zwei"]), base = rr(0, 360), out = [], n = 7;
+    for (var i = 0; i < n; i++) {
+      var h = scheme === "bunt" ? base + i * 137.5 : scheme === "verwandt" ? base + rr(-45, 45) : base + (i % 2) * 180 + rr(-15, 15);
+      out.push({h: h, s: Math.round(rr(65, 90)), l: Math.round(rr(46, 60)), h2: h + rr(30, 200)});
+    }
+    return {scheme: scheme, list: out};
+  }
+  function newMarble(x, y) {
+    var p = palette.list[Math.floor(Math.random() * palette.list.length)], k = Math.random();
+    return {x: x, y: y, vx: 0, vy: 0, r: 16 + Math.random() * 5, rot: Math.random() * 6.28, still: 0, lift: false, trail: [],
+      type: k < .74 ? "swirl" : k < .86 ? "glass" : k < .94 ? "metal" : "auge", h: p.h, s: p.s, l: p.l, h2: p.h2};
+  }
+
+  function addSeg(ax, ay, bx, by, o) { o = o || {}; segs.push({ax: ax, ay: ay, bx: bx, by: by, t: o.t || 8, e: o.e == null ? .22 : o.e, draw: o.draw !== false}); }
+
+  // Abschnitte der Bahn. Jeder bekommt eine Oberkante und eine Höhe.
+  function secZigzag(y0, h) {
+    var n = Math.max(2, Math.floor(h / 125)), sp = h / n, dir = rng() < .5 ? 0 : 1;
+    for (var i = 0; i < n; i++) {
+      var y = y0 + i * sp, len = PW * rr(.64, .8), d = Math.min(sp - 60, rr(48, 78));
+      if (dir === 0) addSeg(L, y, L + len, y + d); else addSeg(RW, y, RW - len, y + d);
+      dir = 1 - dir;
+    }
+  }
+  function secPegs(y0, h) {
+    var rows = Math.max(3, Math.floor(h / 66)), sp = h / rows, dx = 84, sh = rr(0, 35);
+    for (var r = 0; r < rows; r++) {
+      var y = y0 + sp * (r + .5);
+      for (var x = L + 26 + sh + (r % 2) * 42; x <= RW - 40; x += dx) if (x - L >= 40) pegs.push({x: x, y: y, r: 8, e: .45, last: 0, glow: 0});
+    }
+  }
+  function funnel(y0, cx, g) {
+    var k = .21, sl = cx - g / 2 - L, sr = RW - (cx + g / 2), yb = y0 + k * Math.max(sl, sr);
+    addSeg(L, yb - k * sl, cx - g / 2, yb); addSeg(RW, yb - k * sr, cx + g / 2, yb);
+    addSeg(cx - g / 2, yb, cx - g / 2, yb + 16, {t: 5}); addSeg(cx + g / 2, yb, cx + g / 2, yb + 16, {t: 5});
+    return yb + 16;
+  }
+  function secWheel(y0, h) {
+    var len = rr(80, 100), cx = rr(L + len + 70, RW - len - 70), yb = funnel(y0, cx, 76);
+    var side = rng() < .5 ? -1 : 1, w = side * rr(1.3, 2.3);
+    wheels.push({x: cx + side * -28, y: Math.min(yb + len + 22, y0 + h - len - 6), len: len, n: 4 + Math.floor(rng() * 3), ang: rr(0, 6.28), w: w, arms: []});
+  }
+  function secBumpers(y0, h) {
+    var n = 3 + Math.floor(rng() * 3), tries = 0;
+    while (bumpers.filter(function (b) { return b.sec === y0; }).length < n && tries++ < 300) {
+      var r = rr(28, 42), x = rr(L + r + 48, RW - r - 48), y = rr(y0 + r + 6, y0 + h - r - 6), ok = true;
+      bumpers.forEach(function (b) { if (Math.hypot(b.x - x, b.y - y) < b.r + r + 46) ok = false; });
+      if (ok) bumpers.push({x: x, y: y, r: r, e: .95, kick: 230, flash: 0, sec: y0});
+    }
+  }
+  var TYPES = [
+    {id: "zigzag", min: 230, max: 380, fn: secZigzag},
+    {id: "pegs", min: 200, max: 330, fn: secPegs},
+    {id: "wheel", min: 400, max: 420, fn: secWheel},
+    {id: "bumpers", min: 220, max: 300, fn: secBumpers}
+  ];
+
+  function generate(s) {
+    seed = s; rng = mulberry(s);
+    theme = THEMES[Math.floor(rng() * THEMES.length)]; palette = makePalette();
+    segs = []; pegs = []; bumpers = []; wheels = [];
+    // Rahmen, Zulauf oben, Sammelrinne unten, Aufzug rechts
+    addSeg(L, 0, L, H, {t: 6}); addSeg(0, 4, W, 4, {draw: false}); addSeg(995, H - 280, 995, H, {draw: false}); addSeg(0, H - 8, W, H - 8, {draw: false});
+    var cEnd = rr(150, 640), cY = 112 + (905 - cEnd) * .16;
+    chute = {x: cEnd, y: cY}; addSeg(905, 112, cEnd, cY);
+    addSeg(RW, 120, RW, H - 150, {t: 6});
+    addSeg(L, H - 170, 995, H - 80);
+    var top = cY + 70, bottom = H - 200, y = top, list = [], prev = null;
+    for (;;) {
+      var rem = bottom - y, opts = TYPES.filter(function (t) { return t.min <= rem && t.id !== prev; });
+      if (!opts.length) break;
+      var t = pick(opts), h = Math.min(rem, rr(t.min, t.max));
+      list.push({t: t, h: h}); y += h + 40; prev = t.id;
+    }
+    var extra = Math.max(0, bottom - (y - 40)) / (list.length + 1);
+    y = top + extra;
+    list.forEach(function (s) { s.t.fn(y, s.h); y += s.h + 40 + extra; });
+    applyTheme();
+    var url = new URL(location.href); url.searchParams.set("bahn", String(s)); history.replaceState(null, "", url);
+    document.getElementById("info").textContent = "Bahn " + s + " · " + theme.name + " · " + list.map(function (s) { return {zigzag: "Rampen", pegs: "Stifte", wheel: "Schaufelrad", bumpers: "Pilze"}[s.t.id]; }).join(", ");
+  }
+  function applyTheme() {
+    var r = document.documentElement.style;
+    r.setProperty("--bg", theme.bg[1]); r.setProperty("--ink", theme.ink); r.setProperty("--muted", theme.muted); r.setProperty("--accent", theme.accent);
+    r.setProperty("--panel", theme.light ? "rgba(255,255,255,.6)" : "rgba(0,0,0,.35)"); r.setProperty("--line", theme.light ? "rgba(0,0,0,.15)" : "rgba(255,255,255,.18)");
+    document.querySelector('meta[name="theme-color"]').content = theme.bg[1];
+  }
+
+  // ---------- Physik ----------
+  var lastSnd = {};
+  function collideSeg(m, ax, ay, bx, by, t, e, wh) {
+    var abx = bx - ax, aby = by - ay, l2 = abx * abx + aby * aby, u = ((m.x - ax) * abx + (m.y - ay) * aby) / l2;
+    u = u < 0 ? 0 : u > 1 ? 1 : u;
+    var px = ax + abx * u, py = ay + aby * u, dx = m.x - px, dy = m.y - py, d2 = dx * dx + dy * dy, rad = m.r + t;
+    if (d2 >= rad * rad) return;
+    var d = Math.sqrt(d2), nx, ny;
+    if (d < 1e-6) { var l = Math.sqrt(l2); nx = -aby / l; ny = abx / l; if (ny > 0) { nx = -nx; ny = -ny; } } else { nx = dx / d; ny = dy / d; }
+    m.x += nx * (rad - d); m.y += ny * (rad - d);
+    var svx = 0, svy = 0;
+    if (wh) { svx = -wh.w * (py - wh.y); svy = wh.w * (px - wh.x); }
+    var rvx = m.vx - svx, rvy = m.vy - svy, vn = rvx * nx + rvy * ny;
+    if (vn < 0) {
+      rvx -= (1 + e) * vn * nx; rvy -= (1 + e) * vn * ny;
+      var tx = -ny, ty = nx, vt = rvx * tx + rvy * ty, f = wh ? .02 : .0004;
+      rvx -= tx * vt * f; rvy -= ty * vt * f;
+      m.vx = rvx + svx; m.vy = rvy + svy;
+      if (-vn > 260) snd("rail", -vn, m.x);
+    }
+  }
+  function collideCirc(m, c, kind) {
+    var dx = m.x - c.x, dy = m.y - c.y, d2 = dx * dx + dy * dy, rad = m.r + c.r;
+    if (d2 >= rad * rad) return;
+    var d = Math.sqrt(d2) || 1e-6, nx = dx / d, ny = dy / d;
+    m.x = c.x + nx * rad; m.y = c.y + ny * rad;
+    var vn = m.vx * nx + m.vy * ny;
+    if (vn < 0) {
+      m.vx -= (1 + c.e) * vn * nx; m.vy -= (1 + c.e) * vn * ny;
+      if (kind === "bump") { m.vx += nx * c.kick; m.vy += ny * c.kick; c.flash = 1; snd("bump", -vn + 300, c.x); }
+      else if (-vn > 120) { c.glow = 1; snd("peg", -vn, c.x); }
+    }
+  }
+  function step(dt) {
+    var i, j, k, m, n = marbles.length;
+    for (i = 0; i < wheels.length; i++) {
+      var w = wheels[i]; w.ang += w.w * dt; w.arms.length = 0;
+      for (k = 0; k < w.n; k++) { var a = w.ang + k * 6.2832 / w.n, c = Math.cos(a), s = Math.sin(a); w.arms.push([w.x + c * 12, w.y + s * 12, w.x + c * w.len, w.y + s * w.len]); }
+    }
+    for (i = 0; i < n; i++) {
+      m = marbles[i]; if (m.lift) continue;
+      m.vy += G * dt; m.x += m.vx * dt; m.y += m.vy * dt;
+      for (j = 0; j < segs.length; j++) { var s2 = segs[j]; collideSeg(m, s2.ax, s2.ay, s2.bx, s2.by, s2.t, s2.e, null); }
+      for (j = 0; j < wheels.length; j++) {
+        var wh = wheels[j], dx = m.x - wh.x, dy = m.y - wh.y;
+        if (dx * dx + dy * dy > (wh.len + m.r + 6) * (wh.len + m.r + 6)) continue;
+        collideCirc(m, {x: wh.x, y: wh.y, r: 14, e: .3}, "hub");
+        for (k = 0; k < wh.arms.length; k++) { var ar = wh.arms[k]; collideSeg(m, ar[0], ar[1], ar[2], ar[3], 5, .15, wh); }
+      }
+      for (j = 0; j < pegs.length; j++) { var p = pegs[j]; if (Math.abs(p.y - m.y) < 32 && Math.abs(p.x - m.x) < 32) collideCirc(m, p, "peg"); }
+      for (j = 0; j < bumpers.length; j++) collideCirc(m, bumpers[j], "bump");
+    }
+    for (i = 0; i < n; i++) {
+      var a1 = marbles[i]; if (a1.lift) continue;
+      for (j = i + 1; j < n; j++) {
+        var b = marbles[j]; if (b.lift) continue;
+        var ddx = b.x - a1.x, ddy = b.y - a1.y, rs = a1.r + b.r;
+        if (ddx > rs || ddx < -rs || ddy > rs || ddy < -rs) continue;
+        var dd = ddx * ddx + ddy * ddy; if (dd >= rs * rs) continue;
+        var dist = Math.sqrt(dd) || 1e-6, nx = ddx / dist, ny = ddy / dist, pen = rs - dist, ma = a1.r * a1.r, mb = b.r * b.r, tot = ma + mb;
+        a1.x -= nx * pen * mb / tot; a1.y -= ny * pen * mb / tot; b.x += nx * pen * ma / tot; b.y += ny * pen * ma / tot;
+        var vrel = (b.vx - a1.vx) * nx + (b.vy - a1.vy) * ny;
+        if (vrel < 0) { var J = -1.6 * vrel / (1 / ma + 1 / mb); a1.vx -= J / ma * nx; a1.vy -= J / ma * ny; b.vx += J / mb * nx; b.vy += J / mb * ny; if (-vrel > 300) snd("klick", -vrel, a1.x); }
+      }
+    }
+    for (i = 0; i < n; i++) {
+      m = marbles[i]; if (m.lift) continue;
+      var sp = Math.hypot(m.vx, m.vy); if (sp > 2200) { m.vx *= 2200 / sp; m.vy *= 2200 / sp; }
+      m.rot += m.vx / m.r * dt;
+    }
+  }
+  function release(m) { m.lift = false; m.x = 885; m.y = 80; m.vx = -120 - Math.random() * 60; m.vy = 0; m.still = 0; m.trail.length = 0; }
+  function freeAtRelease() { return !marbles.some(function (o) { return !o.lift && Math.abs(o.x - 885) < 30 && Math.abs(o.y - 80) < 30; }); }
+  function frameLogic(dt) {
+    // Aufzug: unten rechts einsammeln, im Rohr nach oben fahren, oben wieder auf den Zulauf setzen.
+    var up = marbles.filter(function (m) { return m.lift; }).sort(function (a, b) { return a.y - b.y; }), prev = null;
+    up.forEach(function (m) {
+      var ty = m.y - 300 * dt;
+      if (prev) ty = Math.max(ty, prev.y + prev.r + m.r + 3);
+      m.y = ty; m.rot += 300 * dt / m.r;
+      if (m.y <= 64 && freeAtRelease()) release(m); else if (m.y < 64) m.y = 64;
+      prev = m;
+    });
+    marbles.forEach(function (m) {
+      if (m.lift) return;
+      if (m.x > 914 && m.y > H - 160) { m.lift = true; m.x = 953; m.vx = m.vy = 0; stats.lifted++; return; }
+      if (m.y > H + 40 || m.x < -40 || m.x > W + 40 || m.y < -60 || !isFinite(m.x + m.y)) { m.lift = true; m.x = 953; m.y = H - 100; stats.respawned++; return; }
+      var sp = Math.hypot(m.vx, m.vy);
+      if (sp < 25) m.still += dt; else if (sp > 60) m.still = 0;
+      if (m.still > 2.5 && m.still - dt <= 2.5) { m.vx += (Math.random() < .5 ? -1 : 1) * 220; m.vy -= 260; stats.nudged++; }
+      if (m.still > 6) { m.lift = true; m.x = 953; m.y = H - 100; m.still = 0; stats.respawned++; }
+      if (theme.trails) { m.trail.push(m.x, m.y); if (m.trail.length > 24) m.trail.splice(0, 2); }
+    });
+    if (pending > 0) { spawnT -= dt; if (spawnT <= 0 && freeAtRelease() && marbles.length < MAXM) { var nm = newMarble(885, 80); nm.vx = -150; marbles.push(nm); pending--; spawnT = .22; } }
+    if (marbles.length >= MAXM) pending = 0;
+    bumpers.forEach(function (b) { b.flash = Math.max(0, b.flash - dt * 3); });
+    pegs.forEach(function (p) { p.glow = Math.max(0, p.glow - dt * 4); });
+  }
+
+  // ---------- Klang ----------
+  var actx = null, PENTA = [0, 2, 4, 7, 9];
+  function snd(kind, strength, x) {
+    if (!soundOn || !actx) return;
+    var now = actx.currentTime, gap = kind === "peg" ? .05 : kind === "bump" ? .07 : .04;
+    if (now - (lastSnd[kind] || 0) < gap) return; lastSnd[kind] = now;
+    var vol = Math.min(1, strength / 900), o = actx.createOscillator(), g = actx.createGain(), f, dur;
+    if (kind === "peg") { var idx = Math.max(0, Math.min(14, Math.floor((x - L) / PW * 15))); f = 261.6 * Math.pow(2, (Math.floor(idx / 5) * 12 + PENTA[idx % 5]) / 12); o.type = "sine"; dur = .5; vol = .05 + vol * .12; }
+    else if (kind === "bump") { f = 180 + Math.random() * 60; o.type = "triangle"; o.frequency.setValueAtTime(f * 2.2, now); o.frequency.exponentialRampToValueAtTime(f, now + .15); dur = .25; vol = .12; }
+    else if (kind === "klick") { f = 1800 + Math.random() * 900; o.type = "sine"; dur = .05; vol = .03 + vol * .05; }
+    else { f = 140 + Math.random() * 40; o.type = "triangle"; dur = .07; vol = .02 + vol * .05; }
+    if (kind !== "bump") o.frequency.value = f;
+    g.gain.setValueAtTime(vol, now); g.gain.exponentialRampToValueAtTime(.0001, now + dur);
+    o.connect(g).connect(actx.destination); o.start(now); o.stop(now + dur + .02);
+  }
+
+  // ---------- Zeichnen ----------
+  function toScreen() { ctx.setTransform(dpr * scale, 0, 0, dpr * scale, dpr * ox, dpr * oy); }
+  function railPath(c, s) { c.beginPath(); c.moveTo(s.ax, s.ay); c.lineTo(s.bx, s.by); }
+  function drawStatic() {
+    staticCv.width = cv.width; staticCv.height = cv.height;
+    var c = staticCv.getContext("2d");
+    c.setTransform(1, 0, 0, 1, 0, 0);
+    var g = c.createLinearGradient(0, 0, 0, cv.height); g.addColorStop(0, theme.bg[0]); g.addColorStop(1, theme.bg[1]);
+    c.fillStyle = g; c.fillRect(0, 0, cv.width, cv.height);
+    c.setTransform(dpr * scale, 0, 0, dpr * scale, dpr * ox, dpr * oy);
+    // Punktraster als Untergrund
+    c.fillStyle = theme.dots;
+    for (var y = 20; y < H; y += 40) for (var x = 20 + (y / 40 % 2) * 20; x < W; x += 40) { c.beginPath(); c.arc(x, y, 2.2, 0, 6.28); c.fill(); }
+    c.lineCap = "round";
+    segs.forEach(function (s) { if (!s.draw) return; c.save(); c.translate(3, 5); railPath(c, s); c.strokeStyle = theme.sh; c.lineWidth = s.t * 2; c.stroke(); c.restore(); });
+    if (theme.glow) { c.shadowColor = theme.rail; c.shadowBlur = 14 * scale * dpr; }
+    segs.forEach(function (s) { if (!s.draw) return; railPath(c, s); c.strokeStyle = theme.rail; c.lineWidth = s.t * 2; c.stroke(); });
+    c.shadowBlur = 0;
+    segs.forEach(function (s) {
+      if (!s.draw) return;
+      var dx = s.bx - s.ax, dy = s.by - s.ay, l = Math.hypot(dx, dy) || 1, nx = dy / l, ny = -dx / l; if (ny > 0) { nx = -nx; ny = -ny; }
+      c.beginPath(); c.moveTo(s.ax + nx * s.t * .45, s.ay + ny * s.t * .45); c.lineTo(s.bx + nx * s.t * .45, s.by + ny * s.t * .45);
+      c.strokeStyle = theme.hi; c.globalAlpha = .55; c.lineWidth = s.t * .5; c.stroke(); c.globalAlpha = 1;
+    });
+    pegs.forEach(function (p) {
+      c.fillStyle = theme.sh; c.beginPath(); c.arc(p.x + 2, p.y + 4, p.r, 0, 6.28); c.fill();
+      var gg = c.createRadialGradient(p.x - 2, p.y - 2, 1, p.x, p.y, p.r); gg.addColorStop(0, "#fff"); gg.addColorStop(.35, theme.peg); gg.addColorStop(1, theme.peg);
+      c.fillStyle = gg; c.beginPath(); c.arc(p.x, p.y, p.r, 0, 6.28); c.fill();
+    });
+    // Aufzugrohr (Rückwand)
+    c.fillStyle = theme.glass + ".06)"; roundRect(c, 914, 30, 80, H - 70, 26); c.fill();
+  }
+  function roundRect(c, x, y, w, h, r) { c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); }
+  function drawMarble(m) {
+    var x = m.x, y = m.y, r = m.r;
+    if (!theme.glow) { ctx.fillStyle = theme.light ? "rgba(60,50,90,.18)" : "rgba(0,0,0,.35)"; ctx.beginPath(); ctx.ellipse(x + 3, y + r * .7, r * .9, r * .45, 0, 0, 6.28); ctx.fill(); }
+    var g;
+    if (m.type === "metal") {
+      g = ctx.createRadialGradient(x - r * .4, y - r * .4, r * .1, x, y, r); g.addColorStop(0, "#fff"); g.addColorStop(.3, "#C9CED6"); g.addColorStop(.75, "#6E7480"); g.addColorStop(1, "#2E323A");
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, 6.28); ctx.fill();
+    } else {
+      var glass = m.type === "glass";
+      g = ctx.createRadialGradient(x - r * .35, y - r * .4, r * .1, x, y, r);
+      g.addColorStop(0, hsl(m.h, m.s, Math.min(92, m.l + 32), glass ? .55 : 1)); g.addColorStop(.55, hsl(m.h, m.s, m.l, glass ? .4 : 1)); g.addColorStop(1, hsl(m.h, m.s, m.l - 26, glass ? .75 : 1));
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, 6.28); ctx.fill();
+      ctx.save(); ctx.beginPath(); ctx.arc(x, y, r * .96, 0, 6.28); ctx.clip(); ctx.translate(x, y); ctx.rotate(m.rot);
+      if (m.type === "auge") {
+        ctx.fillStyle = hsl(m.h2, 90, 55, .95); ctx.beginPath(); ctx.ellipse(0, 0, r * 1.1, r * .28, 0, 0, 6.28); ctx.fill();
+      } else {
+        ctx.strokeStyle = hsl(m.h2, 85, glass ? 70 : 62, glass ? .9 : .8); ctx.lineWidth = r * .32; ctx.lineCap = "round";
+        ctx.beginPath(); ctx.moveTo(-r, -r * .2); ctx.bezierCurveTo(-r * .3, -r * .9, r * .2, r * .6, r, -r * .1); ctx.stroke();
+        ctx.lineWidth = r * .16; ctx.strokeStyle = "rgba(255,255,255,.55)";
+        ctx.beginPath(); ctx.moveTo(-r * .8, r * .5); ctx.bezierCurveTo(-r * .2, -r * .1, r * .3, r * .9, r * .9, r * .45); ctx.stroke();
+      }
+      ctx.restore();
+    }
+    ctx.fillStyle = "rgba(255,255,255,.85)"; ctx.beginPath(); ctx.ellipse(x - r * .38, y - r * .42, r * .28, r * .18, -.6, 0, 6.28); ctx.fill();
+  }
+  function draw() {
+    ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.drawImage(staticCv, 0, 0);
+    toScreen();
+    // leuchtende Stifte nach einem Treffer
+    pegs.forEach(function (p) { if (p.glow > 0) { ctx.globalAlpha = p.glow; ctx.fillStyle = theme.hi; ctx.beginPath(); ctx.arc(p.x, p.y, p.r + 6 * p.glow, 0, 6.28); ctx.fill(); ctx.globalAlpha = 1; } });
+    bumpers.forEach(function (b) {
+      if (!theme.glow) { ctx.fillStyle = theme.sh; ctx.beginPath(); ctx.arc(b.x + 3, b.y + 6, b.r, 0, 6.28); ctx.fill(); }
+      var rr2 = b.r * (1 + b.flash * .08);
+      if (theme.glow || b.flash > 0) { ctx.shadowColor = theme.bump; ctx.shadowBlur = (theme.glow ? 18 : 0 + 30 * b.flash) * scale * dpr; }
+      var g = ctx.createRadialGradient(b.x - b.r * .3, b.y - b.r * .35, 2, b.x, b.y, rr2);
+      g.addColorStop(0, theme.bumpHi); g.addColorStop(.5 - b.flash * .3, theme.bump); g.addColorStop(1, theme.bump);
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(b.x, b.y, rr2, 0, 6.28); ctx.fill(); ctx.shadowBlur = 0;
+      ctx.strokeStyle = theme.hi; ctx.globalAlpha = .5 + b.flash * .5; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(b.x, b.y, rr2 * .62, 0, 6.28); ctx.stroke(); ctx.globalAlpha = 1;
+    });
+    wheels.forEach(function (w) {
+      ctx.lineCap = "round";
+      if (theme.glow) { ctx.shadowColor = theme.wheel; ctx.shadowBlur = 12 * scale * dpr; }
+      w.arms.forEach(function (a) { ctx.strokeStyle = theme.wheel; ctx.lineWidth = 10; ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(a[2], a[3]); ctx.stroke(); });
+      ctx.shadowBlur = 0;
+      ctx.strokeStyle = theme.hi; ctx.globalAlpha = .35; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(w.x, w.y, w.len, 0, 6.28); ctx.stroke(); ctx.globalAlpha = 1;
+      ctx.fillStyle = theme.wheel; ctx.beginPath(); ctx.arc(w.x, w.y, 14, 0, 6.28); ctx.fill();
+      ctx.fillStyle = theme.hi; ctx.beginPath(); ctx.arc(w.x, w.y, 5, 0, 6.28); ctx.fill();
+    });
+    // Förderband im Aufzug
+    ctx.strokeStyle = theme.glass + ".22)"; ctx.lineWidth = 3; ctx.setLineDash([14, 18]); ctx.lineDashOffset = T * 300;
+    ctx.beginPath(); ctx.moveTo(986, H - 50); ctx.lineTo(986, 40); ctx.stroke(); ctx.setLineDash([]);
+    if (theme.trails) marbles.forEach(function (m) {
+      if (m.trail.length < 4) return; ctx.lineCap = "round"; ctx.lineWidth = m.r * 1.1;
+      for (var i = 2; i < m.trail.length; i += 2) { ctx.strokeStyle = hsl(m.h, 100, 60, i / m.trail.length * .35); ctx.beginPath(); ctx.moveTo(m.trail[i - 2], m.trail[i - 1]); ctx.lineTo(m.trail[i], m.trail[i + 1]); ctx.stroke(); }
+    });
+    marbles.forEach(drawMarble);
+    // Glas vorne
+    ctx.strokeStyle = theme.glass + ".35)"; ctx.lineWidth = 3; roundRect(ctx, 914, 30, 80, H - 70, 26); ctx.stroke();
+    ctx.strokeStyle = theme.glass + ".18)"; ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(926, 70); ctx.lineTo(926, H - 90); ctx.stroke();
+  }
+
+  // ---------- Größe und Ablauf ----------
+  var built = false;
+  function resize() {
+    var cw = stage.clientWidth, ch = stage.clientHeight; if (!cw || !ch) return;
+    dpr = Math.min(2, window.devicePixelRatio || 1);
+    cv.width = Math.round(cw * dpr); cv.height = Math.round(ch * dpr);
+    var nh = Math.round(Math.max(1300, Math.min(2400, W * ch / cw)));
+    if (!built || Math.abs(nh - H) / H > .08) {
+      H = nh; generate(seed || newSeed());
+      var keep = Math.max(16, marbles.length); marbles = []; pending = keep; built = true;
+    }
+    scale = Math.min(cw / W, ch / H); ox = (cw - W * scale) / 2; oy = (ch - H * scale) / 2;
+    drawStatic();
+  }
+  function newSeed() { var q = new URLSearchParams(location.search).get("bahn"); return q && /^\d{1,9}$/.test(q) ? +q : 1 + Math.floor(Math.random() * 99999); }
+
+  var last = performance.now();
+  function loop(now) {
+    var dt = Math.min(.033, (now - last) / 1000); last = now;
+    if (!paused) {
+      dt *= slow ? .35 : 1; T += dt;
+      var n = 10, sd = dt / n;
+      for (var i = 0; i < n; i++) step(sd);
+      frameLogic(dt);
+    }
+    draw();
+    requestAnimationFrame(loop);
+  }
+
+  document.getElementById("neu").addEventListener("click", function () {
+    var keep = Math.max(16, Math.min(40, marbles.length)); seed = 1 + Math.floor(Math.random() * 99999); generate(seed); drawStatic(); marbles = []; pending = keep;
+  });
+  document.getElementById("mehr").addEventListener("click", function () { pending += 10; });
+  document.getElementById("slow").addEventListener("click", function () { slow = !slow; this.classList.toggle("on", slow); });
+  document.getElementById("pause").addEventListener("click", function () { paused = !paused; this.textContent = paused ? "▶" : "⏸"; this.classList.toggle("on", paused); });
+  document.getElementById("ton").addEventListener("click", function () {
+    soundOn = !soundOn; this.textContent = soundOn ? "🔊" : "🔇"; this.classList.toggle("on", soundOn);
+    if (soundOn && !actx) { try { actx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+    if (actx && actx.state === "suspended") actx.resume();
+  });
+  cv.addEventListener("pointerdown", function (e) {
+    var r = cv.getBoundingClientRect(), x = (e.clientX - r.left - ox) / scale, y = (e.clientY - r.top - oy) / scale;
+    if (x < L + 16 || x > RW - 16 || y < 20 || y > H - 210 || marbles.length >= MAXM) return;
+    marbles.push(newMarble(x, y));
+    document.getElementById("toast").classList.add("off");
+  });
+  window.addEventListener("resize", resize);
+  setTimeout(function () { document.getElementById("toast").classList.add("off"); }, 5000);
+  resize();
+  requestAnimationFrame(loop);
+  window.__murmelbahn = {stats: stats, get marbles() { return marbles; }, get segs() { return segs; }, get H() { return H; }, step: step, frameLogic: frameLogic, generate: function (s) { generate(s); drawStatic(); marbles = []; pending = 0; }, add: function (k) { pending += k; }};
+})();
+</script>
+</body>
+</html>
