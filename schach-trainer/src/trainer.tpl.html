@@ -299,7 +299,7 @@ nav.tabs.dragging button{cursor:grabbing}
               <div class="solution" id="solTxt"></div>
               <p class="note" id="solNote" style="margin:8px 0">◆ markiert Züge, die einen Punkt geben.</p>
               <div class="btns" id="rateBtns" hidden><button class="b ok" id="bOk" type="button">Richtig</button><button class="b no" id="bNo" type="button">Falsch</button></div>
-              <div class="btns" id="doneBtns" hidden><button class="b" id="bReplay" type="button">Lösung nochmal zeigen</button><button class="b primary" id="bNext" type="button">Weiter</button></div>
+              <div class="btns" id="doneBtns" hidden><button class="b" id="bReplay" type="button">Lösung anzeigen</button><button class="b primary" id="bNext" type="button">Weiter</button></div>
             </div>
             <div class="btns" style="margin-top:14px"><button class="b" id="bEnd" type="button">Sitzung beenden</button></div>
           </div>
@@ -563,19 +563,18 @@ function qzRender(){
     box.innerHTML='<p class="q">1 von 3: '+(e.pz?'Taktikstellung':'Aus deiner Partie vom '+e[5].split('.').reverse().join('.'))+', '+(w?'Weiß':'Schwarz')+' am Zug. Zieh den besten Zug.</p><div class="board" id="qzB"></div><div class="fb" id="qzFb" hidden></div><div class="btns" id="qzBtns"></div>';
     qzBoard=makeBoard($('qzB'),(from,to)=>{const g=qzBoard.game;const m=g.move({from,to,promotion:'q'});qzBoard.last=[from,to];qzBoard.locked=true;qzBoard.draw();
       const ok=sanKey(m.san)===sanKey(e[2]);quiz.res.push(ok);quiz.notes.push('Stellung '+P.efIdx+': '+(ok?'richtig ('+m.san+')':'falsch, gezogen '+m.san+', best '+e[2]));
-      const f=$('qzFb');f.hidden=false;f.className='fb '+(ok?'ok':'no');f.textContent=ok?'Richtig, '+figurine(m.san)+' war der beste Zug.':'Nicht der beste. Du hast '+figurine(m.san)+' gezogen. Am besten war '+figurine(e[2])+'.'+(e.pz?'':' In der Partie kam '+figurine(e[1])+', danach '+figurine(e[3])+'.');
+      const f=$('qzFb');f.hidden=false;f.className='fb '+(ok?'ok':'no');f.textContent=ok?'Richtig, '+figurine(m.san)+' war der beste Zug.':'Nicht der beste Zug. Du hast '+figurine(m.san)+' gezogen.';
       const bm=(()=>{const t=new Chess();t.load(e[0]);const mm=t.moves({verbose:true}).find(x=>sanKey(x.san)===sanKey(e[2]));return mm?mm.from+mm.to+(mm.promotion||''):null})();
-      const again=()=>{if(!bm)return;animateLine(qzBoard,e[0],[bm],t=>{f.textContent='Der beste Zug: '+t.replace(/^1\. /,'')})};if(!ok)setTimeout(again,900);
-      $('qzBtns').innerHTML=(bm?'<button class="b" type="button" id="qzAgain">Besten Zug zeigen</button> ':'')+'<button class="b primary" type="button" id="qzNext">Weiter</button>';if(bm)$('qzAgain').addEventListener('click',again);$('qzNext').addEventListener('click',()=>{quiz.step=1;qzRender()})});
+      const again=()=>{if(!bm)return;animateLine(qzBoard,e[0],[bm],t=>{f.textContent='Der beste Zug: '+t.replace(/^1\. /,'')+(e.pz?'':'. In deiner Partie kam '+figurine(e[1])+', danach '+figurine(e[3])+'.')})};      $('qzBtns').innerHTML=(bm?'<button class="b" type="button" id="qzAgain">Besten Zug zeigen</button> ':'')+'<button class="b primary" type="button" id="qzNext">Weiter</button>';if(bm)$('qzAgain').addEventListener('click',again);$('qzNext').addEventListener('click',()=>{quiz.step=1;qzRender()})});
     qzBoard.load(e[0]);qzBoard.locked=false;qzBoard.draw();
   }else if(s===1){const n=P.wn;const p=WP[n-1];const line=LINES[n-1];
     box.innerHTML=resHtml+'<p class="q">2 von 3: Woodpecker Nr. '+n+', '+(p[1]==='w'?'Weiß':'Schwarz')+' am Zug. Zieh den Schlüsselzug.</p><div class="head">'+p[2]+'</div><div class="board" id="qzB"></div><div class="fb" id="qzFb" hidden></div><div class="btns" id="qzBtns"></div>';
     qzBoard=makeBoard($('qzB'),(from,to)=>{const g=qzBoard.game;const exp=line[0];const cands=g.moves({square:from,verbose:true}).filter(m=>m.to===to);const promo=cands[0]&&cands[0].promotion?(exp.slice(0,4)===from+to&&exp[4]?exp[4]:'q'):undefined;
       const uci=from+to+(promo||'');const best=g.moves({verbose:true}).find(m=>m.from+m.to+(m.promotion||'')===exp);const bestSan=best?best.san:exp;
       const m=g.move({from,to,promotion:promo});qzBoard.last=[from,to];qzBoard.locked=true;qzBoard.draw();const ok=uci===exp;quiz.res.push(ok);quiz.notes.push('Woodpecker Nr. '+n+': '+(ok?'richtig':'falsch, gezogen '+m.san+', Lösung '+bestSan));
-      const f=$('qzFb');f.hidden=false;f.className='fb '+(ok?'ok':'no');const fen0=p[0]+' '+p[1]+' - - 0 1';f.textContent=(ok?'Richtig. ':'Falsch, du hast '+figurine(m.san)+' gezogen. ')+'Lösung: '+germanLine(fen0,line).text;
-      const again=()=>animateLine(qzBoard,fen0,line,(t,last)=>{f.textContent=t+(last?'  (Ende der Lösung)':'')});setTimeout(again,900);
-      $('qzBtns').innerHTML='<button class="b" type="button" id="qzAgain">Lösung nochmal zeigen</button> <button class="b primary" type="button" id="qzNext">Weiter</button>';$('qzAgain').addEventListener('click',again);$('qzNext').addEventListener('click',()=>{quiz.step=2;qzRender()})});
+      const f=$('qzFb');f.hidden=false;f.className='fb '+(ok?'ok':'no');const fen0=p[0]+' '+p[1]+' - - 0 1';f.textContent=ok?'Richtig.':'Falsch, du hast '+figurine(m.san)+' gezogen.';
+      const again=()=>{f.textContent='Lösung: '+germanLine(fen0,line).text;animateLine(qzBoard,fen0,line,(t,last)=>{f.textContent=t+(last?'  (Ende der Lösung)':'')})};
+      $('qzBtns').innerHTML='<button class="b" type="button" id="qzAgain">Lösung anzeigen</button> <button class="b primary" type="button" id="qzNext">Weiter</button>';$('qzAgain').addEventListener('click',again);$('qzNext').addEventListener('click',()=>{quiz.step=2;qzRender()})});
     qzBoard.load(p[0]+' '+p[1]+' - - 0 1');qzBoard.locked=false;qzBoard.draw();
   }else if(s===2){const l=LESSONS.find(x=>x.id===P.lid);
     box.innerHTML=resHtml+'<p class="q">3 von 3, '+l.title+': '+P.q+'</p><div class="opt">'+P.opts.map((o,i)=>'<button class="b" type="button" data-o="'+i+'">'+o.o+'</button>').join('')+'</div><div class="fb" id="qzFb" hidden></div><div class="btns" id="qzBtns"></div>';
@@ -988,7 +987,7 @@ function userMove(from,to){
   }else{
     const played=figurine(cands[0].san),best=sanOf(exp);
     game.move({from,to,promotion:promo});lastMove=[from,to];drawBoard();
-    finish(false,'Falsch. Du hast '+played+' gespielt, die Lösung ist '+best+'.');
+    finish(false,'Falsch. Du hast '+played+' gespielt.');
   }
 }
 function finish(ok,msg){
@@ -996,11 +995,11 @@ function finish(ok,msg){
   setFb(ok?'ok':'no',msg||(ok?'Richtig! Ganze Variante gefunden.':'Falsch.'));
   $('playBtns').hidden=true;$('solBox').hidden=false;$('doneBtns').hidden=false;
   $('bNext').dataset.ok=ok?'1':'0';$('bNext').dataset.review=wasMode==='review'?'1':'0';
-  if(!ok&&line.length)setTimeout(()=>{if(puzMode==='done')$('bReplay').click()},900);
+  $('solTxt').hidden=!!line.length;
 }
-$('bGiveUp').addEventListener('click',()=>{if(puzMode==='play'||puzMode==='review')finish(false,'Aufgedeckt, zählt als falsch. Die Lösung beginnt mit '+sanOf(line[step])+'.')});
+$('bGiveUp').addEventListener('click',()=>{if(puzMode==='play'||puzMode==='review'){finish(false,'Aufgedeckt, zählt als falsch.');$('bReplay').click()}});
 $('bReplay').addEventListener('click',()=>{
-  clearTimeout(replayTimer);const p=WP[shownNo-1];game=new Chess();game.load(p[0]+' '+p[1]+' - - 0 1');lastMove=null;drawBoard();let k=0;
+  $('solTxt').hidden=false;clearTimeout(replayTimer);const p=WP[shownNo-1];game=new Chess();game.load(p[0]+' '+p[1]+' - - 0 1');lastMove=null;drawBoard();let k=0;
   const gl=line.length?germanLine(p[0]+' '+p[1]+' - - 0 1',line):{parts:[]};
   const stepFn=()=>{if(k>=line.length)return;const o=line[k];game.move({from:o.slice(0,2),to:o.slice(2,4),promotion:o[4]||undefined});lastMove=[o.slice(0,2),o.slice(2,4)];drawBoard();setFb('hint',gl.parts[k]+(k===line.length-1?'  (Ende der Lösung)':''));k++;replayTimer=setTimeout(stepFn,1100)};
   replayTimer=setTimeout(stepFn,400);
@@ -1018,7 +1017,7 @@ $('bStart').addEventListener('click',()=>{
   $('sessInfo').textContent='Uhr läuft. Figur antippen, Zielfeld antippen.';
   showPuzzle(stand.naechste||1,'play');startTick();
 });
-$('bShow').addEventListener('click',()=>{$('solBox').hidden=false;$('fallbackBtns').hidden=true;$('rateBtns').hidden=puzMode==='review';if(puzMode==='review'){$('doneBtns').hidden=false;$('bNext').dataset.review='1'}});
+$('bShow').addEventListener('click',()=>{$('solBox').hidden=false;$('solTxt').hidden=false;$('fallbackBtns').hidden=true;$('rateBtns').hidden=puzMode==='review';if(puzMode==='review'){$('doneBtns').hidden=false;$('bNext').dataset.review='1'}});
 async function answer(ok){
   if(!sess)return;
   const sec=Math.round((Date.now()-puzStart)/1000);
