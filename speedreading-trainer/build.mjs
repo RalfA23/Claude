@@ -1,6 +1,6 @@
 // Builds dist/: wraps src/trainer.html (the same page that runs as a Claude artifact) into a standalone PWA.
 // Config comes from env: SR_SUPABASE_URL and SR_SUPABASE_ANON_KEY (both public values). Without them the app runs local-only.
-import { readFileSync, writeFileSync, mkdirSync, cpSync, rmSync } from "node:fs";
+import { readFileSync, writeFileSync, mkdirSync, cpSync, rmSync, readdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -24,6 +24,10 @@ for (const [from, to] of PUBLIC_TEXT) {
   trainer = trainer.replace(from, to);
 }
 // Head tags at the top of the trainer (title, font links) move into <head>; the artifact-only meta is dropped.
+// Inhaltsdaten (src/*-data.js) werden vor dem Hauptskript eingebettet; im Artifact fehlen sie, die App läuft dort ohne.
+const dataJs = readdirSync(join(root, "src")).filter(f => f.endsWith("-data.js")).sort().map(f => `<script>\n${readFileSync(join(root, "src", f), "utf8")}</script>\n`).join("");
+if (!trainer.includes("<!--DATA-->")) throw new Error("Marker <!--DATA--> fehlt");
+trainer = trainer.replace("<!--DATA-->", () => dataJs);
 const split = trainer.indexOf("<style>");
 const headTags = trainer.slice(0, split).replace(/<meta name="claude:viewport-fit-sides"[^>]*>\n?/, "");
 const page = shell.replace("</head>", headTags + "</head>").replace("<!--TRAINER-->", trainer.slice(split));
