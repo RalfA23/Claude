@@ -868,7 +868,7 @@ function viewFree(v){
     const go=h("button",{class:"btn",onclick:async()=>{ if(q.value.trim().length<2){ om.textContent="Bitte gib ein Stichwort ein."; return; }
       go.disabled=true; om.textContent="Ich hole den Text…";
       try{ const t=await generateText(q.value,kind.value); om.textContent=`Neuer Text: ${t.title}`; render(); }
-      catch(e){ let c=""; try{ const b=e&&e.context&&e.context.json?await e.context.json():null; c=b&&b.error||""; }catch(_){} om.textContent=ERR[c]||"Das hat nicht geklappt. Versuch es später noch einmal."; go.disabled=false; } }},"Text holen");
+      catch(e){ let c="",d=""; try{ const b=e&&e.context&&e.context.json?await e.context.json():null; c=b&&b.error||""; d=b&&b.detail||""; }catch(_){} om.textContent=(ERR[c]||"Das hat nicht geklappt. Versuch es später noch einmal.")+(d?` (${d})`:""); go.disabled=false; } }},"Text holen");
     v.append(h("div",{class:"card",style:"margin-top:16px"},h("h3",{text:"Originaltext holen"}),
       h("p",{class:"muted",style:"margin:0"},"Ein Auszug aus Wikipedia oder einem gemeinfreien Klassiker, unverändert. Die Fragen schreibt Claude. Quelle und Lizenz stehen im Lesefenster."),
       h("label",{class:"field"},"Art",kind),h("label",{class:"field"},"Stichwort",h("div",{class:"row",style:"flex-wrap:nowrap"},q,go)),om));
