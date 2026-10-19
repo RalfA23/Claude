@@ -1,0 +1,811 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#120C22">
+<meta name="description" content="Götterquiz: Wissensspiel nach dem Vorbild von Powerplay. Vier Götter, je vier Krieger, Fragen aus allen Bereichen.">
+<title>Götterquiz</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#120C22;--bg2:#1D1536;--panel:#221A3D;--line:#3A2F5E;--ink:#EEE8DA;--muted:#A99FC4;--gold:#F2C14E;--ok:#58C98B;--bad:#EF5B5B;
+  --c0:#C9A94F;--c1:#B5654A;--c2:#5B7FA6;--c3:#6E9160;--tele:#F4F1E8;
+  --S:320px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:radial-gradient(ellipse at 50% -10%,#3A2A6B 0%,var(--bg) 55%) fixed,var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif;min-height:100%}
+body{padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+h1,h2,h3,.cinzel{font-family:Cinzel,Georgia,serif;letter-spacing:.04em}
+a{color:var(--gold)}
+button{font:inherit;color:inherit;cursor:pointer}
+.wrap{max-width:1080px;margin:0 auto;padding:12px 16px 40px}
+header.top{display:flex;align-items:center;gap:12px;justify-content:space-between;margin-bottom:8px}
+header.top h1{margin:0;font-size:1.35rem;color:var(--gold);text-shadow:0 2px 0 #000}
+header.top .back{color:var(--muted);text-decoration:none;font-size:.9rem}
+.btn{border:1px solid var(--line);background:var(--bg2);border-radius:10px;padding:10px 14px;min-height:44px}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{background:linear-gradient(#F6CF6A,#D9A23A);color:#1A1205;border-color:#F6CF6A;font-weight:700}
+.btn.ghost{background:transparent}
+.btn:disabled{opacity:.45;cursor:default}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:12px}
+.muted{color:var(--muted)}
+.small{font-size:.88rem}
+[hidden]{display:none!important}
+
+/* Start */
+.hero{text-align:center;padding:12px 0 4px}
+.hero h2{font-size:clamp(1.6rem,6vw,2.6rem);margin:0;color:var(--gold);text-shadow:0 3px 0 #000,0 0 24px rgba(242,193,78,.35)}
+.hero p{margin:6px auto 0;max-width:560px;color:var(--muted)}
+.gods{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:12px 0}
+.god{border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--bg2);text-align:center}
+.god .sym{font-size:1.8rem;line-height:1}
+.god h3{margin:6px 0 8px;font-size:1rem}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;flex-wrap:wrap}
+.seg button{border:0;background:transparent;padding:8px 10px;min-height:40px}
+.seg button.on{background:var(--gold);color:#1A1205;font-weight:700}
+.opt{display:grid;grid-template-columns:minmax(120px,170px) 1fr;gap:8px 12px;align-items:center}
+.opt label{color:var(--muted)}
+@media (max-width:520px){.opt{grid-template-columns:1fr}}
+details summary{cursor:pointer;font-weight:600}
+textarea{width:100%;min-height:140px;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:10px;font:14px/1.4 ui-monospace,Menlo,Consolas,monospace}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}
+.stat{background:var(--bg2);border-radius:10px;padding:10px}
+.stat b{display:block;font-size:1.3rem}
+
+/* Game layout */
+.game{display:grid;grid-template-columns:1fr 300px;gap:16px;align-items:start}
+@media (max-width:860px){.game{grid-template-columns:1fr}}
+.stage{position:relative;width:100%;height:calc(var(--S) * 1.18);overflow:visible;user-select:none;-webkit-user-select:none}
+.board{position:absolute;left:50%;top:58%;width:var(--S);height:var(--S);margin:calc(var(--S) / -2) 0 0 calc(var(--S) / -2);
+  transform-origin:50% 50%;transform:rotateX(55deg) rotateZ(45deg);transform-style:preserve-3d;
+  display:grid;grid-template-columns:repeat(8,1fr);grid-template-rows:repeat(8,1fr);
+  box-shadow:0 0 0 calc(var(--S) * .02) #3B2E22,0 0 0 calc(var(--S) * .03) #1A130C,0 30px 60px rgba(0,0,0,.6)}
+.tile{position:relative;transform-style:preserve-3d;transform:translateZ(1px);border:1px solid rgba(0,0,0,.25);
+  background-image:linear-gradient(135deg,rgba(255,255,255,.18),rgba(255,255,255,0) 45%,rgba(0,0,0,.12))}
+.tile.c0{background-color:var(--c0)}.tile.c1{background-color:var(--c1)}.tile.c2{background-color:var(--c2)}.tile.c3{background-color:var(--c3)}
+.tile.tele{background:radial-gradient(circle,#fff 0 18%,#E8E2FF 30%,#B9A8F0 60%,#7E6AC9 100%)}
+.tile.tele::after{content:"";position:absolute;inset:18%;border-radius:50%;border:2px dashed rgba(60,40,120,.55);animation:spin 6s linear infinite;pointer-events:none}
+@keyframes spin{from{transform:translateZ(1px) rotate(0)}to{transform:translateZ(1px) rotate(360deg)}}
+.tile.target{cursor:pointer}
+.tile.target::before{content:"";position:absolute;inset:6%;pointer-events:none;transform:translateZ(1px);border-radius:4px;box-shadow:0 0 0 3px #fff,0 0 18px 4px rgba(255,255,255,.9);animation:pulse 1s ease-in-out infinite alternate}
+.tile.target.attack::before{box-shadow:0 0 0 3px var(--bad),0 0 18px 4px rgba(239,91,91,.9)}
+@keyframes pulse{from{opacity:.55}to{opacity:1}}
+.tile.sel{box-shadow:inset 0 0 0 3px #fff}
+.piece{position:absolute;left:50%;bottom:50%;width:120%;height:200%;margin-left:-60%;transform-origin:50% 100%;
+  transform:rotateZ(-45deg) rotateX(-55deg) scale(var(--k,1));pointer-events:none;transition:transform .25s}
+.piece svg{width:100%;height:100%;display:block;filter:drop-shadow(0 2px 1px rgba(0,0,0,.6))}
+.piece.mine{cursor:pointer;pointer-events:auto}
+.piece.chosen svg{filter:drop-shadow(0 0 6px #fff) drop-shadow(0 2px 1px rgba(0,0,0,.6))}
+.piece .rk{position:absolute;left:50%;top:34%;transform:translateX(-50%);font:800 calc(var(--S) * .022)/1 Cinzel,Georgia,serif;color:#140E06}
+.legend{display:flex;flex-wrap:wrap;gap:6px 12px;justify-content:center;font-size:.82rem;color:var(--muted);margin-top:4px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+
+.side .who{display:flex;align-items:center;gap:10px}
+.side .who .sym{font-size:1.8rem}
+.plist{display:flex;flex-direction:column;gap:6px}
+.pl{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;background:var(--bg2);border:1px solid transparent}
+.pl.cur{border-color:var(--gold)}
+.pl.out{opacity:.4;text-decoration:line-through}
+.pl .dot{width:14px;height:14px;border-radius:50%;flex:none;border:2px solid #000}
+.pl .pc{margin-left:auto;font-size:.82rem;color:var(--muted);white-space:nowrap}
+.wbar{height:6px;border-radius:3px;background:#0005;overflow:hidden;margin-top:4px}
+.wbar i{display:block;height:100%;background:var(--gold)}
+.log{max-height:180px;overflow:auto;font-size:.86rem;color:var(--muted);display:flex;flex-direction:column-reverse;gap:3px}
+.hint{font-size:.92rem;margin:6px 0 10px}
+
+/* Question overlay */
+.ov{position:fixed;inset:0;background:rgba(8,5,18,.82);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:16px;z-index:10}
+.qbox{width:min(720px,100%);max-height:100%;overflow:auto;background:linear-gradient(#2A2050,#1A1333);border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:0 20px 60px #000}
+.qhead{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:.86rem;color:var(--muted)}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:3px 9px;border-radius:999px;font-weight:700;color:#14100A}
+.qtext{font-size:clamp(1.05rem,3.6vw,1.35rem);margin:10px 0 14px;font-weight:600}
+.compass{display:grid;grid-template-columns:1fr 88px 1fr;grid-template-areas:". n ." "w c e" ". s .";gap:8px;align-items:stretch}
+.compass .n{grid-area:n}.compass .e{grid-area:e}.compass .s{grid-area:s}.compass .w{grid-area:w}.compass .core{grid-area:c}
+.compass .n,.compass .s{grid-column:1/4;justify-self:center;width:min(100%,360px)}
+.ans{border:2px solid var(--line);background:var(--bg2);border-radius:12px;padding:10px 12px;min-height:54px;text-align:center;position:relative}
+.ans:hover:not(:disabled){border-color:var(--gold)}
+.ans .k{position:absolute;top:3px;left:7px;font-size:.7rem;color:var(--muted)}
+.ans.ok{border-color:var(--ok);background:#1E4A33}
+.ans.bad{border-color:var(--bad);background:#4E1F27}
+.ans.cpu{outline:3px dashed var(--gold);outline-offset:2px}
+.core{display:flex;align-items:center;justify-content:center}
+.ring{width:80px;height:80px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--gold) calc(var(--p,1) * 360deg),#0006 0);position:relative}
+.ring::after{content:"";position:absolute;inset:7px;border-radius:50%;background:#1A1333}
+.ring b{position:relative;z-index:1;font:800 1.4rem Cinzel,Georgia,serif}
+.qfoot{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:12px;flex-wrap:wrap}
+.verdict{font-weight:700}
+.verdict.ok{color:var(--ok)}.verdict.bad{color:var(--bad)}
+.duelbar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:6px;font-weight:700}
+.duelbar .vs{font-family:Cinzel,serif;color:var(--gold)}
+.pads{display:grid;gap:10px}
+.pad{border:1px solid var(--line);border-radius:12px;padding:8px}
+.pad h4{margin:0 0 6px;font-size:.9rem}
+.pad .compass{grid-template-columns:1fr 40px 1fr}
+.pad .ans{min-height:44px;padding:8px}
+.pad .ring{display:none}
+@media (max-width:600px){.pad.flip{transform:rotate(180deg)}}
+.big{font-size:3rem;text-align:center;margin:4px 0}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#000c;border:1px solid var(--gold);color:var(--ink);padding:10px 16px;border-radius:12px;z-index:20;max-width:90vw;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1>⚡ Götterquiz</h1>
+    <a class="back" href="../">← Lernportal</a>
+  </header>
+
+  <!-- Start -->
+  <section id="start">
+    <div class="hero">
+      <h2>Das Spiel der Götter</h2>
+      <p>Vier Götter schicken je vier Krieger in den Tempelhof. Wer richtig antwortet, zieht. Wer klug genug ist, mutiert. Wer ein Duell verliert, stürzt eine Stufe ab.</p>
+    </div>
+    <div class="card" id="resumeCard" hidden>
+      <div class="row" style="justify-content:space-between"><span id="resumeTxt"></span><span class="row"><button class="btn primary" id="resume">Weiterspielen</button><button class="btn ghost" id="discard">Verwerfen</button></span></div>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">Wer spielt mit?</h3>
+      <div class="gods" id="godSetup"></div>
+      <div class="opt">
+        <label>Computer</label><div class="seg" id="optCpu"></div>
+        <label>Bedenkzeit</label><div class="seg" id="optTime"></div>
+        <label>Spieldauer</label><div class="seg" id="optRounds"></div>
+        <label>Fragen</label><div class="seg" id="optSrc"></div>
+        <label>Ton</label><div class="seg" id="optSound"></div>
+      </div>
+      <div class="row" style="margin-top:14px"><button class="btn primary" id="go">Spiel starten</button><span class="muted small" id="setupHint"></span></div>
+    </div>
+    <div class="card">
+      <details>
+        <summary>So wird gespielt</summary>
+        <div class="small" style="margin-top:8px">
+          <p>Jeder Gott führt vier Krieger. Du wählst einen Krieger, und die Farbe seines Feldes bestimmt den Bereich der Frage: <b style="color:var(--c0)">Allgemeinwissen</b>, <b style="color:var(--c1)">Geschichte und Geografie</b>, <b style="color:var(--c2)">Wissenschaft und Technik</b> oder <b style="color:var(--c3)">Sport und Freizeit</b>. Die Antworten liegen in den vier Himmelsrichtungen, mit den Pfeiltasten oder per Tippen.</p>
+          <p>Richtig beantwortet: Der Krieger bekommt Weisheit und zieht ein Feld in eine der acht Richtungen. Falsch oder zu langsam: Der Zug ist vorbei. Die weißen Felder sind Teleporter, sie werfen den Krieger auf ein zufälliges anderes Teleporterfeld.</p>
+          <p>Ziehst du auf einen gegnerischen Krieger, beginnt ein Duell. Beide bekommen dieselbe Frage, wer zuerst richtig antwortet, gewinnt. Eine falsche Antwort schenkt dem Gegner den Sieg, läuft die Zeit ab, verliert der Angreifer. Der Verlierer verliert Weisheit und fällt eine Stufe ab. Wer auf der untersten Stufe verliert, scheidet aus.</p>
+          <p>Mit 25 Weisheitspunkten kann ein Krieger mutieren: Herkules wird zum Zyklopen, dann zum Minotaurus, zuletzt zum Satyr. Höhere Stufen überstehen mehr Niederlagen, bekommen aber schwerere Fragen. Es gewinnt, wer als letzter Gott Krieger auf dem Feld hat. Mit Rundenlimit gewinnt am Ende, wer die meiste Macht hat (Stufen aller Krieger plus Weisheit).</p>
+          <p class="muted">Vorbild ist „Powerplay: The Game of the Gods“ von Arcana (1986, Amiga, Atari ST, C64). Die Stufen und Regeln folgen den damaligen Spielbeschreibungen.</p>
+        </div>
+      </details>
+    </div>
+    <div class="card">
+      <details>
+        <summary>Eigene Fragen (Fragen-Compiler)</summary>
+        <div class="small" style="margin-top:8px">
+          <p>Wie im Original kannst du eigene Fragen einbauen. Eine Frage pro Zeile: <code>Bereich;Stufe;Frage;Richtig;Falsch;Falsch;Falsch</code>. Bereich 1 bis 4 (Allgemein, Geschichte, Wissenschaft, Sport), Stufe 1 bis 4. Die letzte falsche Antwort darf fehlen.</p>
+          <textarea id="ownTxt" placeholder="2;1;Wie heißt der Hamburger Hausberg?;Süllberg;Brocken;Feldberg;Wilseder Berg"></textarea>
+          <div class="row" style="margin-top:8px"><button class="btn" id="ownSave">Fragen speichern</button><span class="muted" id="ownMsg"></span></div>
+        </div>
+      </details>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">Deine Bilanz</h3>
+      <div class="stats" id="stats"></div>
+      <p class="muted small" id="poolInfo" style="margin-bottom:0"></p>
+    </div>
+  </section>
+
+  <!-- Game -->
+  <section id="game" hidden>
+    <div class="game">
+      <div>
+        <div class="stage" id="stage"><div class="board" id="board"></div></div>
+        <div class="legend" id="legend"></div>
+      </div>
+      <aside class="side">
+        <div class="card">
+          <div class="who"><span class="sym" id="curSym"></span><div><div class="cinzel" id="curName" style="font-weight:800"></div><div class="muted small" id="roundTxt"></div></div></div>
+          <p class="hint" id="hint"></p>
+          <div id="selInfo"></div>
+          <div class="row" id="actions"></div>
+        </div>
+        <div class="card"><div class="plist" id="plist"></div></div>
+        <div class="card"><div class="log" id="log"></div></div>
+        <div class="row"><button class="btn ghost" id="quit">Spiel beenden</button><button class="btn ghost" id="sndBtn"></button></div>
+      </aside>
+    </div>
+  </section>
+</div>
+
+<div class="ov" id="ov" hidden><div class="qbox" id="qbox"></div></div>
+
+<script>
+const ALLQ = __FRAGEN__;
+</script>
+<script>
+"use strict";
+/* ============ Konstanten ============ */
+const N = 8;
+const CATS = [
+  {n:"Allgemeinwissen", s:"Allgemein", c:"#C9A94F", i:"📜"},
+  {n:"Geschichte und Geografie", s:"Geschichte", c:"#B5654A", i:"🗺️"},
+  {n:"Wissenschaft und Technik", s:"Wissenschaft", c:"#5B7FA6", i:"⚗️"},
+  {n:"Sport und Freizeit", s:"Sport", c:"#6E9160", i:"🏅"}
+];
+const GODS = [
+  {n:"Apollon", c:"#F2C14E", s:"☀️", d:"Gott des Lichts und der Künste"},
+  {n:"Hermes", c:"#D9E4EE", s:"🪽", d:"Götterbote, flink und listig"},
+  {n:"Hekate", c:"#9B5DE5", s:"🌙", d:"Göttin der Magie und der Wege"},
+  {n:"Aphrodite", c:"#F06292", s:"🌹", d:"Göttin der Liebe und Schönheit"}
+];
+const RANKS = ["", "Herkules", "Zyklop", "Minotaurus", "Satyr"];
+const RANKS_DAT = ["", "Herkules", "Zyklopen", "Minotaurus", "Satyr"];
+const ROMAN = ["", "I", "II", "III", "IV"];
+const MUTATE_AT = 25;
+// Ecken der Götter und Startaufstellung: drei Herkules, auf dem inneren Eckfeld ein Zyklop.
+const CORNERS = [[0,0,1,1],[7,0,-1,1],[7,7,-1,-1],[0,7,1,-1]];
+const SEATS = {2:[0,2], 3:[0,1,2], 4:[0,1,2,3]};
+const TELE = [[2,2],[5,2],[2,5],[5,5]];
+const isTele = (x,y) => TELE.some(t => t[0]===x && t[1]===y);
+const catOf = (x,y) => (x + 2*y) % 4;
+const DIRS = [[-1,-1],[0,-1],[1,-1],[-1,0],[1,0],[-1,1],[0,1],[1,1]];
+const CPU = {leicht:{p:.55, t:[4,8]}, mittel:{p:.7, t:[3,6.5]}, schwer:{p:.85, t:[2,5]}};
+
+/* ============ Speicher ============ */
+const LS = {
+  get(k, d){ try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch(e){ return d; } },
+  set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} },
+  del(k){ try { localStorage.removeItem(k); } catch(e){} }
+};
+const SET = Object.assign({seats:["human","cpu","off","off"], cpu:"mittel", time:20, rounds:30, src:"alle", sound:true}, LS.get("gq-settings", {}));
+const STATS = Object.assign({games:0, wins:0, right:[0,0,0,0], total:[0,0,0,0]}, LS.get("gq-stats", {}));
+const saveSet = () => LS.set("gq-settings", SET);
+const saveStats = () => LS.set("gq-stats", STATS);
+
+/* ============ Hilfen ============ */
+const $ = id => document.getElementById(id);
+function h(tag, attrs, ...kids){
+  const e = document.createElement(tag);
+  for (const k in (attrs||{})) {
+    const v = attrs[k];
+    if (v == null || v === false) continue;
+    if (k.startsWith("on")) e.addEventListener(k.slice(2), v);
+    else if (k === "text") e.textContent = v;
+    else if (k === "html") e.innerHTML = v;
+    else e.setAttribute(k, v === true ? "" : v);
+  }
+  for (const c of kids.flat()) if (c != null && c !== false) e.append(c.nodeType ? c : document.createTextNode(c));
+  return e;
+}
+const rnd = n => Math.floor(Math.random() * n);
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = rnd(i + 1); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const wait = ms => new Promise(r => setTimeout(r, ms));
+function toast(t){ const e = h("div", {class:"toast", text:t}); document.body.append(e); setTimeout(() => e.remove(), 2600); }
+
+/* ============ Ton ============ */
+let AC = null;
+function beep(notes){
+  if (!SET.sound) return;
+  try {
+    AC = AC || new (window.AudioContext || window.webkitAudioContext)();
+    let t = AC.currentTime;
+    for (const [f, d, type] of notes) {
+      const o = AC.createOscillator(), g = AC.createGain();
+      o.type = type || "square"; o.frequency.value = f; g.gain.setValueAtTime(.06, t); g.gain.exponentialRampToValueAtTime(.001, t + d);
+      o.connect(g); g.connect(AC.destination); o.start(t); o.stop(t + d); t += d * .9;
+    }
+  } catch(e){}
+}
+const SND = {
+  ok: () => beep([[523,.09],[659,.09],[784,.16]]),
+  bad: () => beep([[220,.18,"sawtooth"],[165,.25,"sawtooth"]]),
+  tele: () => beep([[300,.06,"sine"],[500,.06,"sine"],[800,.06,"sine"],[1200,.1,"sine"]]),
+  duel: () => beep([[392,.12],[392,.12],[523,.3]]),
+  up: () => beep([[440,.08],[554,.08],[659,.08],[880,.2]]),
+  tick: () => beep([[1000,.03,"sine"]])
+};
+
+/* ============ Fragen ============ */
+function ownQuestions(){
+  return LS.get("gq-own", []).map(o => ({c:o.c, l:o.l, q:o.q, a:o.a, src:"Eigene Frage"}));
+}
+function pool(){
+  let q = ALLQ.slice();
+  if (SET.src === "eigen") q = q.filter(x => !x.src);
+  if (SET.src === "lesen") q = q.filter(x => x.src);
+  return q.concat(ownQuestions());
+}
+let POOL = [];
+function pickQuestion(cat, level){
+  const used = G.used || (G.used = {});
+  const free = x => !used[x.q];
+  const inCat = POOL.filter(x => x.c === cat);
+  // Erst die passende Stufe, dann die nächstgelegenen Stufen, zuletzt wieder von vorn.
+  for (const d of [0, -1, 1, -2, 2, -3, 3]) {
+    const list = inCat.filter(x => x.l === level + d && free(x));
+    if (list.length) { const q = list[rnd(list.length)]; used[q.q] = 1; return q; }
+  }
+  inCat.forEach(x => delete used[x.q]);
+  const q = inCat[rnd(inCat.length)] || POOL[rnd(POOL.length)];
+  used[q.q] = 1; return q;
+}
+
+/* ============ Spielzustand ============ */
+let G = null;
+function newGame(){
+  const seats = SET.seats.map((t, i) => ({god:i, type:t})).filter(s => s.type !== "off");
+  const corners = SEATS[seats.length];
+  const players = seats.map((s, i) => ({god:s.god, type:s.type, corner:corners[i], out:false}));
+  const pieces = [];
+  players.forEach((p, pi) => {
+    const [cx, cy, dx, dy] = CORNERS[p.corner];
+    [[0,0,1],[1,0,1],[0,1,1],[1,1,2]].forEach(([a, b, r], k) => pieces.push({id:pi*4+k, p:pi, x:cx+a*dx, y:cy+b*dy, rank:r, wis:0}));
+  });
+  G = {players, pieces, turn:0, round:1, phase:"select", sel:null, log:[], used:{}, rounds:SET.rounds, over:false};
+  log(`Das Turnier beginnt: ${players.map(p => GODS[p.god].n).join(", ")}.`);
+  STATS.games++; saveStats();
+}
+const cur = () => G.players[G.turn];
+const pieceAt = (x, y) => G.pieces.find(p => p.x === x && p.y === y);
+const alivePlayers = () => G.players.filter(p => !p.out);
+const godOf = pi => GODS[G.players[pi].god];
+const power = pi => G.pieces.filter(p => p.p === pi).reduce((a, p) => a + p.rank + p.wis / 100, 0);
+function log(t){ G.log.push(t); if (G.log.length > 80) G.log.shift(); }
+function save(){ if (G && !G.over) LS.set("gq-game", G); }
+function targets(pc){
+  const out = [];
+  for (const [dx, dy] of DIRS) {
+    const x = pc.x + dx, y = pc.y + dy;
+    if (x < 0 || y < 0 || x >= N || y >= N) continue;
+    const o = pieceAt(x, y);
+    if (o && o.p === pc.p) continue;
+    out.push({x, y, enemy:o || null});
+  }
+  return out;
+}
+
+/* ============ Darstellung: Brett ============ */
+function figure(god, rank){
+  const c = GODS[god].c;
+  // Krieger mit Helmbusch; je höher die Stufe, desto größer und prächtiger.
+  const crest = rank >= 2 ? `<path d="M30 6 C40 0 52 4 54 14 C46 10 38 10 32 14Z" fill="${rank >= 4 ? "#F2C14E" : "#B3261E"}" stroke="#140E06" stroke-width="1.5"/>` : "";
+  const horns = rank >= 3 ? `<path d="M19 16 C10 12 8 4 12 0 C14 7 18 10 23 12Z M41 16 C50 12 52 4 48 0 C46 7 42 10 37 12Z" fill="#EEE8DA" stroke="#140E06" stroke-width="1.5"/>` : "";
+  return `<svg viewBox="0 0 60 100" aria-hidden="true">
+    <ellipse cx="30" cy="94" rx="24" ry="6" fill="#000" opacity=".35"/>
+    <path d="M10 92 C10 80 14 74 20 70 L40 70 C46 74 50 80 50 92 Z" fill="${c}" stroke="#140E06" stroke-width="2"/>
+    <path d="M18 72 C14 56 16 40 22 34 L38 34 C44 40 46 56 42 72 Z" fill="${c}" stroke="#140E06" stroke-width="2"/>
+    <circle cx="30" cy="24" r="12" fill="${c}" stroke="#140E06" stroke-width="2"/>
+    <path d="M18 24 A12 12 0 0 1 42 24 L42 27 L18 27 Z" fill="#140E06" opacity=".35"/>
+    ${horns}${crest}
+    <circle cx="30" cy="52" r="9" fill="#F6EFD9" stroke="#140E06" stroke-width="1.5"/>
+    <text x="30" y="56.5" text-anchor="middle" font-family="Cinzel,Georgia,serif" font-weight="800" font-size="11" fill="#140E06">${ROMAN[rank]}</text>
+  </svg>`;
+}
+function sizeBoard(){
+  const st = $("stage"); if (!st) return;
+  const w = Math.min(st.clientWidth || 320, 760);
+  document.documentElement.style.setProperty("--S", Math.floor(w / 1.45) + "px");
+}
+window.addEventListener("resize", sizeBoard);
+function renderBoard(){
+  const b = $("board"); b.replaceChildren();
+  const me = cur(), human = me.type === "human" && !G.over && !G.busy;
+  const tg = (G.phase === "move" && G.sel != null) ? targets(G.pieces.find(p => p.id === G.sel)) : [];
+  for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+    const t = h("div", {class:"tile " + (isTele(x, y) ? "tele" : "c" + catOf(x, y)), "data-x":x, "data-y":y,
+      title: isTele(x, y) ? "Teleporter" : CATS[catOf(x, y)].n});
+    const tt = tg.find(q => q.x === x && q.y === y);
+    if (tt && human) { t.classList.add("target"); if (tt.enemy) t.classList.add("attack"); t.addEventListener("click", () => doMove(x, y)); }
+    const pc = pieceAt(x, y);
+    if (pc) {
+      if (pc.id === G.sel) t.classList.add("sel");
+      const el = h("div", {class:"piece" + (pc.id === G.sel ? " chosen" : ""), html:figure(G.players[pc.p].god, pc.rank),
+        title:`${godOf(pc.p).n}: ${RANKS[pc.rank]}, Weisheit ${pc.wis}`});
+      el.style.setProperty("--k", (.78 + pc.rank * .08).toFixed(2));
+      if (human && pc.p === G.turn && G.phase === "select") { el.classList.add("mine"); el.addEventListener("click", e => { e.stopPropagation(); selectPiece(pc.id); }); t.addEventListener("click", () => selectPiece(pc.id)); }
+      t.append(el);
+    }
+    b.append(t);
+  }
+}
+function render(){
+  renderBoard();
+  const me = cur(), g = GODS[me.god];
+  $("curSym").textContent = g.s; $("curName").textContent = g.n + (me.type === "cpu" ? " (Computer)" : "");
+  $("curName").style.color = g.c;
+  $("roundTxt").textContent = `Runde ${G.round}` + (G.rounds ? ` von ${G.rounds}` : "");
+  const pl = $("plist"); pl.replaceChildren();
+  G.players.forEach((p, i) => {
+    const mine = G.pieces.filter(q => q.p === i);
+    pl.append(h("div", {class:"pl" + (i === G.turn ? " cur" : "") + (p.out ? " out" : "")},
+      h("span", {class:"dot", style:`background:${GODS[p.god].c}`}), h("span", {text:GODS[p.god].n + (p.type === "cpu" ? " 🤖" : "")}),
+      h("span", {class:"pc", text: p.out ? "ausgeschieden" : mine.map(q => ROMAN[q.rank]).join(" · ")})));
+  });
+  $("log").replaceChildren(...G.log.slice().reverse().map(t => h("div", {text:t})));
+  // Hinweis und Aktionen
+  const sel = G.pieces.find(p => p.id === G.sel), act = $("actions"), info = $("selInfo");
+  act.replaceChildren(); info.replaceChildren();
+  let hint = "";
+  if (G.over) hint = "Das Spiel ist vorbei.";
+  else if (me.type === "cpu") hint = `${g.n} ist am Zug …`;
+  else if (G.phase === "select") hint = sel ? "Stell dich der Frage oder wähle einen anderen Krieger." : "Wähle einen deiner Krieger auf dem Brett.";
+  else if (G.phase === "move") hint = "Richtig! Wähle ein leuchtendes Feld. Rot heißt Duell.";
+  $("hint").textContent = hint;
+  if (sel && !G.over) {
+    info.append(h("div", {class:"small"}, h("b", {text:RANKS[sel.rank]}), ` auf ${isTele(sel.x, sel.y) ? "einem Teleporter" : CATS[catOf(sel.x, sel.y)].n}`),
+      h("div", {class:"wbar"}, h("i", {style:`width:${Math.min(100, sel.wis / MUTATE_AT * 100)}%`})),
+      h("div", {class:"muted small", style:"margin-bottom:8px", text:`Weisheit ${sel.wis} von ${MUTATE_AT}` + (sel.rank >= 4 ? " (höchste Stufe)" : "")}));
+    if (me.type === "human" && G.phase === "select") {
+      act.append(h("button", {class:"btn primary", onclick:() => askTurn(sel)}, "Frage stellen"));
+      if (sel.wis >= MUTATE_AT && sel.rank < 4) act.append(h("button", {class:"btn", onclick:() => mutate(sel)}, `Mutieren zum ${RANKS_DAT[sel.rank + 1]}`));
+    }
+    if (me.type === "human" && G.phase === "move") act.append(h("button", {class:"btn", onclick:() => { log(`${g.n} bleibt stehen.`); endTurn(); }}, "Stehen bleiben"));
+  }
+  $("sndBtn").textContent = SET.sound ? "🔊 Ton an" : "🔈 Ton aus";
+}
+
+/* ============ Ablauf ============ */
+function selectPiece(id){
+  if (G.phase !== "select" || G.busy) return;
+  G.sel = id; render();
+}
+function mutate(pc){
+  pc.rank++; pc.wis = 0; SND.up();
+  log(`${godOf(pc.p).n}: Ein Krieger mutiert zum ${RANKS_DAT[pc.rank]}!`);
+  save(); render();
+}
+// Eine Frage für den Zug. Teleporterfelder haben keine Farbe: dort kommt ein zufälliger Bereich.
+async function askTurn(pc){
+  if (G.busy) return;
+  G.busy = true; render();
+  const cat = isTele(pc.x, pc.y) ? rnd(4) : catOf(pc.x, pc.y);
+  const q = pickQuestion(cat, pc.rank);
+  const res = await Question.single(q, cat, pc, cur());
+  G.busy = false;
+  const ci = cat;
+  if (cur().type === "human") { STATS.total[ci]++; if (res.ok) STATS.right[ci]++; saveStats(); }
+  if (res.ok) {
+    // 5 Punkte plus bis zu 3 für Tempo.
+    const bonus = Math.max(0, Math.round(3 * res.left));
+    pc.wis += 5 + bonus;
+    log(`${godOf(pc.p).n} antwortet richtig (+${5 + bonus} Weisheit).`);
+    G.phase = "move"; render();
+    if (cur().type === "cpu") cpuMove(pc);
+  } else {
+    log(`${godOf(pc.p).n} ${res.timeout ? "war zu langsam" : "lag falsch"}.`);
+    endTurn();
+  }
+}
+async function doMove(x, y){
+  if (G.phase !== "move" || G.busy) return;
+  const pc = G.pieces.find(p => p.id === G.sel);
+  const enemy = pieceAt(x, y);
+  if (enemy && enemy.p !== pc.p) { await duel(pc, enemy); return; }
+  pc.x = x; pc.y = y;
+  if (isTele(x, y)) teleport(pc);
+  endTurn();
+}
+function teleport(pc){
+  const others = TELE.filter(t => !(t[0] === pc.x && t[1] === pc.y) && !pieceAt(t[0], t[1]));
+  // Wie im Original: Ein zufälliges anderes Teleporterfeld, besetzte werden übersprungen.
+  if (!others.length) return;
+  const [x, y] = others[rnd(others.length)];
+  pc.x = x; pc.y = y; SND.tele();
+  log(`${godOf(pc.p).n}: Der Teleporter wirft einen Krieger auf ein anderes Feld.`);
+}
+function nearestFree(x, y){
+  const seen = new Set([x + "," + y]), q = [[x, y]];
+  while (q.length) {
+    const [cx, cy] = q.shift();
+    for (const [dx, dy] of DIRS) {
+      const nx = cx + dx, ny = cy + dy, k = nx + "," + ny;
+      if (nx < 0 || ny < 0 || nx >= N || ny >= N || seen.has(k)) continue;
+      seen.add(k);
+      if (!pieceAt(nx, ny) && !isTele(nx, ny)) return [nx, ny];
+      q.push([nx, ny]);
+    }
+  }
+  return null;
+}
+async function duel(att, def){
+  G.busy = true; render(); SND.duel();
+  const cat = isTele(def.x, def.y) ? rnd(4) : catOf(def.x, def.y);
+  const q = pickQuestion(cat, Math.max(att.rank, def.rank));
+  const res = await Question.duel(q, cat, att, def);
+  G.busy = false;
+  const win = res.winner === "att" ? att : def, lose = res.winner === "att" ? def : att;
+  const humanSide = [att, def].filter(p => G.players[p.p].type === "human");
+  humanSide.forEach(p => { STATS.total[cat]++; if (p === win) STATS.right[cat]++; });
+  saveStats();
+  win.wis += 5; lose.wis = Math.max(0, lose.wis - 10); lose.rank--;
+  const why = res.why ? ` (${res.why})` : "";
+  log(`Duell: ${godOf(win.p).n} besiegt ${godOf(lose.p).n}${why}.`);
+  if (lose.rank <= 0) {
+    log(`${godOf(lose.p).n} verliert einen Krieger.`);
+    G.pieces = G.pieces.filter(p => p !== lose);
+  } else log(`${godOf(lose.p).n}: Der Krieger fällt auf ${RANKS[lose.rank]} zurück.`);
+  if (win === att) {
+    const tx = def.x, ty = def.y;
+    if (lose.rank > 0) { const f = nearestFree(tx, ty); if (f) { def.x = f[0]; def.y = f[1]; } }
+    att.x = tx; att.y = ty;
+    if (isTele(tx, ty)) teleport(att);
+  }
+  checkOut();
+  endTurn();
+}
+function checkOut(){
+  G.players.forEach((p, i) => {
+    if (!p.out && !G.pieces.some(q => q.p === i)) { p.out = true; log(`${GODS[p.god].n} scheidet aus.`); }
+  });
+}
+function endTurn(){
+  G.sel = null; G.phase = "select";
+  if (alivePlayers().length <= 1) return finish();
+  let t = G.turn;
+  do { t = (t + 1) % G.players.length; if (t === 0) G.round++; } while (G.players[t].out);
+  G.turn = t;
+  if (G.rounds && G.round > G.rounds) return finish();
+  save(); render();
+  if (cur().type === "cpu") cpuTurn();
+}
+function finish(){
+  G.over = true; LS.del("gq-game");
+  const alive = G.players.map((p, i) => ({p, i})).filter(o => !o.p.out);
+  alive.sort((a, b) => power(b.i) - power(a.i));
+  const w = alive[0];
+  log(`${GODS[w.p.god].n} ist der weiseste aller Götter!`);
+  const humanWin = w.p.type === "human";
+  if (humanWin && G.players.some(p => p.type === "cpu")) { STATS.wins++; saveStats(); }
+  render(); SND.up();
+  const box = $("qbox"); $("ov").hidden = false;
+  box.replaceChildren(
+    h("div", {class:"big", text:GODS[w.p.god].s}),
+    h("h2", {style:`text-align:center;color:${GODS[w.p.god].c};margin:0`, text:`${GODS[w.p.god].n} gewinnt`}),
+    h("p", {class:"muted", style:"text-align:center", text: alive.length > 1 ? "Das Rundenlimit ist erreicht. Gezählt wird die Macht: Stufen aller Krieger plus Weisheit." : "Alle anderen Götter haben ihre Krieger verloren."}),
+    h("div", {class:"plist"}, ...G.players.map((p, i) => h("div", {class:"pl"}, h("span", {class:"dot", style:`background:${GODS[p.god].c}`}), h("span", {text:GODS[p.god].n}), h("span", {class:"pc", text:p.out ? "ausgeschieden" : `Macht ${power(i).toFixed(1)}`})))),
+    h("div", {class:"row", style:"justify-content:center;margin-top:14px"},
+      h("button", {class:"btn primary", onclick:() => { $("ov").hidden = true; start(); }}, "Neues Spiel"),
+      h("button", {class:"btn", onclick:() => { $("ov").hidden = true; showStart(); }}, "Zum Start")));
+}
+
+/* ============ Computer ============ */
+function cpuScore(pc, t){
+  let s = Math.random() * 1.5;
+  const enemies = G.pieces.filter(p => p.p !== pc.p);
+  if (t.enemy) s += t.enemy.rank <= pc.rank ? 8 + (pc.rank - t.enemy.rank) * 3 : -4;
+  else {
+    const d0 = Math.min(...enemies.map(e => Math.max(Math.abs(e.x - pc.x), Math.abs(e.y - pc.y))));
+    const d1 = Math.min(...enemies.map(e => Math.max(Math.abs(e.x - t.x), Math.abs(e.y - t.y))));
+    s += (d0 - d1) * 2;
+    // Nicht neben stärkere Gegner stellen.
+    if (enemies.some(e => e.rank > pc.rank && Math.max(Math.abs(e.x - t.x), Math.abs(e.y - t.y)) === 1)) s -= 3;
+    if (isTele(t.x, t.y)) s += .5;
+  }
+  return s;
+}
+async function cpuTurn(){
+  G.busy = true; render();
+  await wait(700);
+  const mine = G.pieces.filter(p => p.p === G.turn);
+  const m = mine.find(p => p.wis >= MUTATE_AT && p.rank < 4);
+  if (m) { mutate(m); await wait(600); }
+  let best = null;
+  for (const pc of mine) for (const t of targets(pc)) { const s = cpuScore(pc, t); if (!best || s > best.s) best = {pc, t, s}; }
+  if (!best) { G.busy = false; endTurn(); return; }
+  G.sel = best.pc.id; G.cpuPlan = best.t; G.busy = false; render();
+  await wait(500);
+  askTurn(best.pc);
+}
+async function cpuMove(pc){
+  G.busy = true; render(); await wait(650); G.busy = false;
+  let t = G.cpuPlan;
+  // Der Plan kann nach einem Teleport oder einer Mutation veraltet sein: dann neu wählen.
+  const ok = t && targets(pc).find(q => q.x === t.x && q.y === t.y);
+  if (!ok) { const all = targets(pc).map(q => ({q, s:cpuScore(pc, q)})).sort((a, b) => b.s - a.s); t = all[0] && all[0].q; }
+  if (!t) { endTurn(); return; }
+  doMove(t.x, t.y);
+}
+const cpuKnows = rank => Math.random() < CPU[SET.cpu].p - (rank - 1) * .06;
+
+/* ============ Fragefenster ============ */
+const KEYS = {ArrowUp:0, ArrowRight:1, ArrowDown:2, ArrowLeft:3, w:0, d:1, s:2, a:3, W:0, D:1, S:2, A:3};
+const DIRN = ["n", "e", "s", "w"], DIRL = ["↑", "→", "↓", "←"], DIRL2 = ["W", "D", "S", "A"];
+const Question = {
+  head(q, cat, extra){
+    const c = CATS[cat];
+    return h("div", {class:"qhead"}, h("span", {class:"chip", style:`background:${c.c}`}, c.i + " " + c.n), extra || null,
+      q.src ? h("span", {text:"aus: " + q.src}) : null);
+  },
+  // Vier Antworten liegen in den vier Himmelsrichtungen, drei Antworten (Lesetraining) im Norden, Westen und Osten.
+  dirs: n => n === 4 ? [0, 1, 2, 3] : [0, 3, 1],
+  idx(n, key){ return Question.dirs(n).indexOf(KEYS[key]); },
+  compass(answers, onPick, keys){
+    const dd = Question.dirs(answers.length);
+    const btns = answers.map((a, i) => h("button", {class:"ans " + DIRN[dd[i]], onclick:() => onPick(i)}, h("span", {class:"k", text:keys[dd[i]]}), a));
+    const ring = h("div", {class:"ring"}, h("b", {text:""}));
+    const grid = h("div", {class:"compass"}, ...btns, h("div", {class:"core"}, ring));
+    return {grid, btns, ring};
+  },
+  timer(ring, secs, onTick, onEnd){
+    const t0 = performance.now(); let last = -1, stop = false;
+    const step = now => {
+      if (stop) return;
+      const left = Math.max(0, secs - (now - t0) / 1000);
+      ring.style.setProperty("--p", (left / secs).toFixed(3)); const s = Math.ceil(left);
+      if (s !== last) { ring.querySelector("b").textContent = s; last = s; if (s <= 3 && s > 0) SND.tick(); }
+      if (onTick) onTick(left);
+      if (left <= 0) { stop = true; onEnd(); return; }
+      requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+    return {stop(){ stop = true; }, left(){ return Math.max(0, secs - (performance.now() - t0) / 1000) / secs; }};
+  },
+  // Normale Zugfrage: ein Spieler, Mensch oder Computer.
+  single(q, cat, pc, player){
+    return new Promise(resolve => {
+      const order = shuffle(q.a.map((a, i) => ({a, ok:i === 0}))), god = GODS[player.god];
+      const box = $("qbox"), cpu = player.type === "cpu";
+      let done = false, tm = null;
+      const finish = (i, timeout) => {
+        if (done) return; done = true; tm && tm.stop(); document.removeEventListener("keydown", key);
+        const ok = i != null && order[i].ok, left = tm ? tm.left() : 0;
+        order.forEach((o, k) => { if (o.ok) c.btns[k].classList.add("ok"); else if (k === i) c.btns[k].classList.add("bad"); c.btns[k].disabled = true; });
+        ok ? SND.ok() : SND.bad();
+        verdict.className = "verdict " + (ok ? "ok" : "bad");
+        verdict.textContent = ok ? "Richtig!" : timeout ? "Zeit abgelaufen." : "Leider falsch.";
+        const close = () => { $("ov").hidden = true; resolve({ok, timeout, left}); };
+        if (cpu) setTimeout(close, 1500);
+        else foot.append(h("button", {class:"btn primary", onclick:close}, ok ? "Ziehen" : "Weiter"));
+        if (!cpu) setTimeout(() => { const b = foot.querySelector("button"); b && b.focus(); }, 30);
+      };
+      const key = e => { if (!(e.key in KEYS) || cpu) return; const i = Question.idx(order.length, e.key); if (i < 0) return; e.preventDefault(); finish(i); };
+      const c = Question.compass(order.map(o => o.a), i => !cpu && finish(i), DIRL);
+      const verdict = h("span", {class:"verdict"});
+      const foot = h("div", {class:"qfoot"}, h("span", {class:"muted small", text:`${god.s} ${god.n} · ${RANKS[pc.rank]}`}), verdict);
+      box.replaceChildren(Question.head(q, cat, h("span", {text:`Stufe ${ROMAN[Math.min(4, q.l)]}`})), h("div", {class:"qtext", text:q.q}), c.grid, foot);
+      $("ov").hidden = false;
+      tm = Question.timer(c.ring, SET.time, null, () => finish(null, true));
+      if (cpu) {
+        const knows = cpuKnows(pc.rank), d = 1200 + Math.random() * 1600;
+        setTimeout(() => {
+          if (done) return;
+          const i = knows ? order.findIndex(o => o.ok) : shuffle(order.map((o, k) => k).filter(k => !order[k].ok))[0];
+          c.btns[i].classList.add("cpu"); setTimeout(() => finish(i), 500);
+        }, d);
+      } else document.addEventListener("keydown", key);
+    });
+  },
+  // Duell: beide Seiten bekommen dieselbe Frage. Wer zuerst richtig antwortet, gewinnt; wer falsch antwortet, verliert.
+  duel(q, cat, att, def){
+    return new Promise(resolve => {
+      const order = shuffle(q.a.map((a, i) => ({a, ok:i === 0})));
+      const box = $("qbox"), sides = [{pc:att, role:"att"}, {pc:def, role:"def"}];
+      sides.forEach(s => { s.pl = G.players[s.pc.p]; s.god = GODS[s.pl.god]; s.human = s.pl.type === "human"; });
+      const humans = sides.filter(s => s.human);
+      let done = false, tm = null;
+      const end = (winner, why, pickSide, pickIdx) => {
+        if (done) return; done = true; tm && tm.stop(); document.removeEventListener("keydown", key);
+        sides.forEach(s => s.c && s.c.btns.forEach((b, k) => { b.disabled = true; if (order[k].ok) b.classList.add("ok"); else if (s === pickSide && k === pickIdx) b.classList.add("bad"); }));
+        const w = sides.find(s => s.role === winner);
+        verdict.className = "verdict " + (w.human ? "ok" : "bad");
+        verdict.textContent = `${w.god.n} gewinnt das Duell!`;
+        w.human ? SND.ok() : SND.bad();
+        const close = () => { $("ov").hidden = true; resolve({winner, why}); };
+        if (!humans.length) setTimeout(close, 1600);
+        else foot.append(h("button", {class:"btn primary", onclick:close}, "Weiter"));
+      };
+      const pick = (s, i) => {
+        if (done) return;
+        const other = sides.find(o => o !== s);
+        if (order[i].ok) end(s.role, `${s.god.n} war schneller`, s, i);
+        else end(other.role, `${s.god.n} lag falsch`, s, i);
+      };
+      // Tastatur: mit einem Menschen die Pfeiltasten, mit zwei Menschen Pfeiltasten für den Angreifer und WASD für den Verteidiger.
+      const key = e => {
+        if (!(e.key in KEYS)) return;
+        const arrows = e.key.startsWith("Arrow");
+        const s = humans.length === 2 ? humans[arrows ? 0 : 1] : humans[0];
+        const i = Question.idx(order.length, e.key);
+        if (!s || i < 0) return;
+        e.preventDefault(); pick(s, i);
+      };
+      const verdict = h("span", {class:"verdict"});
+      const foot = h("div", {class:"qfoot"}, h("span", {class:"muted small", text:"Wer zuerst richtig antwortet, gewinnt. Läuft die Zeit ab, verliert der Angreifer."}), verdict);
+      const bar = h("div", {class:"duelbar"}, h("span", {style:`color:${sides[0].god.c}`, text:`${sides[0].god.s} ${sides[0].god.n} (${RANKS[att.rank]})`}), h("span", {class:"vs", text:"⚔ Duell"}), h("span", {style:`color:${sides[1].god.c}`, text:`${sides[1].god.n} (${RANKS[def.rank]}) ${sides[1].god.s}`}));
+      let ring;
+      const nodes = [Question.head(q, cat), bar, h("div", {class:"qtext", text:q.q})];
+      if (humans.length === 2) {
+        const pads = h("div", {class:"pads"});
+        humans.slice().reverse().forEach((s, idx) => {
+          s.c = Question.compass(order.map(o => o.a), i => pick(s, i), s.role === "att" ? DIRL : DIRL2);
+          pads.append(h("div", {class:"pad" + (idx === 0 ? " flip" : ""), style:`border-color:${s.god.c}`}, h("h4", {style:`color:${s.god.c}`, text:`${s.god.s} ${s.god.n}` + (s.role === "att" ? " (Pfeiltasten)" : " (W A S D)")}), s.c.grid));
+        });
+        ring = h("div", {class:"ring"}, h("b"));
+        nodes.push(h("div", {class:"row", style:"justify-content:center;margin-bottom:8px"}, ring), pads);
+      } else if (humans.length === 1) {
+        const s = humans[0];
+        s.c = Question.compass(order.map(o => o.a), i => pick(s, i), DIRL); ring = s.c.ring;
+        nodes.push(s.c.grid);
+      } else {
+        const s = {c:Question.compass(order.map(o => o.a), () => {}, DIRL)}; sides[0].c = s.c; ring = s.c.ring;
+        s.c.btns.forEach(b => b.disabled = true); nodes.push(s.c.grid);
+      }
+      nodes.push(foot);
+      box.replaceChildren(...nodes); $("ov").hidden = false;
+      tm = Question.timer(ring, SET.time, null, () => end("def", "Zeit abgelaufen"));
+      // Computer-Seiten antworten nach einer zufälligen Bedenkzeit.
+      sides.filter(s => !s.human).forEach(s => {
+        const [a, b] = CPU[SET.cpu].t, d = (a + Math.random() * (b - a)) * 1000 * Math.min(1, SET.time / 20);
+        setTimeout(() => {
+          if (done) return;
+          const knows = cpuKnows(s.pc.rank);
+          const i = knows ? order.findIndex(o => o.ok) : shuffle(order.map((o, k) => k).filter(k => !order[k].ok))[0];
+          const shown = (humans[0] && humans[0].c) || sides[0].c;
+          if (shown) shown.btns[i].classList.add("cpu");
+          pick(s, i);
+        }, d);
+      });
+      if (humans.length) document.addEventListener("keydown", key);
+    });
+  }
+};
+
+/* ============ Startseite ============ */
+function seg(el, opts, val, set){
+  el.replaceChildren(...opts.map(([v, t]) => h("button", {type:"button", class:v === val ? "on" : "", onclick:() => { set(v); saveSet(); renderStart(); }}, t)));
+}
+function renderStart(){
+  const gs = $("godSetup"); gs.replaceChildren();
+  GODS.forEach((g, i) => {
+    const s = h("div", {class:"seg"});
+    seg(s, [["human", "Mensch"], ["cpu", "Computer"], ["off", "Frei"]], SET.seats[i], v => SET.seats[i] = v);
+    gs.append(h("div", {class:"god", style:SET.seats[i] === "off" ? "opacity:.55" : `border-color:${g.c}`},
+      h("div", {class:"sym", text:g.s}), h("h3", {style:`color:${g.c}`, text:g.n}), h("div", {class:"muted small", style:"margin:-4px 0 8px", text:g.d}), s));
+  });
+  seg($("optCpu"), [["leicht", "Leicht"], ["mittel", "Mittel"], ["schwer", "Schwer"]], SET.cpu, v => SET.cpu = v);
+  seg($("optTime"), [[10, "10 s"], [15, "15 s"], [20, "20 s"], [30, "30 s"]], SET.time, v => SET.time = v);
+  seg($("optRounds"), [[15, "Kurz (15 Runden)"], [30, "Mittel (30)"], [0, "Bis zum Ende"]], SET.rounds, v => SET.rounds = v);
+  seg($("optSrc"), [["alle", "Alle"], ["eigen", "Nur Wissensfragen"], ["lesen", "Nur Lesetraining"]], SET.src, v => SET.src = v);
+  seg($("optSound"), [[true, "An"], [false, "Aus"]], SET.sound, v => SET.sound = v);
+  const n = SET.seats.filter(s => s !== "off").length, hu = SET.seats.filter(s => s === "human").length;
+  const ok = n >= 2 && hu >= 1;
+  $("go").disabled = !ok;
+  $("setupHint").textContent = ok ? `${n} Götter, ${hu === 1 ? "du gegen den Computer" : hu + " Menschen an einem Gerät"}.` : "Mindestens zwei Götter und ein Mensch.";
+  const st = $("stats"); st.replaceChildren(
+    h("div", {class:"stat"}, h("b", {text:STATS.games}), "Spiele"),
+    h("div", {class:"stat"}, h("b", {text:STATS.wins}), "Siege gegen den Computer"),
+    ...CATS.map((c, i) => h("div", {class:"stat"}, h("b", {style:`color:${c.c}`, text:STATS.total[i] ? Math.round(STATS.right[i] / STATS.total[i] * 100) + " %" : "–"}), `${c.s} (${STATS.right[i]}/${STATS.total[i]})`)));
+  const all = ALLQ.length, les = ALLQ.filter(x => x.src).length, ow = ownQuestions().length;
+  $("poolInfo").textContent = `Im Spiel: ${all - les} Wissensfragen, ${les} Fragen aus dem Lesetraining` + (ow ? ` und ${ow} eigene Fragen.` : ".");
+  const saved = LS.get("gq-game", null);
+  $("resumeCard").hidden = !saved;
+  if (saved) $("resumeTxt").textContent = `Laufendes Spiel: ${saved.players.map(p => GODS[p.god].n).join(", ")}, Runde ${saved.round}.`;
+}
+function showStart(){ $("game").hidden = true; $("start").hidden = false; renderStart(); scrollTo(0, 0); }
+function showGame(){
+  $("start").hidden = true; $("game").hidden = false; POOL = pool();
+  const lg = $("legend"); lg.replaceChildren(...CATS.map(c => h("span", {}, h("i", {style:`background:${c.c}`}), c.n)), h("span", {}, h("i", {style:"background:#B9A8F0"}), "Teleporter"));
+  sizeBoard(); render(); scrollTo(0, 0);
+  if (cur().type === "cpu" && !G.over) cpuTurn();
+}
+function start(){ newGame(); save(); showGame(); }
+$("go").addEventListener("click", start);
+$("resume").addEventListener("click", () => { G = LS.get("gq-game", null); if (!G) return renderStart(); G.busy = false; G.phase = "select"; G.sel = null; showGame(); });
+$("discard").addEventListener("click", () => { LS.del("gq-game"); renderStart(); });
+$("quit").addEventListener("click", () => { if (G && !G.over) save(); showStart(); });
+$("sndBtn").addEventListener("click", () => { SET.sound = !SET.sound; saveSet(); render(); });
+// Eigene Fragen: Bereich;Stufe;Frage;Richtig;Falsch;Falsch;Falsch
+$("ownTxt").value = LS.get("gq-own", []).map(o => [o.c + 1, o.l, o.q, ...o.a].join(";")).join("\n");
+$("ownSave").addEventListener("click", () => {
+  const out = [], bad = [];
+  $("ownTxt").value.split("\n").map(l => l.trim()).filter(Boolean).forEach((l, i) => {
+    const f = l.split(";").map(x => x.trim());
+    const c = +f[0] - 1, lv = +f[1];
+    if (f.length < 6 || !(c >= 0 && c <= 3) || !(lv >= 1 && lv <= 4) || f.slice(2).some(x => !x)) { bad.push(i + 1); return; }
+    out.push({c, l:lv, q:f[2], a:f.slice(3, 7)});
+  });
+  LS.set("gq-own", out);
+  $("ownMsg").textContent = `${out.length} Fragen gespeichert.` + (bad.length ? ` Nicht lesbar: Zeile ${bad.join(", ")}.` : "");
+  renderStart();
+});
+renderStart();
+</script>
+</body>
+</html>
