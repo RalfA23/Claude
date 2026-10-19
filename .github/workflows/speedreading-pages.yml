@@ -3,9 +3,9 @@ name: Trainer veröffentlichen (Lesetraining und Schachtraining)
 on:
   push:
     branches: [main]
-    paths: ["speedreading-trainer/**", "schach-trainer/**", ".github/workflows/speedreading-pages.yml"]
+    paths: ["speedreading-trainer/**", "schach-trainer/**", "portal/**", ".github/workflows/speedreading-pages.yml"]
   pull_request:
-    paths: ["speedreading-trainer/**", "schach-trainer/**", ".github/workflows/speedreading-pages.yml"]
+    paths: ["speedreading-trainer/**", "schach-trainer/**", "portal/**", ".github/workflows/speedreading-pages.yml"]
   workflow_dispatch:
 
 permissions:
@@ -46,6 +46,11 @@ jobs:
         run: |
           cp speedreading-trainer/dist/config.js schach-trainer/dist/config.js
           cp -r schach-trainer/dist speedreading-trainer/dist/schach
+      - name: Lernportal unter /portal/ ablegen
+        run: |
+          mkdir -p speedreading-trainer/dist/portal
+          cp portal/index.html speedreading-trainer/dist/portal/index.html
+          cp speedreading-trainer/dist/config.js speedreading-trainer/dist/portal/config.js
       - uses: actions/upload-pages-artifact@v3
         if: github.event_name != 'pull_request'
         with:
