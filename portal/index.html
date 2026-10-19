@@ -5,15 +5,15 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
 <meta name="theme-color" content="#1E241F">
-<title>Lernportal</title>
+<title>Lebensplattform</title>
 <script src="config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <style>
-:root{--bg:#F3F4EF;--surface:#fff;--ink:#1E241F;--muted:#5E6A61;--line:#D9DDD3;--accent:#B3261E;--accent-ink:#fff}
-@media (prefers-color-scheme:dark){:root{--bg:#151916;--surface:#1E2420;--ink:#E7EBE4;--muted:#9AA69C;--line:#323A34;--accent:#E0574C;--accent-ink:#1A0E0D}}
+:root{--bg:#F3F4EF;--surface:#fff;--ink:#1E241F;--muted:#5E6A61;--line:#D9DDD3;--accent:#B3261E;--accent-ink:#fff;--soft:#E9ECE4;--good:#2E7D4F;--rowh:118px;--gap:12px;--cols:4}
+@media (prefers-color-scheme:dark){:root{--bg:#151916;--surface:#1E2420;--ink:#E7EBE4;--muted:#9AA69C;--line:#323A34;--accent:#E0574C;--accent-ink:#1A0E0D;--soft:#262D28;--good:#5FBF85}}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
-.wrap{max-width:960px;margin:0 auto;padding:20px 16px 48px}
+.wrap{max-width:1100px;margin:0 auto;padding:20px 16px 48px}
 header{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;justify-content:space-between;border-bottom:2px solid var(--ink);padding-bottom:10px}
 h1{margin:0;font-size:2rem;line-height:1.1}
 h1 small{display:block;font-size:.9rem;font-weight:400;color:var(--muted);margin-top:4px}
@@ -21,14 +21,8 @@ h2{font-size:1.1rem;text-transform:uppercase;letter-spacing:.06em;color:var(--mu
 .acct{font-size:.85rem;color:var(--muted)}
 button,.btn{font:inherit;font-weight:600;padding:10px 16px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;text-decoration:none;display:inline-block}
 button.primary,.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
-button.sm{padding:4px 10px;font-size:.85rem;font-weight:500}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:8px}
-.card.locked{opacity:.8;border-style:dashed}
-.card .ic{font-size:2rem;line-height:1}
-.card h3{margin:0;font-size:1.25rem}
-.card p{margin:0;color:var(--muted);font-size:.95rem;flex:1}
-.card .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:4px}
+button.sm,.btn.sm{padding:4px 10px;font-size:.85rem;font-weight:500}
+button:disabled{cursor:default;opacity:.7}
 .empty{color:var(--muted)}
 footer{margin-top:40px;text-align:center;font-size:.8rem;color:var(--muted)}
 footer a{color:inherit}
@@ -37,30 +31,110 @@ footer a{color:inherit}
 #login h2{margin:0;font-size:1.4rem;text-transform:none;letter-spacing:0;color:var(--ink)}
 #login p{margin:0;color:var(--muted)}
 label{display:flex;flex-direction:column;gap:4px}
-input{font:inherit;padding:10px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+input,select,textarea{font:inherit;padding:10px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);min-width:0}
 label.chk{flex-direction:row;gap:8px;align-items:flex-start;font-size:.9rem}
 label.chk input{width:auto;margin-top:4px}
 [hidden]{display:none!important}
-.card{position:relative}.badge{position:absolute;top:12px;right:12px;background:var(--accent,#B3261E);color:#fff;border-radius:999px;padding:2px 10px;font-size:.8rem;font-weight:600}.news{background:var(--surface);border:1px solid var(--accent,#B3261E);border-radius:12px;padding:12px 16px;margin:12px 0;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.news{background:var(--surface);border:1px solid var(--accent);border-radius:12px;padding:12px 16px;margin:12px 0;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+
+/* Leiste über dem Dashboard */
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:18px 0 12px}
+.bar .grow{flex:1}
+.bar .st{font-size:.8rem;color:var(--muted)}
+.hintedit{font-size:.9rem;color:var(--muted);margin:0 0 10px}
+
+/* Dashboard-Raster: Breite und Höhe jeder Kachel in Spalten und Zeilen */
+.dash{display:grid;grid-template-columns:repeat(var(--cols),minmax(0,1fr));grid-auto-rows:var(--rowh);grid-auto-flow:row dense;gap:var(--gap)}
+.tile{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:6px;overflow:hidden;min-width:0}
+.tile .body{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:6px}
+.tile h3{margin:0;font-size:1.1rem;line-height:1.25}
+.tile p{margin:0;color:var(--muted);font-size:.92rem}
+.tile .ic{font-size:1.8rem;line-height:1}
+.tile .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.tile .clamp{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:4;overflow:hidden}
+.tile.locked{opacity:.8;border-style:dashed}
+.tile .lbl{font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600}
+.badge{position:absolute;top:12px;right:12px;background:var(--accent);color:#fff;border-radius:999px;padding:2px 10px;font-size:.8rem;font-weight:600}
+.big{font-size:2.4rem;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+.meter{height:8px;border-radius:99px;background:var(--soft);overflow:hidden}.meter i{display:block;height:100%;background:var(--accent)}
+
+/* Bearbeiten: ziehen, Größe ändern, ausblenden, entfernen */
+.tools{display:none;position:absolute;top:6px;right:6px;gap:4px;z-index:2}
+.tools button,.tools .mv{padding:4px 8px;font-size:.85rem;line-height:1.2;font-weight:500}
+.tools .mv{border:1px solid var(--line);border-radius:8px;background:var(--surface);touch-action:none;cursor:grab;padding:4px 12px}
+.grip{display:none;position:absolute;right:0;bottom:0;width:34px;height:34px;cursor:nwse-resize;touch-action:none;z-index:2}
+.grip::after{content:"";position:absolute;right:7px;bottom:7px;width:14px;height:14px;border-right:3px solid var(--muted);border-bottom:3px solid var(--muted);border-radius:0 0 4px 0}
+.editing .tile{cursor:grab;user-select:none;-webkit-user-select:none;outline:2px dashed var(--line);outline-offset:-2px}
+.editing .tile .body{pointer-events:none;opacity:.75}
+.editing .tile .tools{display:flex}.editing .tile .grip{display:block}
+.editing .tile .badge{display:none}
+.tile.dragging{opacity:.35}
+.ghost{position:fixed;z-index:50;pointer-events:none;box-shadow:0 12px 32px rgba(0,0,0,.25);opacity:.95;transform:rotate(1.5deg)}
+.tile .size{display:none;position:absolute;left:10px;bottom:8px;font-size:.75rem;color:var(--muted);z-index:2}
+.editing .tile .size{display:block}
+.hidden-list{margin-top:14px}
+.hidden-list .chips{display:flex;flex-wrap:wrap;gap:8px}
+
+/* Kachel-Galerie */
+dialog{border:1px solid var(--line);border-radius:14px;background:var(--bg);color:var(--ink);padding:0;width:min(760px,calc(100vw - 24px));max-height:calc(100vh - 40px)}
+dialog::backdrop{background:rgba(0,0,0,.45)}
+.gal-head{position:sticky;top:0;background:var(--bg);display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid var(--line);z-index:1}
+.gal-head h2{margin:0;color:var(--ink);text-transform:none;letter-spacing:0;font-size:1.3rem}
+.gal-body{padding:4px 16px 18px}
+.gal-body h2{margin:18px 0 8px;font-size:.95rem}
+.gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+.gi{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px;display:flex;gap:10px;align-items:flex-start}
+.gi .ic{font-size:1.6rem;line-height:1}
+.gi div{flex:1;min-width:0}
+.gi b{display:block}
+.gi p{margin:2px 0 8px;color:var(--muted);font-size:.85rem}
+
+/* Einzelne Werkzeuge */
+.kan{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;flex:1;min-height:0}
+.kan.list{grid-template-columns:1fr}
+.col{background:var(--soft);border-radius:8px;padding:6px;display:flex;flex-direction:column;gap:5px;min-height:0;overflow:auto}
+.col .lbl{padding:2px 4px}
+.it{display:flex;gap:4px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:4px 6px;font-size:.88rem}
+.it span{flex:1;cursor:pointer;word-break:break-word}
+.it.done span{text-decoration:line-through;color:var(--muted)}
+.it button{padding:0 6px;font-size:.8rem;font-weight:500;border:0;background:transparent;color:var(--muted)}
+.add{display:flex;gap:6px}.add input{flex:1;padding:6px 8px}.add button{padding:6px 10px}
+.note{flex:1;width:100%;resize:none;padding:8px;font-size:.95rem;min-height:60px}
+.breath{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;flex:1}
+.orb{width:70px;height:70px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#8FC3A8,#3E7F66);transition:transform 4s ease-in-out;transform:scale(.7)}
+.orb.in{transform:scale(1.25)}
+.links a{display:block;padding:6px 8px;border-radius:6px;background:var(--soft);color:var(--ink);text-decoration:none;font-size:.92rem;margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mini{display:grid;grid-template-columns:1fr 1fr;gap:6px}.mini.date{grid-template-columns:minmax(0,1fr) auto auto;align-items:center}.mini input,.mini select{padding:6px 8px;font-size:.9rem}
+.out{white-space:pre-wrap;font-size:.85rem;background:var(--soft);border-radius:8px;padding:8px}
 </style>
 </head>
 <body>
 <div class="wrap" id="app" hidden>
   <header>
-    <h1>Lernportal<small>Deine Kurse an einem Ort</small></h1>
+    <h1>Lebensplattform<small>Dein Dashboard, so wie du es willst</small></h1>
     <div class="acct"><span id="who"></span> <button class="sm" id="out" type="button">Abmelden</button></div>
   </header>
-  <div class="news" id="news" hidden><span id="newsTxt"></span> <button class="sm" id="newsOk" type="button">Verstanden</button></div>
-  <h2>Meine Kurse</h2>
-  <div class="grid" id="mine"></div>
-  <h2>Weitere Kurse</h2>
-  <div class="grid" id="more"></div>
+  <div class="news" id="news" hidden><span id="newsTxt"></span> <button class="sm" id="newsAdd" type="button">Aufs Dashboard</button> <button class="sm" id="newsOk" type="button">Verstanden</button></div>
+  <div class="bar">
+    <button type="button" id="edit">✎ Anpassen</button>
+    <button type="button" id="addTile" class="primary">＋ Kachel</button>
+    <button type="button" id="reset" class="sm" hidden>Zurücksetzen</button>
+    <span class="grow"></span>
+    <span class="st" id="saveSt"></span>
+  </div>
+  <p class="hintedit" id="hintEdit" hidden>Kachel am Griff ⠿ ziehen zum Verschieben (mit der Maus geht die ganze Kachel), an der Ecke unten rechts ziehen für die Größe. 👁 blendet aus, ✕ entfernt.</p>
+  <div class="dash" id="dash"></div>
+  <div class="hidden-list" id="hiddenList" hidden><h2>Ausgeblendet</h2><div class="chips" id="hiddenChips"></div></div>
   <footer><a href="impressum.html">Impressum</a> · <a href="datenschutz.html">Datenschutz</a></footer>
 </div>
+<dialog id="gallery">
+  <div class="gal-head"><h2>Kachel-Galerie</h2><button type="button" class="sm" id="galClose">Schließen</button></div>
+  <div class="gal-body" id="galBody"></div>
+</dialog>
 <div id="login" hidden>
   <form id="lf">
     <h2>Anmelden</h2>
-    <p>Das Lernportal ist nur für eingeladene Personen. Ein Konto gilt für alle Kurse.</p>
+    <p>Die Lebensplattform ist nur für eingeladene Personen. Ein Konto gilt für alle Kurse.</p>
     <label>E-Mail<input id="em" type="email" required autocomplete="username"></label>
     <label>Passwort<input id="pw" type="password" autocomplete="current-password"></label>
     <label id="coderow" hidden>Einladungscode<input id="code" type="text" autocomplete="off" autocapitalize="off"></label>
@@ -71,7 +145,7 @@ label.chk input{width:auto;margin-top:4px}
   </form>
 </div>
 <script>
-// Kursliste: neue Kurse hier eintragen. Der Pfad ist relativ zum Portal.
+// Kursliste: neue Kurse hier eintragen. Der Pfad ist relativ zum Portal. Jeder Kurs wird automatisch zu einer Kachel in der Galerie.
 var COURSES = [
   {id: "lesen", icon: "📖", title: "Lesetraining", text: "8 Wochen schneller lesen: feste Lektionen, Lesefenster mit Pacer, Tests und Fortschritt.", href: "lesen/"},
   {id: "lesen-fortgeschritten", icon: "🎓", title: "Lesetraining Fortgeschritten", text: "24 Lektionen für alle, die das Lesetraining geschafft haben: Lesen mit Plan, Abruf, kritisches Lesen, dazu das Fachmodul Recht mit Datenschutz, Zivilrecht und Steuerrecht.", href: "lesen/?kurs=fortgeschritten", needs: "lesen"},
@@ -89,81 +163,524 @@ var GEVT = {id: "gevt", icon: "🥋", title: "Ving Tsun Wissen", text: "Frag dei
   if (!cfg.supabaseUrl || !cfg.supabaseAnonKey || !window.supabase) { $("login").hidden = false; $("lf").innerHTML = "<h2>Nicht eingerichtet</h2><p>Das Portal ist ohne Anmeldung nicht verfügbar.</p>"; return; }
   var sb = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
   var user = null;
+  function el(tag, attrs, kids) {
+    var d = document.createElement(tag);
+    if (attrs) for (var k in attrs) { if (k === "text") d.textContent = attrs[k]; else if (k === "class") d.className = attrs[k]; else if (k.slice(0, 2) === "on") d.addEventListener(k.slice(2), attrs[k]); else d.setAttribute(k, attrs[k]); }
+    (kids || []).forEach(function (c) { if (c != null) d.appendChild(typeof c === "string" ? document.createTextNode(c) : c); });
+    return d;
+  }
+  function uid() { return Math.random().toString(36).slice(2, 9); }
+
   // Freischaltung: Kurse mit needs sind sichtbar, öffnen sich aber erst nach den 48 Lektionen des Grundkurses (oder für Admins). Der Kurs prüft das beim Öffnen selbst noch einmal.
-  var lessonsDone = null, isAdmin = false;
+  var lessonsDone = null, isAdmin = false, lessonKeys = null;
   function unlocked(c) { return !c.needs || isAdmin || (lessonsDone !== null && lessonsDone >= 48); }
   async function checkUnlock() {
     try {
       var a = await sb.from("app_admins").select("user_id").eq("user_id", user.id).maybeSingle();
       isAdmin = !a.error && !!a.data;
       var r = await sb.from("progress").select("lessons:state->lessons").eq("user_id", user.id).maybeSingle();
-      lessonsDone = !r.error && r.data && r.data.lessons ? Object.keys(r.data.lessons).length : (r.error ? null : 0);
+      lessonKeys = !r.error && r.data && r.data.lessons ? Object.keys(r.data.lessons) : (r.error ? null : []);
+      lessonsDone = lessonKeys ? lessonKeys.length : null;
     } catch (e) {}
-    render();
+    refreshType(/^kurs:/); refreshType(/^lektion$/);
   }
 
-  function mine() { var c = (user && user.user_metadata && user.user_metadata.courses) || []; return Array.isArray(c) ? c.filter(function (x) { return COURSES.some(function (k) { return k.id === x; }); }) : []; }
-  async function setMine(list) {
-    var r = await sb.auth.updateUser({data: {courses: list}});
-    if (r.error) { alert("Das Speichern hat nicht geklappt: " + r.error.message); return; }
-    user = r.data.user; render();
-  }
-  // Courses the user already knows about. A course not in this list shows "Neu". First visit of a brand-new account: everything counts as known.
+  // Kurse, die der Nutzer schon kennt. Ein Kurs, der hier fehlt, zeigt „Neu“. Erster Besuch eines neuen Kontos: alles gilt als bekannt.
   function seen() { var x = user && user.user_metadata && user.user_metadata.seen; return Array.isArray(x) ? x : null; }
   function isNew(c) { var x = seen(); return !!x && x.indexOf(c.id) < 0; }
-  async function setSeen(list) { var r = await sb.auth.updateUser({data: {seen: list}}); if (!r.error) { user = r.data.user; render(); } }
+  async function setSeen(list) { var r = await sb.auth.updateUser({data: {seen: list}}); if (!r.error) { user = r.data.user; renderNews(); refreshType(/^(kurs:|hinweis$)/); } }
   function allIds() { return COURSES.map(function (k) { return k.id; }); }
-  function card(c, own) {
-    var d = document.createElement("div"); d.className = "card";
-    d.innerHTML = '<div class="ic"></div><h3></h3><p></p><div class="row"></div>';
-    if (isNew(c)) { var bd = document.createElement("span"); bd.className = "badge"; bd.textContent = "Neu"; d.appendChild(bd); }
-    var k = d.querySelector(".ic"); k.textContent = c.icon; d.querySelector("h3").textContent = c.title; d.querySelector("p").textContent = c.text;
-    var row = d.querySelector(".row");
-    if (!unlocked(c)) {
-      d.classList.add("locked");
-      var lk = document.createElement("button"); lk.type = "button"; lk.disabled = true; lk.textContent = "🔒 Noch gesperrt"; row.appendChild(lk);
-      var hint = document.createElement("p"); hint.className = "hint"; hint.style.cssText = "margin:8px 0 0;font-size:.85rem;opacity:.8";
-      hint.textContent = lessonsDone === null ? "Ich prüfe, wie weit du im Lesetraining bist." : "Schließe zuerst alle 48 Lektionen des Lesetrainings ab. Du bist bei " + lessonsDone + " von 48.";
-      d.appendChild(hint); return d;
-    }
-    if (own) {
-      var a = document.createElement("a"); a.className = "btn primary"; a.href = c.href; a.textContent = "Öffnen"; row.appendChild(a);
-      var rm = document.createElement("button"); rm.type = "button"; rm.className = "sm"; rm.textContent = "Entfernen";
-      rm.addEventListener("click", function () { setMine(mine().filter(function (x) { return x !== c.id; })); }); row.appendChild(rm);
-    } else {
-      var ad = document.createElement("button"); ad.type = "button"; ad.className = "primary"; ad.textContent = "Zu meinen Kursen";
-      ad.addEventListener("click", function () { setMine(mine().concat([c.id])); if (isNew(c)) setSeen((seen() || []).concat([c.id])); }); row.appendChild(ad);
-    }
+  function mine() { var c = (user && user.user_metadata && user.user_metadata.courses) || []; return Array.isArray(c) ? c.filter(function (x) { return COURSES.some(function (k) { return k.id === x; }); }) : []; }
+
+  /* ---------- Kachel-Typen ---------- */
+  // w/h: Startgröße in Spalten und Zeilen. multi: darf mehrmals aufs Dashboard.
+  var TYPES = {
+    uhr: {group: "Info", icon: "🕰️", title: "Uhr und Datum", desc: "Uhrzeit, Wochentag, Datum und Kalenderwoche.", w: 2, h: 1, render: renderClock},
+    hinweis: {group: "Info", icon: "📣", title: "Hinweisleiste", desc: "Neue Kurse und wichtige Hinweise der Plattform an einer Stelle.", w: 2, h: 1, render: renderHint},
+    lektion: {group: "Info", icon: "📈", title: "Aktuelle Lektion", desc: "Wo du im Lesetraining stehst, mit direktem Sprung zur nächsten Lektion.", w: 2, h: 1, render: renderLesson},
+    elo: {group: "Info", icon: "♟️", title: "Schach-Wertung", desc: "Deine aktuelle Elo von Lichess oder chess.com und der Abstand zum Ziel.", w: 2, h: 1, render: renderElo},
+    wetter: {group: "Info", icon: "🌤️", title: "Wetter", desc: "Wetter heute für deinen Ort, Standard Hamburg.", w: 1, h: 2, render: renderWeather},
+    todo: {group: "Werkzeuge", icon: "🗂️", title: "To-Dos und Kanban", desc: "Aufgaben in Offen, In Arbeit und Erledigt. Antippen schiebt weiter.", w: 2, h: 3, multi: true, render: renderTodo},
+    notiz: {group: "Werkzeuge", icon: "📝", title: "Notizzettel", desc: "Freier Text, wird automatisch gespeichert.", w: 1, h: 2, multi: true, render: renderNote},
+    links: {group: "Werkzeuge", icon: "🔗", title: "Schnellzugriff", desc: "Deine wichtigsten Links als Liste.", w: 1, h: 2, multi: true, render: renderLinks},
+    countdown: {group: "Werkzeuge", icon: "⏳", title: "Countdown", desc: "Tage bis zu einem Termin, etwa Urlaub, Prüfung oder Turnier.", w: 2, h: 1, multi: true, render: renderCountdown},
+    entspannung: {group: "Werkzeuge", icon: "🌿", title: "Entspannungsecke", desc: "Geführte Box-Atmung 4-4-4-4 zum kurzen Runterkommen, dazu die Murmelbahn.", w: 1, h: 2, render: renderBreath},
+    kleinanzeigen: {group: "Projekte", icon: "🏷️", title: "Kleinanzeigen-Verkaufsassistent", desc: "Artikel, Zustand und Preis eingeben und einen fertigen Anzeigentext kopieren.", w: 2, h: 3, multi: true, render: renderAd},
+    istr: {group: "Projekte", icon: "⚖️", title: "IStR-Vortrag", desc: "Vortragstermin mit Countdown und Checkliste der Punkte und BFH-Entscheidungen.", w: 2, h: 2, render: renderIstr}
+  };
+  function courseList() { return COURSES; }
+  function courseOf(type) { var id = type.slice(5); return courseList().filter(function (c) { return c.id === id; })[0] || null; }
+  function typeOf(type) {
+    if (type.slice(0, 5) === "kurs:") { var c = courseOf(type); return c ? {group: "Kurse", icon: c.icon, title: c.title, desc: c.text, w: 1, h: 2, course: c, render: renderCourse} : null; }
+    return TYPES[type] || null;
+  }
+
+  /* ---------- Layout laden und speichern: Supabase (Tabelle schach_docs, Pfad portal/dashboard), sonst localStorage ---------- */
+  var layout = null, editing = false, remoteOk = null, saveTimer = 0;
+  var DOC = "portal/dashboard";
+  function lkey() { return "portal-dash-" + user.id; }
+  function defaultLayout() {
+    var m = mine(); if (!m.length) m = COURSES.filter(function (c) { return !c.needs; }).map(function (c) { return c.id; });
+    var t = [{type: "uhr"}, {type: "hinweis"}, {type: "lektion"}, {type: "elo"}]
+      .concat(m.map(function (id) { return {type: "kurs:" + id}; }))
+      .concat([{type: "todo"}, {type: "entspannung"}, {type: "notiz"}]);
+    return {v: 1, ts: 0, tiles: t.map(newTile)};
+  }
+  function newTile(t) { var ty = typeOf(t.type) || {w: 1, h: 1}; return {id: uid(), type: t.type, w: ty.w, h: ty.h, cfg: {}}; }
+  function valid(l) { return l && Array.isArray(l.tiles); }
+  function readLocal() { try { var x = JSON.parse(localStorage.getItem(lkey()) || "null"); return valid(x) ? x : null; } catch (e) { return null; } }
+  function writeLocal() { try { localStorage.setItem(lkey(), JSON.stringify(layout)); return true; } catch (e) { return false; } }
+  async function loadLayout() {
+    var loc = readLocal(), rem = null;
+    layout = loc || defaultLayout(); renderDash();
+    try {
+      var r = await sb.from("schach_docs").select("data").eq("user_id", user.id).eq("path", DOC).maybeSingle();
+      if (r.error) throw r.error;
+      remoteOk = true; rem = r.data && valid(r.data.data) ? r.data.data : null;
+    } catch (e) { remoteOk = false; }
+    if (rem && (!loc || (rem.ts || 0) >= (loc.ts || 0))) { layout = rem; writeLocal(); renderDash(); }
+    else if (loc && remoteOk) save(true);
+    showSaved();
+  }
+  function save(now) {
+    layout.ts = Date.now(); var lok = writeLocal();
+    clearTimeout(saveTimer);
+    $("saveSt").textContent = "Speichere …";
+    saveTimer = setTimeout(async function () {
+      try {
+        var r = await sb.from("schach_docs").upsert({user_id: user.id, path: DOC, data: layout, updated_at: new Date().toISOString()});
+        if (r.error) throw r.error; remoteOk = true;
+      } catch (e) { remoteOk = false; }
+      showSaved(lok);
+    }, now ? 0 : 700);
+  }
+  function showSaved(lok) {
+    $("saveSt").textContent = remoteOk ? "Im Konto gespeichert" : remoteOk === false ? (lok === false ? "Nicht gespeichert" : "Nur auf diesem Gerät gespeichert") : "";
+  }
+
+  /* ---------- Raster ---------- */
+  var cols = 4;
+  function measure() {
+    var w = $("dash").clientWidth || window.innerWidth;
+    var c = w >= 900 ? 4 : w >= 600 ? 3 : 2;
+    document.documentElement.style.setProperty("--rowh", (w < 600 ? 108 : 118) + "px");
+    if (c !== cols) { cols = c; document.documentElement.style.setProperty("--cols", c); applySizes(); }
+  }
+  function span(t) { return {w: Math.max(1, Math.min(t.w || 1, cols)), h: Math.max(1, Math.min(t.h || 1, 5))}; }
+  function sizeTile(d, t) { var s = span(t); d.style.gridColumn = "span " + s.w; d.style.gridRow = "span " + s.h; var z = d.querySelector(".size"); if (z) z.textContent = s.w + " × " + s.h; }
+  function applySizes() { if (!layout) return; layout.tiles.forEach(function (t) { var d = nodes[t.id]; if (d) { sizeTile(d, t); if (t.type === "todo") refresh(t); } }); }
+
+  var nodes = {};
+  function visibleTiles() { return layout.tiles.filter(function (t) { return !t.hidden && typeOf(t.type); }); }
+  function renderDash() {
+    var dash = $("dash"); dash.replaceChildren(); nodes = {};
+    dash.classList.toggle("editing", editing);
+    visibleTiles().forEach(function (t) { dash.appendChild(tileEl(t)); });
+    if (!dash.children.length) dash.appendChild(el("p", {class: "empty", text: "Dein Dashboard ist leer. Über „＋ Kachel“ wählst du aus der Galerie."}));
+    var hid = layout.tiles.filter(function (t) { return t.hidden && typeOf(t.type); });
+    $("hiddenList").hidden = !hid.length || !editing;
+    $("hiddenChips").replaceChildren.apply($("hiddenChips"), hid.map(function (t) {
+      var ty = typeOf(t.type);
+      return el("button", {type: "button", class: "sm", text: "👁 " + ty.icon + " " + (t.cfg && t.cfg.title || ty.title) + " einblenden", onclick: function () { t.hidden = false; save(); renderDash(); }});
+    }));
+    renderNews();
+  }
+  function tileEl(t) {
+    var ty = typeOf(t.type);
+    var d = el("div", {class: "tile", "data-id": t.id});
+    var body = el("div", {class: "body"});
+    try { ty.render(body, t, d); } catch (e) { body.appendChild(el("p", {text: "Diese Kachel konnte nicht geladen werden."})); }
+    d.appendChild(body);
+    d.appendChild(el("div", {class: "tools"}, [
+      el("span", {class: "mv", title: "Ziehen zum Verschieben", text: "⠿"}),
+      el("button", {type: "button", title: "Ausblenden", "aria-label": "Ausblenden", text: "👁", onclick: function () { t.hidden = true; save(); renderDash(); }}),
+      el("button", {type: "button", title: "Entfernen", "aria-label": "Entfernen", text: "✕", onclick: function () { layout.tiles = layout.tiles.filter(function (x) { return x !== t; }); save(); renderDash(); }})
+    ]));
+    d.appendChild(el("span", {class: "size"}));
+    var g = el("div", {class: "grip", title: "Größe ändern"}); d.appendChild(g);
+    sizeTile(d, t);
+    d.addEventListener("pointerdown", function (e) { if (editing) startDrag(e, t, d); });
+    g.addEventListener("pointerdown", function (e) { if (editing) { e.stopPropagation(); startResize(e, t, d); } });
+    nodes[t.id] = d;
     return d;
   }
-  function render() {
-    var m = mine(), mi = $("mine"), mo = $("more");
-    mi.replaceChildren(); mo.replaceChildren();
-    COURSES.filter(function (c) { return m.indexOf(c.id) >= 0; }).forEach(function (c) { mi.appendChild(card(c, true)); });
-    if (!mi.children.length) { var e = document.createElement("p"); e.className = "empty"; e.textContent = "Noch kein Kurs ausgewählt. Wähle unten deine Kurse."; mi.appendChild(e); }
-    var rest = COURSES.filter(function (c) { return m.indexOf(c.id) < 0; });
-    rest.forEach(function (c) { mo.appendChild(card(c, false)); });
-    if (!rest.length) { var e2 = document.createElement("p"); e2.className = "empty"; e2.textContent = "Du hast alle Kurse ausgewählt."; mo.appendChild(e2); }
-    $("who").textContent = user.email || "";
-    var nw = COURSES.filter(isNew);
-    $("news").hidden = !nw.length;
-    if (nw.length) $("newsTxt").textContent = (nw.length === 1 ? "Neuer Kurs: " : "Neue Kurse: ") + nw.map(function (c) { return c.title; }).join(", ") + ". Du findest ihn unten unter „Weitere Kurse“.";
+  function refresh(t) { var old = nodes[t.id]; if (old && old.isConnected) { var n = tileEl(t); old.replaceWith(n); } }
+  function refreshType(re) { if (!layout) return; visibleTiles().forEach(function (t) { if (re.test(t.type)) refresh(t); }); }
+
+  /* ---------- Ziehen zum Verschieben (Maus und Finger) ---------- */
+  function startDrag(e, t, d) {
+    // Mit dem Finger nur am Griff, damit man im Bearbeiten-Modus weiter scrollen kann.
+    var onGrip = !!e.target.closest(".mv");
+    if (e.button > 0 || e.target.closest(".grip") || (e.target.closest(".tools") && !onGrip) || (e.pointerType !== "mouse" && !onGrip)) return;
+    e.preventDefault();
+    var r = d.getBoundingClientRect(), ox = e.clientX - r.left, oy = e.clientY - r.top, moved = false, ghost = null, lastY = e.clientY, raf = 0;
+    function place(x, y) { ghost.style.left = (x - ox) + "px"; ghost.style.top = (y - oy) + "px"; }
+    function move(ev) {
+      if (!moved) {
+        if (Math.abs(ev.clientX - e.clientX) + Math.abs(ev.clientY - e.clientY) < 6) return;
+        moved = true; ghost = d.cloneNode(true); ghost.classList.add("ghost"); ghost.style.width = r.width + "px"; ghost.style.height = r.height + "px";
+        document.body.appendChild(ghost); d.classList.add("dragging");
+      }
+      lastY = ev.clientY; place(ev.clientX, ev.clientY);
+      var over = document.elementFromPoint(ev.clientX, ev.clientY), tg = over && over.closest(".tile");
+      if (tg && tg !== d && tg.parentNode === d.parentNode && !tg.classList.contains("ghost")) {
+        var tr = tg.getBoundingClientRect();
+        var after = ev.clientY > tr.bottom - tr.height / 3 || (ev.clientY > tr.top + tr.height / 3 && ev.clientX > tr.left + tr.width / 2);
+        var ref = after ? tg.nextSibling : tg;
+        if (ref !== d && d.nextSibling !== ref) d.parentNode.insertBefore(d, ref);
+      }
+      if (!raf) raf = requestAnimationFrame(scroll);
+    }
+    // Am Bildschirmrand weiterscrollen, damit man auch auf dem Handy weit ziehen kann.
+    function scroll() { raf = 0; if (!moved) return; var h = window.innerHeight, v = lastY < 70 ? -12 : lastY > h - 70 ? 12 : 0; if (v) { window.scrollBy(0, v); raf = requestAnimationFrame(scroll); } }
+    function up() {
+      window.removeEventListener("pointermove", move); window.removeEventListener("pointerup", up); window.removeEventListener("pointercancel", up);
+      if (ghost) ghost.remove(); d.classList.remove("dragging"); cancelAnimationFrame(raf); raf = 0;
+      if (!moved) return;
+      var order = Array.prototype.map.call($("dash").children, function (n) { return n.getAttribute("data-id"); });
+      var vis = order.map(function (id) { return layout.tiles.filter(function (x) { return x.id === id; })[0]; }).filter(Boolean);
+      layout.tiles = vis.concat(layout.tiles.filter(function (x) { return vis.indexOf(x) < 0; }));
+      save();
+    }
+    // Am Fenster lauschen: das Umsetzen im DOM beendet die Pointer-Erfassung der Kachel.
+    window.addEventListener("pointermove", move); window.addEventListener("pointerup", up); window.addEventListener("pointercancel", up);
+  }
+
+  /* ---------- Ecke ziehen zum Ändern der Größe ---------- */
+  function startResize(e, t, d) {
+    e.preventDefault();
+    var g = e.currentTarget, dash = $("dash"), gap = parseFloat(getComputedStyle(dash).columnGap) || 12;
+    var colW = (dash.clientWidth - gap * (cols - 1)) / cols + gap, rowH = parseFloat(getComputedStyle(dash).gridAutoRows) + gap;
+    var s0 = span(t), changed = false;
+    function move(ev) {
+      var w = Math.max(1, Math.min(cols, s0.w + Math.round((ev.clientX - e.clientX) / colW)));
+      var h = Math.max(1, Math.min(5, s0.h + Math.round((ev.clientY - e.clientY) / rowH)));
+      if (w !== span(t).w || h !== span(t).h) { t.w = w; t.h = h; changed = true; sizeTile(d, t); }
+    }
+    function up() {
+      window.removeEventListener("pointermove", move); window.removeEventListener("pointerup", up); window.removeEventListener("pointercancel", up);
+      if (changed) { save(); refresh(t); }
+    }
+    window.addEventListener("pointermove", move); window.addEventListener("pointerup", up); window.addEventListener("pointercancel", up);
+  }
+
+  /* ---------- Galerie ---------- */
+  function allTypes() {
+    var list = courseList().map(function (c) { return "kurs:" + c.id; });
+    return list.concat(Object.keys(TYPES));
+  }
+  function renderGallery() {
+    var body = $("galBody"); body.replaceChildren();
+    ["Kurse", "Info", "Werkzeuge", "Projekte"].forEach(function (grp) {
+      var items = allTypes().filter(function (k) { return typeOf(k).group === grp; });
+      if (!items.length) return;
+      body.appendChild(el("h2", {text: grp}));
+      var g = el("div", {class: "gal"});
+      items.forEach(function (k) {
+        var ty = typeOf(k), have = layout.tiles.filter(function (t) { return t.type === k; }), btn;
+        if (have.length && !ty.multi) {
+          btn = have[0].hidden
+            ? el("button", {type: "button", class: "sm", text: "Wieder einblenden", onclick: function () { have[0].hidden = false; done(); }})
+            : el("button", {type: "button", class: "sm", disabled: "", text: "✓ Auf dem Dashboard"});
+        } else btn = el("button", {type: "button", class: "sm primary", text: "Hinzufügen", onclick: function () { layout.tiles.push(newTile({type: k})); done(); }});
+        var c = ty.course; if (c && isNew(c)) btn.textContent += " · Neu";
+        g.appendChild(el("div", {class: "gi"}, [el("span", {class: "ic", text: ty.icon}), el("div", null, [el("b", {text: ty.title}), el("p", {text: ty.desc}), btn])]));
+      });
+      body.appendChild(g);
+    });
+    function done() { save(); renderDash(); renderGallery(); var c = layout.tiles[layout.tiles.length - 1]; if (c && nodes[c.id]) nodes[c.id].scrollIntoView({block: "nearest"}); }
+  }
+  $("addTile").addEventListener("click", function () { renderGallery(); $("gallery").showModal(); });
+  $("galClose").addEventListener("click", function () { $("gallery").close(); });
+  $("gallery").addEventListener("click", function (e) { if (e.target === $("gallery")) $("gallery").close(); });
+  $("edit").addEventListener("click", function () {
+    editing = !editing; $("edit").textContent = editing ? "✓ Fertig" : "✎ Anpassen";
+    $("reset").hidden = !editing; $("hintEdit").hidden = !editing; renderDash();
+  });
+  var resetArmed = 0;
+  $("reset").addEventListener("click", function () {
+    if (!resetArmed) { resetArmed = setTimeout(function () { resetArmed = 0; $("reset").textContent = "Zurücksetzen"; }, 4000); $("reset").textContent = "Wirklich zurücksetzen?"; return; }
+    clearTimeout(resetArmed); resetArmed = 0; $("reset").textContent = "Zurücksetzen";
+    layout = defaultLayout(); save(); renderDash();
+  });
+
+  /* ---------- Hinweise zu neuen Kursen (oben, falls die Hinweisleiste nicht auf dem Dashboard ist) ---------- */
+  function newCourses() { return courseList().filter(isNew); }
+  function hintOnDash() { return layout && visibleTiles().some(function (t) { return t.type === "hinweis"; }); }
+  function addNewCourses() {
+    newCourses().forEach(function (c) { var k = "kurs:" + c.id, have = layout.tiles.filter(function (t) { return t.type === k; })[0]; if (have) have.hidden = false; else layout.tiles.push(newTile({type: k})); });
+    save(); setSeen(allIds()); renderDash();
+  }
+  function renderNews() {
+    var nw = newCourses(); $("news").hidden = !nw.length || hintOnDash();
+    if (nw.length) $("newsTxt").textContent = (nw.length === 1 ? "Neuer Kurs: " : "Neue Kurse: ") + nw.map(function (c) { return c.title; }).join(", ") + ".";
   }
   $("newsOk").addEventListener("click", function () { setSeen(allIds()); });
+  $("newsAdd").addEventListener("click", addNewCourses);
+
+  /* ---------- Kacheln ---------- */
+  function renderCourse(b, t, d) {
+    var c = typeOf(t.type).course;
+    if (isNew(c)) d.appendChild(el("span", {class: "badge", text: "Neu"}));
+    b.appendChild(el("div", {class: "ic", text: c.icon})); b.appendChild(el("h3", {text: c.title}));
+    var s = span(t); var p = el("p", {class: s.h > 2 || s.w > 1 ? "" : "clamp", text: c.text}); b.appendChild(p);
+    var row = el("div", {class: "row"}); b.appendChild(row);
+    if (!unlocked(c)) {
+      d.classList.add("locked");
+      row.appendChild(el("button", {type: "button", disabled: "", text: "🔒 Noch gesperrt"}));
+      b.appendChild(el("p", {style: "font-size:.85rem", text: lessonsDone === null ? "Ich prüfe, wie weit du im Lesetraining bist." : "Schließe zuerst alle 48 Lektionen des Lesetrainings ab. Du bist bei " + lessonsDone + " von 48."}));
+      return;
+    }
+    row.appendChild(el("a", {class: "btn primary", href: c.href, text: "Öffnen", onclick: function () { if (isNew(c)) setSeen((seen() || []).concat([c.id])); }}));
+  }
+
+  var ticks = [];
+  setInterval(function () { ticks = ticks.filter(function (f) { return f.n.isConnected; }); ticks.forEach(function (f) { f.fn(); }); }, 1000);
+  function tick(n, fn) { fn(); ticks.push({n: n, fn: fn}); }
+  function isoWeek(d) { var t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())); var day = t.getUTCDay() || 7; t.setUTCDate(t.getUTCDate() + 4 - day); var y0 = new Date(Date.UTC(t.getUTCFullYear(), 0, 1)); return Math.ceil(((t - y0) / 864e5 + 1) / 7); }
+  function renderClock(b) {
+    var tm = el("div", {class: "big"}), dt = el("p");
+    b.appendChild(tm); b.appendChild(dt);
+    tick(tm, function () {
+      var n = new Date();
+      tm.textContent = n.toLocaleTimeString("de-DE", {hour: "2-digit", minute: "2-digit"});
+      dt.textContent = n.toLocaleDateString("de-DE", {weekday: "long", day: "numeric", month: "long", year: "numeric"}) + " · KW " + isoWeek(n);
+    });
+  }
+  function renderHint(b) {
+    b.appendChild(el("div", {class: "lbl", text: "📣 Hinweise"}));
+    var nw = newCourses();
+    if (!nw.length) { b.appendChild(el("p", {text: "Alles gesehen. Neue Kurse und Hinweise erscheinen hier."})); return; }
+    b.appendChild(el("p", {style: "color:var(--ink)", text: (nw.length === 1 ? "Neuer Kurs: " : "Neue Kurse: ") + nw.map(function (c) { return c.icon + " " + c.title; }).join(", ")}));
+    b.appendChild(el("div", {class: "row"}, [
+      el("button", {type: "button", class: "sm primary", text: "Aufs Dashboard", onclick: addNewCourses}),
+      el("button", {type: "button", class: "sm", text: "Verstanden", onclick: function () { setSeen(allIds()); }})
+    ]));
+  }
+  function renderLesson(b) {
+    b.appendChild(el("div", {class: "lbl", text: "📖 Lesetraining"}));
+    if (lessonsDone === null) { b.appendChild(el("p", {text: lessonKeys === null && user ? "Lade deinen Stand …" : "Kein Stand gefunden."})); return; }
+    var next = 0; for (var n = 1; n <= 48; n++) if (lessonKeys.indexOf(String(n)) < 0) { next = n; break; }
+    if (!next) {
+      b.appendChild(el("h3", {text: "Grundkurs geschafft 🎉"}));
+      b.appendChild(el("div", {class: "row"}, [el("a", {class: "btn sm primary", href: "lesen/?kurs=fortgeschritten", text: "Zum Fortgeschrittenenkurs"})]));
+      return;
+    }
+    b.appendChild(el("div", {class: "row"}, [el("h3", {text: "Lektion " + next + " von 48"}), el("a", {class: "btn sm primary", href: "lesen/", text: "Weiter"})]));
+    b.appendChild(el("div", {class: "meter"}, [el("i", {style: "width:" + Math.round(lessonsDone / 48 * 100) + "%"})]));
+    b.appendChild(el("p", {text: lessonsDone + " Lektionen erledigt"}));
+  }
+
+  // Schach-Wertung: Benutzernamen und Ziel aus dem Schachtraining, Wertung live von Lichess oder chess.com, sonst die zuletzt eingetragene.
+  var elo = null, eloLoading = false;
+  async function loadElo() {
+    if (eloLoading) return; eloLoading = true;
+    var out = {};
+    try {
+      var r = await sb.from("schach_docs").select("path,data").eq("user_id", user.id).in("path", ["einstellungen/konten", "einstellungen/ui"]);
+      var docs = {}; (r.data || []).forEach(function (x) { docs[x.path] = x.data || {}; });
+      var k = docs["einstellungen/konten"] || {}; out.ziel = +(docs["einstellungen/ui"] || {}).ziel || 1500;
+      if (k.lichess) try { var j = await (await fetch("https://lichess.org/api/user/" + encodeURIComponent(k.lichess))).json(); var p = j.perfs || {}; if (p.rapid && p.rapid.rating) { out.val = p.rapid.rating; out.src = "Lichess Rapid"; } else if (p.blitz) { out.val = p.blitz.rating; out.src = "Lichess Blitz"; } } catch (e) {}
+      if (!out.val && k.chesscom) try { var c = await (await fetch("https://api.chess.com/pub/player/" + encodeURIComponent(k.chesscom.toLowerCase()) + "/stats")).json(); if (c.chess_rapid && c.chess_rapid.last) { out.val = c.chess_rapid.last.rating; out.src = "chess.com Rapid"; } } catch (e) {}
+      if (!out.val) {
+        var w = await sb.from("schach_docs").select("data").eq("user_id", user.id).like("path", "wertungen/%");
+        var list = (w.data || []).map(function (x) { return x.data; }).filter(function (x) { return x && x.rapid; }).sort(function (a, b2) { return (b2.datum + (b2.ts || "")) > (a.datum + (a.ts || "")) ? 1 : -1; });
+        if (list.length) { out.val = list[0].rapid; out.src = "eingetragen am " + list[0].datum; }
+      }
+      out.konto = !!(k.lichess || k.chesscom);
+    } catch (e) { out.err = true; }
+    elo = out; eloLoading = false; refreshType(/^elo$/);
+  }
+  function renderElo(b) {
+    b.appendChild(el("div", {class: "lbl", text: "♟️ Schach-Wertung"}));
+    if (!elo) { b.appendChild(el("p", {text: "Lade deine Wertung …"})); loadElo(); return; }
+    if (!elo.val) { b.appendChild(el("p", {text: elo.konto ? "Keine Wertung gefunden." : "Trag im Schachtraining deinen Lichess- oder chess.com-Namen ein."})); b.appendChild(el("div", {class: "row"}, [el("a", {class: "btn sm", href: "schach/", text: "Zum Schachtraining"})])); return; }
+    var gap = elo.ziel - elo.val;
+    b.appendChild(el("div", {class: "row"}, [el("span", {class: "big", text: String(elo.val)}), el("p", {text: gap > 0 ? "noch " + gap + " bis " + elo.ziel : "Ziel " + elo.ziel + " erreicht 🎉"})]));
+    b.appendChild(el("div", {class: "meter"}, [el("i", {style: "width:" + Math.max(0, Math.min(100, Math.round(elo.val / elo.ziel * 100))) + "%"})]));
+    b.appendChild(el("p", {style: "font-size:.8rem", text: elo.src}));
+  }
+
+  var WMAP = [[0, "☀️", "Klar"], [2, "⛅", "Leicht bewölkt"], [3, "☁️", "Bewölkt"], [48, "🌫️", "Nebel"], [57, "🌦️", "Niesel"], [67, "🌧️", "Regen"], [77, "🌨️", "Schnee"], [82, "🌦️", "Schauer"], [86, "🌨️", "Schneeschauer"], [99, "⛈️", "Gewitter"]];
+  var weather = {};
+  function renderWeather(b, t) {
+    var city = (t.cfg && t.cfg.city) || "Hamburg";
+    b.appendChild(el("div", {class: "lbl", text: "🌤️ " + city}));
+    var w = weather[city];
+    if (!w) {
+      b.appendChild(el("p", {text: "Lade das Wetter …"}));
+      weather[city] = {loading: true};
+      (async function () {
+        try {
+          var g = await (await fetch("https://geocoding-api.open-meteo.com/v1/search?count=1&language=de&name=" + encodeURIComponent(city))).json();
+          var loc = g.results && g.results[0]; if (!loc) throw 0;
+          var f = await (await fetch("https://api.open-meteo.com/v1/forecast?latitude=" + loc.latitude + "&longitude=" + loc.longitude + "&current=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=auto&forecast_days=1")).json();
+          weather[city] = {t: Math.round(f.current.temperature_2m), code: f.current.weather_code, max: Math.round(f.daily.temperature_2m_max[0]), min: Math.round(f.daily.temperature_2m_min[0]), rain: f.daily.precipitation_probability_max[0]};
+        } catch (e) { weather[city] = {err: true}; }
+        refreshType(/^wetter$/);
+      })();
+      return;
+    }
+    if (w.loading) { b.appendChild(el("p", {text: "Lade das Wetter …"})); return; }
+    if (w.err) b.appendChild(el("p", {text: "Wetter für „" + city + "“ nicht gefunden."}));
+    else {
+      var m = WMAP.filter(function (x) { return w.code <= x[0]; })[0] || WMAP[WMAP.length - 1];
+      b.appendChild(el("div", {class: "row"}, [el("span", {class: "big", text: m[1] + " " + w.t + "°"})]));
+      b.appendChild(el("p", {text: m[2] + " · " + w.min + "° bis " + w.max + "°" + (w.rain != null ? " · Regen " + w.rain + " %" : "")}));
+    }
+    var inp = el("input", {type: "text", value: city, "aria-label": "Ort", style: "padding:6px 8px;font-size:.85rem"});
+    inp.addEventListener("change", function () { t.cfg = t.cfg || {}; t.cfg.city = inp.value.trim() || "Hamburg"; save(); refresh(t); });
+    b.appendChild(inp);
+  }
+
+  // Liste mit Status 0 offen, 1 in Arbeit, 2 erledigt. Antippen schiebt eine Stufe weiter, ↺ holt zurück.
+  function itemEl(t, it, steps) {
+    var li = el("div", {class: "it" + (it.s >= steps - 1 ? " done" : "")});
+    li.appendChild(el("span", {text: it.t, title: "Antippen: weiter", onclick: function () { it.s = it.s >= steps - 1 ? 0 : it.s + 1; save(); refresh(t); }}));
+    li.appendChild(el("button", {type: "button", "aria-label": "Löschen", text: "✕", onclick: function () { t.cfg.items = t.cfg.items.filter(function (x) { return x !== it; }); save(); refresh(t); }}));
+    return li;
+  }
+  function addRow(t, ph, steps) {
+    var inp = el("input", {type: "text", placeholder: ph, maxlength: "200"});
+    var f = el("form", {class: "add"}, [inp, el("button", {type: "submit", class: "primary", text: "＋"})]);
+    f.addEventListener("submit", function (e) { e.preventDefault(); var v = inp.value.trim(); if (!v) return; t.cfg.items = (t.cfg.items || []).concat([{id: uid(), t: v, s: 0}]); save(); refresh(t); var n = nodes[t.id]; if (n) { var i2 = n.querySelector(".add input"); if (i2) i2.focus(); } });
+    return f;
+  }
+  function renderTodo(b, t) {
+    t.cfg = t.cfg || {}; var items = t.cfg.items || [];
+    b.appendChild(el("div", {class: "lbl", text: "🗂️ To-Dos"}));
+    b.appendChild(addRow(t, "Neue Aufgabe", 3));
+    var wide = span(t).w >= 2, k = el("div", {class: "kan" + (wide ? "" : " list")});
+    ["Offen", "In Arbeit", "Erledigt"].forEach(function (name, s) {
+      var col = el("div", {class: "col"}, [el("div", {class: "lbl", text: name + " · " + items.filter(function (i) { return i.s === s; }).length})]);
+      items.filter(function (i) { return i.s === s; }).forEach(function (i) { col.appendChild(itemEl(t, i, 3)); });
+      k.appendChild(col);
+    });
+    b.appendChild(k);
+  }
+  function renderNote(b, t) {
+    t.cfg = t.cfg || {};
+    var ta = el("textarea", {class: "note", placeholder: "Notiz …", "aria-label": "Notiz"}); ta.value = t.cfg.text || "";
+    ta.addEventListener("input", function () { t.cfg.text = ta.value; save(); });
+    b.appendChild(el("div", {class: "lbl", text: "📝 Notiz"})); b.appendChild(ta);
+  }
+  function renderLinks(b, t) {
+    t.cfg = t.cfg || {}; var ls = t.cfg.links || [];
+    b.appendChild(el("div", {class: "lbl", text: "🔗 Schnellzugriff"}));
+    var box = el("div", {class: "links"});
+    ls.forEach(function (l) {
+      box.appendChild(el("div", {class: "row", style: "flex-wrap:nowrap;gap:4px"}, [
+        el("a", {href: l.u, target: "_blank", rel: "noopener", text: l.n, style: "flex:1;min-width:0"}),
+        el("button", {type: "button", class: "sm", "aria-label": "Link löschen", text: "✕", style: "margin-bottom:4px", onclick: function () { t.cfg.links = ls.filter(function (x) { return x !== l; }); save(); refresh(t); }})
+      ]));
+    });
+    if (!ls.length) box.appendChild(el("p", {text: "Noch keine Links."}));
+    b.appendChild(box);
+    var inp = el("input", {type: "text", placeholder: "Name und Adresse, z. B. Bank https://…"});
+    var f = el("form", {class: "add"}, [inp, el("button", {type: "submit", class: "primary", text: "＋"})]);
+    f.addEventListener("submit", function (e) {
+      e.preventDefault(); var v = inp.value.trim(), m = v.match(/(https?:\/\/\S+|[\w-]+(\.[\w-]+)+\S*)\s*$/); if (!m) { inp.value = ""; inp.placeholder = "Bitte mit Adresse, z. B. https://…"; return; }
+      var u = /^https?:/.test(m[1]) ? m[1] : "https://" + m[1], n = v.slice(0, m.index).trim() || u.replace(/^https?:\/\/(www\.)?/, "").split("/")[0];
+      t.cfg.links = ls.concat([{n: n, u: u}]); save(); refresh(t);
+    });
+    b.appendChild(f);
+  }
+  function daysTo(date) { var a = new Date(); a.setHours(0, 0, 0, 0); var d = new Date(date + "T00:00:00"); return Math.round((d - a) / 864e5); }
+  function dateEditor(t, label) {
+    var tt = el("input", {type: "text", value: t.cfg.title || "", placeholder: "Wofür?", "aria-label": "Titel"});
+    var dd = el("input", {type: "date", value: t.cfg.date || "", "aria-label": "Datum"});
+    var f = el("form", {class: "mini date"}, [tt, dd, el("button", {type: "submit", class: "sm primary", text: label || "Speichern"})]);
+    f.addEventListener("submit", function (e) { e.preventDefault(); t.cfg.title = tt.value.trim(); t.cfg.date = dd.value; t.cfg.editDate = false; save(); refresh(t); });
+    return f;
+  }
+  function countdownLine(b, t) {
+    var n = daysTo(t.cfg.date);
+    b.appendChild(el("div", {class: "row"}, [
+      el("span", {class: "big", text: n > 0 ? String(n) : n === 0 ? "Heute" : "✓"}),
+      el("p", {text: n > 1 ? "Tage bis " + new Date(t.cfg.date + "T00:00:00").toLocaleDateString("de-DE") : n === 1 ? "Tag, morgen ist es so weit" : n === 0 ? "ist es so weit" : "vorbei seit " + (-n) + " Tagen"}),
+      el("button", {type: "button", class: "sm", text: "✎", "aria-label": "Termin ändern", onclick: function () { t.cfg.editDate = true; refresh(t); }})
+    ]));
+  }
+  function renderCountdown(b, t) {
+    t.cfg = t.cfg || {};
+    b.appendChild(el("div", {class: "lbl", text: "⏳ " + (t.cfg.title || "Countdown")}));
+    if (!t.cfg.date || t.cfg.editDate) { b.appendChild(dateEditor(t)); return; }
+    countdownLine(b, t);
+  }
+  function renderIstr(b, t) {
+    t.cfg = t.cfg || {};
+    b.appendChild(el("div", {class: "lbl", text: "⚖️ IStR-Vortrag" + (t.cfg.title ? " · " + t.cfg.title : "")}));
+    if (!t.cfg.date || t.cfg.editDate) { b.appendChild(el("p", {text: "Trag Thema und Termin deines Vortrags ein."})); b.appendChild(dateEditor(t)); }
+    else countdownLine(b, t);
+    var items = t.cfg.items || [], done = items.filter(function (i) { return i.s >= 1; }).length;
+    if (items.length) b.appendChild(el("div", {class: "meter"}, [el("i", {style: "width:" + Math.round(done / items.length * 100) + "%;background:var(--good)"})]));
+    b.appendChild(addRow(t, "Punkt oder BFH-Entscheidung", 2));
+    var col = el("div", {class: "col"}, [el("div", {class: "lbl", text: done + " von " + items.length + " fertig"})]);
+    items.forEach(function (i) { col.appendChild(itemEl(t, i, 2)); });
+    b.appendChild(col);
+  }
+  function renderBreath(b) {
+    b.appendChild(el("div", {class: "lbl", text: "🌿 Entspannungsecke"}));
+    var orb = el("div", {class: "orb"}), txt = el("p", {text: "Box-Atmung: je 4 Sekunden einatmen, halten, ausatmen, halten."}), timer = 0, step = 0;
+    var go = el("button", {type: "button", class: "sm primary", text: "Starten"});
+    var PH = [["Einatmen", true], ["Halten", true], ["Ausatmen", false], ["Halten", false]];
+    function next() { if (!orb.isConnected) { clearInterval(timer); timer = 0; return; } var p = PH[step % 4]; txt.textContent = p[0]; orb.classList.toggle("in", p[1]); step++; }
+    go.addEventListener("click", function () {
+      if (timer) { clearInterval(timer); timer = 0; orb.classList.remove("in"); txt.textContent = "Gut gemacht."; go.textContent = "Starten"; return; }
+      step = 0; next(); timer = setInterval(next, 4000); go.textContent = "Stopp";
+    });
+    b.appendChild(el("div", {class: "breath"}, [orb, txt, el("div", {class: "row"}, [go, el("a", {class: "btn sm", href: "murmelbahn/", text: "🔮 Murmelbahn"})])]));
+  }
+  // Verkaufsassistent: baut aus wenigen Angaben einen sauberen Anzeigentext zum Kopieren.
+  function renderAd(b, t) {
+    t.cfg = t.cfg || {}; var c = t.cfg;
+    b.appendChild(el("div", {class: "lbl", text: "🏷️ Kleinanzeigen-Verkaufsassistent"}));
+    function f(key, attrs) { var i = el(attrs.tag || "input", attrs); i.value = c[key] || attrs.def || ""; i.addEventListener("input", function () { c[key] = i.value; save(); upd(); }); return i; }
+    var zs = el("select", {"aria-label": "Zustand"}); ["Neu", "Wie neu", "Sehr gut", "Gut", "In Ordnung", "Defekt"].forEach(function (z) { zs.appendChild(el("option", {text: z})); });
+    zs.value = c.zustand || "Sehr gut"; zs.addEventListener("change", function () { c.zustand = zs.value; save(); upd(); });
+    var vs = el("select", {"aria-label": "Übergabe"}); ["Abholung oder Versand", "Nur Abholung", "Nur Versand"].forEach(function (z) { vs.appendChild(el("option", {text: z})); });
+    vs.value = c.uebergabe || "Abholung oder Versand"; vs.addEventListener("change", function () { c.uebergabe = vs.value; save(); upd(); });
+    b.appendChild(el("div", {class: "mini"}, [
+      f("artikel", {type: "text", placeholder: "Artikel, z. B. Rennrad Canyon", "aria-label": "Artikel"}),
+      f("preis", {type: "text", inputmode: "decimal", placeholder: "Preis in €", "aria-label": "Preis"}),
+      zs, vs
+    ]));
+    var det = f("details", {tag: "textarea", rows: "2", placeholder: "Besonderheiten, Maße, Zubehör, Mängel", "aria-label": "Besonderheiten", style: "padding:6px 8px;font-size:.9rem;resize:vertical"});
+    b.appendChild(det);
+    var out = el("div", {class: "out"}), cp = el("button", {type: "button", class: "sm primary", text: "Text kopieren"});
+    function text() {
+      var a = (c.artikel || "").trim(), p = (c.preis || "").trim();
+      if (!a) return "";
+      var lines = [a + " – " + (c.zustand || "Sehr gut"), "", "Verkaufe " + a + " im Zustand „" + (c.zustand || "Sehr gut") + "“."];
+      if ((c.details || "").trim()) lines.push("", (c.details || "").trim());
+      lines.push("", "Preis: " + (p ? p.replace(/\s*€$/, "") + " € VB" : "VB"), "Übergabe: " + (c.uebergabe || "Abholung oder Versand") + (c.uebergabe === "Nur Abholung" ? " in Hamburg" : "") + ".", "Privatverkauf, keine Garantie oder Rücknahme.");
+      return lines.join("\n");
+    }
+    function upd() { var s = text(); out.textContent = s || "Gib zuerst den Artikel ein."; cp.disabled = !s; }
+    cp.addEventListener("click", async function () { try { await navigator.clipboard.writeText(text()); cp.textContent = "Kopiert ✓"; } catch (e) { cp.textContent = "Kopieren ging nicht"; } setTimeout(function () { cp.textContent = "Text kopieren"; }, 2000); });
+    b.appendChild(out); b.appendChild(el("div", {class: "row"}, [cp]));
+    upd();
+  }
+
+  /* ---------- Start ---------- */
+  window.addEventListener("resize", measure);
   function enter(u) {
-    user = u; $("login").hidden = true; $("app").hidden = false; render(); checkUnlock();
-    // Accounts from before this feature: what they already chose counts as known, the rest is new. Brand-new accounts know everything.
+    user = u; $("login").hidden = true; $("app").hidden = false;
+    $("who").textContent = user.email || "";
+    measure(); loadLayout(); checkUnlock();
+    // Konten von vor dieser Funktion: was sie schon gewählt hatten, gilt als bekannt, der Rest ist neu. Neue Konten kennen alles.
     if (!seen()) setSeen(mine().length ? mine() : allIds());
     // Merken, ob das Konto freigeschaltet ist, damit die Kachel beim nächsten Öffnen gleich mit den anderen erscheint. Die Abfrage bestätigt oder entfernt sie danach.
     var gk = "portal-gevt-" + u.id, had = false;
     try { had = localStorage.getItem(gk) === "1"; } catch (e) {}
-    if (had && COURSES.indexOf(GEVT) < 0) { COURSES.push(GEVT); render(); }
+    if (had && COURSES.indexOf(GEVT) < 0) { COURSES.push(GEVT); if (layout) renderDash(); }
     sb.from("gevt_members").select("role").limit(1).then(function (r) {
       if (r.error) return;
       var ok = !!(r.data && r.data.length), i = COURSES.indexOf(GEVT);
       try { if (ok) localStorage.setItem(gk, "1"); else localStorage.removeItem(gk); } catch (e) {}
-      if (ok && i < 0) { COURSES.push(GEVT); render(); }
-      if (!ok && i >= 0) { COURSES.splice(i, 1); render(); }
+      if (ok && i < 0) COURSES.push(GEVT);
+      if (!ok && i >= 0) COURSES.splice(i, 1);
+      if (layout) renderDash();
     });
   }
   $("out").addEventListener("click", async function () { await sb.auth.signOut(); location.reload(); });
