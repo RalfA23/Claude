@@ -143,6 +143,26 @@ input[type=text].txt{padding:8px 10px;border-radius:8px;border:1px solid var(--l
 .tabrow{display:grid;grid-template-columns:auto auto minmax(0,1fr) auto;gap:8px;align-items:center}
 .tabrow .btn{min-height:40px;padding:6px 12px}
 .tabrow label{display:flex;gap:6px;align-items:center;font-size:.9rem;white-space:nowrap}
+.side{display:none}
+.side .pips{display:flex;gap:5px}
+.side .card{padding:14px;gap:8px}
+.side h3{margin:0}
+.side .tip{font-family:var(--f-read);font-size:.92rem;line-height:1.5;margin:0}
+@media (min-width:1180px){
+  .wrap{max-width:1400px;display:grid;grid-template-columns:minmax(220px,1fr) minmax(0,760px) minmax(220px,1fr);column-gap:28px;row-gap:16px;align-content:start}
+  .wrap>header,.wrap>nav,.wrap>main,.wrap>#syncnote{grid-column:2}
+  .wrap>.side{display:flex;flex-direction:column;gap:12px;grid-row:1/span 4;position:sticky;top:16px;align-self:start;max-height:calc(100vh - 32px);overflow:auto;scrollbar-width:none}
+  .wrap>#sideL{grid-column:1}.wrap>#sideR{grid-column:3}
+  body.noside .wrap>.side{display:none}
+  body.noside .wrap{display:flex;max-width:760px}
+}
+.tchip{border:1px solid var(--line);border-radius:999px;padding:6px 12px;background:var(--card);color:var(--ink);font:inherit;font-size:.9rem;cursor:pointer}
+.tchip[aria-pressed="true"]{background:color-mix(in srgb,var(--accent) 15%,var(--card));border-color:var(--accent);font-weight:700}
+.tchips{display:flex;gap:8px;flex-wrap:wrap}
+details.tg{border:1px solid var(--line);border-radius:12px;padding:8px 12px;background:var(--card)}
+details.tg summary{cursor:pointer;font-weight:700;padding:4px 0}
+details.tg .tchips{padding:6px 0 4px}
+textarea.own{width:100%;min-height:140px;padding:10px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;resize:vertical}
 .big{font-size:2.2rem;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.1}
 @media (prefers-reduced-motion: reduce){*{scroll-behavior:auto!important;transition:none!important}}
 </style>
@@ -155,6 +175,8 @@ input[type=text].txt{padding:8px 10px;border-radius:8px;border:1px solid var(--l
   <nav class="tabs" role="tablist" id="tabs"></nav>
   <main id="view"></main>
   <p class="muted" id="syncnote" style="font-size:.8rem;margin:0"></p>
+  <aside class="side" id="sideL" aria-label="Dein Kurs"></aside>
+  <aside class="side" id="sideR" aria-label="Tempo, Tipp und Themen"></aside>
 </div>
 
 <div id="reader" hidden>
@@ -407,7 +429,18 @@ const BASICS = [
  ["Nachholen","Der Kurs zählt Lektionen, nicht Kalendertage. Hast du einen Tag verpasst, machst du einfach die nächste Lektion. Wer im Rückstand ist, kann zwei Lektionen an einem Tag machen."]
 ];
 
-const AI_TOPICS = ["Die Geschichte der Hanse","Das Wattenmeer","Wie ein Leuchtturm funktioniert","Der Nord-Ostsee-Kanal","Warum der Himmel blau ist","Die Erfindung der Glühbirne","Wie Navigationssatelliten die Position bestimmen","Die Geschichte des Geldes","Wie Gletscher entstehen","Die Umsatzsteuer in Europa","Das Leben der Eichhörnchen","Wie Vulkane entstehen","Die Geschichte der Eisenbahn in Deutschland","Wie das Immunsystem arbeitet","Die Erfindung des Fahrrads","Warum Zugvögel ihren Weg finden","Die Geschichte des Hamburger Rathauses","Wie Windkraftanlagen Strom erzeugen","Die Entstehung des Grundgesetzes","Wie Schiffe schwimmen"];
+const TOPIC_GROUPS = {
+  "Natur & Tiere":["Das Wattenmeer","Das Leben der Eichhörnchen","Warum Zugvögel ihren Weg finden","Wie Gletscher entstehen","Wie Vulkane entstehen","Wie Bienen miteinander kommunizieren","Wie Wale tauchen"],
+  "Geschichte":["Die Geschichte der Hanse","Die Geschichte der Eisenbahn in Deutschland","Die Entstehung des Grundgesetzes","Die Geschichte des Geldes","Der Fall der Berliner Mauer","Der Alltag im alten Rom"],
+  "Technik & Erfindungen":["Die Erfindung der Glühbirne","Die Erfindung des Fahrrads","Wie Navigationssatelliten die Position bestimmen","Wie Windkraftanlagen Strom erzeugen","Wie Schiffe schwimmen","Wie ein Leuchtturm funktioniert","Wie das Internet Daten transportiert"],
+  "Wissenschaft":["Warum der Himmel blau ist","Wie Schwarze Löcher entstehen","Wie Impfstoffe wirken","Die Entdeckung des Penicillins","Wie das Gedächtnis funktioniert"],
+  "Wirtschaft, Recht & Steuern":["Die Umsatzsteuer in Europa","Wie Inflation entsteht","Was eine Aktie ist","Das Prinzip der Gewaltenteilung","Wie ein Gerichtsverfahren in Deutschland abläuft","Was Doppelbesteuerungsabkommen regeln"],
+  "Hamburg & der Norden":["Der Nord-Ostsee-Kanal","Die Geschichte des Hamburger Rathauses","Die Speicherstadt in Hamburg","Die Sturmflut von 1962","Die Insel Helgoland"],
+  "Kultur & Literatur":["Johann Wolfgang von Goethe und sein Leben","Friedrich Schiller und die Weimarer Klassik","Die Brüder Grimm und ihre Märchen","Die Geschichte der Oper","Wie Musik auf das Gehirn wirkt"],
+  "Körper & Gesundheit":["Wie das Immunsystem arbeitet","Wie der Schlaf funktioniert","Warum Bewegung gesund ist","Wie das Herz arbeitet","Wie das Auge sieht"]
+};
+const AI_TOPICS = Object.values(TOPIC_GROUPS).flat();
+const chosenTopics = () => ((S.prefs||{}).topics||[]).filter(t=>typeof t==="string"&&t.trim());
 
 /* ============ HILFSFUNKTIONEN ============ */
 const $ = s => document.querySelector(s);
@@ -483,10 +516,11 @@ async function connectAI(){
     if(window.claude && window.claude.use){ const sm=await window.claude.use("sample"); if(sm) AI={generate:p=>sm.json(p,{modelTier:"default"})}; }
   }catch(e){}
 }
-async function generateText(){
+async function generateText(wish){
   if(!AI) throw new Error("none");
   const used=new Set((S.ai||[]).map(t=>t.topic));
-  const free=AI_TOPICS.filter(t=>!used.has(t)); const topic=(free.length?free:AI_TOPICS)[Math.floor(Math.random()*(free.length||AI_TOPICS.length))];
+  let topic=String(wish||"").trim().slice(0,80);
+  if(!topic){ const ch=chosenTopics(), pool=ch.length?ch:AI_TOPICS, free=pool.filter(t=>!used.has(t)); topic=(free.length?free:pool)[Math.floor(Math.random()*(free.length||pool.length))]; }
   const prompt=`Schreibe einen sachlichen deutschen Übungstext für ein Lesetraining für Erwachsene. Thema: ${topic}. Länge: 240 bis 290 Wörter in 3 oder 4 Absätzen. Nur gut gesicherte Fakten, allgemein verständlich, keine Überschrift im Text, keine Aufzählungen. Dazu genau 4 Multiple-Choice-Fragen zum Inhalt (drei Detailfragen, eine Frage zur Hauptaussage), jeweils 3 kurze Antworten, die richtige Antwort immer an erster Stelle. Antworte nur mit JSON in dieser Form: {"title":"kurzer Titel","paras":["Absatz 1","Absatz 2"],"qs":[{"q":"Frage?","a":["richtig","falsch","falsch"]}]}`;
   const r=await AI.generate(prompt,{topic});
   if(!r||!Array.isArray(r.paras)||!Array.isArray(r.qs)||r.paras.length<2||r.qs.length<3) throw new Error("shape");
@@ -603,6 +637,7 @@ function applyPrefs(){
   else { st.removeProperty("--marker"); st.removeProperty("--marker-soft"); }
   set("--f-read",(FONTS[p.font]||{}).v);
   document.body.style.fontSize=p.size&&SIZES[p.size]?SIZES[p.size].px+"px":"";
+  document.body.classList.toggle("noside",p.side==="off");
   const nm=(p.name||"").trim(), hh=$("#brand-h"), sub=$("#brand-s");
   if(nm){ const parts=nm.split(/\s+/), last=parts.pop(); hh.replaceChildren(...(parts.length?[parts.join(" ")+" "]:[]),h("span",{class:"mk",text:last})); document.title=nm; }
   if(typeof p.tagline==="string") sub.textContent=p.tagline;
@@ -614,6 +649,52 @@ function tabList(){
 }
 function setPref(k,v,rerender){ S.prefs=Object.assign({},S.prefs,{[k]:v}); save(); if(rerender) render(); else applyPrefs(); }
 function livePref(k,v){ S.prefs=Object.assign({},S.prefs,{[k]:v}); applyPrefs(); }
+/* ============ SEITENLEISTEN (große Bildschirme) ============ */
+const bar=x=>h("div",{class:"lvl"},h("i",{style:`width:${Math.round(Math.min(1,Math.max(0,x))*100)}%`}));
+function spark(vals){
+  const W=200,H=56,pd=4,mn=Math.min(...vals),mx=Math.max(...vals),sp=(mx-mn)||1, ns="http://www.w3.org/2000/svg";
+  const pts=vals.map((v,i)=>[+(pd+i*(W-2*pd)/(vals.length-1)).toFixed(1),+(H-pd-(v-mn)/sp*(H-2*pd)).toFixed(1)]);
+  const svg=document.createElementNS(ns,"svg"), pl=document.createElementNS(ns,"polyline"), dot=document.createElementNS(ns,"circle"), set=(e,o)=>{ for(const k in o) e.setAttribute(k,o[k]); return e; };
+  set(svg,{viewBox:`0 0 ${W} ${H}`,role:"img","aria-label":"Verlauf deiner effektiven Rate"}); svg.style.cssText="width:100%;height:auto";
+  set(pl,{points:pts.map(q=>q.join(",")).join(" "),fill:"none",stroke:"var(--accent)","stroke-width":2.5,"stroke-linecap":"round","stroke-linejoin":"round"});
+  const l=pts[pts.length-1]; set(dot,{cx:l[0],cy:l[1],r:3.5,fill:"var(--accent)"}); svg.append(pl,dot); return svg;
+}
+function renderSide(){
+  const L=$("#sideL"), R=$("#sideR"); if(!L||!R) return;
+  const n=nextLesson(), w=n?plan(n).w:8, lv=level(), st=streak();
+  const pips=[]; for(let d=1;d<=6;d++){ const k=(w-1)*6+d; pips.push(h("span",{class:"pip"+(S.lessons[k]?" done":"")+(k===n?" next":"")+(TESTS[k]?" test":""),title:`Lektion ${k}`})); }
+  const nb=BADGES.find(b=>!S.badges[b.id]);
+  L.replaceChildren(
+    h("div",{class:"card"},h("p",{class:"eyebrow"},"Dein Kurs"),h("h3",{text:n?`Woche ${w} von 8`:"Kurs geschafft"}),n?h("p",{class:"muted",style:"margin:0;font-size:.9rem"},`${WEEKS[w-1].name}: ${WEEKS[w-1].goal}`):null,h("div",{class:"pips"},pips),bar(doneCount()/TOTAL),h("p",{class:"muted",style:"margin:0;font-size:.9rem"},`${doneCount()} von ${TOTAL} Lektionen · Serie ${st} ${st===1?"Tag":"Tage"}`)),
+    h("div",{class:"card"},h("p",{class:"eyebrow"},"Stufe"),h("h3",{text:`${lv.n}: ${lv.name}`}),bar(lv.pct),h("p",{class:"muted",style:"margin:0;font-size:.9rem"},lv.toNext?`Noch ${nf(lv.toNext)} Punkte bis zur nächsten Stufe.`:"Höchste Stufe erreicht.")),
+    nb?h("div",{class:"card"},h("p",{class:"eyebrow"},"Nächster Erfolg"),h("h3",{text:nb.name}),h("p",{class:"muted",style:"margin:0;font-size:.9rem"},nb.desc)):null);
+  const cs=compSessions().slice(-12), r=recentEff(3), tip=TIPS[Math.floor(Date.now()/864e5)%TIPS.length], ch=chosenTopics();
+  R.replaceChildren(
+    h("div",{class:"card"},h("p",{class:"eyebrow"},"Dein Tempo"),
+      cs.length>=2?spark(cs.map(x=>x.eff)):h("p",{class:"muted",style:"margin:0;font-size:.9rem"},"Nach zwei gemessenen Texten erscheint hier dein Verlauf."),
+      S.baseline&&r?h("p",{class:"muted",style:"margin:0;font-size:.9rem"},`Effektive Rate: ${nf(S.baseline.eff)} am Start, jetzt ${nf(r.eff)}`):null),
+    h("div",{class:"card"},h("p",{class:"eyebrow"},"Tipp des Tages"),h("h3",{text:tip[0]}),h("p",{class:"tip"},tip[1])),
+    h("div",{class:"card"},h("p",{class:"eyebrow"},"Meine Themen"),
+      h("p",{class:"muted",style:"margin:0;font-size:.9rem"},ch.length?ch.slice(0,5).join(", ")+(ch.length>5?` und ${ch.length-5} weitere`:""):"Noch nichts gewählt, neue Texte kommen aus allen Themen."),
+      h("button",{class:"btn ghost",onclick:()=>{ if(Run) return; Tab="anpassen"; render(); }},"Themen wählen")));
+}
+const OpenGroups=new Set();
+function topicsCard(){
+  const sel=new Set(chosenTopics()), custom=chosenTopics().filter(t=>!AI_TOPICS.includes(t));
+  const flip=t=>{ const a=chosenTopics(); const i=a.indexOf(t); if(i>=0) a.splice(i,1); else a.push(t); setPref("topics",a,true); };
+  const inp=h("input",{type:"text",class:"txt",maxlength:80,placeholder:"Eigenes Thema, z. B. Die Brüder Grimm"});
+  const add=()=>{ const t=inp.value.trim(); if(!t) return; const a=chosenTopics(); if(!a.includes(t)) a.push(t); setPref("topics",a,true); };
+  inp.addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); add(); } });
+  return h("div",{class:"card pref",style:"margin-top:16px"},h("h3",{text:"Meine Themen"}),
+    h("p",{class:"muted",style:"margin:0"},"Neue Übungstexte schreibt Claude zu den Themen, die du hier wählst. Ist nichts gewählt, kommt alles gemischt. Dazu kannst du eigene Themen eintragen, auch Klassiker der Literatur oder ein Wikipedia-Stichwort."),
+    ...Object.entries(TOPIC_GROUPS).map(([g,list])=>{
+      const d=h("details",{class:"tg"},h("summary",{},`${g}${list.some(t=>sel.has(t))?" · "+list.filter(t=>sel.has(t)).length+" gewählt":""}`),h("div",{class:"tchips"},list.map(t=>h("button",{class:"tchip","aria-pressed":String(sel.has(t)),onclick:()=>flip(t)},t))));
+      if(OpenGroups.has(g)||list.some(t=>sel.has(t))) d.open=true;
+      d.addEventListener("toggle",()=>{ if(d.open) OpenGroups.add(g); else OpenGroups.delete(g); });
+      return d; }),
+    h("label",{class:"field"},"Eigenes Thema hinzufügen",h("div",{class:"row",style:"flex-wrap:nowrap"},inp,h("button",{class:"btn",onclick:add},"Hinzufügen"))),
+    custom.length?h("div",{class:"tchips"},custom.map(t=>h("button",{class:"tchip","aria-pressed":"true",title:"Entfernen",onclick:()=>flip(t)},t+" ✕"))):null);
+}
 function viewCustomize(v){
   const p=prefs();
   const colorIn=(label,key,fallback)=>h("label",{class:"field"},label,h("input",{type:"color",value:HEX.test(p[key]||"")?p[key]:fallback,oninput:e=>livePref(key,e.target.value),onchange:()=>save()}));
@@ -642,6 +723,8 @@ function viewCustomize(v){
   });
   v.append(h("div",{class:"card pref",style:"margin-top:16px"},h("h3",{text:"Reiter"}),h("p",{class:"muted",style:"margin:0"},"Am schnellsten: Reiter ganz oben gedrückt halten und verschieben (am Computer einfach ziehen). Hier kannst du sie auch mit den Pfeilen ordnen, ausblenden und umbenennen."),...rows,
     h("div",{class:"row"},h("button",{class:"btn ghost",onclick:()=>{ S.prefs=Object.assign({},S.prefs,{order:[],hidden:[],labels:{}}); save(); render(); }},"Reiter zurücksetzen"))));
+  v.append(topicsCard());
+  v.append(h("div",{class:"card pref",style:"margin-top:16px"},h("h3",{text:"Seitenleisten"}),h("label",{class:"row"},h("input",{type:"checkbox",checked:p.side!=="off",onchange:e=>setPref("side",e.target.checked?"":"off")}),"Auf großen Bildschirmen links und rechts Kurs, Tempo und Tipp zeigen")));
   v.append(h("div",{class:"row",style:"margin-top:16px"},h("button",{class:"btn ghost",id:"prefreset",onclick:e=>{ const b=e.currentTarget; if(b.dataset.arm){ S.prefs=undefined; delete S.prefs; save(); render(); } else { b.dataset.arm="1"; b.textContent="Alles Gestalterische zurücksetzen? Nochmal tippen"; } }},"Gestaltung ganz zurücksetzen")));
 }
 /* Reiter oben per Drag & Drop anordnen: mit der Maus ziehen, am Handy gedrückt halten und ziehen. */
@@ -690,7 +773,7 @@ function drawTabs(){
 }
 function confirmLeave(){ Run=null; return true; }
 function render(){
-  applyPrefs(); drawTabs();
+  applyPrefs(); drawTabs(); renderSide();
   const L=level(), st=streak();
   $("#chips").replaceChildren(
     h("span",{class:"chip"},"Stufe ",h("b",{text:L.n})," · ",L.name),
@@ -744,7 +827,8 @@ function viewFree(v){
   const out=h("span",{class:"wpm",text:speed.value+" WpM"}); speed.addEventListener("input",()=>out.textContent=speed.value+" WpM");
   const quiz=h("input",{type:"checkbox",id:"fr-quiz",checked:true});
   const msg=h("p",{class:"muted"});
-  const aiBtn=h("button",{class:"btn",onclick:async()=>{ aiBtn.disabled=true; msg.textContent="Claude schreibt einen neuen Text…"; try{ const t=await generateText(); msg.textContent=`Neuer Text: ${t.title}`; render(); }catch(e){ msg.textContent=AI?"Das hat nicht geklappt. Versuch es später noch einmal.":"Neue KI-Texte sind hier gerade nicht verfügbar."; aiBtn.disabled=false; } }},"Neuer KI-Text");
+  const wish=h("input",{type:"text",class:"txt",id:"fr-topic",maxlength:80,placeholder:"Thema (leer = aus deinen Themen)"});
+  const aiBtn=h("button",{class:"btn",onclick:async()=>{ aiBtn.disabled=true; msg.textContent="Claude schreibt einen neuen Text…"; try{ const t=await generateText(wish.value); msg.textContent=`Neuer Text: ${t.title}`; render(); }catch(e){ msg.textContent=AI?"Das hat nicht geklappt. Versuch es später noch einmal.":"Neue KI-Texte sind hier gerade nicht verfügbar."; aiBtn.disabled=false; } }},"Neuer KI-Text");
   v.append(h("div",{class:"card"},
     h("h2",{text:"Lesefenster"}),
     h("p",{class:"muted"},"Freies Training außerhalb des Kursplans. Das Lesefenster öffnet sich über den ganzen Bildschirm."),
@@ -759,7 +843,17 @@ function viewFree(v){
         if(quiz.checked&&t.qs){ Quiz.open(t,(c)=>{ const eff=wpm*c; S.sessions.push({date:today(),type:"free",textId:t.id,wpm:Math.round(wpm),comp:c,eff:Math.round(eff),mode:m}); save(); showFreeResult(wpm,c); }); }
         else { S.sessions.push({date:today(),type:"free",textId:t.id,wpm:Math.round(wpm),mode:m}); save(); render(); }
       }});
-    }},"Lesen"),aiBtn),msg));
+    }},"Lesen")),h("label",{class:"field"},"Neuen KI-Text schreiben lassen",h("div",{class:"row",style:"flex-wrap:nowrap"},wish,aiBtn)),msg));
+  const own=h("textarea",{class:"own",id:"fr-own",maxlength:20000,placeholder:"Text hier einfügen, zum Beispiel ein Artikel, ein Urteil oder ein Kapitel aus einem Buch."});
+  const ownMsg=h("p",{class:"muted"});
+  v.append(h("div",{class:"card",style:"margin-top:16px"},h("h3",{text:"Eigenen Text einfügen"}),
+    h("p",{class:"muted",style:"margin:0"},"Der Text bleibt auf deinem Gerät und wird nicht gespeichert. Art und Tempo nimmst du von oben."),
+    own,
+    h("div",{class:"row"},h("button",{class:"btn primary",onclick:()=>{
+      const paras=own.value.split(/\n+/).map(x=>x.trim()).filter(Boolean), t={id:"own",kind:"own",title:"Mein Text",paras};
+      if(wordsOf(t)<30){ ownMsg.textContent="Bitte füge einen Text mit mindestens 30 Wörtern ein."; return; }
+      ownMsg.textContent=""; openReader({text:t,mode:mode.value,wpm:+speed.value,title:t.title,onDone:()=>render()});
+    }},"Lesen")),ownMsg));
 }
 function showFreeResult(wpm,c){ const v=$("#view"); v.replaceChildren(h("div",{class:"card"},h("p",{class:"eyebrow"},"Freies Training"),h("div",{class:"big",text:`${nf(wpm)} WpM`}),h("p",{},`${Math.round(c*100)} % Verständnis, effektive Rate ${nf(wpm*c)}.`),h("div",{class:"row"},h("button",{class:"btn primary",onclick:()=>render()},"Zurück zum Lesefenster")))); }
 
