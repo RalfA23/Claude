@@ -190,6 +190,11 @@ ol.steps .t .here{display:table;margin-top:4px;font-style:normal;color:#fff}
 .quote .src{font-size:.72rem;color:var(--muted);margin-top:4px}
 .side{display:none}
 .side .card{padding:14px}
+[data-sortable]>.card{position:relative}
+.grip{position:absolute;top:6px;right:6px;width:34px;height:34px;display:grid;place-items:center;border:0;background:transparent;color:var(--muted);cursor:grab;touch-action:none;font-size:18px;line-height:1;border-radius:8px;opacity:.55;padding:0}
+.grip:hover,.grip:focus-visible{opacity:1;background:var(--line)}
+.card.moving{box-shadow:0 8px 24px rgba(0,0,0,.25);z-index:3;opacity:.96}
+body.sorting{cursor:grabbing;user-select:none}
 .side h3{margin:0 0 8px}
 .side .bar{height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin:4px 0 10px}
 .side .bar>i{display:block;height:100%;background:var(--accent)}
@@ -676,6 +681,36 @@ $('tabs').addEventListener('click',e=>{const b=e.target.closest('button[data-v]'
   document.addEventListener('pointercancel',e=>{if(st&&e.pointerId===st.id)finish()});
   nav.addEventListener('click',e=>{if(justDragged){e.stopImmediatePropagation();e.preventDefault()}},true);
 })();
+/* Kästen per Ziehen anordnen: Griff oben rechts an jedem Kasten (Heute, Anpassen, beide Seitenleisten). Reihenfolge wird in den Einstellungen gespeichert. */
+(function(){
+  const slug=t=>(t||'').toLowerCase().replace(/[^a-z0-9äöüß]+/g,'-').slice(0,30);
+  const bid=el=>el.dataset.bid||el.id||slug((el.querySelector('h1,h2,h3')||{}).textContent)||'x';
+  const items=c=>[...c.children].filter(e=>e.classList.contains('card'));
+  let busy=false,st=null;
+  function enhance(c,key){
+    if(busy||st)return;busy=true;c.setAttribute('data-sortable','');
+    const its=items(c),saved=(P.blocks||{})[key]||[];
+    if(saved.length){const rank=e=>{const i=saved.indexOf(bid(e));return i<0?1e6:i};
+      const sorted=its.map((e,i)=>[e,i]).sort((a,b)=>rank(a[0])-rank(b[0])||a[1]-b[1]).map(x=>x[0]);
+      sorted.forEach((e,i)=>{if(items(c)[i]!==e)c.insertBefore(e,items(c)[i]||null)})}
+    items(c).forEach(e=>{if(!e.querySelector(':scope>.grip')){const g=document.createElement('button');g.type='button';g.className='grip';g.textContent='\u2807';g.title='Kasten verschieben: ziehen';g.setAttribute('aria-label','Kasten verschieben, ziehen oder mit Pfeiltasten');
+      g.addEventListener('pointerdown',ev=>{if(ev.button>0)return;ev.preventDefault();st={c,key,el:e,id:ev.pointerId};e.classList.add('moving');document.body.classList.add('sorting')});
+      g.addEventListener('keydown',ev=>{const d=ev.key==='ArrowUp'?-1:ev.key==='ArrowDown'?1:0;if(!d)return;ev.preventDefault();const l=items(c),i=l.indexOf(e),j=i+d;if(j<0||j>=l.length)return;
+        if(d<0)c.insertBefore(e,l[j]);else c.insertBefore(l[j],e);g.focus();save(c,key)});
+      e.prepend(g)}});
+    busy=false}
+  function save(c,key){const ids=items(c).map(bid);setPref({blocks:Object.assign({},P.blocks,{[key]:ids})},false)}
+  document.addEventListener('pointermove',ev=>{if(!st||ev.pointerId!==st.id)return;ev.preventDefault();
+    const me=st.el,others=items(st.c).filter(o=>o!==me);let idx=0;
+    for(const o of others){const r=o.getBoundingClientRect();if(ev.clientY>r.top+r.height/2)idx++}
+    if(idx!==items(st.c).indexOf(me)){busy=true;st.c.insertBefore(me,others[idx]||null);busy=false}
+    if(ev.clientY<70)scrollBy(0,-14);else if(ev.clientY>innerHeight-70)scrollBy(0,14)});
+  function end(ev){if(!st||ev.pointerId!==st.id)return;const x=st;st=null;x.el.classList.remove('moving');document.body.classList.remove('sorting');save(x.c,x.key)}
+  document.addEventListener('pointerup',end);document.addEventListener('pointercancel',end);
+  window.sortableOrderReset=()=>{setPref({blocks:{}},false);setTimeout(()=>location.reload(),700)};
+  [['v-heute','heute'],['v-an','an'],['sideL','sideL'],['sideR','sideR']].forEach(([id,key])=>{const c=document.getElementById(id);if(!c)return;
+    new MutationObserver(()=>enhance(c,key)).observe(c,{childList:true,subtree:true});enhance(c,key)});
+})();
 const hashV={heute:'heute',woodpecker:'wp',eintragen:'log',fortschritt:'fs',anpassen:'an'}[location.hash.slice(1)];
 let startTab=hashV;try{startTab=startTab||localStorage.getItem('tab')}catch(e){}
 
@@ -753,7 +788,7 @@ function renderCustomize(){
       t.id==='an'?h('span',{class:'note'},'bleibt sichtbar'):h('label',{},h('input',{type:'checkbox',checked:!t.hidden,onchange:e=>{const hs=new Set(P.hidden||[]);if(e.target.checked)hs.delete(t.id);else hs.add(t.id);setPref({hidden:[...hs]},true);drawTabs()}}),'sichtbar'),
       h('input',{type:'text',maxlength:20,value:(P.labels||{})[t.id]||'',placeholder:t.def,'aria-label':'Name des Reiters '+t.def,oninput:e=>{livePref({labels:Object.assign({},P.labels,{[t.id]:e.target.value})});drawTabs()},onchange:()=>savePrefs()}))});
   v.append(h('div',{class:'card pref'},h('h3',{text:'Reiter'}),h('p',{class:'note',style:'margin:0'},'Am schnellsten: Reiter oben ziehen (am Handy gedrückt halten und verschieben). Hier kannst du sie auch mit den Pfeilen ordnen, ausblenden und umbenennen.'),...rows,
-    h('div',{class:'btns'},h('button',{type:'button',class:'b',onclick:()=>{setPref({order:[],hidden:[],labels:{}},true);drawTabs()}},'Reiter zurücksetzen'))));
+    h('div',{class:'btns'},h('button',{type:'button',class:'b',onclick:()=>{setPref({order:[],hidden:[],labels:{}},true);drawTabs()}},'Reiter zurücksetzen'),h('button',{type:'button',class:'b',onclick:()=>window.sortableOrderReset()},'Kästen zurücksetzen'))));
   v.append(h('div',{class:'card pref'},h('h3',{text:'Anzeige'}),
     h('label',{class:'chk'},h('input',{type:'checkbox',checked:p.side!=='off',onchange:e=>setPref({side:e.target.checked?'':'off'})}),'Auf großen Bildschirmen links und rechts Zitat, Zahlen und Regel des Tages zeigen'),
     h('label',{class:'chk'},h('input',{type:'checkbox',checked:p.quote!=='off',onchange:e=>setPref({quote:e.target.checked?'':'off'})}),'Schachzitat des Tages zeigen')));
