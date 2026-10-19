@@ -184,6 +184,25 @@ details.tg.own{border-color:var(--accent);background:color-mix(in srgb,var(--acc
 details.tg .tchips{padding:6px 0 4px}
 textarea.own{width:100%;min-height:140px;padding:10px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;resize:vertical}
 .big{font-size:2.2rem;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.1}
+/* Nerd-Ecke: Sammelalbum mit Stickern */
+.album{display:grid;grid-template-columns:repeat(auto-fill,minmax(138px,1fr));gap:18px 14px;padding-top:8px}
+.nc{--rc:var(--line);position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;padding:16px 8px 10px;border-radius:16px;border:3px solid var(--rc);background:var(--card);color:var(--ink);font:inherit;cursor:pointer;box-shadow:0 3px 0 var(--shade),0 6px 14px var(--shade);transform:rotate(var(--rot,0deg));min-height:176px}
+.nc:nth-child(odd){--rot:-1.2deg}.nc:nth-child(even){--rot:1.2deg}
+.nc:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.nc .ic{font-size:2.4rem;line-height:1.1}
+.nc b{font-size:.85rem;line-height:1.2}
+.nc small{font-size:.72rem;color:var(--muted);line-height:1.3}
+.nc.lock{opacity:.7;border-style:dashed;background:var(--shade)}
+.nc.lock .ic{filter:grayscale(1) brightness(.7);opacity:.55}
+.nc.r-selten{--rc:#2f7bd3}.nc.r-episch{--rc:#8a4fd6}
+.nc.r-legendär{--rc:#d9a40c}.nc.r-legendär:not(.lock){background:linear-gradient(135deg,color-mix(in srgb,#ffd84a 24%,var(--card)),var(--card) 62%)}
+.nc .rar{position:absolute;top:-10px;left:50%;transform:translateX(-50%);font-size:.62rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:1px 8px;border-radius:999px;background:var(--rc);color:#fff;white-space:nowrap}
+.nc.r-gewöhnlich .rar{background:var(--muted)}
+.stars{letter-spacing:2px;color:#d9a40c;font-size:.95rem}.stars i{font-style:normal;opacity:.3}
+.nc.big{max-width:230px;width:100%;margin:6px auto;padding:20px 12px 14px;cursor:default;--rot:-1.5deg}
+.nc.big .ic{font-size:4rem}.nc.big b{font-size:1rem}.nc.big small{font-size:.85rem}
+.pop{animation:pop .7s cubic-bezier(.2,1.6,.4,1)}
+@keyframes pop{0%{transform:scale(.3) rotate(-14deg);opacity:0}100%{transform:scale(1) rotate(-1.5deg);opacity:1}}
 @media (prefers-reduced-motion: reduce){*{scroll-behavior:auto!important;transition:none!important}}
 </style>
 
@@ -220,6 +239,7 @@ textarea.own{width:100%;min-height:140px;padding:10px;border-radius:8px;border:1
   </div>
 </div>
 
+<!--DATA-->
 <script>
 "use strict";
 /* ============ TEXTE ============ */
@@ -592,6 +612,7 @@ const TOPIC_GROUPS = {
   "Hamburg & der Norden":["Der Nord-Ostsee-Kanal","Die Geschichte des Hamburger Rathauses","Die Speicherstadt in Hamburg","Die Sturmflut von 1962","Die Insel Helgoland","Der Hamburger Hafen","Der Michel und seine Geschichte","Die Reeperbahn und St. Pauli","Die Köhlbrandbrücke","Die Hamburger Hafencity"],
   "Kultur & Literatur":["Johann Wolfgang von Goethe und sein Leben","Friedrich Schiller und die Weimarer Klassik","Die Brüder Grimm und ihre Märchen","Die Geschichte der Oper","Wie Musik auf das Gehirn wirkt"],
   "Körper & Gesundheit":["Wie das Immunsystem arbeitet","Wie der Schlaf funktioniert","Warum Bewegung gesund ist","Wie das Herz arbeitet","Wie das Auge sieht"],
+  "Nerd & Comics":["Die Geschichte der Comics","Asterix und Obelix","Manga und Anime","Die Geschichte der Videospiele","Skurrile Rekorde und unnützes Wissen","Wörter und ihre Herkunft"],
   "Huberman-Protokolle":["Licht am Morgen und die innere Uhr","Koffein, Alkohol und guter Schlaf","Der physiologische Seufzer und NSDR","Zone-2-Training und Intervalle","Kälte und Erholung nach dem Sport","Fokus und Lernen nach Huberman"]
 };
 const AI_TOPICS = Object.values(TOPIC_GROUPS).flat();
@@ -621,8 +642,9 @@ const wordsOf = t => t.paras.join(" ").split(/\s+/).filter(Boolean).length;
 const nf = n => Math.round(n).toLocaleString("de-DE");
 function hash(s){ let x=2166136261; for(const c of s){ x^=c.charCodeAt(0); x=Math.imul(x,16777619);} return x>>>0; }
 function shuffled(arr, seed){ const a=arr.slice(); let s=seed||1; for(let i=a.length-1;i>0;i--){ s=(Math.imul(s,1103515245)+12345)>>>0; const j=s%(i+1); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+const NERD = window.NERD || {texts:[],facts:[]};
 let BASE=[], IS_ADMIN=false; // gemeinsamer Grundbestand (nur im gehosteten Betrieb)
-function textById(id){ return TEXTS.find(t=>t.id===id) || BASE.find(t=>t.id===id) || (S.ai||[]).find(t=>t.id===id); }
+function textById(id){ return TEXTS.find(t=>t.id===id) || NERD.texts.find(t=>t.id===id) || BASE.find(t=>t.id===id) || (S.ai||[]).find(t=>t.id===id); }
 
 /* ============ ZUSTAND & SPEICHER ============ */
 const LS_KEY="sr-trainer-v1";
@@ -759,7 +781,14 @@ const BADGES=[
  {id:"sprint10",name:"Sprinter",desc:"10 Sprints gelaufen",ok:()=>S.sprints>=10},
  {id:"half",name:"Halbzeit",desc:"24 Lektionen geschafft",ok:()=>doneCount()>=24},
  {id:"grad",name:"Absolvent",desc:"Alle 48 Lektionen geschafft",ok:()=>doneCount()>=48}
-];
+].concat(NERD.texts.length?[
+ {id:"n1",name:"Erster Sticker",desc:"Ersten Nerd-Sticker freigeschaltet",ok:()=>nerdCount()>=1},
+ {id:"n7",name:"Halbes Album",desc:"7 Nerd-Sticker gesammelt",ok:()=>nerdCount()>=7},
+ {id:"nstar",name:"Sternensammler",desc:"20 Sterne im Nerd-Album",ok:()=>nerdStars()>=20},
+ {id:"nfact",name:"Faktenjäger",desc:"7 Nerd-Fakten des Tages abgeholt",ok:()=>((S.nerd||{}).facts||0)>=7},
+ {id:"nsec",name:"Geheimnisjäger",desc:"2 geheime Sticker gefunden",ok:()=>Object.keys((S.nerd||{}).secret||{}).length>=2},
+ {id:"nall",name:"Album komplett",desc:"Alle Nerd-Sticker gesammelt",ok:()=>nerdCount()>=NERD.texts.length}
+]:[]);
 function gain(){ if(!S.baseline) return 0; const r=recentEff(3); if(!r) return 0; return r.eff/S.baseline.eff-1; }
 function checkBadges(){ const fresh=[]; for(const b of BADGES){ if(!S.badges[b.id]&&b.ok()){ S.badges[b.id]=today(); fresh.push(b); } } return fresh; }
 function compText(){
@@ -781,7 +810,7 @@ let Tab="heute", Run=null;
 document.getElementById("tabs").addEventListener("click",e=>{ const b=e.target.closest("button[data-tab]"); if(!b) return; if(Run&&!confirmLeave()) return; Tab=b.dataset.tab; render(); });
 
 /* ============ EIGENE GESTALTUNG ============ */
-const TABS=[["heute","Heute"],["kurs","Kurs"],["lesen","Lesefenster"],["fortschritt","Fortschritt"],["grundlagen","Grundlagen"],["anpassen","Anpassen"]];
+const TABS=[["heute","Heute"],["kurs","Kurs"],["lesen","Lesefenster"]].concat(NERD.texts.length?[["nerd","Nerd-Ecke"]]:[],[["fortschritt","Fortschritt"],["grundlagen","Grundlagen"],["anpassen","Anpassen"]]);
 const FONTS={serif:{n:"Buchschrift (Literata)",v:'"Literata",Georgia,"Times New Roman",serif'},sans:{n:"Gut lesbar (Atkinson)",v:'"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif'},mono:{n:"Schreibmaschine",v:'ui-monospace,SFMono-Regular,Menlo,Consolas,monospace'}};
 const SIZES={s:{n:"Klein",px:15},m:{n:"Normal",px:16},l:{n:"Groß",px:18},xl:{n:"Sehr groß",px:20}};
 const PRESETS=[
@@ -1037,7 +1066,7 @@ function render(){
     h("span",{class:"chip"},"Tempo ",h("b",{text:nf(tgt())})," WpM"));
   const v=$("#view"); v.replaceChildren();
   if(Run){ renderRun(v); return; }
-  ({heute:viewToday,kurs:viewCourse,lesen:viewFree,fortschritt:viewProgress,grundlagen:viewBasics,anpassen:viewCustomize})[Tab](v);
+  ({heute:v=>{ viewToday(v); const c=nerdTodayCard(); if(c) v.append(c); },kurs:viewCourse,lesen:viewFree,nerd:viewNerd,fortschritt:viewProgress,grundlagen:viewBasics,anpassen:viewCustomize})[Tab](v);
   arrangeCards(v);
 }
 
@@ -1125,8 +1154,8 @@ function viewCourse(v){
 
 let FR_NEW=null, FR_SEL=null, FR_NOTE=""; // frisch geholter Text: nach dem Neuzeichnen vorwählen und bestätigen
 function viewFree(v){
-  const lib=TEXTS.filter(t=>t.kind!=="test"||S.seen[t.id]).concat(BASE,S.ai||[]);
-  const sel=h("select",{id:"fr-text"},lib.map(t=>h("option",{value:t.id},(t.base?"Grundbestand · ":t.src?(t.src.name.startsWith("Wikipedia")?"Wikipedia · ":"Klassiker · "):t.kind==="ai"?"KI · ":"")+t.title)));
+  const lib=TEXTS.filter(t=>t.kind!=="test"||S.seen[t.id]).concat(NERD.texts,BASE,S.ai||[]);
+  const sel=h("select",{id:"fr-text"},lib.map(t=>h("option",{value:t.id},(t.kind==="nerd"?"Nerd · ":t.base?"Grundbestand · ":t.src?(t.src.name.startsWith("Wikipedia")?"Wikipedia · ":"Klassiker · "):t.kind==="ai"?"KI · ":"")+t.title)));
   const mode=h("select",{id:"fr-mode"},[["line","Pacer, Zeile"],["chunk","Pacer, Sinngruppen"],["self","Eigenes Tempo mit Zeitmessung"],["rsvp","Wortanzeige"]].map(([k,l])=>h("option",{value:k},l)));
   const speed=h("input",{type:"range",id:"fr-wpm",min:120,max:900,step:10,value:Math.round(tgt())});
   const out=h("span",{class:"wpm",text:speed.value+" WpM"}); speed.addEventListener("input",()=>out.textContent=speed.value+" WpM");
@@ -1324,6 +1353,120 @@ function finishLesson(){
     fresh.length?h("div",{class:"badges"},fresh.map(b=>h("div",{class:"badge on"},h("b",{text:"Neu: "+b.name}),h("span",{text:b.desc})))):null,
     h("p",{},n===48?"Du hast den Kurs abgeschlossen. Im Reiter Fortschritt siehst du den Vergleich mit deinem Einstiegstest.":"Morgen wartet die nächste Lektion. Um 20 Uhr fragt Claude im Projekt kurz nach."),
     h("div",{class:"row"},h("button",{class:"btn primary",onclick:()=>{ Tab="heute"; render(); }},"Fertig"),h("button",{class:"btn",onclick:()=>{ Tab="fortschritt"; render(); }},"Fortschritt ansehen"))));
+}
+
+/* ============ NERD-ECKE ============ */
+const NERD_RAR=["gewöhnlich","gewöhnlich","selten","gewöhnlich","episch","selten","gewöhnlich","selten","gewöhnlich","episch","selten","gewöhnlich","legendär"];
+const rarOf=t=>NERD_RAR[NERD.texts.indexOf(t)]||"gewöhnlich";
+const NS=()=>S.nerd||(S.nerd={cards:{},factDay:"",facts:0});
+const nerdCards=()=>(S.nerd||{}).cards||{};
+const nerdCount=()=>Object.keys(nerdCards()).length;
+const nerdStars=()=>Object.values(nerdCards()).reduce((a,c)=>a+c.stars,0);
+const starTxt=n=>h("span",{class:"stars","aria-label":`${n} von 3 Sternen`},"★".repeat(n),h("i",{},"★".repeat(3-n)));
+function nerdRank(){
+  const R=[[0,"Kiosk-Gucker","👀"],[1,"Heftchen-Leser","📖"],[4,"Sammler","🎴"],[7,"Kenner","🧐"],[10,"Nerd","🤓"],[NERD.texts.length,"Nerd-Legende","👑"]], n=nerdCount();
+  let i=0; while(i+1<R.length&&n>=R[i+1][0]) i++; const nx=R[i+1];
+  return {name:R[i][1],icon:R[i][2],pct:nx?(n-R[i][0])/(nx[0]-R[i][0]):1,next:nx?nx[1]:null,need:nx?nx[0]-n:0};
+}
+function sticker(t,tag,onclick){
+  const c=nerdCards()[t.id], rar=rarOf(t);
+  return h(tag,{class:"nc r-"+rar+(c?"":" lock"),type:tag==="button"?"button":null,onclick,"aria-label":c?`${t.title}, ${c.stars} von 3 Sternen`:`${t.title}, noch gesperrt`},
+    h("span",{class:"rar"},rar),h("span",{class:"ic","aria-hidden":"true"},c?t.icon:"❔"),h("b",{text:c?t.title:"Noch gesperrt"}),
+    c?h("small",{text:t.card}):h("small",{text:"Anlesen und Fragen beantworten"}),c?starTxt(c.stars):null);
+}
+let NSEL=null, NMSG="";
+const nerdFact=()=>NERD.facts[Math.floor(Date.now()/864e5)%NERD.facts.length];
+function claimFact(){
+  const ns=NS(); if(ns.factDay===today()) return; ns.factDay=today(); ns.facts=(ns.facts||0)+1; S.xp+=5;
+  const fresh=checkBadges(); NMSG="+5 Punkte"+(fresh.length?" · Neu: "+fresh.map(b=>b.name).join(", "):""); save(); render();
+}
+function factCard(extra){
+  const got=(S.nerd||{}).factDay===today();
+  return h("div",{class:"card","data-k":"nerdfakt"},h("p",{class:"eyebrow"},"Nerd-Fakt des Tages"),h("p",{class:"prose",style:"margin:0"},nerdFact()),
+    h("div",{class:"row"},got?h("span",{class:"muted"},"✓ Heute abgeholt"+(NMSG?" · "+NMSG:"")):h("button",{class:"btn",onclick:claimFact},"Gewusst? +5 Punkte"),extra||null));
+}
+function nerdTodayCard(){
+  if(!NERD.facts.length) return null;
+  const c=factCard(h("button",{class:"btn ghost",onclick:()=>{ Tab="nerd"; render(); }},"Zur Nerd-Ecke")); c.style.marginTop="16px"; return c;
+}
+function nerdRead(t){
+  openReader({text:t,mode:"self",title:t.title,onDone:()=>{ S.seen[t.id]=(S.seen[t.id]||0)+1; Quiz.open(t,c=>nerdDone(t,c)); }});
+}
+function nerdDone(t,c){
+  const v=$("#view"), right=Math.round(c*t.qs.length), stars=right>=t.qs.length?3:right>=t.qs.length-1?2:right>=t.qs.length-2?1:0;
+  if(!stars){ v.replaceChildren(h("div",{class:"card"},h("p",{class:"eyebrow"},"Fast"),h("h2",{text:`${right} von ${t.qs.length} richtig`}),h("p",{},"Für den Sticker brauchst du mindestens die Hälfte. Lies den Text noch einmal in Ruhe, dann klappt es."),
+    h("div",{class:"row"},h("button",{class:"btn primary",onclick:()=>nerdRead(t)},"Nochmal lesen"),h("button",{class:"btn ghost",onclick:()=>render()},"Zurück zum Album")))); return; }
+  const ns=NS(), old=ns.cards[t.id], oldStars=old?old.stars:0, rk0=nerdRank().name;
+  const xp=(old?0:20)+10*Math.max(0,stars-oldStars);
+  ns.cards[t.id]={date:old?old.date:today(),stars:Math.max(oldStars,stars)}; S.xp+=xp;
+  const fresh=checkBadges(), rk1=nerdRank(); save(); NSEL=t.id;
+  const done=nerdCount()>=NERD.texts.length;
+  v.replaceChildren(h("div",{class:"card"},
+    h("p",{class:"eyebrow"},old?"Sticker verbessert":"Neuer Sticker"),
+    (()=>{ const s=sticker(t,"div"); s.classList.add("big","pop"); return s; })(),
+    h("p",{style:"text-align:center;margin:0"},`${right} von ${t.qs.length} richtig · `+(xp?`+${xp} Punkte`:"keine neuen Punkte, du hattest schon so viele Sterne")),
+    rk0!==rk1.name?h("p",{class:"notice",style:"border-left-color:var(--good)"},`Neuer Rang: ${rk1.icon} ${rk1.name}`):null,
+    done?h("p",{class:"notice",style:"border-left-color:var(--good)"},"Das Album ist komplett."):null,
+    fresh.length?h("div",{class:"badges"},fresh.map(b=>h("div",{class:"badge on"},h("b",{text:"Neu: "+b.name}),h("span",{text:b.desc})))):null,
+    h("div",{class:"row"},h("button",{class:"btn primary",onclick:()=>render()},"Zum Album"),stars<3?h("button",{class:"btn",onclick:()=>nerdRead(t)},"Nochmal für mehr Sterne"):null)));
+}
+
+/* Geheimes: Easter Eggs und ein Geheimlevel. Geheime Sticker stehen in S.nerd.secret und tauchen erst nach dem Fund im Album auf. */
+const SECRETS={
+  konami:{icon:"🕹️",title:"Konami-Code",card:"Hoch, hoch, runter, runter, links, rechts, links, rechts, B, A: der berühmteste Cheat der Spielegeschichte.",hint:"Ein Code aus alten Spielen, auf der Tastatur eingegeben."},
+  ei:{icon:"🥚",title:"Das Osterei",card:"Du hast siebenmal auf den Titel getippt. Easter Eggs heißen so, weil Programmierer sie wie Ostereier verstecken.",hint:"Manche Titel mögen es, wenn man oft auf sie tippt."},
+  blitz:{icon:"🏆",title:"Quiz-Champion",card:"Acht Blitzfragen, höchstens eine falsch. Das schaffen nur Leute, die wirklich gelesen haben.",hint:"Das Geheimlevel mit den Blitzfragen."}
+};
+function findSecret(id){
+  const ns=NS(); if(ns.secret&&ns.secret[id]) return false; ns.secret=Object.assign({},ns.secret,{[id]:today()}); S.xp+=40;
+  const fresh=checkBadges(); save(); const sc=SECRETS[id];
+  const msg=h("div",{role:"status",style:"position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:90;max-width:90vw;background:var(--card);border:2px solid #d9a40c;border-radius:14px;padding:12px 16px;box-shadow:0 8px 24px var(--shade);text-align:center"},
+    h("b",{},`${sc.icon} Geheimer Sticker: ${sc.title}`),h("div",{class:"muted"},"+40 Punkte"+(fresh.length?" · Neu: "+fresh.map(b=>b.name).join(", "):"")));
+  document.body.append(msg); setTimeout(()=>{ msg.remove(); if(Tab==="nerd"&&!Run&&!RD.open) render(); },3500); return true;
+}
+(function(){
+  const seq=["ArrowUp","ArrowUp","ArrowDown","ArrowDown","ArrowLeft","ArrowRight","ArrowLeft","ArrowRight","b","a"]; let k=0, taps=0, tt=0;
+  document.addEventListener("keydown",e=>{ if(!NERD.texts.length||RD.open) return; const key=e.key.length===1?e.key.toLowerCase():e.key; k=key===seq[k]?k+1:(key===seq[0]?1:0); if(k===seq.length){ k=0; findSecret("konami"); } });
+  const b=document.getElementById("brand-h"); if(b) b.addEventListener("click",()=>{ if(!NERD.texts.length) return; clearTimeout(tt); tt=setTimeout(()=>{ taps=0; },1500); if(++taps>=7){ taps=0; findSecret("ei"); } });
+})();
+function blitzLevel(){
+  const pool=NERD.texts.flatMap(t=>t.qs.map(q=>({q:q.q,a:q.a}))), picks=shuffled(pool,Date.now()>>>0).slice(0,8);
+  const t={qs:picks}, v=$("#view");
+  Quiz.open(t,c=>{
+    const right=Math.round(c*8), ok=right>=7; let got=false;
+    if(ok) got=findSecret("blitz");
+    v.replaceChildren(h("div",{class:"card"},h("p",{class:"eyebrow"},"Geheimlevel: Blitzquiz"),h("h2",{text:`${right} von 8 richtig`}),
+      h("p",{},ok?(got?"Geschafft, der geheime Sticker ist dein.":"Wieder geschafft. Der Sticker gehört dir schon."):"Für den Sticker brauchst du mindestens 7 richtige. Die Fragen sind jedes Mal neu gemischt."),
+      h("div",{class:"row"},h("button",{class:"btn primary",onclick:()=>render()},"Zurück zur Nerd-Ecke"),ok?null:h("button",{class:"btn",onclick:blitzLevel},"Nochmal"))));
+  });
+}
+function secretCard(){
+  const sec=(S.nerd||{}).secret||{}, open=nerdCount()>=10;
+  const cells=Object.entries(SECRETS).map(([id,sc])=>{ const on=!!sec[id];
+    return h("div",{class:"nc r-legendär"+(on?"":" lock")},h("span",{class:"rar"},"geheim"),h("span",{class:"ic","aria-hidden":"true"},on?sc.icon:"🔒"),h("b",{text:on?sc.title:"???"}),h("small",{text:on?sc.card:"Hinweis: "+sc.hint}),on?starTxt(3):null); });
+  return h("div",{class:"card","data-k":"geheim",style:"margin-top:16px"},h("h3",{text:"Geheimfach"}),
+    h("p",{class:"muted",style:"margin:0"},"Hier verstecken sich Sticker, die nirgends angekündigt sind. Jeder gefundene bringt 40 Punkte."),
+    h("div",{class:"album"},cells),
+    open?h("div",{class:"row"},h("button",{class:"btn primary",onclick:blitzLevel},"Geheimlevel: Blitzquiz starten"),h("span",{class:"muted"},"8 Fragen aus allen Texten, 7 richtig für den Sticker")):h("p",{class:"muted",style:"margin:0"},`🔒 Ein Geheimlevel wartet. Es öffnet sich bei 10 Stickern (dir fehlen noch ${10-nerdCount()}).`));
+}
+function viewNerd(v){
+  const cards=nerdCards(), total=NERD.texts.length, n=nerdCount(), rk=nerdRank();
+  v.append(h("div",{class:"card"},h("p",{class:"eyebrow"},"Nerd-Ecke · Comics und nutzloses Wissen"),h("h2",{text:`${rk.icon} ${rk.name}`}),bar(rk.pct),
+    h("p",{class:"muted",style:"margin:0"},`${n} von ${total} Stickern · ${nerdStars()} von ${total*3} Sternen`+(rk.next?` · noch ${rk.need} bis ${rk.next}`:" · Album komplett")),
+    h("p",{class:"muted",style:"margin:0;font-size:.9rem"},"Jeder Text dauert etwa eine Minute. Für Sticker und Sterne beantwortest du danach vier Fragen: 2 richtig gibt einen Stern, 3 zwei, 4 drei. Neue Sticker bringen 20 Punkte, jeder Stern 10.")));
+  const next=NERD.texts.find(t=>!cards[t.id])||NERD.texts.slice().sort((a,b)=>cards[a.id].stars-cards[b.id].stars)[0];
+  v.append(h("div",{class:"card","data-k":"nerdheute",style:"margin-top:16px"},h("p",{class:"eyebrow"},cards[next.id]?"Noch mehr Sterne holen":"Heute zum Anlesen"),
+    h("h3",{text:`${next.icon} ${next.title}`}),h("p",{class:"muted",style:"margin:0"},next.card),
+    h("div",{class:"row"},h("button",{class:"btn primary",onclick:()=>nerdRead(next)},cards[next.id]?"Nochmal lesen":"Anlesen"))));
+  v.append(factCard());
+  const sel=NSEL&&NERD.texts.find(t=>t.id===NSEL);
+  if(sel){ const c=cards[sel.id], s=sticker(sel,"div"); s.classList.add("big");
+    v.append(h("div",{class:"card","data-k":"nerddetail",style:"margin-top:16px"},h("p",{class:"eyebrow"},c?"Dein Sticker":"Noch gesperrt"),s,
+      c?h("p",{class:"prose",style:"margin:0"},sel.card):h("p",{class:"muted",style:"margin:0"},"Lies den Text und beantworte mindestens die Hälfte der Fragen, dann gehört dir der Sticker."),
+      h("div",{class:"row"},h("button",{class:"btn primary",onclick:()=>nerdRead(sel)},c?(c.stars<3?"Nochmal lesen für mehr Sterne":"Nochmal lesen"):"Anlesen"),h("button",{class:"btn ghost",onclick:()=>{ NSEL=null; render(); }},"Schließen")))); }
+  v.append(h("div",{class:"card","data-k":"album",style:"margin-top:16px"},h("h3",{text:"Sammelalbum"}),h("p",{class:"muted",style:"margin:0"},"Tippe einen Sticker an. Die Farbe zeigt die Seltenheit: grau gewöhnlich, blau selten, lila episch, gold legendär."),
+    h("div",{class:"album"},NERD.texts.map(t=>sticker(t,"button",()=>{ NSEL=t.id; render(); window.scrollTo(0,0); })))));
+  v.append(secretCard());
 }
 
 /* ============ QUIZ ============ */
