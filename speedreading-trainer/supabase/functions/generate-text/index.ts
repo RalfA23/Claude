@@ -102,15 +102,17 @@ function pickPassage(paras: string[], start: number) {
 }
 
 // One retry, generous timeout; the failing host and status end up in `detail` so a failure can be diagnosed.
+const where = (u: string) => { const x = new URL(u); return (x.host + x.pathname).slice(0, 60); };
+
 async function fetchOk(url: string, accept: string, timeoutMs: number, attempts = 2) {
   let detail = "";
   for (let attempt = 0; attempt < attempts; attempt++) {
     try {
       const r = await fetch(url, { headers: { "User-Agent": UA, Accept: accept }, redirect: "follow", signal: AbortSignal.timeout(timeoutMs) });
       if (r.ok) return r;
-      detail = `${new URL(url).host} HTTP ${r.status}`;
+      detail = `${where(url)} HTTP ${r.status}`;
     } catch (e) {
-      detail = `${new URL(url).host} ${(e as Error).name}`;
+      detail = `${where(url)} ${(e as Error).name}`;
     }
   }
   throw new SourceError("fetch_failed", 502, detail);
@@ -206,13 +208,22 @@ async function fromGutenberg(query: string) {
   const book = books.find((b) => b.died > 0);
   if (!book) throw new SourceError("not_public_domain", 422);
   const died = book.died;
-  let r: Response;
-  try {
-    if (!book.textUrl) throw new Error("no url");
-    r = await fetchOk(book.textUrl, "text/plain", 25000);
-  } catch {
-    r = await fetchOk(`https://www.gutenberg.org/cache/epub/${book.id}/pg${book.id}.txt`, "text/plain", 25000);
+  // Gutenberg keeps the plain text under several names depending on the book, so try them in turn.
+  const id = book.id;
+  const urls = [book.textUrl, `https://www.gutenberg.org/ebooks/${id}.txt.utf-8`, `https://www.gutenberg.org/cache/epub/${id}/pg${id}.txt`,
+    `https://www.gutenberg.org/files/${id}/${id}-0.txt`, `https://www.gutenberg.org/files/${id}/${id}.txt`]
+    .filter((u, i, a): u is string => !!u && a.indexOf(u) === i);
+  let r: Response | null = null;
+  let lastErr: SourceError | null = null;
+  for (const u of urls) {
+    try {
+      r = await fetchOk(u, "text/plain", 25000, 1);
+      break;
+    } catch (e) {
+      if (e instanceof SourceError) lastErr = e; else throw e;
+    }
   }
+  if (!r) throw new SourceError("fetch_failed", 502, `${lastErr?.detail ?? "kein Text"} (Buch ${id})`);
   let raw = (await r.text()).replace(/\r\n?/g, "\n");
   const a = raw.search(/\*\*\* ?START OF[^\n]*\n/);
   if (a >= 0) raw = raw.slice(raw.indexOf("\n", a) + 1);
