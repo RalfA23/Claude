@@ -177,6 +177,10 @@ details.tg summary .tl{flex:1}
 .tgrip:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 details.tg.carrying{outline:2px dashed var(--accent);outline-offset:3px;box-shadow:0 8px 24px var(--shade)}
 .tgs{display:flex;flex-direction:column;gap:12px}
+details.tg.own{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 7%,var(--card))}
+.tchip .x{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;margin-left:8px;border-radius:50%;background:color-mix(in srgb,var(--ink) 14%,transparent);font-size:.7rem;line-height:1;vertical-align:middle}
+.tchip:hover .x{background:var(--accent);color:var(--paper)}
+.thint{margin:6px 0 2px;font-size:.8rem}
 details.tg .tchips{padding:6px 0 4px}
 textarea.own{width:100%;min-height:140px;padding:10px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;resize:vertical}
 .big{font-size:2.2rem;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.1}
@@ -810,13 +814,13 @@ function topicsCard(){
     if(OpenGroups.has(g)||list.some(t=>sel.has(t))) d.open=true;
     d.addEventListener("toggle",()=>{ if(d.open) OpenGroups.add(g); else OpenGroups.delete(g); });
     return {g,el:d}; });
-  if(custom.length) groups.push({g:CUSTOM_G,el:h("details",{class:"tg",open:true,"data-g":CUSTOM_G},h("summary",{},h("span",{class:"tl"},`Meine eigenen Themen · ${custom.length}`),grip()),h("div",{class:"tchips"},custom.map(t=>h("button",{class:"tchip","aria-pressed":"true",title:"Zum Entfernen anklicken",onclick:()=>flip(t)},t+" ✕"))),h("p",{class:"muted",style:"margin:4px 0 0;font-size:.85rem"},"Antippen entfernt ein Thema."))});
-  const ord=Array.isArray(prefs().topicorder)?prefs().topicorder:[], rk=g=>{ const i=ord.indexOf(g); return i<0?1e6:i; };
+  if(custom.length) groups.push({g:CUSTOM_G,el:h("details",{class:"tg own",open:true,"data-g":CUSTOM_G},h("summary",{},h("span",{class:"tl"},`Meine eigenen Themen · ${custom.length}`),grip()),h("div",{class:"tchips"},custom.map(t=>h("button",{class:"tchip","aria-pressed":"true",title:"Zum Entfernen anklicken","aria-label":t+" entfernen",onclick:()=>flip(t)},t,h("span",{class:"x","aria-hidden":"true"},"✕")))),h("p",{class:"muted thint"},"Antippen entfernt ein Thema."))});
+  const ord=Array.isArray(prefs().topicorder)?prefs().topicorder:[], rk=g=>{ const i=ord.indexOf(g); return i<0?(g===CUSTOM_G?-1:1e6):i; };
   groups.sort((a,b)=>rk(a.g)-rk(b.g));
   return h("div",{class:"card pref",style:"margin-top:16px"},h("h3",{text:"Meine Themen"}),
     h("p",{class:"muted",style:"margin:0"},"Neue Übungstexte entstehen zu den Themen, die du hier wählst. Ist nichts gewählt, kommt alles gemischt. Dazu kannst du eigene Themen eintragen, auch Klassiker der Literatur oder ein Wikipedia-Stichwort."),
-    h("div",{class:"tgs",id:"tgs"},groups.map(x=>x.el)),
-    h("label",{class:"field"},"Eigenes Thema hinzufügen",h("div",{class:"row",style:"flex-wrap:nowrap"},inp,h("button",{class:"btn",onclick:add},"Hinzufügen"))));
+    h("label",{class:"field"},"Eigenes Thema hinzufügen",h("div",{class:"row",style:"flex-wrap:nowrap"},inp,h("button",{class:"btn",onclick:add},"Hinzufügen"))),
+    h("div",{class:"tgs",id:"tgs"},groups.map(x=>x.el)));
 }
 function viewCustomize(v){
   v.append(h("div",{class:"card pref"},h("h3",{text:"So machst du die Oberfläche zu deiner"}),
