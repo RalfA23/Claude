@@ -30,22 +30,38 @@ window.addEventListener("DOMContentLoaded", async function () {
   var db = await window.claude.use("db");
   var POOL_MIN = 50;
   // Free tactics (no book file): random puzzles from the public Lichess puzzle database, kept in the user's own account.
-  async function loadPool(status) {
+  async function loadPool(status, d) {
     var items = [];
     try { var ps = await db.doc("puzzles/pool").get(); if (ps && ps.exists && ps.data().items) items = ps.data().items; } catch (e) {}
     if (items.length >= POOL_MIN) return items;
     var seen = {}; items.forEach(function (i) { seen[i.id] = 1; });
-    for (var tries = 0; items.length < POOL_MIN && tries < 120; tries += 4) {
+    // Stufen nach Ziel-Wertung: Aufgaben von knapp unter der aktuellen Wertung bis knapp über dem Ziel, aufsteigend sortiert.
+    var z = 0, r = 0;
+    try { var u = await db.doc("einstellungen/ui").get(); if (u && u.exists) z = +u.data().ziel || 0; } catch (e) {}
+    try { var rk = Object.keys((d && d.rate) || {}).sort(); if (rk.length) r = +d.rate[rk[rk.length - 1]] || 0; } catch (e) {}
+    var fresh = !items.length, lo = 0, hi = 99999, levels = [null];
+    if (fresh && (z || r)) {
+      z = z || r + 300; lo = Math.max(400, r ? r - 150 : z - 700); hi = Math.max(z + 100, lo + 300);
+      levels = [["easiest", -600], ["easier", -300], ["normal", 0], ["harder", 300], ["hardest", 600]].filter(function (l) { return 1500 + l[1] >= lo - 250 && 1500 + l[1] <= hi + 250; }).map(function (l) { return l[0]; });
+      if (!levels.length) levels = [null];
+    }
+    var all = [];
+    for (var tries = 0; items.length < POOL_MIN && tries < 400; tries += 4) {
       status("Aufgaben werden geladen … " + items.length + " von " + POOL_MIN);
-      var rs = await Promise.all([0, 1, 2, 3].map(function () {
-        return fetch("https://lichess.org/api/puzzle/next").then(function (r) { return r.json(); }).catch(function () { return null; });
+      var rs = await Promise.all([0, 1, 2, 3].map(function (k) {
+        var lv = levels[(tries / 4 + k) % levels.length];
+        return fetch("https://lichess.org/api/puzzle/next" + (lv ? "?difficulty=" + lv : "")).then(function (r2) { return r2.json(); }).catch(function () { return null; });
       }));
       rs.forEach(function (j) {
         if (!j || !j.puzzle || !j.game || seen[j.puzzle.id]) return;
         seen[j.puzzle.id] = 1;
-        items.push({ id: j.puzzle.id, rating: j.puzzle.rating, pgn: j.game.pgn, solution: j.puzzle.solution, themes: j.puzzle.themes });
+        var it = { id: j.puzzle.id, rating: j.puzzle.rating, pgn: j.game.pgn, solution: j.puzzle.solution, themes: j.puzzle.themes };
+        if (j.puzzle.rating >= lo && j.puzzle.rating <= hi) items.push(it); else all.push(it);
       });
+      if (tries >= 160 && items.length < 25) { while (items.length < POOL_MIN && all.length) items.push(all.shift()); }
     }
+    while (items.length < POOL_MIN && all.length) items.push(all.shift());
+    if (fresh) items.sort(function (a, b) { return a.rating - b.rating; });
     if (items.length) { try { await db.doc("puzzles/pool").set({ items: items }); } catch (e) {} }
     return items;
   }
@@ -64,7 +80,7 @@ window.addEventListener("DOMContentLoaded", async function () {
       var note = document.createElement("p");
       note.style.cssText = "max-width:420px;margin:48px auto;font-family:system-ui,sans-serif;color:#5E6A61";
       document.body.prepend(note);
-      var items = await loadPool(function (t) { note.textContent = t; });
+      var items = await loadPool(function (t) { note.textContent = t; }, d);
       if (!items.length) { note.innerHTML = "Die Aufgaben konnten gerade nicht geladen werden. <a href='' onclick='location.reload();return false'>Noch einmal versuchen</a>"; return; }
       note.remove();
       d.wp = items; d.lines = [];
