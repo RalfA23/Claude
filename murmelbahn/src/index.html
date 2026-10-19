@@ -27,7 +27,10 @@ button.primary{background:var(--accent);color:var(--bg);border-color:var(--accen
 canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:manipulation;cursor:crosshair}
 #toast{position:absolute;left:50%;top:14px;transform:translateX(-50%);max-width:min(92%,440px);background:var(--panel);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border:1px solid var(--line);border-radius:12px;padding:10px 14px;text-align:center;font-size:.9rem;transition:opacity .8s;pointer-events:none}
 #toast.off{opacity:0}
-@media (max-width:560px){header .lbl{display:none}header .info{order:5;flex-basis:100%}}
+.anz{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:10px;padding:0 10px;min-height:38px}
+.anz input{width:110px;accent-color:var(--accent)}
+.anz b{min-width:2ch;text-align:right;font-variant-numeric:tabular-nums}
+@media (max-width:560px){.anz input{width:80px}header .lbl{display:none}header .info{order:5;flex-basis:100%}}
 </style>
 </head>
 <body>
@@ -37,7 +40,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
   <span class="info" id="info"></span>
   <div class="btns">
     <button class="primary" id="neu" type="button" title="Neue Bahn bauen">🔀<span class="lbl"> Neue Bahn</span></button>
-    <button id="mehr" type="button" title="Zehn Murmeln dazu">＋10</button>
+    <label class="anz" title="Anzahl der Murmeln">🔮<input id="anz" type="range" min="1" max="60" step="1" aria-label="Anzahl der Murmeln"><b id="anzv"></b></label>
     <button id="slow" type="button" title="Zeitlupe">🐢<span class="lbl"> Zeitlupe</span></button>
     <button id="ton" type="button" title="Klang an oder aus">🔇</button>
     <button id="pause" type="button" title="Anhalten">⏸</button>
@@ -45,18 +48,20 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
 </header>
 <div id="stage">
   <canvas id="cv" aria-label="Murmelbahn"></canvas>
-  <div id="toast">Jede Bahn wird beim Start neu gebaut. Tippe auf die Bahn, um eine Murmel fallen zu lassen.</div>
+  <div id="toast">Jede Bahn wird beim Start neu gebaut. Tippe auf die Bahn, um eine Murmel fallen zu lassen. Mit dem Regler oben stellst du die Anzahl ein.</div>
 </div>
 <script>
 (function () {
   "use strict";
   // Welt: 1000 Einheiten breit, Höhe passt sich dem Bildschirm an. Die Physik rechnet nur in Welt-Einheiten.
-  var W = 1000, H = 1600, L = 12, RW = 905, PW = RW - L, G = 1250, MAXM = 90;
+  var W = 1000, H = 1600, L = 12, RW = 905, PW = RW - L, G = 1250, MAXM = 60;
   var cv = document.getElementById("cv"), ctx = cv.getContext("2d");
   var stage = document.getElementById("stage");
   var segs = [], pegs = [], bumpers = [], wheels = [], marbles = [], pending = 0, spawnT = 0;
   var seed = 0, rng = Math.random, theme = null, palette = [], chute = null;
   var scale = 1, ox = 0, oy = 0, dpr = 1, staticCv = document.createElement("canvas");
+  var target = 8;
+  try { var st = parseInt(localStorage.getItem("murmelbahn-anzahl"), 10); if (st >= 1 && st <= 60) target = st; } catch (e) {}
   var T = 0, paused = false, slow = false, soundOn = false;
   var stats = {lifted: 0, respawned: 0, nudged: 0};
 
@@ -258,7 +263,6 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
       if (theme.trails) { m.trail.push(m.x, m.y); if (m.trail.length > 24) m.trail.splice(0, 2); }
     });
     if (pending > 0) { spawnT -= dt; if (spawnT <= 0 && freeAtRelease() && marbles.length < MAXM) { var nm = newMarble(885, 80); nm.vx = -150; marbles.push(nm); pending--; spawnT = .22; } }
-    if (marbles.length >= MAXM) pending = 0;
     bumpers.forEach(function (b) { b.flash = Math.max(0, b.flash - dt * 3); });
     pegs.forEach(function (p) { p.glow = Math.max(0, p.glow - dt * 4); });
   }
@@ -382,7 +386,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
     var nh = Math.round(Math.max(1300, Math.min(2400, W * ch / cw)));
     if (!built || Math.abs(nh - H) / H > .08) {
       H = nh; generate(seed || newSeed());
-      var keep = Math.max(16, marbles.length); marbles = []; pending = keep; built = true;
+      marbles = []; pending = target; built = true;
     }
     scale = Math.min(cw / W, ch / H); ox = (cw - W * scale) / 2; oy = (ch - H * scale) / 2;
     drawStatic();
@@ -403,9 +407,23 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
   }
 
   document.getElementById("neu").addEventListener("click", function () {
-    var keep = Math.max(16, Math.min(40, marbles.length)); seed = 1 + Math.floor(Math.random() * 99999); generate(seed); drawStatic(); marbles = []; pending = keep;
+    seed = 1 + Math.floor(Math.random() * 99999); generate(seed); drawStatic(); marbles = []; pending = target;
   });
-  document.getElementById("mehr").addEventListener("click", function () { pending += 10; });
+  // Murmelanzahl: Regler im Kopf, im Browser gemerkt. Zu viele Murmeln werden entfernt, zuerst die im Aufzug.
+  var anz = document.getElementById("anz"), anzv = document.getElementById("anzv");
+  function setTarget(n, fromTap) {
+    target = Math.max(1, Math.min(MAXM, Math.round(n))); anz.value = target; anzv.textContent = target;
+    try { localStorage.setItem("murmelbahn-anzahl", String(target)); } catch (e) {}
+    if (fromTap) return;
+    var have = marbles.length + pending;
+    if (have < target) pending += target - have;
+    else {
+      var extra = have - target, p = Math.min(pending, extra); pending -= p; extra -= p;
+      while (extra-- > 0) { var i = marbles.findIndex(function (m) { return m.lift; }); marbles.splice(i >= 0 ? i : marbles.length - 1, 1); }
+    }
+  }
+  anz.max = MAXM; anz.addEventListener("input", function () { setTarget(+anz.value); });
+  setTarget(target, true);
   document.getElementById("slow").addEventListener("click", function () { slow = !slow; this.classList.toggle("on", slow); });
   document.getElementById("pause").addEventListener("click", function () { paused = !paused; this.textContent = paused ? "▶" : "⏸"; this.classList.toggle("on", paused); });
   document.getElementById("ton").addEventListener("click", function () {
@@ -416,7 +434,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
   cv.addEventListener("pointerdown", function (e) {
     var r = cv.getBoundingClientRect(), x = (e.clientX - r.left - ox) / scale, y = (e.clientY - r.top - oy) / scale;
     if (x < L + 16 || x > RW - 16 || y < 20 || y > H - 210 || marbles.length >= MAXM) return;
-    marbles.push(newMarble(x, y));
+    marbles.push(newMarble(x, y)); setTarget(marbles.length + pending, true);
     document.getElementById("toast").classList.add("off");
   });
   window.addEventListener("resize", resize);

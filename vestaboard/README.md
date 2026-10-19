@@ -1,0 +1,13 @@
+# Vestaboard
+
+Die Fallblatt-Anzeige aus Ralfs Mac-Bildschirmschoner als Kachel im Lernportal, unter `/vestaboard/`, ohne Anmeldung. Grundlage ist die Browser-Version „Mein Vestaboard“ (6×22 Kacheln, Split-Flap-Animation, Zeichensatz und acht Farbkacheln wie das Original).
+
+- Startet in der Rotation: Uhr, Wetter für Hamburg, Zitat der Stunde, Tagesschau-Schlagzeilen und Sprüche im Wechsel (alle 20 Sekunden). Countdowns sind vorerst aus.
+- Wetter (Open-Meteo) und Tagesschau holt die Seite selbst. Termine gibt es hier nicht, die kennt nur der Bildschirmschoner auf dem Mac über sein Hintergrundskript.
+- Eigener Text mit Farbkacheln, Uhr-Modus, Vollbild, Bildschirmschoner-Modus und Ton (Klackern erst nach „Ton an“). Einstellungen liegen im Browser.
+
+| Pfad | Inhalt |
+|---|---|
+| `src/index.html` | Die ganze Anzeige. |
+| `public/` | Manifest und Icon. |
+| `build.mjs` | Kopiert alles nach `dist/`. |
