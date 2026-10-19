@@ -21,7 +21,6 @@ const fill = (key, value) => {
 // The Woodpecker set (book text) and the personal game data are NOT part of this repository: the repository is public and the
 // book is copyrighted. In the hosted app they live in the user's own account (document "daten/start") and are loaded after login.
 // For local tests, SCH_DATA_FILE=<seed file> embeds them instead: node build.mjs with SCH_DATA_FILE=schach-daten.json.
-const hosted = !!(process.env.SR_SUPABASE_URL && process.env.SR_SUPABASE_ANON_KEY);
 let seed = { wp: [], lines: [], ef: [], rate: {} };
 if (process.env.SCH_DATA_FILE) seed = JSON.parse(readFileSync(process.env.SCH_DATA_FILE, "utf8")).docs["daten/start"];
 fill("__WP__", safe(JSON.stringify(seed.wp)));
@@ -29,8 +28,8 @@ fill("__RATE__", JSON.stringify(seed.rate));
 fill("__LINES__", JSON.stringify(seed.lines));
 fill("__EF__", safe(JSON.stringify(seed.ef)));
 fill("__CHESSJS__", safe(read("src/data/chess.js")));
-// Hosted: the main script waits until login and data are there (see shell.html), so it is stored inert here.
-if (hosted && !process.env.SCH_DATA_FILE) {
+// Without an embedded seed the main script waits until login and data are there (see shell.html), so it is stored inert here.
+if (!process.env.SCH_DATA_FILE) {
   const i = trainer.lastIndexOf("<script>");
   if (i < 0) throw new Error("Hauptskript nicht gefunden");
   trainer = trainer.slice(0, i) + '<script type="text/plain" id="sch-main">' + trainer.slice(i + "<script>".length);

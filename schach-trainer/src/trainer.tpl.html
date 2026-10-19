@@ -1,6 +1,6 @@
 <title>Ralfs Schachtraining</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Atkinson+Hyperlegible:wght@400;700&family=Literata:wght@400;600&display=swap">
 <style>
 /* Layout: Kopfzeile mit Reitern, darunter je Reiter eine Arbeitsfläche; Brett links, Steuerung rechts, mobil gestapelt */
 :root{
@@ -171,31 +171,83 @@ td{border-bottom:1px solid var(--line);padding:7px 8px;vertical-align:top}
 td.typ{white-space:nowrap}
 td.typ b{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:6px;background:var(--c)}
 .empty{color:var(--muted);font-size:.9rem;padding:12px 0}
+
+/* Tagesablauf, Zitat, Anpassen, Seitenleisten */
+.stepn{display:inline-flex;align-items:center;justify-content:center;width:1.6em;height:1.6em;border-radius:50%;background:var(--accent);color:var(--accent-ink);font-family:var(--f-mono);font-size:.8rem;font-weight:600;margin-right:8px;flex:none}
+.here{display:inline-block;font-size:.78rem;font-weight:700;letter-spacing:.03em;padding:3px 9px;border-radius:999px;background:var(--warn);color:#fff;white-space:nowrap}
+ol.steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+ol.steps li{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:8px}
+ol.steps li.here-now{border-color:var(--warn);box-shadow:0 0 0 2px color-mix(in srgb,var(--warn) 30%,transparent)}
+ol.steps li.done{opacity:.75}
+ol.steps li.done .stepn{background:var(--good)}
+ol.steps li.opt .stepn{background:var(--muted)}
+ol.steps .t{flex:1;min-width:0}
+ol.steps .t b{display:block}
+ol.steps .t span{font-size:.85rem;color:var(--muted)}
+ol.steps .t .here{display:table;margin-top:4px;font-style:normal;color:#fff}
+.quote blockquote{margin:0;font-family:var(--f-display);font-size:1.35rem;line-height:1.3;font-weight:500;text-wrap:balance}
+.quote cite{display:block;margin-top:6px;font-style:normal;font-size:.85rem;color:var(--muted)}
+.quote .src{font-size:.72rem;color:var(--muted);margin-top:4px}
+.side{display:none}
+.side .card{padding:14px}
+.side h3{margin:0 0 8px}
+.side .bar{height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin:4px 0 10px}
+.side .bar>i{display:block;height:100%;background:var(--accent)}
+.side .row{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:.9rem}
+.side .row b{font-family:var(--f-display);font-size:1.3rem;font-weight:600}
+.side .rule{font-size:.95rem;line-height:1.5;border-left:3px solid var(--accent);padding-left:10px;margin:0}
+.side ol.steps li{padding:8px 10px}
+@media (min-width:1180px){
+  .wrap{max-width:1400px;display:grid;grid-template-columns:minmax(220px,1fr) minmax(0,820px) minmax(220px,1fr);column-gap:28px;align-content:start}
+  .wrap>header,.wrap>#dbmsg,.wrap>section.view{grid-column:2}
+  .wrap>.side{display:flex;flex-direction:column;gap:12px;grid-row:1/span 6;position:sticky;top:16px;align-self:start;max-height:calc(100vh - 32px);overflow:auto;scrollbar-width:none;padding-top:8px}
+  .wrap>#sideL{grid-column:1}.wrap>#sideR{grid-column:3}
+  body.noside .wrap>.side{display:none}
+  body.noside .wrap{display:block;max-width:1000px}
+  body:not(.noside) .qinline,body:not(.noside) #dayCard{display:none}
+}
+nav.tabs{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;max-width:100%;-webkit-overflow-scrolling:touch}
+nav.tabs::-webkit-scrollbar{display:none}
+nav.tabs button{white-space:nowrap;flex:none;touch-action:pan-x}
+nav.tabs button.drag{background:var(--line);transform:scale(1.08);box-shadow:0 4px 14px rgba(0,0,0,.25);cursor:grabbing;position:relative;z-index:1}
+nav.tabs.dragging button{cursor:grabbing}
+.pref{display:flex;flex-direction:column;gap:10px;margin-bottom:14px}
+.pref h2,.pref h3{margin:0}
+.swatches{display:flex;flex-wrap:wrap;gap:8px}
+.swatch{display:flex;flex-direction:column;align-items:center;gap:4px;font:inherit;font-size:.78rem;color:var(--ink);background:none;border:2px solid transparent;border-radius:8px;padding:4px;cursor:pointer}
+.swatch[aria-pressed="true"]{border-color:var(--accent)}
+.swatch i{width:44px;height:30px;border-radius:6px;border:1px solid var(--line);display:block}
+.tabrow{display:grid;grid-template-columns:auto auto minmax(0,1fr);gap:8px;align-items:center}
+.tabrow label{display:flex;gap:6px;align-items:center;font-size:.9rem;white-space:nowrap}
+.tabrow input[type=text]{width:100%}
+.tabrow input[type=checkbox]{width:auto}
+.pref label.chk{display:flex;gap:8px;align-items:center}
+.pref label.chk input{width:auto}
+.colors{display:flex;flex-wrap:wrap;gap:14px}
+.colors input[type=color]{width:56px;height:36px;padding:2px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 
 <div class="wrap">
+  <aside class="side" id="sideL" aria-label="Zitat und Tagesablauf"></aside>
+  <aside class="side" id="sideR" aria-label="Zahlen und Regel des Tages"></aside>
   <header class="top">
-    <h1>Ralfs Schachtraining<small>Ziel Lichess Rapid 1500 · 30 Minuten am Tag</small></h1>
-    <nav class="tabs" role="tablist">
-      <button role="tab" id="tab-heute" aria-selected="true" data-v="heute">Heute</button>
-      <button role="tab" id="tab-wp" aria-selected="false" data-v="wp">Woodpecker</button>
-      <button role="tab" id="tab-sm" aria-selected="false" data-v="sm">Smirnov</button>
-      <button role="tab" id="tab-fs" aria-selected="false" data-v="fs">Fortschritt</button>
-      <button role="tab" id="tab-log" aria-selected="false" data-v="log">Eintragen</button>
-    </nav>
+    <h1><span id="brandN">Ralfs Schachtraining</span><small id="brandS">Ziel Lichess Rapid 1500 · 30 Minuten am Tag</small></h1>
+    <nav class="tabs" id="tabs" role="tablist"></nav>
   </header>
   <div id="dbmsg" class="banner" hidden>Speichern ist in dieser Ansicht nicht möglich. Öffne die Seite über die veröffentlichte Adresse und melde dich an, damit deine Ergebnisse gespeichert werden.</div>
 
   <!-- Heute -->
   <section class="view" id="v-heute">
+    <div class="card quote qinline" id="quoteInline" style="margin-bottom:14px"></div>
+    <div class="card" id="dayCard" style="margin-bottom:14px"></div>
     <div class="card" id="taskCard">
-      <span class="tag" id="taskTag">Aufgabe des Tages</span>
+      <span class="tag" id="taskTag"><span class="stepn">1</span>Aufgabe des Tages</span>
       <div id="taskBody"><p class="note" style="margin:0">Lade den Wochenplan …</p></div>
       <div class="week" id="weekRow"></div>
     </div>
     <div class="card" id="quizCard" style="margin-top:14px">
-      <div class="inline" style="justify-content:space-between"><h3 style="margin:0">Abfrage des Tages</h3><span class="timer" id="qzTimer"></span></div>
+      <div class="inline" style="justify-content:space-between"><h3 style="margin:0"><span class="stepn">2</span>Abfrage des Tages</h3><span class="timer" id="qzTimer"></span></div>
       <div id="qzBody"><p class="note" style="margin:6px 0 0">Lade …</p></div>
     </div>
     <p class="note" style="margin-top:14px">Jeden Tag eine Aufgabe, mal Woodpecker, mal Smirnov, zufällig gemischt. Was du nicht schaffst, bleibt stehen und ist am nächsten Tag dran. Willst du gezielt etwas anderes machen, nimm die Reiter Woodpecker oder Smirnov, das zählt genauso.</p>
@@ -232,7 +284,7 @@ td.typ b{display:inline-block;width:8px;height:8px;border-radius:2px;margin-righ
             <div class="timer" id="tSess">00:00</div>
           </div>
           <p class="note" id="sessInfo" style="margin:6px 0 10px">Starte die Sitzung, dann läuft die Uhr. Du ziehst die Figuren direkt auf dem Brett: Figur antippen, Zielfeld antippen. Die Seite prüft jeden Zug gegen die Lösung und spielt die Antwort des Gegners.</p>
-          <div class="btns" id="bStartRow"><button class="b primary" id="bStart" type="button">Sitzung starten</button></div>
+          <div class="btns" id="bStartRow"><span class="here">▶ Hier starten</span><button class="b primary" id="bStart" type="button">Sitzung starten</button></div>
           <div id="solveRow" hidden>
             <div class="inline" style="justify-content:space-between;margin-bottom:8px"><span class="label">Diese Aufgabe</span><span class="timer" id="tPuz">0:00</span></div>
             <div class="fb" id="fb" hidden></div>
@@ -259,13 +311,18 @@ td.typ b{display:inline-block;width:8px;height:8px;border-radius:2px;margin-righ
 
   <!-- Smirnov -->
   <section class="view" id="v-sm" hidden>
+    <p class="note" style="margin:0 0 10px"><span class="here">▶ So geht's</span> Lektion lesen, die drei Übungsstellungen lösen, dann „Gelernt“ drücken. Das zählt als Trainingszeit.</p>
     <p class="note" style="margin:0 0 14px">Die Kernregeln von GM Igor Smirnov, kurz zusammengefasst aus seinen frei zugänglichen Lektionen und Newslettern. Jeder Clip öffnet sich auf YouTube (Einbetten geht hier nicht). Zu jeder Lektion gibt es drei Stellungen aus deinen eigenen Partien, an denen du die Regel anwendest. Danach „Gelernt“ drücken, die Zeit wird gemessen.</p>
     <div class="lessons" id="lessons"></div>
     <p class="note" style="margin-top:14px">Die gekauften Kurse (Super Pack, Boost Your ELO) liegen nur auf deinem Rechner. Wenn du daraus PDFs oder PGNs hochlädst, bauen wir die Inhalte hier ein.</p>
   </section>
 
+  <!-- Anpassen -->
+  <section class="view" id="v-an" hidden></section>
+
   <!-- Eintragen -->
   <section class="view" id="v-log" hidden>
+    <p class="note" style="margin:0 0 14px"><span class="here">▶ Wann?</span> Nur nach einer gespielten Partie (Di, Do, Sa) und einmal pro Woche die Wertung. Alles andere erfasst die Seite von selbst.</p>
     <div class="forms">
       <form class="card" id="fPartie">
         <h2>Partie</h2>
@@ -506,20 +563,20 @@ function makePlan(rot){
   const items=[{typ:'wp',anzahl:8},{typ:'wp',anzahl:8},{typ:'wp',anzahl:8},{typ:'wp',anzahl:8}];
   for(let i=0;i<3;i++)items.push({typ:'sm',lesson:LESSONS[(rot+i)%LESSONS.length].id});
   for(let i=items.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[items[i],items[j]]=[items[j],items[i]]}
-  return {plan:items,idx:0,ab:today(),abTs:new Date().toISOString(),start:today(),rot:(rot+3)%LESSONS.length};
+  return {plan:items,idx:0,von:today(),ab:today(),abTs:new Date().toISOString(),start:today(),rot:(rot+3)%LESSONS.length};
 }
 function curTask(){return heute&&heute.plan&&heute.idx<heute.plan.length?heute.plan[heute.idx]:null}
 async function saveHeute(){if(db){try{await db.doc('stand/heute').set(heute)}catch(e){}}renderHeute()}
-function advanceTask(){if(!heute)return;heute.idx++;heute.ab=today();heute.abTs=new Date().toISOString();if(heute.idx>=heute.plan.length)heute=makePlan(heute.rot||0);saveHeute()}
+function advanceTask(){if(!heute)return;heute.idx++;heute.doneDate=today();heute.von=addDays(today(),1);heute.ab=today();heute.abTs=new Date().toISOString();if(heute.idx>=heute.plan.length)heute=makePlan(heute.rot||0);saveHeute()}
 function wpToday(){return sitzungen.filter(s=>s.typ==='woodpecker'&&s.datum===today()&&(!heute||!heute.abTs||(s.ts||'')>=heute.abTs)).reduce((a,s)=>a+(s.versuche||[]).length,0)}
 function checkWpTask(){const c=curTask();if(c&&c.typ==='wp'&&wpToday()>=c.anzahl)advanceTask()}
 
 function renderHeute(){
-  renderQuiz();
+  renderQuiz();renderDay();renderSide();
   const body=$('taskBody');if(!body)return;
   if(!heute){body.innerHTML='<p class="note" style="margin:0">'+(db?'Lade den Wochenplan …':'Ohne Speicherung gibt es keinen Tagesplan. Öffne die Seite angemeldet in claude.ai.')+'</p>';$('weekRow').innerHTML='';return}
   const c=curTask();if(!c){body.innerHTML='';return}
-  const carry=heute.ab&&heute.ab<today()?'<span class="carry">Übernommen vom '+deDate(heute.ab)+'</span><br>':'';
+  const carry=heute.doneDate===today()?'<span class="carry" style="color:var(--good);border-color:var(--good)">Heute schon erledigt. Das hier ist eine Zugabe, morgen ist es dran.</span><br>':(heute.von||heute.ab)<today()?'<span class="carry">Übernommen vom '+deDate(heute.von||heute.ab)+'</span><br>':'';
   if(c.typ==='wp'){const n=wpToday();
     body.innerHTML=carry+'<div class="task-title">Woodpecker, '+c.anzahl+' Aufgaben</div><p style="margin:0 0 10px">Heute schon gelöst: '+n+' von '+c.anzahl+'. Sobald '+c.anzahl+' erreicht sind, ist die Aufgabe erledigt.</p><div class="btns"><button class="b primary" type="button" id="goWp">Zum Brett</button><button class="b" type="button" id="swapTask">Lieber Smirnov heute</button></div>';
     $('goWp').addEventListener('click',()=>show('wp'));
@@ -531,12 +588,187 @@ function renderHeute(){
   $('weekRow').innerHTML=heute.plan.map((x,k)=>'<span class="'+(k<heute.idx?'done':k===heute.idx?'cur':'')+'">'+(k+1)+' '+(x.typ==='wp'?'Woodpecker':'Smirnov')+(k<heute.idx?' ✓':'')+'</span>').join('');
 }
 
-/* Tabs */
-const tabs=[...document.querySelectorAll('nav.tabs button')];
-function show(v){tabs.forEach(b=>b.setAttribute('aria-selected',b.dataset.v===v));['heute','wp','sm','log','fs'].forEach(k=>$('v-'+k).hidden=k!==v);try{localStorage.setItem('tab',v)}catch(e){}if(v==='fs')renderProgress();if(v==='sm')renderLessons();if(v==='heute')renderHeute()}
-tabs.forEach(b=>b.addEventListener('click',()=>show(b.dataset.v)));
-const hashV={heute:'heute',woodpecker:'wp',eintragen:'log',fortschritt:'fs'}[location.hash.slice(1)];
+/* Gestaltung: Reiter, Farben, Schrift, Seitenleisten. Gespeichert im Konto (Dokument einstellungen/ui) und lokal als Rückfall. */
+const TABS=[['heute','Heute'],['wp','Woodpecker'],['sm','Smirnov'],['fs','Fortschritt'],['an','Anpassen'],['log','Eintragen']];
+const VIEWS=TABS.map(t=>t[0]);
+const FONTS={'':{n:'Standard (IBM Plex)',v:''},read:{n:'Gut lesbar (Atkinson)',v:'"Atkinson Hyperlegible",system-ui,sans-serif'},serif:{n:'Buchschrift (Literata)',v:'"Literata",Georgia,serif'},mono:{n:'Schreibmaschine',v:'ui-monospace,Menlo,Consolas,monospace'}};
+const SIZES={'':{n:'Standard',px:''},s:{n:'Klein',px:'14px'},l:{n:'Groß',px:'17px'},xl:{n:'Sehr groß',px:'19px'}};
+const PRESETS=[{n:'Standard',c:{}},{n:'Sepia',c:{bg:'#F4ECD8',accent:'#8A5A2B'}},{n:'Wald',c:{bg:'#EAF2EA',accent:'#2F7D4F'}},{n:'Rosé',c:{bg:'#FBEFF3',accent:'#C2417A'}},{n:'Ozean',c:{bg:'#E8F1F8',accent:'#0B6FA4'}},{n:'Nacht',c:{bg:'#10121A',accent:'#8B7CF6'}},{n:'Kontrast',c:{bg:'#FFFFFF',accent:'#0033CC'}}];
+const BOARDS=[{n:'Grün',c:{}},{n:'Holz',c:{l:'#F0D9B5',d:'#B58863'}},{n:'Blau',c:{l:'#DEE3E6',d:'#8CA2AD'}},{n:'Grau',c:{l:'#E0E0E0',d:'#9A9A9A'}},{n:'Violett',c:{l:'#E8E0F0',d:'#9070B0'}}];
+const HEX=/^#[0-9a-f]{6}$/i;
+const rgb=x=>[1,3,5].map(i=>parseInt(x.slice(i,i+2),16));
+const toHex=a=>'#'+a.map(v=>Math.round(Math.min(255,Math.max(0,v))).toString(16).padStart(2,'0')).join('');
+const mixHex=(a,b,t)=>{const A=rgb(a),B=rgb(b);return toHex(A.map((v,i)=>v*(1-t)+B[i]*t))};
+const lumOf=x=>{const [r,g,b]=rgb(x).map(v=>{v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)});return .2126*r+.7152*g+.0722*b};
+let P={}, curView='heute';
+try{P=JSON.parse(localStorage.getItem('sch-prefs')||'{}')||{}}catch(e){P={}}
+function savePrefs(){try{localStorage.setItem('sch-prefs',JSON.stringify(P))}catch(e){}if(db){try{Promise.resolve(db.doc('einstellungen/ui').set(P)).catch(()=>{})}catch(e){}}}
+function setPref(o,rerender){P=Object.assign({},P,o);savePrefs();applyPrefs();if(rerender)renderCustomize();renderSide()}
+function livePref(o){P=Object.assign({},P,o);applyPrefs()}
+function applyPrefs(){
+  const root=document.documentElement, st=root.style, p=P;
+  const set=(k,v)=>{if(v)st.setProperty(k,v);else st.removeProperty(k)};
+  if(p.mode==='light'||p.mode==='dark')root.dataset.theme=p.mode;else delete root.dataset.theme;
+  if(HEX.test(p.bg||'')){const dark=lumOf(p.bg)<.18, ink=dark?'#E7EBE4':'#1E241F';
+    set('--bg',p.bg);set('--ink',ink);set('--surface',mixHex(p.bg,'#FFFFFF',dark?.06:.65));set('--muted',mixHex(ink,p.bg,.35));set('--line',mixHex(ink,p.bg,.85));st.colorScheme=dark?'dark':'light';
+  }else{['--bg','--ink','--surface','--muted','--line'].forEach(k=>st.removeProperty(k));st.colorScheme=''}
+  if(HEX.test(p.accent||'')){set('--accent',p.accent);set('--accent-ink',lumOf(p.accent)>.4?'#1A1A1A':'#FFFFFF')}else{st.removeProperty('--accent');st.removeProperty('--accent-ink')}
+  set('--sq-light',HEX.test(p.sqL||'')?p.sqL:'');set('--sq-dark',HEX.test(p.sqD||'')?p.sqD:'');
+  set('--f-body',(FONTS[p.font||'']||{}).v);
+  document.body.style.fontSize=(SIZES[p.size||'']||{}).px||'';
+  document.body.classList.toggle('noside',p.side==='off');
+  const nm=(p.name||'').trim();
+  $('brandN').textContent=nm||'Ralfs Schachtraining';document.title=nm||'Ralfs Schachtraining';
+  if(typeof p.tagline==='string')$('brandS').textContent=p.tagline;
+  const q=$('quoteInline');if(q)q.hidden=p.quote==='off';
+}
+function tabList(){
+  const order=(P.order||[]).filter(id=>VIEWS.includes(id));
+  VIEWS.forEach(id=>{if(!order.includes(id))order.push(id)});
+  return order.map(id=>{const d=TABS.find(t=>t[0]===id)[1];return {id,def:d,label:((P.labels||{})[id]||'').trim()||d,hidden:id!=='an'&&(P.hidden||[]).includes(id)}});
+}
+function drawTabs(){
+  const nav=$('tabs'), list=tabList().filter(t=>!t.hidden);
+  nav.replaceChildren(...list.map(t=>{const b=document.createElement('button');b.type='button';b.setAttribute('role','tab');b.dataset.v=t.id;b.id='tab-'+t.id;b.title='Zum Verschieben ziehen, am Handy gedrückt halten';b.setAttribute('aria-selected',String(t.id===curView));b.textContent=t.label;return b}));
+}
+function show(v){
+  if(!VIEWS.includes(v))v='heute';
+  curView=v;drawTabs();
+  VIEWS.forEach(k=>$('v-'+k).hidden=k!==v);
+  try{localStorage.setItem('tab',v)}catch(e){}
+  if(v==='fs')renderProgress();if(v==='sm')renderLessons();if(v==='heute')renderHeute();if(v==='an')renderCustomize();
+  const sel=document.querySelector('#tabs [aria-selected="true"]');if(sel&&sel.scrollIntoView)try{sel.scrollIntoView({block:'nearest',inline:'nearest'})}catch(e){}
+}
+$('tabs').addEventListener('click',e=>{const b=e.target.closest('button[data-v]');if(b)show(b.dataset.v)});
+/* Reiter per Ziehen anordnen: Maus ziehen, am Handy gedrückt halten und ziehen */
+(function(){
+  const nav=$('tabs');let st=null,justDragged=false;
+  const btns=()=>[...nav.querySelectorAll('button[data-v]')];
+  function begin(){if(!st||st.active)return;st.active=true;st.b.classList.add('drag');nav.classList.add('dragging');try{navigator.vibrate&&navigator.vibrate(15)}catch(e){}}
+  function moveTo(x){const me=st.b,others=btns().filter(o=>o!==me);let idx=0;
+    for(const o of others){const r=o.getBoundingClientRect();if(x>r.left+r.width/2)idx++}
+    if(idx!==btns().indexOf(me))nav.insertBefore(me,others[idx]||null);
+    const nr=nav.getBoundingClientRect();if(x<nr.left+30)nav.scrollLeft-=12;else if(x>nr.right-30)nav.scrollLeft+=12}
+  function finish(){if(!st)return;clearTimeout(st.timer);const was=st.active;st.b.classList.remove('drag');nav.classList.remove('dragging');st=null;if(!was)return;
+    justDragged=true;setTimeout(()=>{justDragged=false},60);
+    const vis=btns().map(b=>b.dataset.v),full=tabList().map(t=>t.id),inVis=new Set(vis);let k=0;
+    setPref({order:full.map(id=>inVis.has(id)?vis[k++]:id)},false);if(curView==='an')renderCustomize()}
+  nav.addEventListener('pointerdown',e=>{const b=e.target.closest('button[data-v]');if(!b||e.button>0)return;
+    const touch=e.pointerType!=='mouse';st={b,x0:e.clientX,y0:e.clientY,id:e.pointerId,touch,active:false,timer:null};if(touch)st.timer=setTimeout(begin,380)});
+  document.addEventListener('pointermove',e=>{if(!st||e.pointerId!==st.id)return;
+    if(!st.active){if(st.touch){if(Math.hypot(e.clientX-st.x0,e.clientY-st.y0)>8){clearTimeout(st.timer);st=null}}else if(Math.abs(e.clientX-st.x0)>6)begin();return}
+    e.preventDefault();moveTo(e.clientX)});
+  nav.addEventListener('touchmove',e=>{if(st&&st.active)e.preventDefault()},{passive:false});
+  nav.addEventListener('contextmenu',e=>{if(st)e.preventDefault()});
+  document.addEventListener('pointerup',e=>{if(st&&e.pointerId===st.id)finish()});
+  document.addEventListener('pointercancel',e=>{if(st&&e.pointerId===st.id)finish()});
+  nav.addEventListener('click',e=>{if(justDragged){e.stopImmediatePropagation();e.preventDefault()}},true);
+})();
+const hashV={heute:'heute',woodpecker:'wp',eintragen:'log',fortschritt:'fs',anpassen:'an'}[location.hash.slice(1)];
 let startTab=hashV;try{startTab=startTab||localStorage.getItem('tab')}catch(e){}
+
+/* Anpassen */
+function h(tag,attrs,...kids){const e=document.createElement(tag);
+  for(const k in (attrs||{})){const v=attrs[k];if(k==='text')e.textContent=v;else if(k.startsWith('on'))e.addEventListener(k.slice(2),v);else if(v===true)e.setAttribute(k,'');else if(v!==false&&v!=null)e.setAttribute(k,v)}
+  kids.flat().forEach(c=>{if(c!=null)e.append(c)});return e}
+function renderCustomize(){
+  const v=$('v-an');v.replaceChildren();const p=P;
+  const cur=n=>{const c=getComputedStyle(document.documentElement).getPropertyValue(n).trim();return HEX.test(c)?c:'#808080'};
+  const colorIn=(label,key,fb)=>h('label',{class:'field'},label,h('input',{type:'color',value:HEX.test(p[key]||'')?p[key]:fb,oninput:e=>livePref({[key]:e.target.value}),onchange:()=>savePrefs()}));
+  v.append(h('div',{class:'card pref'},h('h2',{text:'Dein Training, deine Optik'}),h('p',{class:'note',style:'margin:0'},'Alles hier gehört dir und wird mit deinem Konto auf allen Geräten gespeichert.')));
+  v.append(h('div',{class:'card pref'},h('h3',{text:'Name'}),
+    h('div',{class:'field'},h('label',{for:'prName',text:'Name der Seite'}),h('input',{id:'prName',type:'text',maxlength:40,value:p.name||'',placeholder:'Ralfs Schachtraining',oninput:e=>livePref({name:e.target.value}),onchange:()=>savePrefs()})),
+    h('div',{class:'field'},h('label',{for:'prTag',text:'Untertitel'}),h('input',{id:'prTag',type:'text',maxlength:90,value:typeof p.tagline==='string'?p.tagline:'Ziel Lichess Rapid 1500 · 30 Minuten am Tag',oninput:e=>livePref({tagline:e.target.value}),onchange:()=>savePrefs()}))));
+  const sw=h('div',{class:'swatches'},PRESETS.map(pr=>h('button',{type:'button',class:'swatch','aria-pressed':String((pr.c.bg||'')===(p.bg||'')&&(pr.c.accent||'')===(p.accent||'')),onclick:()=>setPref({bg:pr.c.bg||'',accent:pr.c.accent||''},true)},h('i',{style:'background:'+(pr.c.bg||'var(--bg)')+';box-shadow:inset 0 0 0 5px '+(pr.c.accent||'var(--accent)')}),pr.n)));
+  const mode=h('select',{id:'prMode',onchange:e=>setPref({mode:e.target.value},true)},[['','Automatisch (wie dein Gerät)'],['light','Immer hell'],['dark','Immer dunkel']].map(([k,l])=>h('option',{value:k,selected:(p.mode||'')===k},l)));
+  v.append(h('div',{class:'card pref'},h('h3',{text:'Farben'}),sw,h('div',{class:'field'},h('label',{for:'prMode',text:'Hell oder dunkel'}),mode),
+    h('div',{class:'colors'},colorIn('Hintergrund','bg',cur('--bg')),colorIn('Akzent (Knöpfe, Reiter)','accent',cur('--accent'))),
+    h('div',{class:'btns'},h('button',{type:'button',class:'b',onclick:()=>setPref({bg:'',accent:'',mode:''},true)},'Farben zurücksetzen'))));
+  v.append(h('div',{class:'card pref'},h('h3',{text:'Brett'}),h('div',{class:'swatches'},BOARDS.map(b=>h('button',{type:'button',class:'swatch','aria-pressed':String((b.c.l||'')===(p.sqL||'')&&(b.c.d||'')===(p.sqD||'')),onclick:()=>setPref({sqL:b.c.l||'',sqD:b.c.d||''},true)},
+    h('i',{style:'background:linear-gradient(135deg,'+(b.c.l||'#E9E2CF')+' 50%,'+(b.c.d||'#7D9473')+' 50%)'}),b.n)))));
+  const opt=(m,sel)=>Object.entries(m).map(([k,f])=>h('option',{value:k,selected:(sel||'')===k},f.n));
+  v.append(h('div',{class:'card pref'},h('h3',{text:'Schrift'}),
+    h('div',{class:'field'},h('label',{for:'prFont',text:'Schriftart'}),h('select',{id:'prFont',onchange:e=>setPref({font:e.target.value})},opt(FONTS,p.font))),
+    h('div',{class:'field'},h('label',{for:'prSize',text:'Größe'}),h('select',{id:'prSize',onchange:e=>setPref({size:e.target.value})},opt(SIZES,p.size)))));
+  const list=tabList();
+  const rows=list.map((t,i)=>{const move=d=>{const ids=list.map(x=>x.id),j=i+d;if(j<0||j>=ids.length)return;[ids[i],ids[j]]=[ids[j],ids[i]];setPref({order:ids},true);drawTabs()};
+    return h('div',{class:'tabrow'},
+      h('div',{class:'btns',style:'gap:4px;flex-wrap:nowrap'},h('button',{type:'button',class:'b sm','aria-label':'Nach vorne',disabled:i===0,onclick:()=>move(-1)},'↑'),h('button',{type:'button',class:'b sm','aria-label':'Nach hinten',disabled:i===list.length-1,onclick:()=>move(1)},'↓')),
+      t.id==='an'?h('span',{class:'note'},'bleibt sichtbar'):h('label',{},h('input',{type:'checkbox',checked:!t.hidden,onchange:e=>{const hs=new Set(P.hidden||[]);if(e.target.checked)hs.delete(t.id);else hs.add(t.id);setPref({hidden:[...hs]},true);drawTabs()}}),'sichtbar'),
+      h('input',{type:'text',maxlength:20,value:(P.labels||{})[t.id]||'',placeholder:t.def,'aria-label':'Name des Reiters '+t.def,oninput:e=>{livePref({labels:Object.assign({},P.labels,{[t.id]:e.target.value})});drawTabs()},onchange:()=>savePrefs()}))});
+  v.append(h('div',{class:'card pref'},h('h3',{text:'Reiter'}),h('p',{class:'note',style:'margin:0'},'Am schnellsten: Reiter oben ziehen (am Handy gedrückt halten und verschieben). Hier kannst du sie auch mit den Pfeilen ordnen, ausblenden und umbenennen.'),...rows,
+    h('div',{class:'btns'},h('button',{type:'button',class:'b',onclick:()=>{setPref({order:[],hidden:[],labels:{}},true);drawTabs()}},'Reiter zurücksetzen'))));
+  v.append(h('div',{class:'card pref'},h('h3',{text:'Anzeige'}),
+    h('label',{class:'chk'},h('input',{type:'checkbox',checked:p.side!=='off',onchange:e=>setPref({side:e.target.checked?'':'off'})}),'Auf großen Bildschirmen links und rechts Zitat, Zahlen und Regel des Tages zeigen'),
+    h('label',{class:'chk'},h('input',{type:'checkbox',checked:p.quote!=='off',onchange:e=>setPref({quote:e.target.checked?'':'off'})}),'Schachzitat des Tages zeigen')));
+  v.append(h('div',{class:'btns'},h('button',{type:'button',class:'b',onclick:e=>{const b=e.currentTarget;if(b.dataset.arm){P={};savePrefs();applyPrefs();drawTabs();renderCustomize();renderSide()}else{b.dataset.arm='1';b.textContent='Alles zurücksetzen? Nochmal tippen'}}},'Gestaltung ganz zurücksetzen')));
+}
+
+/* Zitat des Tages */
+const QUOTES=[
+ ['Der Sieger ist, wer den vorletzten Fehler macht.','Savielly Tartakower'],
+ ['Alle Fehler stehen schon auf dem Brett und warten nur darauf, gemacht zu werden.','Savielly Tartakower'],
+ ['Taktik heißt wissen, was zu tun ist, wenn etwas zu tun ist. Strategie heißt wissen, was zu tun ist, wenn nichts zu tun ist.','Savielly Tartakower'],
+ ['Die Bauern sind die Seele des Schachs.','François-André Danican Philidor'],
+ ['Schach hat, wie die Liebe und die Musik, die Kraft, den Menschen glücklich zu machen.','Siegbert Tarrasch'],
+ ['Die Drohung ist stärker als die Ausführung.','Aaron Nimzowitsch'],
+ ['Wenn du einen guten Zug siehst, suche nach einem besseren.','Emanuel Lasker (zugeschrieben)'],
+ ['Auf dem Schachbrett haben Lüge und Heuchelei keinen Bestand.','Emanuel Lasker (zugeschrieben)'],
+ ['Wer besser werden will, muss vor allem das Endspiel studieren.','José Raúl Capablanca'],
+ ['Ein guter Spieler hat immer Glück.','José Raúl Capablanca (zugeschrieben)'],
+ ['Ich glaube nicht an Psychologie. Ich glaube an gute Züge.','Bobby Fischer'],
+ ['Schach ist Krieg über dem Brett.','Bobby Fischer'],
+ ['Du musst deinen Gegner in einen dunklen Wald führen, in dem zwei plus zwei fünf ist und der Weg hinaus nur für einen breit genug ist.','Michail Tal'],
+ ['Bevor du ziehst: Welche Schachs, Schlagzüge und Drohungen hat dein Gegner danach?','Trainerregel'],
+ ['Eine hängende Figur kostet mehr als jede verpasste Kombination.','Trainerregel'],
+ ['Erst Sicherheit, dann Angriff: Sind alle deine Figuren gedeckt?','Trainerregel'],
+ ['Lieber fünf Sekunden zu lang nachdenken als 300 Punkte verlieren.','Trainerregel'],
+ ['Ein Zug, ein Blick aufs ganze Brett.','Trainerregel'],
+ ['Wiederholung macht Muster zu Reflexen. Heute wieder ein Schritt.','Trainerregel'],
+ ['Nach jedem Zug des Gegners zuerst fragen: Was will er?','Trainerregel'],
+];
+function quoteOfDay(){const q=QUOTES[dayNum()%QUOTES.length];return q}
+function quoteHtml(){const q=quoteOfDay();const att=q[1]!=='Trainerregel';
+  return '<h3>Schachzitat des Tages</h3><blockquote>„'+q[0]+'“</blockquote><cite>'+(att?'– ':'')+q[1]+'</cite>'+(att?'<div class="src">Frei ins Deutsche übertragen, Zuschreibung wie überliefert.</div>':'')}
+
+/* Tagesablauf und Seitenleisten */
+function dayState(){const t=today();return {t1:!!heute&&heute.doneDate===t,t2:sitzungen.some(s=>s.typ==='abfrage'&&s.datum===t),c:curTask()}}
+function taskName(c){return !c?'Aufgabe des Tages':c.typ==='wp'?'Woodpecker, '+c.anzahl+' Aufgaben':'Smirnov: '+((LESSONS.find(x=>x.id===c.lesson)||LESSONS[0]).title)}
+function stepsHtml(){const d=dayState();let first=!d.t1?1:!d.t2?2:0;
+  const li=(n,cls,title,sub,go)=>'<li class="'+cls+'"><span class="stepn">'+(cls.includes('done')?'✓':n)+'</span><div class="t"><b>'+title+'</b><span>'+sub+'</span>'+(!cls.includes('done')&&n===first?'<em class="here">▶ Hier starten</em>':'')+'</div>'+(cls.includes('done')?'':(go?'<button class="b sm" type="button" data-go="'+go+'">Los</button>':''))+'</li>';
+  return '<ol class="steps">'+
+    li(1,(d.t1?'done':n1(first,1)),'Tagesaufgabe',d.t1?'Erledigt':taskName(d.c),'taskCard')+
+    li(2,(d.t2?'done':n1(first,2)),'Abfrage',d.t2?'Erledigt':'Drei Fragen, etwa fünf Minuten','quizCard')+
+    '<li class="opt"><span class="stepn">+</span><div class="t"><b>Partie gespielt?</b><span>Dann im Reiter Eintragen festhalten (Di, Do, Sa)</span></div><button class="b sm" type="button" data-tab="log">Eintragen</button></li></ol>'}
+function n1(first,n){return first===n?'here-now':''}
+function bindSteps(box){box.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>{if(curView!=='heute')show('heute');const t=$(b.dataset.go);if(t)t.scrollIntoView({behavior:'smooth',block:'start'})}));
+  box.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>show(b.dataset.tab)))}
+function dayTitle(){const d=dayState();return d.t1&&d.t2?'Geschafft für heute. Bis morgen!':'So läuft dein Tag'}
+function renderDay(){const box=$('dayCard');if(!box)return;box.innerHTML='<h3>'+dayTitle()+'</h3>'+stepsHtml();bindSteps(box)}
+function streak(){const days=new Set(sitzungen.map(s=>s.datum));let n=0,d=today();if(!days.has(d))d=addDays(d,-1);while(days.has(d)){n++;d=addDays(d,-1)}return n}
+function renderSide(){
+  const L=$('sideL'),R=$('sideR');if(!L||!R)return;
+  const qc=document.createElement('div');qc.className='card quote';qc.innerHTML=P.quote==='off'?'':quoteHtml();
+  const dc=document.createElement('div');dc.className='card';dc.innerHTML='<h3>'+dayTitle()+'</h3>'+stepsHtml();bindSteps(dc);
+  L.replaceChildren(...(P.quote==='off'?[]:[qc]),dc);
+  const t=today(),last7=[...Array(7)].map((_,i)=>addDays(t,-i));
+  const wmin=sitzungen.filter(s=>last7.includes(s.datum)).reduce((a,s)=>a+(+s.minuten||0),0);
+  const rates=[...Object.entries(RATE0).map(([d,v])=>({datum:d,rapid:v})),...wertungen].sort((a,b)=>a.datum<b.datum?-1:1);
+  const cr=rates.length?rates[rates.length-1].rapid:null;
+  const done=Math.min(SET,(stand.naechste||1)-1),z=stand.zyklus||1,sk=streak();
+  const bar=x=>'<div class="bar"><i style="width:'+Math.round(Math.min(1,Math.max(0,x))*100)+'%"></i></div>';
+  const nums=document.createElement('div');nums.className='card';
+  nums.innerHTML='<h3>Deine Zahlen</h3>'+
+    '<div class="row"><span>Lichess Rapid</span><b>'+(cr==null?'–':cr)+'</b></div>'+bar(cr==null?0:(cr-800)/700)+'<div class="note" style="margin:-6px 0 10px">'+(cr==null?'Noch keine Wertung':'noch '+Math.max(0,1500-cr)+' bis 1500')+'</div>'+
+    '<div class="row"><span>Woodpecker Runde '+z+'</span><b>'+done+'/'+SET+'</b></div>'+bar(done/SET)+
+    '<div class="row"><span>Minuten, 7 Tage</span><b>'+wmin+'</b></div>'+bar(wmin/210)+'<div class="note" style="margin:-6px 0 10px">Ziel 210</div>'+
+    '<div class="row"><span>Tage in Folge</span><b>'+sk+'</b></div>';
+  const rl=LESSONS[dayNum()%LESSONS.length];
+  const rule=document.createElement('div');rule.className='card';
+  rule.innerHTML='<h3>Regel des Tages</h3><p class="rule"></p><div class="note" style="margin-top:6px">'+rl.title+'</div>';rule.querySelector('.rule').textContent=rl.rule;
+  R.replaceChildren(nums,rule);
+  const qi=$('quoteInline');if(qi)qi.innerHTML=P.quote==='off'?'':quoteHtml();
+}
 
 /* Board */
 const GL={k:'\u265A',q:'\u265B',r:'\u265C',b:'\u265D',n:'\u265E',p:'\u265F'};
@@ -816,16 +1048,17 @@ function renderProgress(){
 }
 
 /* Boot */
-showPuzzle(1,'idle');renderStand();
-show(startTab||'heute');
+applyPrefs();showPuzzle(1,'idle');renderStand();
+show(startTab||'heute');renderSide();
 (async()=>{
   if(window.SCH_READY){try{await window.SCH_READY}catch(e){}}
   try{db=await window.claude?.use?.('db')}catch(e){db=null}
   if(!db){$('dbmsg').hidden=false;renderHeute();return}
+  db.doc('einstellungen/ui').onSnapshot(s=>{if(s.exists){P=JSON.parse(JSON.stringify(s.data()));try{localStorage.setItem('sch-prefs',JSON.stringify(P))}catch(e){}applyPrefs();drawTabs();renderSide();if(curView==='an'&&!document.activeElement.closest('#v-an'))renderCustomize()}},()=>{});
   db.doc('stand/woodpecker').onSnapshot(s=>{if(s.exists&&!sess){stand=Object.assign({zyklus:1,naechste:1},s.data());renderStand();showPuzzle(Math.min(SET,stand.naechste||1),'idle')}},()=>{});
-  db.collection('sitzungen').onSnapshot(q=>{const live=sess?sitzungen.find(s=>s.id===sess.id):null;sitzungen=q.docs.map(d=>({id:d.id,...d.data()}));if(live&&!sitzungen.find(s=>s.id===live.id))sitzungen.push(live);renderStand();checkWpTask();if(!$('v-heute').hidden){renderHeute()}if(!$('v-sm').hidden)renderLessons();if(!$('v-fs').hidden)renderProgress()},()=>{});
+  db.collection('sitzungen').onSnapshot(q=>{const live=sess?sitzungen.find(s=>s.id===sess.id):null;sitzungen=q.docs.map(d=>({id:d.id,...d.data()}));if(live&&!sitzungen.find(s=>s.id===live.id))sitzungen.push(live);renderStand();checkWpTask();renderSide();if(!$('v-heute').hidden){renderHeute()}if(!$('v-sm').hidden)renderLessons();if(!$('v-fs').hidden)renderProgress()},()=>{});
   db.doc('stand/heute').onSnapshot(s=>{if(s.exists&&s.data().plan){heute=JSON.parse(JSON.stringify(s.data()));if(heute.idx>=heute.plan.length){heute=makePlan(heute.rot||0);saveHeute();return}renderHeute()}else{heute=makePlan(0);saveHeute()}},()=>{});
-  db.collection('wertungen').onSnapshot(q=>{wertungen=q.docs.map(d=>({id:d.id,...d.data()}));if(!$('v-fs').hidden)renderProgress()},()=>{});
+  db.collection('wertungen').onSnapshot(q=>{wertungen=q.docs.map(d=>({id:d.id,...d.data()}));renderSide();if(!$('v-fs').hidden)renderProgress()},()=>{});
 })();
 })();
 </script>

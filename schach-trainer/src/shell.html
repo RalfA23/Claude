@@ -24,6 +24,7 @@
 window.addEventListener("DOMContentLoaded", async function () {
   var main = document.getElementById("sch-main");
   if (!main) return;
+  if (!window.SCH_HOSTED) { document.body.insertAdjacentHTML("afterbegin", "<p style='max-width:420px;margin:48px auto;font-family:system-ui,sans-serif'>Diese Seite ist ohne Anmeldung nicht eingerichtet.</p>"); return; }
   await window.SCH_READY;
   var db = await window.claude.use("db");
   function run(d) {
