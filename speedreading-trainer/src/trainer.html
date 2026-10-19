@@ -860,7 +860,7 @@ function viewFree(v){
         else { S.sessions.push({date:today(),type:"free",textId:t.id,wpm:Math.round(wpm),mode:m}); save(); render(); }
       }});
     }},"Lesen")),h("label",{class:"field"},"Neuen KI-Text schreiben lassen",h("div",{class:"row",style:"flex-wrap:nowrap"},wish,aiBtn)),msg));
-  if(window.SR_HOSTED&&AI){
+  if(window.SR_HOSTED&&AI&&/[?&]test\b/.test(location.search)){ // vorerst nur mit ?test in der Adresse sichtbar
     const q=h("input",{type:"text",class:"txt",id:"fr-orig-q",maxlength:80,placeholder:"Stichwort, zum Beispiel Mondlandung, oder Autor und Titel"});
     const kind=h("select",{id:"fr-orig-kind"},[["wikipedia","Wikipedia-Artikel"],["classic","Klassiker (gemeinfrei)"]].map(([k,l])=>h("option",{value:k},l)));
     const om=h("p",{class:"muted"});
