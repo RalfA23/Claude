@@ -28,7 +28,47 @@ window.addEventListener("DOMContentLoaded", async function () {
   if (!window.SCH_HOSTED) { document.body.insertAdjacentHTML("afterbegin", "<p style='max-width:420px;margin:48px auto;font-family:system-ui,sans-serif'>Diese Seite ist ohne Anmeldung nicht eingerichtet.</p>"); return; }
   await window.SCH_READY;
   var db = await window.claude.use("db");
-  function run(d) {
+  var POOL_MIN = 50;
+  // Free tactics (no book file): random puzzles from the public Lichess puzzle database, kept in the user's own account.
+  async function loadPool(status) {
+    var items = [];
+    try { var ps = await db.doc("puzzles/pool").get(); if (ps && ps.exists && ps.data().items) items = ps.data().items; } catch (e) {}
+    if (items.length >= POOL_MIN) return items;
+    var seen = {}; items.forEach(function (i) { seen[i.id] = 1; });
+    for (var tries = 0; items.length < POOL_MIN && tries < 120; tries += 4) {
+      status("Aufgaben werden geladen … " + items.length + " von " + POOL_MIN);
+      var rs = await Promise.all([0, 1, 2, 3].map(function () {
+        return fetch("https://lichess.org/api/puzzle/next").then(function (r) { return r.json(); }).catch(function () { return null; });
+      }));
+      rs.forEach(function (j) {
+        if (!j || !j.puzzle || !j.game || seen[j.puzzle.id]) return;
+        seen[j.puzzle.id] = 1;
+        items.push({ id: j.puzzle.id, rating: j.puzzle.rating, pgn: j.game.pgn, solution: j.puzzle.solution, themes: j.puzzle.themes });
+      });
+    }
+    if (items.length) { try { await db.doc("puzzles/pool").set({ items: items }); } catch (e) {} }
+    return items;
+  }
+  async function run(d) {
+    window.SCH_FREI = !(d.wp && d.wp.length);
+    // The user's own games and rating history (Lichess/chess.com account) are merged into the seed data.
+    try {
+      var es = await db.doc("daten/eigene").get();
+      if (es && es.exists) {
+        var e = es.data(), seenF = {};
+        d.ef = (d.ef || []).concat(e.ef || []).filter(function (x) { var k = x[0]; if (seenF[k]) return false; seenF[k] = 1; return true; });
+        d.rate = Object.assign({}, d.rate || {}, e.rate || {});
+      }
+    } catch (e2) {}
+    if (window.SCH_FREI) {
+      var note = document.createElement("p");
+      note.style.cssText = "max-width:420px;margin:48px auto;font-family:system-ui,sans-serif;color:#5E6A61";
+      document.body.prepend(note);
+      var items = await loadPool(function (t) { note.textContent = t; });
+      if (!items.length) { note.innerHTML = "Die Aufgaben konnten gerade nicht geladen werden. <a href='' onclick='location.reload();return false'>Noch einmal versuchen</a>"; return; }
+      note.remove();
+      d.wp = items; d.lines = [];
+    }
     var hide = document.getElementById("sch-hide"); if (hide) hide.remove();
     document.getElementById("wpdata").textContent = JSON.stringify(d.wp || []);
     document.getElementById("linesdata").textContent = JSON.stringify(d.lines || []);
@@ -43,7 +83,28 @@ window.addEventListener("DOMContentLoaded", async function () {
   if (snap && snap.exists) return run(snap.data());
   var box = document.createElement("div");
   box.style.cssText = "max-width:420px;margin:48px auto;padding:20px;font-family:system-ui,sans-serif;border:1px solid #D9DDD3;border-radius:12px;background:#fff;color:#1E241F;display:flex;flex-direction:column;gap:12px";
-  box.innerHTML = "<h2 style='margin:0'>Einrichtung</h2><p style='margin:0;color:#5E6A61'>Die Aufgaben und deine Daten liegen nur in deinem Konto, nicht in der Seite. Wähle einmal die Datei <b>schach-daten.json</b>, die Claude dir gegeben hat.</p><input id='sch-seed' type='file' accept='application/json,.json'><button id='sch-seed-go' style='font:inherit;font-weight:600;padding:10px 16px;border-radius:6px;border:1px solid #B3261E;background:#B3261E;color:#fff;cursor:pointer'>Einlesen</button><p id='sch-seed-msg' style='margin:0;color:#5E6A61' aria-live='polite'></p>";
+  var btn = "font:inherit;font-weight:600;padding:10px 16px;border-radius:6px;border:1px solid #B3261E;background:#B3261E;color:#fff;cursor:pointer";
+  var inp = "font:inherit;padding:8px;border:1px solid #D9DDD3;border-radius:6px;width:100%;box-sizing:border-box";
+  box.innerHTML = "<h2 style='margin:0'>Willkommen beim Schachtraining</h2>"
+    + "<p style='margin:0;color:#5E6A61'>Trag deinen Benutzernamen ein, dann holt die Seite deine Wertung und Partien. Dazu gibt es freie Taktikaufgaben und die Kurzlektionen. Beides kannst du später unter Anpassen ändern.</p>"
+    + "<label>Lichess-Benutzername<input id='sch-li' type='text' autocomplete='off' autocapitalize='off' style='" + inp + "'></label>"
+    + "<label>chess.com-Benutzername (optional)<input id='sch-cc' type='text' autocomplete='off' autocapitalize='off' style='" + inp + "'></label>"
+    + "<label>Ziel-Wertung<input id='sch-ziel' type='number' min='600' max='2800' step='50' placeholder='1500' style='" + inp + "'></label>"
+    + "<button id='sch-new-go' style='" + btn + "'>Los geht's</button><p id='sch-new-msg' style='margin:0;color:#5E6A61' aria-live='polite'></p>"
+    + "<hr style='border:0;border-top:1px solid #D9DDD3;width:100%'><details><summary style='cursor:pointer;color:#5E6A61'>Ich habe eine Datei schach-daten.json</summary>"
+    + "<p style='color:#5E6A61'>Die Datei mit Aufgaben und Daten, die du bekommen hast.</p><input id='sch-seed' type='file' accept='application/json,.json'> <button id='sch-seed-go' style='" + btn + "'>Einlesen</button><p id='sch-seed-msg' style='margin:8px 0 0;color:#5E6A61' aria-live='polite'></p></details>";
+  box.querySelector("#sch-new-go").addEventListener("click", async function () {
+    var msg = box.querySelector("#sch-new-msg"), li = box.querySelector("#sch-li").value.trim(), cc = box.querySelector("#sch-cc").value.trim(), z = +box.querySelector("#sch-ziel").value;
+    try {
+      msg.textContent = "Einen Moment …";
+      await db.doc("daten/start").set({ wp: [], lines: [], ef: [], rate: {}, frei: true });
+      await db.doc("einstellungen/konten").set({ lichess: li, chesscom: cc });
+      if (z >= 600 && z <= 2800) await db.doc("einstellungen/ui").set({ ziel: z });
+      msg.textContent = "Fertig. Die Seite lädt …";
+      location.hash = (li || cc) ? "anpassen" : "";
+      setTimeout(function () { location.reload(); }, 400);
+    } catch (e) { msg.textContent = "Das hat nicht geklappt: " + (e && e.message || "Fehler"); }
+  });
   document.body.prepend(box);
   box.querySelector("#sch-seed-go").addEventListener("click", async function () {
     var msg = box.querySelector("#sch-seed-msg"), f = box.querySelector("#sch-seed").files[0];
