@@ -69,6 +69,7 @@ button{font-family:inherit}
 .weeks{display:flex;flex-direction:column;gap:10px}
 .week{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;align-items:center;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--card)}
 .week .pips{display:flex;gap:5px}
+.card.warn{border-color:var(--warn,#d98a00);border-width:2px}
 .pip{width:14px;height:14px;border-radius:4px;border:1px solid var(--line)}
 .pip.done{background:var(--good);border-color:var(--good)}
 .pip.test{border-color:var(--accent);border-width:2px}
@@ -783,12 +784,36 @@ const doneCount=()=>Object.keys(S.lessons).length;
 const nextLesson=()=>{ for(let n=1;n<=TOTAL;n++) if(!S.lessons[n]) return n; return null; };
 function trainingDays(from,to){ let c=0; const d=parseDay(from), e=parseDay(to); while(d<=e){ if(d.getDay()!==0) c++; d.setDate(d.getDate()+1);} return c; }
 function behind(){ const first=S.lessons[1]; if(!first) return 0; const exp=Math.min(TOTAL,trainingDays(first.date,today())); return Math.max(0,exp-doneCount()); }
-function streak(){
-  const days=new Set(Object.values(S.lessons).map(l=>l.date)); if(!days.size) return 0;
-  const d=new Date(); if(!days.has(today(d))){ d.setDate(d.getDate()-1); }
-  let c=0; for(let guard=0;guard<400;guard++){ if(d.getDay()===0){ d.setDate(d.getDate()-1); continue; } if(days.has(today(d))){ c++; d.setDate(d.getDate()-1);} else break; }
-  return c;
+function streakInfo(){
+  const days=new Set(Object.values(S.lessons).map(l=>l.date)); if(!days.size) return {c:0,j:0,best:0,done:false,risk:false};
+  const d=parseDay([...days].sort()[0]), now=parseDay(today()), t0=today();
+  let c=0, j=0, best=0, done=false;
+  for(let g=0;g<800&&d<=now;g++,d.setDate(d.getDate()+1)){
+    if(d.getDay()===0) continue;
+    const k=today(d);
+    if(days.has(k)){ c++; if(c%6===0&&j<2) j++; best=Math.max(best,c); if(k===t0) done=true; }
+    else if(k===t0){ /* heute noch offen */ }
+    else if(j>0) j--;
+    else c=0;
+  }
+  return {c,j,best,done,risk:c>0&&!done&&now.getDay()!==0};
 }
+const streak=()=>streakInfo().c;
+// Test-Medaillen: werden aus den Messungen abgeleitet, rückwirkend und ohne eigenen Zustand
+function medalOf(n){
+  const ids=Object.keys(TESTS).map(Number).sort((a,b)=>a-b), idx=ids.indexOf(n);
+  const ss=S.sessions.filter(x=>x.type==="test"&&x.lesson===n); if(!ss.length||idx<0) return 0;
+  const b=S.baseline?S.baseline.eff:0; let m=1;
+  for(const x of ss){
+    let lv=1;
+    if(idx===0){ if(x.comp>=.8) lv=2; if(x.comp>=1) lv=3; }
+    else { if(x.comp>=.8&&b&&x.eff>b) lv=2; if(x.comp>=.8&&b&&x.eff>=b*(1+.1*idx)) lv=3; }
+    m=Math.max(m,lv);
+  }
+  return m;
+}
+const MEDALS=["","🥉","🥈","🥇"], MEDALNAME=["","Bronze","Silber","Gold"];
+const medalTests=()=>Object.keys(TESTS).map(Number).sort((a,b)=>a-b);
 const LEVELS_B=[[0,"Buchstabierer"],[200,"Zeilenleser"],[500,"Seitenwender"],[900,"Kapitelstürmer"],[1400,"Vielleser"],[2000,"Bücherwurm"],[2700,"Lesefuchs"],[3400,"Textkenner"],[4100,"Schnellleser"],[4800,"Lesemeister"]];
 const LEVELS=ADV?[[0,"Leser mit Plan"],[150,"Fragensteller"],[400,"Strukturfinder"],[700,"Abrufer"],[1000,"Kritischer Leser"],[1400,"Fachleser"],[1800,"Lesestratege"],[2300,"Wissensarbeiter"],[2900,"Textprofi"],[3500,"Lesemeister Pro"]]:LEVELS_B;
 function level(){ let i=0; while(i+1<LEVELS.length&&S.xp>=LEVELS[i+1][0]) i++; const cur=LEVELS[i][0], nxt=LEVELS[i+1]?LEVELS[i+1][0]:null; return {n:i+1,name:LEVELS[i][1],pct:nxt?(S.xp-cur)/(nxt-cur):1,toNext:nxt?nxt-S.xp:0}; }
@@ -807,12 +832,16 @@ const BADGES=(ADV?[
  {id:"rec3",name:"Gedächtnisprofi",desc:"3 Abrufe mit allen Kernaussagen",ok:()=>(S.recallAll||0)>=3},
  {id:"rev8",name:"Wiederholer",desc:"8 Wiederholungen gemacht",ok:()=>(S.revDone||0)>=8},
  {id:"scan5",name:"Spürnase",desc:"5 Suchaufgaben richtig gelöst",ok:()=>(S.scanOk||0)>=5},
+ {id:"s12",name:"Zwölferserie",desc:"12 Trainingstage am Stück",ok:()=>streak()>=12},
+ {id:"mgold",name:"Erstes Gold",desc:"Goldmedaille bei einem Test",ok:()=>medalTests().some(n=>medalOf(n)===3)},
+ {id:"mall",name:"Medaillensammler",desc:"Bei jedem Test eine Medaille",ok:()=>medalTests().every(n=>medalOf(n)>0)},
  {id:"half",name:"Halbzeit",desc:"12 Lektionen geschafft",ok:()=>doneCount()>=12},
  {id:"grad",name:"Fortgeschritten",desc:"Alle 24 Lektionen geschafft",ok:()=>doneCount()>=24}
 ]:[
  {id:"start",name:"Startschuss",desc:"Einstiegstest gemacht",ok:()=>!!S.baseline},
  {id:"s3",name:"Drei in Folge",desc:"3 Trainingstage am Stück",ok:()=>streak()>=3},
  {id:"s6",name:"Volle Woche",desc:"6 Trainingstage am Stück",ok:()=>streak()>=6},
+ {id:"s12",name:"Zwölferserie",desc:"12 Trainingstage am Stück",ok:()=>streak()>=12},
  {id:"s18",name:"Eiserne Serie",desc:"18 Trainingstage am Stück",ok:()=>streak()>=18},
  {id:"full",name:"Alles verstanden",desc:"100 % in einem Fragenblock",ok:()=>compSessions().some(s=>s.comp>=1)},
  {id:"p10",name:"Plus 10",desc:"Effektive Rate 10 % über Start",ok:()=>gain()>=.10},
@@ -820,6 +849,9 @@ const BADGES=(ADV?[
  {id:"p40",name:"Plus 40",desc:"Effektive Rate 40 % über Start",ok:()=>gain()>=.40},
  {id:"schulte",name:"Adlerblick",desc:"Zahlentafel unter 30 Sekunden",ok:()=>S.schulteBest!=null&&S.schulteBest<30000},
  {id:"span5",name:"Weiter Blick",desc:"5 Wörter in der Blickspanne",ok:()=>S.spanBest>=5},
+ {id:"s36",name:"Unaufhaltsam",desc:"36 Trainingstage am Stück",ok:()=>streak()>=36},
+ {id:"mgold",name:"Erstes Gold",desc:"Goldmedaille bei einem Test",ok:()=>medalTests().some(n=>medalOf(n)===3)},
+ {id:"mall",name:"Medaillensammler",desc:"Bei jedem Test eine Medaille",ok:()=>medalTests().every(n=>medalOf(n)>0)},
  {id:"sprint10",name:"Sprinter",desc:"10 Sprints gelaufen",ok:()=>S.sprints>=10},
  {id:"half",name:"Halbzeit",desc:"24 Lektionen geschafft",ok:()=>doneCount()>=24},
  {id:"grad",name:"Absolvent",desc:"Alle 48 Lektionen geschafft",ok:()=>doneCount()>=48}
@@ -1119,12 +1151,12 @@ function render(){
   const L=level(), st=streak();
   $("#chips").replaceChildren(
     h("span",{class:"chip"},"Stufe ",h("b",{text:L.n})," · ",L.name),
-    h("span",{class:"chip"},"Serie ",h("b",{text:st})," ",st===1?"Tag":"Tage"),
+    h("span",{class:"chip",title:"Serie in Trainingstagen, sonntags ist frei"},"🔥 Serie ",h("b",{text:st})," ",st===1?"Tag":"Tage"),
     h("span",{class:"chip"},"Tempo ",h("b",{text:nf(tgt())})," WpM"));
   const v=$("#view"); v.replaceChildren();
   if(ADV&&HOSTED&&!advOpen()){ renderGate(v); return; }
   if(Run){ renderRun(v); return; }
-  ({heute:v=>{ viewToday(v); const c=nerdTodayCard(); if(c) v.append(c); },kurs:viewCourse,lesen:viewFree,nerd:viewNerd,fortschritt:viewProgress,grundlagen:viewBasics,anpassen:viewCustomize})[Tab](v);
+  ({heute:v=>{ viewToday(v); const sc=streakCard(); if(sc) v.append(sc); const c=nerdTodayCard(); if(c) v.append(c); },kurs:viewCourse,lesen:viewFree,nerd:viewNerd,fortschritt:viewProgress,grundlagen:viewBasics,anpassen:viewCustomize})[Tab](v);
   arrangeCards(v);
 }
 
@@ -1302,6 +1334,9 @@ function viewProgress(v){
   if(cs.length<2) chartCard.append(h("p",{class:"muted"},"Nach zwei gemessenen Texten erscheint hier dein Verlauf."));
   else { chartCard.append(h("div",{class:"legend"},h("span",{},h("i",{style:"background:var(--accent)"}),"Effektive Rate"),h("span",{},h("i",{style:"background:var(--s2)"}),"Tempo in WpM"),h("span",{},"Kreise: Tests")),chart(cs)); }
   v.append(chartCard);
+  v.append(h("div",{class:"card",style:"margin-top:16px"},h("h3",{text:"Test-Medaillen"}),
+    h("div",{class:"badges"},medalTests().map((n,i)=>{ const m=medalOf(n); return h("div",{class:"badge"+(m?" on":"")},h("b",{text:(m?MEDALS[m]:"🔒")+" "+(i===0?"Einstiegstest":n===TOTAL?"Abschlusstest":"Test "+n)}),h("span",{text:m?MEDALNAME[m]+(m<3?(i===0?"":" · Gold ab +"+(i*10)+" % effektive Rate")+(i===0?" · Gold bei 100 % Verständnis":""):""):`Lektion ${n}`}));})),
+    h("p",{class:"muted",style:"margin:10px 0 0;font-size:.85rem"},"Bronze: Test gemacht. Silber: mindestens 80 % Verständnis und besser als zum Start. Gold: zusätzlich der Zuwachs, der für diesen Test angepeilt ist.")));
   v.append(h("div",{class:"card",style:"margin-top:16px"},h("h3",{text:"Erfolge"}),h("div",{class:"badges"},BADGES.map(b=>h("div",{class:"badge"+(S.badges[b.id]?" on":"")},h("b",{text:b.name}),h("span",{text:S.badges[b.id]?`${b.desc} · ${fmtDay(S.badges[b.id])}`:b.desc}))))));
   if(cs.length) v.append(h("div",{class:"card",style:"margin-top:16px"},h("h3",{text:"Alle Messungen"}),h("div",{class:"tablewrap"},h("table",{},h("thead",{},h("tr",{},["Datum","Art","Text","WpM","Verständnis","Effektiv"].map(x=>h("th",{text:x})))),h("tbody",{},cs.slice().reverse().map(s=>h("tr",{},h("td",{text:fmtDay(s.date)}),h("td",{text:s.type==="test"?"Test":s.repeat?"Wiederholung":"Lektion"}),h("td",{text:(textById(s.textId)||{}).title||s.textId}),h("td",{text:nf(s.wpm)}),h("td",{text:Math.round(s.comp*100)+" %"}),h("td",{text:nf(s.eff)}))))))));
   v.append(h("div",{class:"row",style:"margin-top:16px"},h("button",{class:"btn ghost",id:"reset",onclick:e=>{ const b=e.currentTarget; if(b.dataset.arm){ const pr=S.prefs, ad=S.adv; S=freshState(); if(pr) S.prefs=pr; if(ad) S.adv=ad; save(); render(); } else { b.dataset.arm="1"; b.textContent="Wirklich alles löschen? Nochmal tippen"; } }},"Fortschritt zurücksetzen")));
@@ -1459,6 +1494,7 @@ function finishLesson(){
   const fresh=checkBadges(); save();
   const v=$("#view"); Run=null; render();
   v.replaceChildren(h("div",{class:"card"},h("p",{class:"eyebrow"},`Lektion ${n} geschafft`),h("div",{class:"big",text:`+${xp} Punkte`}),
+    TESTS[n]&&medalOf(n)?h("p",{style:"font-size:1.1rem"},`${MEDALS[medalOf(n)]} ${MEDALNAME[medalOf(n)]}medaille für diesen Test`):null,
     fresh.length?h("div",{class:"badges"},fresh.map(b=>h("div",{class:"badge on"},h("b",{text:"Neu: "+b.name}),h("span",{text:b.desc})))):null,
     h("p",{},n===TOTAL?"Du hast den Kurs abgeschlossen. Im Reiter Fortschritt siehst du den Vergleich mit deinem Einstiegstest.":"Morgen wartet die nächste Lektion. Um 20 Uhr fragt Claude im Projekt kurz nach."),
     h("div",{class:"row"},h("button",{class:"btn primary",onclick:()=>{ Tab="heute"; render(); }},"Fertig"),h("button",{class:"btn",onclick:()=>{ Tab="fortschritt"; render(); }},"Fortschritt ansehen"))));
@@ -1500,6 +1536,14 @@ function factCard(extra){
   const got=(S.nerd||{}).factDay===today();
   return h("div",{class:"card","data-k":"nerdfakt"},h("p",{class:"eyebrow"},PACKS.length===1?PACKS[0].fact:"Fakt des Tages"),h("p",{class:"prose",style:"margin:0"},nerdFact()),
     h("div",{class:"row"},got?h("span",{class:"muted"},"✓ Heute abgeholt"+(NMSG?" · "+NMSG:"")):h("button",{class:"btn",onclick:claimFact},"Gewusst? +5 Punkte"),extra||null));
+}
+function streakCard(){
+  const si=streakInfo(); if(!doneCount()) return null;
+  const toJoker=6-(si.c%6), msg=si.risk?(si.j>0?"Heute fehlt noch eine Lektion. Ein Joker würde einen verpassten Tag auffangen.":"Heute noch eine Lektion, dann bleibt die Serie bestehen."):(si.done?"Heute erledigt. Bis morgen!":(si.c===0?(si.best>0?`Neue Serie starten. Dein Rekord liegt bei ${si.best} ${si.best===1?"Tag":"Tagen"}.`:"Die Serie beginnt mit deiner nächsten Lektion."):""));
+  const pips=[]; for(let i=0;i<6;i++) pips.push(h("span",{class:"pip"+(i<si.c%6||(si.c>0&&si.c%6===0)?" done":"")}));
+  return h("div",{class:"card"+(si.risk?" warn":""),"data-k":"serie"},h("p",{class:"eyebrow"},"Serie"),h("h3",{text:`🔥 ${si.c} ${si.c===1?"Tag":"Tage"} am Stück`}),
+    h("div",{class:"pips"},pips),
+    h("p",{class:"muted",style:"margin:6px 0 0;font-size:.9rem"},(msg?msg+" ":"")+(si.c>0?`Noch ${toJoker===6?6:toJoker} ${toJoker===1?"Tag":"Tage"} bis ${si.j<2?"zum nächsten Joker und":"zum"} Bonus (+30 Punkte). `:"")+`Joker: ${"🛡️".repeat(si.j)||"keiner"}${si.best>si.c?` · Rekord ${si.best}`:""}`));
 }
 function nerdTodayCard(){
   if(!allFacts().length) return null;
