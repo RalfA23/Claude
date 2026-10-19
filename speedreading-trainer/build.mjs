@@ -27,7 +27,9 @@ for (const [from, to] of PUBLIC_TEXT) {
 const split = trainer.indexOf("<style>");
 const headTags = trainer.slice(0, split).replace(/<meta name="claude:viewport-fit-sides"[^>]*>\n?/, "");
 const page = shell.replace("</head>", headTags + "</head>").replace("<!--TRAINER-->", trainer.slice(split));
-writeFileSync(join(dist, "index.html"), page);
+// Version query so that browsers do not keep serving an old hosted.js/config.js from their cache (GitHub Pages caches for 10 minutes).
+const v = Date.now();
+writeFileSync(join(dist, "index.html"), page.replace('src="hosted.js"', `src="hosted.js?v=${v}"`).replace('src="config.js"', `src="config.js?v=${v}"`));
 
 const config = {
   supabaseUrl: process.env.SR_SUPABASE_URL || "",
