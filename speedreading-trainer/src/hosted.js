@@ -24,9 +24,10 @@
       },
     };
     window.SR_AI = {
-      // The server builds the prompt itself; only the topic is sent.
+      // The server builds the prompt itself; only topic, source ("wikipedia" or "classic") and query are sent.
       async generate(_prompt, opts) {
-        const { data, error } = await sb.functions.invoke("generate-text", { body: { topic: opts && opts.topic } });
+        const o = opts || {};
+        const { data, error } = await sb.functions.invoke("generate-text", { body: { topic: o.topic, source: o.source, query: o.query } });
         if (error) throw error;
         return data;
       },
