@@ -195,6 +195,49 @@ async function viaGutenberg(query: string): Promise<Book[]> {
   return books;
 }
 
+// Gutenberg keeps a book's text under several names, and some books only have an HTML edition, so try them in turn.
+async function bookText(book: Book): Promise<string> {
+  const id = book.id;
+  const plain = [book.textUrl, `https://www.gutenberg.org/ebooks/${id}.txt.utf-8`, `https://www.gutenberg.org/cache/epub/${id}/pg${id}.txt`,
+    `https://www.gutenberg.org/files/${id}/${id}-0.txt`, `https://www.gutenberg.org/files/${id}/${id}.txt`]
+    .filter((u, i, a): u is string => !!u && a.indexOf(u) === i);
+  const html = [`https://www.gutenberg.org/cache/epub/${id}/pg${id}-images.html`, `https://www.gutenberg.org/cache/epub/${id}/pg${id}.html`,
+    `https://www.gutenberg.org/files/${id}/${id}-h/${id}-h.htm`];
+  let lastErr: SourceError | null = null;
+  for (const u of [...plain, ...html]) {
+    try {
+      const t = (await (await fetchOk(u, "text/plain, text/html", 25000, 1)).text()).replace(/\r\n?/g, "\n");
+      return u.endsWith(".html") || u.endsWith(".htm") ? htmlToText(t) : t;
+    } catch (e) {
+      if (e instanceof SourceError) lastErr = e; else throw e;
+    }
+  }
+  throw new SourceError("fetch_failed", 502, `${lastErr?.detail ?? "kein Text"} (Buch ${id})`);
+}
+
+function htmlToText(h: string): string {
+  const body = h.replace(/<(script|style)[\s\S]*?<\/\1>/gi, "").replace(/<\/(p|div|h\d|blockquote|li|tr)>/gi, "\n\n").replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<[^>]+>/g, "");
+  const ent: Record<string, string> = { amp: "&", lt: "<", gt: ">", quot: '"', apos: "'", nbsp: " " };
+  return body.replace(/&(#x?[0-9a-f]+|\w+);/gi, (m, e: string) => {
+    if (e[0] === "#") {
+      const n = e[1].toLowerCase() === "x" ? parseInt(e.slice(2), 16) : parseInt(e.slice(1), 10);
+      return Number.isFinite(n) ? String.fromCodePoint(n) : m;
+    }
+    return ent[e.toLowerCase()] ?? m;
+  });
+}
+
+function paragraphsOf(text: string): string[] {
+  let raw = text;
+  const a = raw.search(/\*\*\* ?START OF[^\n]*\n/);
+  if (a >= 0) raw = raw.slice(raw.indexOf("\n", a) + 1);
+  const z = raw.search(/\*\*\* ?END OF/);
+  if (z >= 0) raw = raw.slice(0, z);
+  return raw.split(/\n\s*\n/).map((x) => x.replace(/\s*\n\s*/g, " ").trim())
+    .filter((x) => wc(x) >= 30 && x.length < 2500 && /[.!?"»“«)]$/.test(x));
+}
+
 async function fromGutenberg(query: string) {
   let books: Book[];
   try {
@@ -205,33 +248,23 @@ async function fromGutenberg(query: string) {
     books = await viaGutenberg(query);
   }
   if (!books.length) throw new SourceError("not_found");
-  const book = books.find((b) => b.died > 0);
-  if (!book) throw new SourceError("not_public_domain", 422);
-  const died = book.died;
-  // Gutenberg keeps the plain text under several names depending on the book, so try them in turn.
-  const id = book.id;
-  const urls = [book.textUrl, `https://www.gutenberg.org/ebooks/${id}.txt.utf-8`, `https://www.gutenberg.org/cache/epub/${id}/pg${id}.txt`,
-    `https://www.gutenberg.org/files/${id}/${id}-0.txt`, `https://www.gutenberg.org/files/${id}/${id}.txt`]
-    .filter((u, i, a): u is string => !!u && a.indexOf(u) === i);
-  let r: Response | null = null;
-  let lastErr: SourceError | null = null;
-  for (const u of urls) {
+  const free = books.filter((b) => b.died > 0).slice(0, 4);
+  if (!free.length) throw new SourceError("not_public_domain", 422);
+  // Not every catalog entry has a readable text (some are audio only), so try the next hit when one fails.
+  let book: Book | null = null, paras: string[] = [], lastErr: SourceError | null = null;
+  for (const cand of free) {
     try {
-      r = await fetchOk(u, "text/plain", 25000, 1);
+      const ps = paragraphsOf(await bookText(cand));
+      if (ps.length < 6) throw new SourceError("too_short", 422);
+      book = cand;
+      paras = ps;
       break;
     } catch (e) {
       if (e instanceof SourceError) lastErr = e; else throw e;
     }
   }
-  if (!r) throw new SourceError("fetch_failed", 502, `${lastErr?.detail ?? "kein Text"} (Buch ${id})`);
-  let raw = (await r.text()).replace(/\r\n?/g, "\n");
-  const a = raw.search(/\*\*\* ?START OF[^\n]*\n/);
-  if (a >= 0) raw = raw.slice(raw.indexOf("\n", a) + 1);
-  const z = raw.search(/\*\*\* ?END OF/);
-  if (z >= 0) raw = raw.slice(0, z);
-  const paras = raw.split(/\n\s*\n/).map((x) => x.replace(/\s*\n\s*/g, " ").trim())
-    .filter((x) => wc(x) >= 30 && x.length < 2500 && /[.!?"»“«)]$/.test(x));
-  if (paras.length < 6) throw new SourceError("too_short", 422);
+  if (!book) throw lastErr ?? new SourceError("fetch_failed", 502, "kein Text");
+  const died = book.died;
   // Somewhere in the middle of the book, skipping preface and appendix.
   const lo = Math.floor(paras.length * 0.15), hi = Math.max(lo + 1, Math.floor(paras.length * 0.7));
   let passage: string[] | null = null;
