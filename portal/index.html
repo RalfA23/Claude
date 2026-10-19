@@ -75,6 +75,8 @@ var COURSES = [
   {id: "lesen", icon: "📖", title: "Lesetraining", text: "8 Wochen schneller lesen: feste Lektionen, Lesefenster mit Pacer, Tests und Fortschritt.", href: "lesen/"},
   {id: "schach", icon: "♞", title: "Schachtraining", text: "Mehr Wertungspunkte: Tagesaufgabe, Taktikaufgaben, Smirnov-Lektionen, tägliche Abfrage, verbunden mit deinem Lichess- oder chess.com-Konto.", href: "schach/"}
 ];
+// Nur für einzeln freigeschaltete Konten sichtbar (Zeile in gevt_members). Ohne Freigabe taucht die Kachel nicht auf.
+var GEVT = {id: "gevt", icon: "🥋", title: "Ving Tsun Wissen", text: "Frag deine GEVT-Wissensdatenbank: Göksels Lehre und deine Notizen getrennt, mit Grad und Quellen.", href: "gevt/"};
 (function () {
   "use strict";
   var $ = function (id) { return document.getElementById(id); };
@@ -128,6 +130,9 @@ var COURSES = [
     user = u; $("login").hidden = true; $("app").hidden = false; render();
     // Accounts from before this feature: what they already chose counts as known, the rest is new. Brand-new accounts know everything.
     if (!seen()) setSeen(mine().length ? mine() : allIds());
+    sb.from("gevt_members").select("role").limit(1).then(function (r) {
+      if (r.data && r.data.length && COURSES.indexOf(GEVT) < 0) { COURSES.push(GEVT); render(); }
+    });
   }
   $("out").addEventListener("click", async function () { await sb.auth.signOut(); location.reload(); });
 
