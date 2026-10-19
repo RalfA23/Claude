@@ -42,6 +42,27 @@
         return data;
       },
     };
+    // Shared base collection of texts (see supabase/migrations/0003_base_texts.sql): readable by all, writable by admins only.
+    window.SR_BASE = {
+      async list() {
+        const { data, error } = await sb.from("base_texts").select("id,text").order("created_at", { ascending: true });
+        if (error) throw error;
+        return data || [];
+      },
+      async isAdmin() {
+        const { data, error } = await sb.from("app_admins").select("user_id").eq("user_id", user.id).maybeSingle();
+        return !error && !!data;
+      },
+      async add(text) {
+        const { data, error } = await sb.from("base_texts").insert({ text }).select("id").single();
+        if (error) throw error;
+        return data.id;
+      },
+      async remove(id) {
+        const { error } = await sb.from("base_texts").delete().eq("id", id);
+        if (error) throw error;
+      },
+    };
     hideLogin();
     portalBar();
     accountBar(user);
