@@ -339,6 +339,7 @@ nav.tabs.dragging button{cursor:grabbing}
           <div class="field"><label for="gCol">Deine Farbe</label><select id="gCol"><option value="w">Weiß</option><option value="b">Schwarz</option><option value="r">Zufall</option></select></div>
           <div class="field"><label for="gTime">Bedenkzeit</label><select id="gTime"><option value="0">Ohne Uhr</option><option value="10">10 Minuten</option><option value="15">15 Minuten</option></select></div>
         </div>
+        <div id="gLiBox" hidden class="note" style="margin:0"></div>
         <button class="b primary" type="button" id="gGo">Partie starten</button>
         <p class="note" id="gMsg" role="status" aria-live="polite" style="margin:0"></p>
       </div>
@@ -348,7 +349,7 @@ nav.tabs.dragging button{cursor:grabbing}
         <div class="btns" style="justify-content:space-between;align-items:center"><strong id="gBot"></strong><span class="num" id="gBotT"></span></div>
         <p id="gStat" role="status" aria-live="polite" style="margin:4px 0;font-weight:600"></p>
         <p class="note" id="gMoves" style="margin:0"></p>
-        <div class="btns"><button class="b" type="button" id="gBack">Zug zurücknehmen</button><button class="b" type="button" id="gRes">Aufgeben</button><button class="b" type="button" id="gNewBtn">Neue Partie</button></div>
+        <div class="btns"><button class="b" type="button" id="gBack">Zug zurücknehmen</button><button class="b" type="button" id="gDraw" hidden>Remis anbieten</button><button class="b" type="button" id="gRes">Aufgeben</button><button class="b" type="button" id="gNewBtn">Neue Partie</button></div>
         <div id="gEnd"></div>
       </div>
       <div class="card"><h2>Lichess</h2><p class="note" style="margin:0">Kostenlos, ohne Werbung. Für eine Partie dort auf „Spielen“ oder „Gegen den Computer“ gehen.</p>
@@ -791,17 +792,18 @@ function engineMove(fen,lv){return engineInit().then(w=>new Promise(res=>{
   w.onmessage=e=>{const m=/^bestmove (\S+)/.exec(String(e.data));if(m){w.onmessage=null;res(m[1])}};
   w.postMessage('setoption name Skill Level value '+LEVELS[lv][1]);w.postMessage('position fen '+fen);w.postMessage('go movetime '+LEVELS[lv][2])}))}
 let G=null;
+$('gBack').hidden=false;
 function gFmt(ms){const s=Math.max(0,Math.ceil(ms/1000));return Math.floor(s/60)+':'+pad2(s%60)}
 function gDraw(){const g=G.g;G.b.draw();
   const hist=g.history();let t='';hist.forEach((m,i)=>{t+=(i%2===0?(Math.floor(i/2)+1)+'. ':'')+figurine(m)+' '});$('gMoves').textContent=t.trim()||'Noch kein Zug.';
-  $('gTop').textContent=G.cpu?'Computer, '+LEVELS[G.lv][0]:'Gegner';$('gBot').textContent='Du ('+(G.me==='w'?'Weiß':'Schwarz')+')';
+  $('gTop').textContent=G.cpu?'Computer, '+LEVELS[G.lv][0]:(G.opName||'Gegner');$('gBot').textContent='Du ('+(G.me==='w'?'Weiß':'Schwarz')+')';
   if(G.clock){$('gTopT').textContent=gFmt(G.t[G.me==='w'?'b':'w']);$('gBotT').textContent=gFmt(G.t[G.me])}else{$('gTopT').textContent='';$('gBotT').textContent=''}}
-function gEnd(res,why){if(G.over)return;G.over=true;clearInterval(G.tick);G.b.locked=true;G.b.draw();
+function gEnd(res,why){if(G.over)return;G.over=true;clearInterval(G.tick);if(G.ctrl)G.ctrl.abort();G.b.locked=true;G.b.draw();
   const mins=Math.max(1,Math.round((Date.now()-G.t0)/60000));
   $('gStat').textContent=({S:'Du hast gewonnen',N:'Du hast verloren',R:'Remis'})[res]+' ('+why+').';$('gBack').hidden=true;$('gRes').hidden=true;
   $('gEnd').replaceChildren(h('div',{class:'btns',style:'margin-top:8px'},h('button',{type:'button',class:'b primary',onclick:()=>{
     $('pDate').value=today();$('pMin').value=mins;$('pCol').value=G.me==='w'?'Weiß':'Schwarz';$('pRes').value=res;$('pOpp').value='Sonstiges';
-    $('pErr').value='Gegen Computer, Stärke '+LEVELS[G.lv][0]+', auf dieser Seite gespielt.';$('pLink').value='';show('log');$('pBl').focus()}},'In „Eintragen“ übernehmen')))}
+    $('pErr').value=G.cpu?'Gegen Computer, Stärke '+LEVELS[G.lv][0]+', auf dieser Seite gespielt.':'';$('pLink').value=G.cpu?'':'https://lichess.org/'+G.gid;if(!G.cpu)$('pOpp').value='Mensch Rapid';show('log');$('pBl').focus()}},'In „Eintragen“ übernehmen')))}
 function gCheck(){const g=G.g;
   if(g.in_checkmate()){gEnd(g.turn()===G.me?'N':'S','Schachmatt');return true}
   if(g.in_stalemate()){gEnd('R','Patt');return true}
@@ -815,10 +817,10 @@ async function gCpu(){if(G.over)return;const mine=G;G.thinking=true;G.b.locked=t
   const m=G.g.move({from:u.slice(0,2),to:u.slice(2,4),promotion:u[4]||undefined});if(m)G.b.last=[m.from,m.to];
   gDraw();if(gCheck())return;G.b.locked=false;G.b.draw();$('gStat').textContent='Du bist am Zug.'}
 function gStart(){
-  if($('gOpp').value==='human'){window.open('https://lichess.org/','_blank','noopener');$('gMsg').textContent='Gegen Menschen spielst du auf Lichess, das habe ich in einem neuen Fenster geöffnet. Danach holst du die Partie unten ab.';return}
+  if($('gOpp').value==='human'){liStart();return}
   $('gMsg').textContent='';const lv=+$('gLvl').value;let me=$('gCol').value;if(me==='r')me=Math.random()<.5?'w':'b';
-  if(G){clearInterval(G.tick)}
-  const clk=+$('gTime').value*60000;$('gPlay').hidden=false;$('gEnd').replaceChildren();$('gBack').hidden=false;$('gRes').hidden=false;
+  if(G){clearInterval(G.tick);G.over=true;if(G.ctrl)G.ctrl.abort()}
+  $('gDraw').hidden=true;const clk=+$('gTime').value*60000;$('gPlay').hidden=false;$('gEnd').replaceChildren();$('gBack').hidden=false;$('gRes').hidden=false;
   const b=makeBoard($('gB'),(from,to)=>{if(G.over||G.thinking)return;const g=G.g;const m=g.move({from,to,promotion:'q'});if(!m)return;b.last=[from,to];b.sel=null;b.tg=[];
     if(G.clock){G.t[G.me]+=G.inc}gDraw();if(gCheck())return;gCpu()});
   G={g:new Chess(),b,me,lv,cpu:true,over:false,thinking:false,clock:clk>0,t:{w:clk,b:clk},inc:0,t0:Date.now(),last:Date.now()};
@@ -828,11 +830,68 @@ function gStart(){
     if(G.t[side]<=0){G.t[side]=0;gEnd(side===G.me?'N':'S','Zeit abgelaufen')}},250)}
   $('gPlay').scrollIntoView({block:'nearest'});
   if(G.g.turn()===me){b.locked=false;b.draw();$('gStat').textContent='Du bist am Zug.'}else gCpu()}
-$('gGo').addEventListener('click',gStart);$('gNewBtn').addEventListener('click',()=>{if(G){clearInterval(G.tick);G.over=true}$('gPlay').hidden=true;G=null;$('gNew').scrollIntoView({block:'nearest'})});
-$('gRes').addEventListener('click',()=>{if(G&&!G.over)gEnd('N','aufgegeben')});
+$('gGo').addEventListener('click',gStart);$('gNewBtn').addEventListener('click',()=>{if(G){clearInterval(G.tick);if(G.kind==='li'&&!G.over&&G.gid)liPost(G.g.history().length<2?'abort':'resign');G.over=true;if(G.ctrl)G.ctrl.abort()}$('gDraw').hidden=true;$('gPlay').hidden=true;G=null;$('gNew').scrollIntoView({block:'nearest'})});
+$('gRes').addEventListener('click',()=>{if(!G||G.over)return;if(G.kind==='li'){liPost(G.g.history().length<2?'abort':'resign');return}gEnd('N','aufgegeben')});
 $('gBack').addEventListener('click',()=>{if(!G||G.over||G.thinking)return;const g=G.g;if(g.turn()!==G.me||g.history().length<(G.me==='w'?2:3))return;
   g.undo();g.undo();G.b.last=null;G.b.locked=false;gDraw();$('gStat').textContent='Du bist am Zug.'});
-$('gOpp').addEventListener('change',()=>{$('gLvlF').hidden=$('gOpp').value!=='cpu'});
+$('gOpp').addEventListener('change',()=>{$('gLvlF').hidden=$('gOpp').value!=='cpu';liBox()});
+/* Partie gegen Menschen über Lichess (Board-API). Anmeldung per OAuth mit PKCE, der Schlüssel bleibt nur in diesem Browser. */
+const LI_ID='ralfa23-lernportal-schach',LI_REDIR=location.origin+location.pathname;
+const liTok=()=>{try{return localStorage.getItem('sch-li-token')||''}catch(e){return ''}};
+const liHdr=()=>({Authorization:'Bearer '+liTok()});
+const b64u=b=>btoa(String.fromCharCode(...new Uint8Array(b))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+async function liConnect(){const ver=b64u(crypto.getRandomValues(new Uint8Array(32))),st=b64u(crypto.getRandomValues(new Uint8Array(12)));
+  const ch=b64u(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(ver)));
+  try{sessionStorage.setItem('sch-li-v',ver+'|'+st)}catch(e){}
+  location.href='https://lichess.org/oauth?'+new URLSearchParams({response_type:'code',client_id:LI_ID,redirect_uri:LI_REDIR,scope:'board:play',code_challenge_method:'S256',code_challenge:ch,state:st})}
+async function liReturn(){const q=new URLSearchParams(location.search),code=q.get('code');if(!code)return;setTimeout(()=>show('sp'),0);
+  let v='';try{v=sessionStorage.getItem('sch-li-v')||''}catch(e){}const [ver,st]=v.split('|');
+  history.replaceState(null,'',location.pathname+'#spielen');if(!ver||q.get('state')!==st){$('gMsg').textContent='Die Lichess-Anmeldung passte nicht zusammen. Bitte nochmal versuchen.';return}
+  try{const r=await fetch('https://lichess.org/api/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({grant_type:'authorization_code',code,code_verifier:ver,redirect_uri:LI_REDIR,client_id:LI_ID})});
+    const j=await r.json();if(!j.access_token)throw new Error('kein Token');localStorage.setItem('sch-li-token',j.access_token);sessionStorage.removeItem('sch-li-v');
+    show('sp');$('gOpp').value='human';$('gLvlF').hidden=true;liBox();$('gMsg').textContent='Mit Lichess verbunden. Du kannst jetzt eine Partie starten.'}
+  catch(e){$('gMsg').textContent='Die Anmeldung bei Lichess hat nicht geklappt.'}}
+function liBox(){const bx=$('gLiBox');if($('gOpp').value!=='human'){bx.hidden=true;return}bx.hidden=false;
+  if(liTok()){bx.replaceChildren('Mit Lichess verbunden. Gegen Menschen läuft immer mit Uhr (10 Minuten, bei 15 mit 10 Sekunden Zuschlag), ungewertet. ',h('button',{type:'button',class:'b sm',onclick:()=>{try{localStorage.removeItem('sch-li-token')}catch(e){}liBox()}},'Verbindung trennen'))}
+  else bx.textContent='Für Partien gegen Menschen verbindest du dich einmal mit deinem Lichess-Konto. Die Seite darf dann nur in deinem Namen Partien spielen, mehr nicht.'}
+async function ndjson(url,opt,onLine,signal){const r=await fetch(url,Object.assign({signal},opt));if(!r.ok){const e=new Error('HTTP '+r.status);e.status=r.status;throw e}
+  const rd=r.body.getReader(),dec=new TextDecoder();let buf='';
+  for(;;){const {done,value}=await rd.read();if(done)break;buf+=dec.decode(value,{stream:true});let i;
+    while((i=buf.indexOf('\n'))>=0){const line=buf.slice(0,i).trim();buf=buf.slice(i+1);if(line){let j=null;try{j=JSON.parse(line)}catch(e){}if(j)onLine(j)}}}}
+function liPost(path){if(!G||!G.gid)return;fetch('https://lichess.org/api/board/game/'+G.gid+'/'+path,{method:'POST',headers:liHdr()}).catch(()=>{})}
+function liState(st){if(!G||G.kind!=='li')return;const g=new Chess();
+  (st.moves||'').split(' ').filter(Boolean).forEach(u=>g.move({from:u.slice(0,2),to:u.slice(2,4),promotion:u[4]||undefined}));
+  G.g=g;G.b.game=g;const h2=g.history({verbose:true}),lm=h2[h2.length-1];G.b.last=lm?[lm.from,lm.to]:null;G.b.sel=null;G.b.tg=[];
+  if(st.wtime!=null){G.t={w:st.wtime,b:st.btime};G.last=Date.now()}
+  const stat=st.status;
+  if(stat&&stat!=='created'&&stat!=='started'){const win=st.winner;const res=!win?'R':(win==='white')===(G.me==='w')?'S':'N';
+    const why={mate:'Schachmatt',resign:'Aufgabe',outoftime:'Zeit abgelaufen',stalemate:'Patt',draw:'Remis vereinbart',aborted:'abgebrochen',timeout:'Gegner weg',noStart:'nicht gestartet'}[stat]||stat;
+    gDraw();gEnd(stat==='aborted'||stat==='noStart'?'R':res,why);return}
+  gDraw();const mine=g.turn()===G.me;G.b.locked=!mine;G.b.draw();$('gStat').textContent=mine?'Du bist am Zug.':'Der Gegner ist am Zug.'}
+async function liGame(id,ctrl){const run=async()=>{await ndjson('https://lichess.org/api/board/game/stream/'+id,{headers:liHdr()},e=>{
+    if(e.type==='gameFull'){const my=G.myId;const wId=(e.white&&(e.white.id||'')).toLowerCase();G.me=wId===my?'w':'b';G.b.flipped=G.me==='b';
+      const opp=G.me==='w'?e.black:e.white;G.opName=((opp&&(opp.name||opp.id))||'Gegner')+(opp&&opp.rating?' ('+opp.rating+')':'');G.clock=true;G.inc=0;liState(e.state)}
+    else if(e.type==='gameState')liState(e)},ctrl.signal)};
+  for(let n=0;n<30&&G&&G.gid===id&&!G.over&&!ctrl.signal.aborted;n++){try{await run()}catch(e){if(ctrl.signal.aborted)return;if(e.status===404||e.status===401)break}await new Promise(r=>setTimeout(r,2000))}}
+async function liStart(){
+  if(!liTok()){liConnect();return}
+  if(typeof ReadableStream==='undefined'){$('gMsg').textContent='Dieser Browser kann das nicht. Bitte Chrome, Safari oder Firefox in der aktuellen Version nutzen.';return}
+  $('gMsg').textContent='Ich prüfe die Verbindung …';let acc;
+  try{const r=await fetch('https://lichess.org/api/account',{headers:liHdr()});if(r.status===401){localStorage.removeItem('sch-li-token');liBox();$('gMsg').textContent='Die Verbindung ist abgelaufen. Bitte nochmal verbinden.';return}acc=await r.json()}catch(e){$('gMsg').textContent='Lichess ist gerade nicht erreichbar.';return}
+  $('gMsg').textContent='';if(G){clearInterval(G.tick);G.over=true;if(G.ctrl)G.ctrl.abort()}
+  const mins=+$('gTime').value===15?15:10,inc=mins===15?10:0;let want=$('gCol').value;
+  const ctrl=new AbortController();$('gPlay').hidden=false;$('gEnd').replaceChildren();$('gBack').hidden=true;$('gRes').hidden=false;$('gDraw').hidden=false;
+  const b=makeBoard($('gB'),(from,to)=>{if(!G||G.over||G.g.turn()!==G.me)return;const m=G.g.move({from,to,promotion:'q'});if(!m)return;b.last=[from,to];b.sel=null;b.tg=[];b.locked=true;gDraw();
+    fetch('https://lichess.org/api/board/game/'+G.gid+'/move/'+m.from+m.to+(m.promotion||''),{method:'POST',headers:liHdr()}).then(r=>{if(!r.ok)$('gStat').textContent='Der Zug wurde nicht angenommen.'}).catch(()=>{})});
+  G={kind:'li',g:new Chess(),b,me:want==='b'?'b':'w',lv:0,cpu:false,over:false,clock:true,t:{w:mins*60000,b:mins*60000},inc,t0:Date.now(),last:Date.now(),myId:(acc.id||'').toLowerCase(),gid:null,ctrl,opName:'Suche …'};
+  b.load(G.g.fen());b.flipped=G.me==='b';b.locked=true;gDraw();$('gStat').textContent='Ich suche einen Gegner … (kann einen Moment dauern)';
+  G.tick=setInterval(()=>{if(G.over||!G.gid)return;const now=Date.now(),d=now-G.last;G.last=now;const side=G.g.turn();G.t[side]=Math.max(0,G.t[side]-d);gDraw()},250);
+  const mine=G;
+  ndjson('https://lichess.org/api/stream/event',{headers:liHdr()},e=>{if(e.type==='gameStart'&&G===mine&&!G.gid){G.gid=(e.game&&(e.game.gameId||e.game.id))||null;if(G.gid)liGame(G.gid,ctrl)}},ctrl.signal).catch(()=>{});
+  fetch('https://lichess.org/api/board/seek',{method:'POST',headers:Object.assign({'Content-Type':'application/x-www-form-urlencoded'},liHdr()),body:new URLSearchParams({rated:'false',time:String(mins),increment:String(inc),color:want==='w'?'white':want==='b'?'black':'random'}),signal:ctrl.signal})
+    .then(r=>{if(!r.ok&&G===mine&&!G.gid){$('gStat').textContent=r.status===429?'Lichess bremst gerade, bitte kurz warten.':'Die Suche hat nicht geklappt, vielleicht läuft schon eine andere Partie.'}}).catch(()=>{})}
+$('gDraw').addEventListener('click',()=>{if(G&&G.kind==='li'&&!G.over){liPost('draw/yes');$('gStat').textContent='Remis angeboten.'}});
+liBox();liReturn();
 /* Letzte Partie von Lichess oder chess.com holen und in "Eintragen" vorfüllen */
 async function letztePartie(wo){
   const out=$('spRes'),name=(wo==='li'?konto.lichess:konto.chesscom)||'';
