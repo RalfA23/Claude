@@ -61,7 +61,7 @@ h3{font-family:var(--f-display);font-weight:600;font-size:1.1rem;letter-spacing:
   .pc{font-size:min(9.2vw,7vh)}
 }
 .boardbox{display:flex;flex-direction:column;gap:8px;min-width:0}
-.board{display:grid;grid-template-columns:repeat(8,1fr);width:100%;max-width:520px;aspect-ratio:1/1;border:3px solid var(--ink);border-radius:2px;position:relative;user-select:none}
+.board{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));grid-template-rows:repeat(8,minmax(0,1fr));width:100%;max-width:520px;aspect-ratio:1/1;border:3px solid var(--ink);border-radius:2px;position:relative;user-select:none}
 .sq{position:relative;display:flex;align-items:center;justify-content:center}
 .sq.l{background:var(--sq-light)} .sq.d{background:var(--sq-dark)}
 .pc{font-family:var(--f-piece);font-size:min(9.2vw,50px);line-height:1}
@@ -123,7 +123,7 @@ button.b.sm{padding:4px 9px;font-size:.9rem;line-height:1}
 /* Übungen */
 .ex{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;margin-top:10px}
 .ex .item{display:flex;flex-direction:column;gap:6px}
-.mini{display:grid;grid-template-columns:repeat(8,1fr);aspect-ratio:1/1;border:2px solid var(--ink);border-radius:2px;user-select:none}
+.mini{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));grid-template-rows:repeat(8,minmax(0,1fr));aspect-ratio:1/1;border:2px solid var(--ink);border-radius:2px;user-select:none}
 .mini .sq{overflow:hidden} .mini .pc{font-size:clamp(16px,5.5vw,30px);line-height:1}
 .ex .who{font-size:.85rem;font-weight:600}
 .ex .ans{font-size:.85rem;line-height:1.4;min-height:1.2em}
