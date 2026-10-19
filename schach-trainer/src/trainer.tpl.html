@@ -328,8 +328,29 @@ nav.tabs.dragging button{cursor:grabbing}
   <!-- Eintragen -->
   <!-- Spielen -->
   <section class="view" id="v-sp" hidden>
-    <p class="note" style="margin:0 0 14px"><span class="here">▶ Wann?</span> Nach dem Lernen, wenn du noch eine Partie spielen willst. Gespielt wird auf Lichess oder chess.com, das öffnet sich in einem neuen Fenster. Danach holst du das Ergebnis hier ab.</p>
+    <p class="note" style="margin:0 0 14px"><span class="here">▶ Wann?</span> Nach dem Lernen, wenn du noch eine Partie spielen willst. Gegen den Computer spielst du direkt hier, für Partien gegen Menschen öffnet sich Lichess oder chess.com in einem neuen Fenster, danach holst du die Partie unten ab.</p>
     <div class="forms">
+      <div class="card" id="gNew"><h2>Neue Partie</h2>
+        <div class="two">
+          <div class="field"><label for="gOpp">Gegen wen?</label><select id="gOpp"><option value="cpu">Computer</option><option value="human">Mensch (über Lichess)</option></select></div>
+          <div class="field" id="gLvlF"><label for="gLvl">Stärke des Computers</label><select id="gLvl"></select></div>
+        </div>
+        <div class="two">
+          <div class="field"><label for="gCol">Deine Farbe</label><select id="gCol"><option value="w">Weiß</option><option value="b">Schwarz</option><option value="r">Zufall</option></select></div>
+          <div class="field"><label for="gTime">Bedenkzeit</label><select id="gTime"><option value="0">Ohne Uhr</option><option value="10">10 Minuten</option><option value="15">15 Minuten</option></select></div>
+        </div>
+        <button class="b primary" type="button" id="gGo">Partie starten</button>
+        <p class="note" id="gMsg" role="status" aria-live="polite" style="margin:0"></p>
+      </div>
+      <div class="card" id="gPlay" hidden style="grid-column:1/-1">
+        <div class="btns" style="justify-content:space-between;align-items:center"><strong id="gTop"></strong><span class="num" id="gTopT"></span></div>
+        <div class="board" id="gB"></div>
+        <div class="btns" style="justify-content:space-between;align-items:center"><strong id="gBot"></strong><span class="num" id="gBotT"></span></div>
+        <p id="gStat" role="status" aria-live="polite" style="margin:4px 0;font-weight:600"></p>
+        <p class="note" id="gMoves" style="margin:0"></p>
+        <div class="btns"><button class="b" type="button" id="gBack">Zug zurücknehmen</button><button class="b" type="button" id="gRes">Aufgeben</button><button class="b" type="button" id="gNewBtn">Neue Partie</button></div>
+        <div id="gEnd"></div>
+      </div>
       <div class="card"><h2>Lichess</h2><p class="note" style="margin:0">Kostenlos, ohne Werbung. Für eine Partie dort auf „Spielen“ oder „Gegen den Computer“ gehen.</p>
         <div class="btns"><a class="b primary" href="https://lichess.org/" target="_blank" rel="noopener">Partie auf Lichess</a><a class="b" href="https://lichess.org/training" target="_blank" rel="noopener">Taktikaufgaben</a></div></div>
       <div class="card"><h2>chess.com</h2><p class="note" style="margin:0">Online gegen Menschen oder gegen den Computer.</p>
@@ -757,6 +778,61 @@ function h(tag,attrs,...kids){const e=document.createElement(tag);
   for(const k in (attrs||{})){const v=attrs[k];if(k==='text')e.textContent=v;else if(k.startsWith('on'))e.addEventListener(k.slice(2),v);else if(v===true)e.setAttribute(k,'');else if(v!==false&&v!=null)e.setAttribute(k,v)}
   kids.flat().forEach(c=>{if(c!=null)e.append(c)});return e}
 let konto={};
+/* Partie gegen den Computer (Stockfish läuft im Browser, ohne Konto) */
+const SF_URL='https://cdn.jsdelivr.net/npm/stockfish.js@10.0.2/stockfish.js';
+const LEVELS=[['1 · sehr leicht',0,60],['2 · leicht',2,100],['3 · locker',4,150],['4 · mittel',7,250],['5 · fordernd',10,400],['6 · stark',13,600],['7 · sehr stark',16,800],['8 · Maximum',20,1200]];
+$('gLvl').innerHTML=LEVELS.map((l,i)=>'<option value="'+i+'"'+(i===2?' selected':'')+'>'+l[0]+'</option>').join('');
+let sfW=null;
+function engineInit(){return new Promise(async(res,rej)=>{if(sfW)return res(sfW);
+  try{const code=await (await fetch(SF_URL)).text();const w=new Worker(URL.createObjectURL(new Blob([code],{type:'application/javascript'})));
+    const t=setTimeout(()=>rej(new Error('timeout')),20000);w.onerror=e=>{clearTimeout(t);rej(e)};
+    w.onmessage=e=>{if(String(e.data).indexOf('uciok')===0){clearTimeout(t);sfW=w;w.onmessage=null;res(w)}};w.postMessage('uci')}catch(e){rej(e)}})}
+function engineMove(fen,lv){return engineInit().then(w=>new Promise(res=>{
+  w.onmessage=e=>{const m=/^bestmove (\S+)/.exec(String(e.data));if(m){w.onmessage=null;res(m[1])}};
+  w.postMessage('setoption name Skill Level value '+LEVELS[lv][1]);w.postMessage('position fen '+fen);w.postMessage('go movetime '+LEVELS[lv][2])}))}
+let G=null;
+function gFmt(ms){const s=Math.max(0,Math.ceil(ms/1000));return Math.floor(s/60)+':'+pad2(s%60)}
+function gDraw(){const g=G.g;G.b.draw();
+  const hist=g.history();let t='';hist.forEach((m,i)=>{t+=(i%2===0?(Math.floor(i/2)+1)+'. ':'')+figurine(m)+' '});$('gMoves').textContent=t.trim()||'Noch kein Zug.';
+  $('gTop').textContent=G.cpu?'Computer, '+LEVELS[G.lv][0]:'Gegner';$('gBot').textContent='Du ('+(G.me==='w'?'Weiß':'Schwarz')+')';
+  if(G.clock){$('gTopT').textContent=gFmt(G.t[G.me==='w'?'b':'w']);$('gBotT').textContent=gFmt(G.t[G.me])}else{$('gTopT').textContent='';$('gBotT').textContent=''}}
+function gEnd(res,why){if(G.over)return;G.over=true;clearInterval(G.tick);G.b.locked=true;G.b.draw();
+  const mins=Math.max(1,Math.round((Date.now()-G.t0)/60000));
+  $('gStat').textContent=({S:'Du hast gewonnen',N:'Du hast verloren',R:'Remis'})[res]+' ('+why+').';$('gBack').hidden=true;$('gRes').hidden=true;
+  $('gEnd').replaceChildren(h('div',{class:'btns',style:'margin-top:8px'},h('button',{type:'button',class:'b primary',onclick:()=>{
+    $('pDate').value=today();$('pMin').value=mins;$('pCol').value=G.me==='w'?'Weiß':'Schwarz';$('pRes').value=res;$('pOpp').value='Sonstiges';
+    $('pErr').value='Gegen Computer, Stärke '+LEVELS[G.lv][0]+', auf dieser Seite gespielt.';$('pLink').value='';show('log');$('pBl').focus()}},'In „Eintragen“ übernehmen')))}
+function gCheck(){const g=G.g;
+  if(g.in_checkmate()){gEnd(g.turn()===G.me?'N':'S','Schachmatt');return true}
+  if(g.in_stalemate()){gEnd('R','Patt');return true}
+  if(g.insufficient_material()){gEnd('R','zu wenig Material');return true}
+  if(g.in_threefold_repetition()){gEnd('R','dreimalige Stellungswiederholung');return true}
+  if(g.in_draw()){gEnd('R','50-Züge-Regel');return true}
+  return false}
+async function gCpu(){if(G.over)return;const mine=G;G.thinking=true;G.b.locked=true;$('gStat').textContent='Der Computer überlegt …';
+  let u;try{u=await engineMove(G.g.fen(),G.lv)}catch(e){if(G===mine){$('gStat').textContent='Der Computer konnte nicht geladen werden. Bitte Seite neu laden und nochmal versuchen.'}return}
+  if(G!==mine||G.over)return;G.thinking=false;
+  const m=G.g.move({from:u.slice(0,2),to:u.slice(2,4),promotion:u[4]||undefined});if(m)G.b.last=[m.from,m.to];
+  gDraw();if(gCheck())return;G.b.locked=false;G.b.draw();$('gStat').textContent='Du bist am Zug.'}
+function gStart(){
+  if($('gOpp').value==='human'){window.open('https://lichess.org/','_blank','noopener');$('gMsg').textContent='Gegen Menschen spielst du auf Lichess, das habe ich in einem neuen Fenster geöffnet. Danach holst du die Partie unten ab.';return}
+  $('gMsg').textContent='';const lv=+$('gLvl').value;let me=$('gCol').value;if(me==='r')me=Math.random()<.5?'w':'b';
+  if(G){clearInterval(G.tick)}
+  const clk=+$('gTime').value*60000;$('gPlay').hidden=false;$('gEnd').replaceChildren();$('gBack').hidden=false;$('gRes').hidden=false;
+  const b=makeBoard($('gB'),(from,to)=>{if(G.over||G.thinking)return;const g=G.g;const m=g.move({from,to,promotion:'q'});if(!m)return;b.last=[from,to];b.sel=null;b.tg=[];
+    if(G.clock){G.t[G.me]+=G.inc}gDraw();if(gCheck())return;gCpu()});
+  G={g:new Chess(),b,me,lv,cpu:true,over:false,thinking:false,clock:clk>0,t:{w:clk,b:clk},inc:0,t0:Date.now(),last:Date.now()};
+  b.load(G.g.fen());b.flipped=me==='b';b.locked=true;gDraw();
+  if(G.clock){G.tick=setInterval(()=>{if(G.over)return;const now=Date.now(),d=now-G.last;G.last=now;const side=G.g.turn();G.t[side]-=d;
+    $('gTopT').textContent=gFmt(G.t[G.me==='w'?'b':'w']);$('gBotT').textContent=gFmt(G.t[G.me]);
+    if(G.t[side]<=0){G.t[side]=0;gEnd(side===G.me?'N':'S','Zeit abgelaufen')}},250)}
+  $('gPlay').scrollIntoView({block:'nearest'});
+  if(G.g.turn()===me){b.locked=false;b.draw();$('gStat').textContent='Du bist am Zug.'}else gCpu()}
+$('gGo').addEventListener('click',gStart);$('gNewBtn').addEventListener('click',()=>{if(G){clearInterval(G.tick);G.over=true}$('gPlay').hidden=true;G=null;$('gNew').scrollIntoView({block:'nearest'})});
+$('gRes').addEventListener('click',()=>{if(G&&!G.over)gEnd('N','aufgegeben')});
+$('gBack').addEventListener('click',()=>{if(!G||G.over||G.thinking)return;const g=G.g;if(g.turn()!==G.me||g.history().length<(G.me==='w'?2:3))return;
+  g.undo();g.undo();G.b.last=null;G.b.locked=false;gDraw();$('gStat').textContent='Du bist am Zug.'});
+$('gOpp').addEventListener('change',()=>{$('gLvlF').hidden=$('gOpp').value!=='cpu'});
 /* Letzte Partie von Lichess oder chess.com holen und in "Eintragen" vorfüllen */
 async function letztePartie(wo){
   const out=$('spRes'),name=(wo==='li'?konto.lichess:konto.chesscom)||'';
