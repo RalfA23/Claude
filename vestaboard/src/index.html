@@ -1,0 +1,857 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#121315">
+<meta name="description" content="Vestaboard: Fallblatt-Anzeige mit Uhr, Wetter für Hamburg, Tagesschau, Zitat der Stunde und Sprüchen im Wechsel, dazu eigene Texte.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<title>Vestaboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+</head>
+<body>
+<style>
+/* Layout: one dark room, the board as the only bright object, controls tucked below like a wall plate. */
+:root {
+  --room: #121315;
+  --frame: #050506;
+  --tile: #1a1b1d;
+  --tile-hi: #222326;
+  --glyph: #f2efe8;
+  --seam: rgba(0,0,0,.65);
+  --ui-fg: #d9d6cf;
+  --ui-dim: #8b8984;
+  --ui-line: #2c2d31;
+  --ui-field: #1b1c1f;
+  --accent: #e8c45a;
+  --c-red: #d7372e; --c-orange: #ef8a1f; --c-yellow: #f2c419; --c-green: #24a35a;
+  --c-blue: #1f74c7; --c-violet: #7a4bb3; --c-white: #f2efe8; --c-black: #0b0b0c;
+  --f-tile: "Barlow Semi Condensed", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --f-ui: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+  color-scheme: dark;
+}
+html, body { height: 100%; }
+body { background: var(--room); color: var(--ui-fg); font-family: var(--f-ui); font-size: 15px; }
+.back { color: var(--ui-dim); text-decoration: none; font-size: 14px; align-self: flex-start; margin-bottom: -12px; }
+body.saver .back { display: none; }
+.wrap { max-width: 1280px; margin: 0 auto; padding: 24px 16px 40px; display: flex; flex-direction: column; gap: 28px; }
+
+/* ---------- Board ---------- */
+.stage { display: flex; justify-content: center; }
+.board {
+  --cols: 22; --rows: 6;
+  --cw: min(calc((100vw - 32px - 2 * var(--pad)) / 24.3), calc((100vh - 120px) / 6 / 1.42 * .9), 52px);
+  --pad: clamp(10px, 2.2vw, 34px);
+  --gap: max(2px, calc(var(--cw) * .09));
+  background: var(--frame);
+  padding: var(--pad);
+  border-radius: 4px;
+  box-shadow: 0 30px 60px -20px rgba(0,0,0,.8), inset 0 0 0 1px #000, 0 0 0 1px #2a2b2e;
+  display: grid;
+  grid-template-columns: repeat(var(--cols), var(--cw));
+  gap: calc(var(--gap) * 1.6) var(--gap);
+  cursor: zoom-in;
+  max-width: 100%;
+}
+.board:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+
+.cell {
+  position: relative;
+  width: var(--cw);
+  height: calc(var(--cw) * 1.42);
+  perspective: calc(var(--cw) * 8);
+  font-family: var(--f-tile);
+  font-weight: 600;
+  font-size: calc(var(--cw) * 1.02);
+  color: var(--glyph);
+  line-height: 1;
+}
+.half, .flap {
+  position: absolute; left: 0; right: 0; height: 50%;
+  overflow: hidden;
+  background: var(--bg, var(--tile));
+  backface-visibility: hidden;
+}
+.half.top, .flap.ftop { top: 0; border-radius: 2px 2px 0 0; transform-origin: 50% 100%; }
+.half.bot, .flap.fbot { bottom: 0; border-radius: 0 0 2px 2px; transform-origin: 50% 0; }
+.half.top, .flap.ftop { background-image: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,0)); }
+.half.bot::before, .flap.fbot::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 1px; background: var(--seam); z-index: 1; }
+.half span, .flap span {
+  position: absolute; left: 0; right: 0; height: 200%;
+  display: flex; align-items: center; justify-content: center;
+  padding-top: .04em;
+}
+.half.top span, .flap.ftop span { top: 0; }
+.half.bot span, .flap.fbot span { bottom: 0; }
+.flap { visibility: hidden; z-index: 2; }
+.cell.flipping .flap { visibility: visible; }
+.cell.flipping .ftop { animation: fall-top var(--ft, 80ms) ease-in forwards; }
+.cell.flipping .fbot { transform: rotateX(90deg); animation: fall-bot var(--ft, 80ms) ease-out var(--ft, 80ms) forwards; }
+@keyframes fall-top { from { transform: rotateX(0); filter: brightness(1); } to { transform: rotateX(-90deg); filter: brightness(.6); } }
+@keyframes fall-bot { from { transform: rotateX(90deg); filter: brightness(1.3); } to { transform: rotateX(0); filter: brightness(1); } }
+
+/* fullscreen */
+.stage:fullscreen { background: var(--room); align-items: center; }
+.stage:fullscreen .board {
+  --cw: min(calc((100vw - 2 * var(--pad)) / 24.3), calc((100vh - 2 * var(--pad)) / 6 / 1.42 / 1.12));
+  cursor: zoom-out; box-shadow: none;
+}
+
+/* ---------- Controls ---------- */
+.panel { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 340px); gap: 28px; align-items: start; }
+@media (max-width: 820px) { .panel { grid-template-columns: minmax(0, 1fr); } }
+.group { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.label { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--ui-dim); font-weight: 600; }
+.editor { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-start; }
+textarea {
+  font-family: var(--f-mono); font-size: 15px; line-height: 1.5;
+  background: var(--ui-field); color: var(--ui-fg);
+  border: 1px solid var(--ui-line); border-radius: 6px;
+  padding: 10px 12px; resize: vertical;
+  width: 100%; max-width: calc(26ch + 26px); min-height: calc(6 * 1.5em + 22px);
+  text-transform: uppercase;
+}
+textarea:focus-visible, button:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.hint { color: var(--ui-dim); font-size: 13px; line-height: 1.5; max-width: 60ch; }
+.hint code { font-family: var(--f-mono); font-size: 12.5px; color: var(--ui-fg); }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+button {
+  font: 500 14px var(--f-ui); color: var(--ui-fg);
+  background: var(--ui-field); border: 1px solid var(--ui-line);
+  border-radius: 6px; padding: 8px 14px; cursor: pointer;
+  transition: border-color .15s, background .15s;
+}
+button:hover { border-color: #4a4b50; background: #222327; }
+button.primary { background: var(--accent); color: #17140a; border-color: var(--accent); font-weight: 600; }
+button.primary:hover { background: #f1d377; }
+button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
+.swatch { width: 30px; height: 30px; padding: 0; border-radius: 4px; background: var(--sw); border-color: #000; }
+.swatch:hover { background: var(--sw); transform: translateY(-1px); }
+.count { font-family: var(--f-mono); font-size: 12px; color: var(--ui-dim); font-variant-numeric: tabular-nums; }
+.count.over { color: var(--c-orange); }
+.check { display: inline-flex; gap: 8px; align-items: center; font-size: 14px; cursor: pointer; }
+.check input { accent-color: var(--accent); width: 16px; height: 16px; }
+.status { font-size: 13px; color: var(--ui-dim); min-height: 1.4em; }
+
+/* screensaver mode */
+body.saver { cursor: none; overflow: hidden; }
+body.saver .panel { display: none; }
+body.saver .wrap { max-width: none; height: 100%; padding: 0; justify-content: center; }
+body.saver .stage { height: 100%; align-items: center; }
+body.saver .board {
+  --cw: min(calc((100vw - 2 * var(--pad)) / 24.3), calc((100vh - 2 * var(--pad)) / 6 / 1.42 / 1.12));
+  cursor: none; box-shadow: none;
+}
+.saver-exit { position: fixed; right: 16px; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); opacity: 0; transition: opacity .3s; }
+body.saver.moved .saver-exit { opacity: .8; }
+body.saver.moved { cursor: default; }
+
+@media (prefers-reduced-motion: reduce) {
+  .cell.flipping .ftop, .cell.flipping .fbot { animation-duration: 1ms; }
+}
+</style>
+
+<div class="wrap">
+  <a class="back" href="../">← Portal</a>
+  <div class="stage" id="stage">
+    <div class="board" id="board" role="img" aria-label="Vestaboard-Anzeige" tabindex="0" title="Klicken für Vollbild"></div>
+  </div>
+
+  <div class="panel">
+    <div class="group">
+      <label class="label" for="msg">Nachricht</label>
+      <div class="editor">
+        <textarea id="msg" rows="6" spellcheck="false" placeholder="Text eingeben …"></textarea>
+      </div>
+      <div class="row">
+        <button class="primary" id="send">Anzeigen</button>
+        <button id="clear">Leeren</button>
+        <label class="check"><input type="checkbox" id="center" checked> Zentrieren</label>
+        <span class="count" id="count"></span>
+      </div>
+      <div class="label" style="margin-top:6px">Farbkacheln einfügen</div>
+      <div class="row" id="swatches"></div>
+      <p class="hint">Bis zu 6 Zeilen à 22 Zeichen. Lange Zeilen werden automatisch umbrochen. Farben schreibst du als <code>{rot}</code>, <code>{orange}</code>, <code>{gelb}</code>, <code>{grün}</code>, <code>{blau}</code>, <code>{lila}</code>, <code>{weiß}</code>, <code>{schwarz}</code>. Umlaute werden zu AE, OE, UE, weil das echte Board sie nicht kennt. <kbd>Strg</kbd>+<kbd>Enter</kbd> zeigt an.</p>
+    </div>
+
+    <div class="group">
+      <div class="label">Modus</div>
+      <div class="row">
+        <button id="m-msg" aria-pressed="true">Eigener Text</button>
+        <button id="m-clock" aria-pressed="false">Uhr &amp; Datum</button>
+        <button id="m-rot" aria-pressed="false">Rotation</button>
+      </div>
+      <div class="label" style="margin-top:6px">Beispiele</div>
+      <div class="row" id="presets"></div>
+      <div class="label" style="margin-top:6px">Anzeige</div>
+      <div class="row">
+        <button id="fs">Vollbild</button>
+        <button id="demo">Farbtest</button>
+        <button id="snd" aria-pressed="true">Ton an</button>
+        <button class="primary" id="saver">Bildschirmschoner starten</button>
+      </div>
+      <div class="status" id="status" aria-live="polite"></div>
+    </div>
+  </div>
+</div>
+<button class="saver-exit" id="saver-exit" hidden>Bildschirmschoner beenden</button>
+
+<script>
+(() => {
+  const COLS = 22, ROWS = 6;
+
+  // Vestaboard character set (codes follow the official layout)
+  const CHARS = {0:' '};
+  'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach((c,i)=>CHARS[i+1]=c);
+  '1234567890'.split('').forEach((c,i)=>CHARS[i+27]=c);
+  Object.assign(CHARS, {37:'!',38:'@',39:'#',40:'$',41:'(',42:')',44:'-',46:'+',47:'&',48:'=',49:';',50:':',52:"'",53:'"',54:'%',55:',',56:'.',59:'/',60:'?',62:'°'});
+  const COLORS = {63:'--c-red',64:'--c-orange',65:'--c-yellow',66:'--c-green',67:'--c-blue',68:'--c-violet',69:'--c-white',70:'--c-black'};
+  const COLOR_NAMES = {rot:63,red:63,orange:64,gelb:65,yellow:65,'grün':66,gruen:66,green:66,blau:67,blue:67,lila:68,violett:68,violet:68,'weiß':69,weiss:69,white:69,schwarz:70,black:70};
+  const SWATCHES = [['rot',63],['orange',64],['gelb',65],['grün',66],['blau',67],['lila',68],['weiß',69],['schwarz',70]];
+  const CHAR_TO_CODE = {}; for (const k in CHARS) CHAR_TO_CODE[CHARS[k]] = +k;
+  // the drum order a flap walks through
+  const DRUM = [0, ...Array.from({length:36},(_,i)=>i+1), 37,38,39,40,41,42,44,46,47,48,49,50,52,53,54,55,56,59,60,62,63,64,65,66,67,68,69,70];
+  const DRUM_POS = {}; DRUM.forEach((c,i)=>DRUM_POS[c]=i);
+
+  const board = document.getElementById('board');
+  const css = getComputedStyle(document.documentElement);
+  const cells = [];
+  for (let i = 0; i < COLS*ROWS; i++) {
+    const el = document.createElement('div');
+    el.className = 'cell';
+    el.innerHTML = '<div class="half top"><span></span></div><div class="half bot"><span></span></div><div class="flap ftop"><span></span></div><div class="flap fbot"><span></span></div>';
+    const [top, bot, ftop, fbot] = el.children;
+    board.appendChild(el);
+    cells.push({el, top, bot, ftop, fbot, code:0, target:0, busy:false});
+  }
+
+  function paint(part, code) {
+    const col = COLORS[code];
+    part.style.setProperty('--bg', col ? `var(${col})` : 'var(--tile)');
+    part.firstChild.textContent = col ? '' : (CHARS[code] || '');
+  }
+  cells.forEach(c => [c.top,c.bot,c.ftop,c.fbot].forEach(p=>paint(p,0)));
+
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const FT = 55; // ms per half flap
+
+  function nextCode(cur, target) {
+    let p = DRUM_POS[cur] ?? 0;
+    const t = DRUM_POS[target] ?? 0;
+    const dist = (t - p + DRUM.length) % DRUM.length;
+    // walk the drum, but skip ahead on long trips so a change never takes more than ~14 flaps
+    const step = dist > 14 ? Math.ceil(dist / 14) : 1;
+    return DRUM[(p + Math.min(step, dist)) % DRUM.length];
+  }
+
+  // ---------- Ton: das Klackern der Fallblätter, im Browser erzeugt ----------
+  const sound = (() => {
+    let ctx = null, noise = null, flips = 0, userOn = true;
+    // Ton nur im Bildschirmschoner (der lädt die Seite mit ?ton=1); im Browser erst nach Klick auf „Ton an“
+    userOn = new URLSearchParams(location.search).has('ton');
+    try { const st = localStorage.getItem('vb-sound'); if (st) userOn = st === 'an'; } catch {}
+    const conf = () => Object.assign({ ton: true, lautstaerke: 0.5 }, window.VB_CONFIG || {});
+    const enabled = () => userOn && conf().ton !== false;
+    function init() {
+      if (ctx) { if (ctx.state === 'suspended') ctx.resume().catch(() => {}); return; }
+      try {
+        ctx = new (window.AudioContext || window.webkitAudioContext)();
+        noise = ctx.createBuffer(1, Math.floor(ctx.sampleRate * 0.04), ctx.sampleRate);
+        const d = noise.getChannelData(0);
+        for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+        if (ctx.state === 'suspended') ctx.resume().catch(() => {});
+      } catch { ctx = null; }
+    }
+    function click(t, vol) {
+      // kurzer Kunststoff-Tick: gefiltertes Rauschen plus ein leiser, tiefer Anschlag
+      const src = ctx.createBufferSource(); src.buffer = noise;
+      src.playbackRate.value = 0.8 + Math.random() * 0.5;
+      const bp = ctx.createBiquadFilter(); bp.type = 'bandpass';
+      bp.frequency.value = 1800 + Math.random() * 2200; bp.Q.value = 1.2;
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(vol, t + 0.001);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.018 + Math.random() * 0.01);
+      src.connect(bp).connect(g).connect(ctx.destination);
+      src.start(t); src.stop(t + 0.04);
+      const o = ctx.createOscillator(), og = ctx.createGain();
+      o.frequency.value = 110 + Math.random() * 60;
+      og.gain.setValueAtTime(vol * 0.5, t);
+      og.gain.exponentialRampToValueAtTime(0.0001, t + 0.012);
+      o.connect(og).connect(ctx.destination); o.start(t); o.stop(t + 0.015);
+    }
+    setInterval(() => {
+      const n = flips; flips = 0;
+      if (!n || !ctx || ctx.state !== 'running' || !enabled() || document.hidden) return;
+      // viele gleichzeitige Blätter klingen als dichteres, nicht lauteres Rattern
+      const clicks = Math.min(7, Math.ceil(n / 5));
+      const vol = Math.min(1, conf().lautstaerke) * 0.35 * Math.min(1, 0.4 + n / 40);
+      for (let i = 0; i < clicks; i++) click(ctx.currentTime + 0.005 + Math.random() * 0.03, vol * (0.6 + Math.random() * 0.4));
+    }, 30);
+    ['pointerdown', 'keydown', 'touchstart'].forEach(ev => document.addEventListener(ev, init, { passive: true }));
+    // nur klackern, solange das Board zu sehen ist
+    document.addEventListener('visibilitychange', () => {
+      if (!ctx) return;
+      if (document.hidden) ctx.suspend().catch(() => {}); else ctx.resume().catch(() => {});
+    });
+    init(); // im Bildschirmschoner darf der Ton meist ohne Klick starten
+    return {
+      flip() { flips++; },
+      get on() { return userOn; },
+      toggle() { userOn = !userOn; try { localStorage.setItem('vb-sound', userOn ? 'an' : 'aus'); } catch {} init(); return userOn; },
+    };
+  })();
+
+  function flipOnce(c) {
+    if (c.code === c.target) { c.busy = false; return; }
+    const next = reduce ? c.target : nextCode(c.code, c.target);
+    paint(c.top, next); paint(c.bot, c.code);
+    paint(c.ftop, c.code); paint(c.fbot, next);
+    c.el.style.setProperty('--ft', FT + 'ms');
+    c.el.classList.remove('flipping'); void c.el.offsetWidth; c.el.classList.add('flipping');
+    sound.flip();
+    setTimeout(() => {
+      c.code = next;
+      paint(c.bot, next);
+      c.el.classList.remove('flipping');
+      flipOnce(c);
+    }, reduce ? 0 : FT*2 + 5);
+  }
+
+  function show(grid) {
+    grid.forEach((code, i) => {
+      const c = cells[i];
+      c.target = code;
+      if (!c.busy && c.code !== code) {
+        c.busy = true;
+        // small stagger, column-wise like the real board
+        const col = i % COLS;
+        setTimeout(() => flipOnce(c), reduce ? 0 : col * 18 + Math.random()*90);
+      }
+    });
+    board.setAttribute('aria-label', 'Vestaboard: ' + gridToText(grid));
+  }
+
+  function gridToText(grid) {
+    const lines = [];
+    for (let r = 0; r < ROWS; r++) lines.push(grid.slice(r*COLS,(r+1)*COLS).map(c=>COLORS[c]?'■':(CHARS[c]||' ')).join('').trimEnd());
+    return lines.filter(Boolean).join(' / ');
+  }
+
+  // ---------- text → grid ----------
+  function normalize(s) {
+    return s.replace(/Ä/gi,'AE').replace(/Ö/gi,'OE').replace(/Ü/gi,'UE').replace(/ß/g,'SS')
+      .replace(/[„“”]/g,'"').replace(/[‚‘’]/g,"'").replace(/[–—]/g,'-').toUpperCase();
+  }
+  // returns array of tokens: number codes, words separated by spaces kept as code arrays
+  function lineToCodes(line) {
+    const out = [];
+    const re = /\{([^}]+)\}|([\s\S])/g; let m;
+    while ((m = re.exec(line))) {
+      if (m[1] !== undefined) {
+        const k = m[1].trim().toLowerCase();
+        if (k in COLOR_NAMES) out.push(COLOR_NAMES[k]);
+        else if (/^\d+$/.test(k) && (CHARS[+k] !== undefined || COLORS[+k])) out.push(+k);
+      } else {
+        normalize(m[2]).split('').forEach(ch => { if (ch in CHAR_TO_CODE) out.push(CHAR_TO_CODE[ch]); });
+      }
+    }
+    return out;
+  }
+  function wrap(codes, W = COLS) {
+    // greedy word wrap on spaces (code 0)
+    const words = []; let w = [];
+    codes.forEach(c => { if (c === 0) { words.push(w); w = []; } else w.push(c); });
+    words.push(w);
+    const lines = []; let cur = [];
+    words.forEach(word => {
+      while (word.length > W) { // hard-break very long words
+        if (cur.length) { lines.push(cur); cur = []; }
+        lines.push(word.slice(0, W)); word = word.slice(W);
+      }
+      const need = cur.length ? cur.length + 1 + word.length : word.length;
+      if (need <= W) cur = cur.length ? [...cur, 0, ...word] : [...word];
+      else { lines.push(cur); cur = [...word]; }
+    });
+    lines.push(cur);
+    return lines;
+  }
+  // center: true = mittig, false = oben links, 'left' = linksbündig mit Rand, vertikal mittig
+  function textToGrid(text, center) {
+    const W = center === 'left' ? COLS - 1 : COLS;
+    let lines = [];
+    text.replace(/\r/g,'').split('\n').forEach(l => {
+      const codes = lineToCodes(l);
+      if (codes.length <= W) lines.push(codes); else lines.push(...wrap(codes, W));
+    });
+    while (lines.length && !lines[lines.length-1].length) lines.pop();
+    const overflow = lines.length > ROWS;
+    lines = lines.slice(0, ROWS);
+    const grid = new Array(COLS*ROWS).fill(0);
+    const top = center ? Math.floor((ROWS - lines.length)/2) : 0;
+    let maxLen = 0;
+    if (center) lines.forEach(l => { const t = trimCodes(l); maxLen = Math.max(maxLen, t.length); });
+    lines.forEach((l, r) => {
+      const row = center === true ? trimCodes(l) : l;
+      const left = center === 'left' ? 1 : center ? Math.floor((COLS - row.length)/2) : 0;
+      row.forEach((c, i) => { grid[(top+r)*COLS + left + i] = c; });
+    });
+    return {grid, overflow, rows: lines.length};
+  }
+  function trimCodes(l) { let a = 0, b = l.length; while (a<b && l[a]===0) a++; while (b>a && l[b-1]===0) b--; return l.slice(a,b); }
+
+  // ---------- UI ----------
+  const $ = id => document.getElementById(id);
+  const msg = $('msg'), center = $('center'), status = $('status'), count = $('count');
+
+  const PRESETS = [
+    ['Guten Morgen', '{gelb}{gelb}{gelb}\nGUTEN MORGEN!\nHEUTE WIRD EIN\nGUTER TAG\n{gelb}{gelb}{gelb}'],
+    ['Kaffee', 'ERST KAFFEE,\nDANN DIE WELT.\n\n{orange}{rot}{orange}'],
+    ['Wochenende', '{blau}{gruen}{gelb}{orange}{rot}{lila}{blau}{gruen}{gelb}{orange}{rot}{lila}\nENDLICH\nWOCHENENDE!\n{blau}{gruen}{gelb}{orange}{rot}{lila}{blau}{gruen}{gelb}{orange}{rot}{lila}'],
+    ['Zitat', '"DIE BESTE ZEIT, EINEN BAUM ZU PFLANZEN, WAR VOR 20 JAHREN. DIE ZWEITBESTE IST JETZT."'],
+    ['Willkommen', '{gruen}\nWILLKOMMEN\nZUHAUSE\n{gruen}'],
+  ];
+  PRESETS.forEach(([name, text]) => {
+    const b = document.createElement('button'); b.textContent = name;
+    b.addEventListener('click', () => { setMode('msg'); msg.value = text; send(); });
+    $('presets').appendChild(b);
+  });
+  SWATCHES.forEach(([name, code]) => {
+    const b = document.createElement('button');
+    b.className = 'swatch'; b.title = name; b.setAttribute('aria-label', 'Farbkachel ' + name);
+    b.style.setProperty('--sw', `var(${COLORS[code]})`);
+    b.addEventListener('click', () => insert(`{${name}}`));
+    $('swatches').appendChild(b);
+  });
+  function insert(t) {
+    const s = msg.selectionStart ?? msg.value.length, e = msg.selectionEnd ?? s;
+    msg.value = msg.value.slice(0,s) + t + msg.value.slice(e);
+    msg.focus(); msg.selectionStart = msg.selectionEnd = s + t.length; updateCount();
+  }
+
+  function updateCount() {
+    const {rows, overflow} = textToGrid(msg.value, center.checked);
+    const lines = msg.value.split('\n').length;
+    count.textContent = overflow ? 'Text zu lang, wird gekürzt' : `${rows} / 6 Zeilen`;
+    count.classList.toggle('over', overflow);
+  }
+  msg.addEventListener('input', () => { updateCount(); save(); });
+
+  function send() {
+    const {grid, overflow} = textToGrid(msg.value, center.checked);
+    show(grid);
+    status.textContent = overflow ? 'Passt nicht ganz aufs Board, der Rest wurde abgeschnitten.' : '';
+    updateCount(); save();
+  }
+  $('send').addEventListener('click', () => { setMode('msg'); send(); });
+  $('clear').addEventListener('click', () => { msg.value = ''; setMode('msg'); send(); msg.focus(); });
+  msg.addEventListener('keydown', e => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); setMode('msg'); send(); } });
+  center.addEventListener('change', () => { if (mode === 'msg') send(); save(); });
+
+  // ---------- modes ----------
+  let mode = 'msg', timer = null, rotIdx = 0;
+  const TAGE = ['SONNTAG','MONTAG','DIENSTAG','MITTWOCH','DONNERSTAG','FREITAG','SAMSTAG'];
+  const MONATE = ['JANUAR','FEBRUAR','MAERZ','APRIL','MAI','JUNI','JULI','AUGUST','SEPTEMBER','OKTOBER','NOVEMBER','DEZEMBER'];
+  function clockText() {
+    const d = new Date();
+    const hh = String(d.getHours()).padStart(2,'0'), mm = String(d.getMinutes()).padStart(2,'0');
+    return `${TAGE[d.getDay()]}\n${d.getDate()}. ${MONATE[d.getMonth()]} ${d.getFullYear()}\n\n${hh}:${mm} UHR`;
+  }
+  function showClock() { show(textToGrid(clockText(), true).grid); }
+
+  // ---------- Inhalte: Wetter, Kalender, Nachrichten, Sprüche, Countdowns ----------
+  // config.js (Einstellungen) und data.js (vom Hintergrundskript geschrieben) liegen neben dieser Datei.
+  const cfg = () => Object.assign({
+    sekunden: 20,
+    countdowns: [], // auf Ralfs Wunsch vorerst aus
+    sprueche: [],
+  }, window.VB_CONFIG || {});
+  // Im Lernportal gibt es kein Hintergrundskript wie auf dem Mac: Wetter (Open-Meteo) und Tagesschau holt die Seite selbst.
+  // Termine bleiben hier leer, die kennt nur der Bildschirmschoner auf dem Mac.
+  const ORT = {name: 'Hamburg', lat: 53.55, lon: 9.99};
+  async function loadWeb() {
+    const d = Object.assign({}, window.VB_DATA || {});
+    try {
+      const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${ORT.lat}&longitude=${ORT.lon}&current=temperature_2m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=Europe%2FBerlin&forecast_days=2`);
+      const w = await r.json();
+      if (w.current && w.daily) d.wetter = { ort: ORT.name, temp: w.current.temperature_2m, code: w.current.weather_code,
+        min: w.daily.temperature_2m_min[0], max: w.daily.temperature_2m_max[0], regen: w.daily.precipitation_probability_max[0],
+        morgenCode: w.daily.weather_code[1], morgenMin: w.daily.temperature_2m_min[1], morgenMax: w.daily.temperature_2m_max[1] };
+    } catch {}
+    try {
+      const r = await fetch('https://www.tagesschau.de/api2u/homepage/');
+      const n = await r.json();
+      const t = (n.news || []).map(x => x.title).filter(Boolean).slice(0, 12);
+      if (t.length) d.nachrichten = t;
+    } catch {}
+    if (d.wetter || d.nachrichten) { d.aktualisiert = new Date().toISOString(); window.VB_DATA = d; }
+  }
+  loadWeb(); setInterval(loadWeb, 15 * 60 * 1000);
+  function loadData() {
+    const s = document.createElement('script');
+    s.src = 'data.js?t=' + Date.now();
+    s.onload = s.onerror = () => s.remove();
+    document.head.appendChild(s);
+  }
+  if (location.protocol === 'file:') { loadData(); setInterval(loadData, 5 * 60 * 1000); }
+  const data = () => {
+    const d = window.VB_DATA;
+    if (!d || !d.aktualisiert) return null;
+    return Date.now() - new Date(d.aktualisiert) < 6 * 3600e3 ? d : null; // ältere Daten nicht zeigen
+  };
+  const clean = t => normalize(String(t || '')).replace(/[{}]/g, '').replace(/\s+/g, ' ').trim();
+  const pad2 = n => String(n).padStart(2, '0');
+  const ymd = d => `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
+  const deg = t => Math.round(t) + '°';
+
+  const WX = c => c <= 0 ? ['KLAR','gelb'] : c === 1 ? ['HEITER','gelb'] : c === 2 ? ['WOLKIG','weiss']
+    : c === 3 ? ['BEDECKT','weiss'] : c <= 48 ? ['NEBEL','weiss'] : c <= 57 ? ['NIESEL','blau']
+    : c <= 67 ? ['REGEN','blau'] : c <= 77 ? ['SCHNEE','weiss'] : c <= 82 ? ['SCHAUER','blau']
+    : c <= 86 ? ['SCHNEE','weiss'] : ['GEWITTER','lila'];
+
+  function weatherScreen() {
+    const w = data()?.wetter; if (!w) return null;
+    const [txt, col] = WX(w.code), [, colM] = WX(w.morgenCode);
+    return { align: 'left', text: [
+      `{${col}} ${clean(w.ort).slice(0, 19)}`,
+      `JETZT ${deg(w.temp)} ${txt}`,
+      `HEUTE ${Math.round(w.min)} BIS ${deg(w.max)}`,
+      `REGEN ${w.regen ?? 0}%`,
+      `MORGEN ${Math.round(w.morgenMin)} BIS ${deg(w.morgenMax)} {${colM}}`,
+    ].join('\n') };
+  }
+
+  function calendarScreen() {
+    const ev = data()?.termine; if (!ev) return null;
+    const now = new Date(), today = ymd(now), tomorrow = ymd(new Date(now.getTime() + 864e5));
+    const nowHM = pad2(now.getHours()) + ':' + pad2(now.getMinutes());
+    const line = e => (e.ganztag ? '' : e.zeit + ' ') + clean(e.titel);
+    const cut = l => l.length > 21 ? l.slice(0, 21) : l;
+    const sort = (a, b) => (a.ganztag ? '' : a.zeit).localeCompare(b.ganztag ? '' : b.zeit);
+    // laufende Termine bleiben eine Stunde sichtbar
+    const hourAgo = new Date(now.getTime() - 3600e3), agoHM = pad2(hourAgo.getHours()) + ':' + pad2(hourAgo.getMinutes());
+    const heute = ev.filter(e => (e.datum < today && e.ganztag) || (e.datum === today && (e.ganztag || e.zeit >= agoHM || nowHM < '01:00'))).sort(sort);
+    const morgen = ev.filter(e => e.datum === tomorrow).sort(sort);
+    const out = ['{gruen} HEUTE'];
+    if (!heute.length) out.push('KEINE TERMINE MEHR');
+    heute.slice(0, morgen.length ? 3 : 5).forEach(e => out.push(cut(line(e))));
+    if (morgen.length && out.length <= 4) {
+      out.push('{blau} MORGEN');
+      morgen.slice(0, 6 - out.length).forEach(e => out.push(cut(line(e))));
+    }
+    return { align: 'left', text: out.slice(0, 6).join('\n') };
+  }
+
+  let newsIdx = 0;
+  function newsScreen() {
+    const n = data()?.nachrichten; if (!n || !n.length) return null;
+    const t = clean(n[newsIdx++ % n.length]);
+    return { align: true, text: `{rot} TAGESSCHAU {rot}\n\n${t}` };
+  }
+
+  const SPRUECHE = [
+    "DER FRUEHE VOGEL KANN MICH MAL.",
+    "ERST KAFFEE, DANN DIE WELT.",
+    "IN DER RUHE LIEGT DIE KRAFT.",
+    "HEUTE IST EIN GUTER TAG FUER EINEN GUTEN TAG.",
+    "WER NICHT WAGT, DER NICHT GEWINNT.",
+    "EINFACH MAL MACHEN. KOENNTE JA GUT WERDEN.",
+    "ALLES WIRD GUT.",
+    "DAS LEBEN IST ZU KURZ FUER SCHLECHTEN KAFFEE.",
+    "MORGEN IST AUCH NOCH EIN TAG.",
+    "GUT DING WILL WEILE HABEN.",
+    "WENIGER IST MEHR.",
+    "LACHEN IST DIE BESTE MEDIZIN.",
+    "DAS LEBEN IST SCHOEN. VON EINFACH WAR NIE DIE REDE.",
+    "ORDNUNG IST DAS HALBE LEBEN. ICH LEBE IN DER ANDEREN HAELFTE.",
+    "ICH BIN NICHT FAUL, ICH BIN IM ENERGIESPARMODUS.",
+    "MONTAG IST AUCH NUR EIN TAG. EIN BLOEDER, ABER EIN TAG.",
+    "KAFFEE IST KEINE LOESUNG. ABER EIN ANFANG.",
+    "BLEIB WIE DU BIST. AUSSER DU BIST DOOF.",
+    "NICHT PERFEKT, ABER ECHT.",
+    "HEUTE IST DER ERSTE TAG VOM REST DEINES LEBENS.",
+    "GUTE LAUNE IST ANSTECKEND.",
+    "ERST DENKEN, DANN LENKEN.",
+    "LIEBER SPAET ALS NIE.",
+    "PAUSE IST AUCH ARBEIT. FUER DIE SEELE.",
+    "KLEINE SCHRITTE SIND AUCH SCHRITTE.",
+    "FREITAG IST EINE LEBENSEINSTELLUNG.",
+    "HINFALLEN, AUFSTEHEN, KRONE RICHTEN, WEITERGEHEN.",
+    "WER LACHT, HAT NOCH RESERVEN.",
+    "ZUHAUSE IST, WO DAS WLAN SICH AUTOMATISCH VERBINDET.",
+    "TRAEUME NICHT DEIN LEBEN. LEBE DEINEN TRAUM."
+    ];
+  // Zitat der Stunde: jede volle Stunde ein neues
+  const ZITATE = [
+    [
+    "PHANTASIE IST WICHTIGER ALS WISSEN.",
+    "EINSTEIN"
+    ],
+    [
+    "ES IST NICHT WENIG ZEIT, DIE WIR HABEN, SONDERN VIEL ZEIT, DIE WIR NICHT NUTZEN.",
+    "SENECA"
+    ],
+    [
+    "DAS GLUECK DEINES LEBENS HAENGT VON DER BESCHAFFENHEIT DEINER GEDANKEN AB.",
+    "MARC AUREL"
+    ],
+    [
+    "MAN SIEHT NUR MIT DEM HERZEN GUT.",
+    "SAINT-EXUPÉRY"
+    ],
+    [
+    "OHNE MUSIK WAERE DAS LEBEN EIN IRRTUM.",
+    "NIETZSCHE"
+    ],
+    [
+    "ES GIBT NICHTS GUTES, AUSSER MAN TUT ES.",
+    "ERICH KAESTNER"
+    ],
+    [
+    "HUMOR IST, WENN MAN TROTZDEM LACHT.",
+    "O. J. BIERBAUM"
+    ],
+    [
+    "JEDEM ANFANG WOHNT EIN ZAUBER INNE.",
+    "HERMANN HESSE"
+    ],
+    [
+    "DIE GRENZEN MEINER SPRACHE BEDEUTEN DIE GRENZEN MEINER WELT.",
+    "WITTGENSTEIN"
+    ],
+    [
+    "WER NICHTS WEISS, MUSS ALLES GLAUBEN.",
+    "EBNER-ESCHENBACH"
+    ],
+    [
+    "EDEL SEI DER MENSCH, HILFREICH UND GUT.",
+    "GOETHE"
+    ],
+    [
+    "HEITERKEIT IST DIE SONNE, UNTER DER ALLES GEDEIHT.",
+    "JEAN PAUL"
+    ],
+    [
+    "DER WORTE SIND GENUG GEWECHSELT, LASST MICH AUCH ENDLICH TATEN SEHN.",
+    "GOETHE"
+    ],
+    [
+    "GLUECK IST DAS EINZIGE, DAS SICH VERDOPPELT, WENN MAN ES TEILT.",
+    "ALBERT SCHWEITZER"
+    ],
+    [
+    "WER SICH NICHT BEWEGT, SPUERT SEINE FESSELN NICHT.",
+    "ROSA LUXEMBURG"
+    ],
+    [
+    "MUT STEHT AM ANFANG DES HANDELNS, GLUECK AM ENDE.",
+    "DEMOKRIT"
+    ],
+    [
+    "FREUDE IST DIE EINFACHSTE FORM DER DANKBARKEIT.",
+    "KARL BARTH"
+    ],
+    [
+    "WERDE, DER DU BIST.",
+    "PINDAR"
+    ],
+    [
+    "DER MENSCH IST NUR DA GANZ MENSCH, WO ER SPIELT.",
+    "SCHILLER"
+    ],
+    [
+    "ES IRRT DER MENSCH, SOLANG ER STREBT.",
+    "GOETHE"
+    ],
+    [
+    "WER DEN HAFEN NICHT KENNT, IN DEN ER SEGELN WILL, FUER DEN IST KEIN WIND DER RICHTIGE.",
+    "SENECA"
+    ],
+    [
+    "MAN MUSS DAS UNMOEGLICHE VERSUCHEN, UM DAS MOEGLICHE ZU ERREICHEN.",
+    "HERMANN HESSE"
+    ],
+    [
+    "DAS SCHOENSTE, WAS WIR ERLEBEN KOENNEN, IST DAS GEHEIMNISVOLLE.",
+    "EINSTEIN"
+    ],
+    [
+    "KEIN WEG IST ZU LANG MIT EINEM FREUND AN DER SEITE.",
+    "AUS JAPAN"
+    ],
+    [
+    "GEDULD IST BITTER, ABER IHRE FRUCHT IST SUESS.",
+    "ROUSSEAU"
+    ],
+    [
+    "WER NICHT MEHR LIEBT UND NICHT MEHR IRRT, DER LASSE SICH BEGRABEN.",
+    "GOETHE"
+    ],
+    [
+    "ICH DENKE, ALSO BIN ICH.",
+    "DESCARTES"
+    ],
+    [
+    "WER A SAGT, DER MUSS NICHT B SAGEN. ER KANN AUCH ERKENNEN, DASS A FALSCH WAR.",
+    "BRECHT"
+    ],
+    [
+    "HOEFLICHKEIT IST KLUGHEIT, FOLGLICH IST UNHOEFLICHKEIT DUMMHEIT.",
+    "SCHOPENHAUER"
+    ],
+    [
+    "DAS LEBEN IST WIE FAHRRADFAHREN. UM DIE BALANCE ZU HALTEN, MUSST DU IN BEWEGUNG BLEIBEN.",
+    "EINSTEIN"
+    ],
+    [
+    "WAS DU HEUTE KANNST BESORGEN, DAS VERSCHIEBE NICHT AUF MORGEN.",
+    "SPRICHWORT"
+    ],
+    [
+    "WO EIN WILLE IST, IST AUCH EIN WEG.",
+    "SPRICHWORT"
+    ]
+    ];
+  function quoteScreen() {
+    const now = new Date();
+    const hour = Math.floor((now.getTime() - now.getTimezoneOffset() * 6e4) / 36e5);
+    const [q, a] = ZITATE[hour % ZITATE.length];
+    const body = `${q}\n- ${a}`;
+    // Überschrift nur, wenn das Zitat Platz lässt
+    return { align: true, text: textToGrid(body, true).rows <= 5 ? `{gelb} ZITAT DER STUNDE {gelb}\n${body}` : body };
+  }
+
+  let sayIdx = Math.floor(Math.random() * 100);
+  function sayingScreen() {
+    const list = [...(cfg().sprueche || []), ...SPRUECHE];
+    return { align: true, text: clean(list[sayIdx++ % list.length]) };
+  }
+
+  function countdownScreen() {
+    const now = new Date(), t0 = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const items = (cfg().countdowns || []).map(c => {
+      const parts = String(c.datum).split('-').map(Number);
+      let d = parts.length === 3 ? new Date(parts[0], parts[1]-1, parts[2]) : new Date(t0.getFullYear(), parts[0]-1, parts[1]);
+      if (parts.length === 2 && d < t0) d = new Date(t0.getFullYear() + 1, parts[0]-1, parts[1]);
+      return { name: clean(c.name), tage: Math.round((d - t0) / 864e5) };
+    }).filter(c => c.tage >= 0).sort((a, b) => a.tage - b.tage).slice(0, 5);
+    if (!items.length) return null;
+    const lines = items.map(c => {
+      const r = c.tage === 0 ? 'HEUTE!' : c.tage === 1 ? 'MORGEN' : `${c.tage} TAGE`;
+      const name = c.name.slice(0, 21 - r.length - 1);
+      return name + ' '.repeat(21 - name.length - r.length) + r;
+    });
+    return { align: 'left', text: ['{lila} NOCH ...', ...lines].join('\n') };
+  }
+
+  const clockScreen = () => ({ align: true, text: clockText(), live: true });
+  const SCREENS = [clockScreen, weatherScreen, quoteScreen, calendarScreen, newsScreen, sayingScreen, countdownScreen];
+  let rotPos = 0, current = null;
+  function rotateStep() {
+    for (let i = 0; i < SCREENS.length; i++) {
+      const sc = SCREENS[rotPos++ % SCREENS.length]();
+      if (sc) { current = sc; show(textToGrid(sc.text, sc.align).grid); return; }
+    }
+  }
+  function startRotation() {
+    rotateStep();
+    let last = Date.now();
+    timer = setInterval(() => {
+      const now = new Date();
+      if (Date.now() - last >= cfg().sekunden * 1000) { last = Date.now(); rotateStep(); }
+      else if (current?.live && now.getSeconds() === 0) show(textToGrid(clockScreen().text, true).grid);
+    }, 1000);
+  }
+
+  function setMode(m) {
+    mode = m; clearInterval(timer); timer = null;
+    $('m-msg').setAttribute('aria-pressed', m==='msg');
+    $('m-clock').setAttribute('aria-pressed', m==='clock');
+    $('m-rot').setAttribute('aria-pressed', m==='rot');
+    if (m === 'clock') {
+      showClock();
+      timer = setInterval(() => { if (new Date().getSeconds() === 0) showClock(); }, 1000);
+      status.textContent = 'Uhr läuft und aktualisiert sich jede Minute.';
+    } else if (m === 'rot') {
+      startRotation();
+      status.textContent = `Rotation: Uhr, Wetter, Zitat der Stunde, Termine, Nachrichten, Sprüche und Countdowns im Wechsel (alle ${cfg().sekunden} Sekunden). Wetter für Hamburg und die Tagesschau holt die Seite selbst, Termine zeigt nur der Bildschirmschoner auf dem Mac.`;
+    }
+    save();
+  }
+  $('m-msg').addEventListener('click', () => { setMode('msg'); send(); });
+  $('m-clock').addEventListener('click', () => setMode('clock'));
+  $('m-rot').addEventListener('click', () => setMode('rot'));
+
+  $('demo').addEventListener('click', () => {
+    setMode('msg');
+    msg.value = '{rot}{orange}{gelb}{gruen}{blau}{lila}{weiss}{schwarz}{rot}{orange}{gelb}{gruen}{blau}{lila}{weiss}{schwarz}{rot}{orange}{gelb}{gruen}{blau}{lila}\nABCDEFGHIJKLMNOPQRSTUV\nWXYZ 1234567890\n!@#$()-+&=;:\'"%,./?°\n\n{lila}{blau}{gruen}{gelb}{orange}{rot}{schwarz}{weiss}{lila}{blau}{gruen}{gelb}{orange}{rot}{schwarz}{weiss}{lila}{blau}{gruen}{gelb}{orange}{rot}';
+    send();
+  });
+
+  const sndBtn = $('snd');
+  const sndLabel = () => { sndBtn.textContent = sound.on ? 'Ton an' : 'Ton aus'; sndBtn.setAttribute('aria-pressed', sound.on); };
+  sndBtn.addEventListener('click', () => { sound.toggle(); sndLabel(); });
+  sndLabel();
+
+  // ---------- fullscreen ----------
+  const stage = $('stage');
+  let wakeLock = null;
+  async function toggleFs() {
+    try {
+      if (document.fullscreenElement) await document.exitFullscreen();
+      else {
+        await stage.requestFullscreen();
+        try { wakeLock = await navigator.wakeLock?.request('screen'); } catch {}
+      }
+    } catch { status.textContent = 'Vollbild ist hier nicht verfügbar. Öffne die Seite direkt im Browser.'; }
+  }
+  $('fs').addEventListener('click', toggleFs);
+  board.addEventListener('click', toggleFs);
+  board.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleFs(); } });
+  document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement && wakeLock) { wakeLock.release?.(); wakeLock = null; } });
+
+  // ---------- screensaver ----------
+  // Rotation läuft selbstständig, Steuerung und Cursor sind ausgeblendet.
+  // Direkt starten über die Adresse mit #bildschirmschoner am Ende.
+  let moveTimer = null;
+  async function startSaver() {
+    document.body.classList.add('saver'); $('saver-exit').hidden = false;
+    clearInterval(timer); mode = 'saver';
+    startRotation();
+    try { await document.documentElement.requestFullscreen?.(); } catch {}
+    try { wakeLock = await navigator.wakeLock?.request('screen'); } catch {}
+  }
+  function stopSaver() {
+    document.body.classList.remove('saver','moved'); $('saver-exit').hidden = true;
+    if (document.fullscreenElement) document.exitFullscreen().catch(()=>{});
+    if (location.hash === '#bildschirmschoner') history.replaceState(null, '', location.pathname + location.search);
+    setMode('msg'); send();
+  }
+  $('saver').addEventListener('click', startSaver);
+  $('saver-exit').addEventListener('click', stopSaver);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && document.body.classList.contains('saver')) stopSaver(); });
+  document.addEventListener('mousemove', () => {
+    if (!document.body.classList.contains('saver')) return;
+    document.body.classList.add('moved'); clearTimeout(moveTimer);
+    moveTimer = setTimeout(() => document.body.classList.remove('moved'), 2000);
+  });
+  board.addEventListener('click', e => { if (document.body.classList.contains('saver')) e.stopImmediatePropagation(); }, true);
+
+  // ---------- persistence (per browser only) ----------
+  function save() { try { localStorage.setItem('vb-state', JSON.stringify({text: msg.value, center: center.checked, mode})); } catch {} }
+  let saved = null;
+  try { saved = JSON.parse(localStorage.getItem('vb-state') || 'null'); } catch {}
+  msg.value = saved?.text ?? PRESETS[0][1];
+  if (saved && typeof saved.center === 'boolean') center.checked = saved.center;
+  updateCount();
+  if (location.hash === '#bildschirmschoner' || document.documentElement.dataset.saver === '1') { setTimeout(startSaver, 250); return; }
+  setTimeout(() => { const m = saved ? saved.mode : 'rot'; if (m && m !== 'msg') setMode(m); else send(); }, 250);
+})();
+</script>
+
+</body></html>
