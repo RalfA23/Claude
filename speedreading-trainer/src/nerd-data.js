@@ -166,3 +166,96 @@ facts: [
 "Die Gelbe Presse hat ihren Namen von einem Comic: The Yellow Kid."
 ]
 };
+
+/* Paket 2: Hunde, Tiramisu und 80er-Easter-Eggs (themenfreie Fakten in eigenen Worten). */
+window.NERD.texts.push(
+{id:"N14",kind:"nerd",icon:"🐕",title:"Vom Wolf zum Hund",card:"Vor rund 14.000 Jahren wurde in Bonn-Oberkassel ein Mensch gemeinsam mit zwei Hunden begraben.",paras:[
+"Der Hund ist das älteste Haustier des Menschen. Er stammt vom Wolf ab, genauer von Wölfen, die sich irgendwann den Lagerplätzen von Jägern und Sammlern näherten. Wie und wann genau das geschah, ist unter Forschern bis heute umstritten. Die Schätzungen reichen von mindestens 15.000 bis zu 40.000 Jahren.",
+"Ein berührender Fund stammt aus Deutschland. 1914 entdeckten Arbeiter in einem Steinbruch bei Bonn-Oberkassel ein Doppelgrab, das etwa 14.000 Jahre alt ist. Darin lagen ein Mann und eine Frau, und bei ihnen die Knochen von zwei Hunden. Einer der Hunde war als junges Tier schwer krank gewesen und muss gepflegt worden sein, sonst hätte er so lange nicht überlebt.",
+"Heute gibt es eine riesige Vielfalt. Der internationale Dachverband FCI erkennt über 340 Rassen an, vom winzigen Chihuahua bis zur riesigen Deutschen Dogge. Trotz aller Unterschiede gehören alle Hunde zu einer einzigen Art."
+],qs:[
+{q:"Von welchem Tier stammt der Hund ab?",a:["Vom Wolf.","Vom Fuchs.","Vom Schakal."]},
+{q:"Was fand man bei Bonn-Oberkassel?",a:["Ein etwa 14.000 Jahre altes Doppelgrab mit einem Hund.","Ein Wolfsrudel.","Eine Hundefigur aus Gold."]},
+{q:"Was verrät der Fund über einen der Hunde?",a:["Er war als Jungtier krank und wurde gepflegt.","Er war ein Jagdhund.","Er war ein Wolf."]},
+{q:"Wie viele Rassen erkennt die FCI an?",a:["Über 340.","Etwa 20.","Rund 5.000."]}
+]},
+{id:"N15",kind:"nerd",icon:"👃",title:"Die Superkraft der Hundenase",card:"Ein Hund hat je nach Rasse 125 bis 300 Millionen Riechzellen, der Mensch nur etwa fünf bis sechs Millionen.",paras:[
+"Die Nase ist das wichtigste Sinnesorgan des Hundes. Je nach Rasse besitzt er etwa 125 bis 300 Millionen Riechzellen, der Mensch dagegen nur etwa fünf bis sechs Millionen. Auch der Teil des Gehirns, der Gerüche verarbeitet, ist beim Hund im Verhältnis deutlich größer.",
+"Hunde atmen beim Schnüffeln anders als wir. Forscher beobachteten, dass beim Ausatmen die Luft seitlich durch Schlitze der Nase entweicht. So wird die Luft vor den Nasenlöchern nicht weggeblasen, und neue Duftstoffe strömen nach. Dazu kommt ein zusätzliches Organ im Gaumen, das Jacobson-Organ, das besonders auf Botenstoffe anspricht.",
+"Wegen dieser Fähigkeiten arbeiten Hunde als Rettungs-, Spür- und Suchhunde. Sie finden verschüttete Menschen unter Lawinen, Sprengstoff am Flughafen oder vermisste Personen. Die feuchte Nase hilft dabei, Duftteilchen aufzunehmen. Und noch etwas: Der Nasenabdruck jedes Hundes ist einzigartig, ähnlich wie ein Fingerabdruck."
+],qs:[
+{q:"Wie viele Riechzellen hat der Mensch ungefähr?",a:["Fünf bis sechs Millionen.","Fünf bis sechs Milliarden.","Fünfzig Millionen."]},
+{q:"Was passiert beim Ausatmen eines schnüffelnden Hundes?",a:["Die Luft entweicht seitlich, neue Düfte strömen nach.","Er hält den Atem an.","Er atmet durch das Maul."]},
+{q:"Wie heißt das zusätzliche Organ im Gaumen?",a:["Jacobson-Organ.","Riechkolben.","Nasenspiegel."]},
+{q:"Was ist bei jedem Hund einzigartig?",a:["Der Nasenabdruck.","Die Zahl der Zähne.","Die Pfotengröße."]}
+]},
+{id:"N16",kind:"nerd",icon:"🚀",title:"Berühmte Hunde: Laika, Hachiko und Balto",card:"Laika flog 1957 als erstes Lebewesen in eine Erdumlaufbahn.",paras:[
+"Laika war eine Straßenhündin aus Moskau. Am 3. November 1957 startete sie an Bord von Sputnik 2 und wurde das erste Lebewesen in einer Erdumlaufbahn. Eine Rückkehr war nicht vorgesehen. Lange hieß es, sie sei nach einer Woche gestorben. Erst 2002 wurde bekannt, dass sie schon nach wenigen Stunden an Überhitzung starb.",
+"Hachiko war ein Akita aus Japan. Seinen Besitzer, einen Professor, begleitete er täglich zum Bahnhof Shibuya in Tokio und holte ihn abends dort ab. Als der Professor 1925 an der Universität starb, kehrte der Hund fast zehn Jahre lang jeden Tag zum Bahnhof zurück. Heute steht dort eine Bronzestatue des treuen Wartenden.",
+"Balto wurde 1925 weltberühmt. In der Stadt Nome in Alaska brach die Diphtherie aus, und ein Medikament musste im Winter über viele Hundert Kilometer herbeigeschafft werden. Hundeschlittenteams brachten das Serum in einem Staffellauf. Balto führte das Gespann auf der letzten Etappe. Im Central Park in New York erinnert eine Statue daran."
+],qs:[
+{q:"Womit flog Laika ins All?",a:["Mit Sputnik 2.","Mit Apollo 11.","Mit Gemini."]},
+{q:"Seit wann ist ihre wahre Todesursache bekannt?",a:["Seit 2002.","Seit 1957.","Seit 1925."]},
+{q:"Wo wartete Hachiko jahrelang auf sein Herrchen?",a:["Am Bahnhof Shibuya in Tokio.","Am Hafen von Osaka.","Vor einer Schule."]},
+{q:"Was transportierten die Hundeschlitten 1925 nach Nome?",a:["Ein Serum gegen Diphtherie.","Post und Zeitungen.","Lebensmittel für den Winter."]}
+]},
+{id:"N17",kind:"nerd",icon:"🎾",title:"Was Hunde verstehen",card:"Der Border Collie Chaser kannte über 1.000 Spielzeugnamen.",paras:[
+"Wie viel verstehen Hunde von unserer Sprache? Der amerikanische Psychologe John Pilley brachte seinem Border Collie Chaser den Namen von Spielzeugen bei. Als er 2011 darüber berichtete, kannte die Hündin die Namen von 1.022 Gegenständen und holte jeden einzelnen auf Zuruf aus einem Haufen heraus. Sie konnte sogar unbekannte Namen durch Ausschluss zuordnen.",
+"Auch bei Gesten sind Hunde stark. Studien zeigten, dass sie dem Zeigefinger eines Menschen folgen und besser verstehen, worauf er zeigt, als zum Beispiel Schimpansen. Diese Fähigkeit hat sich offenbar im Zusammenleben mit uns entwickelt.",
+"Sogar das Schwanzwedeln verrät etwas. Forscher um Giorgio Vallortigara berichteten 2007, dass Hunde den Schwanz bei positiven Eindrücken eher nach rechts und bei Angst eher nach links wedeln. Andere Hunde bemerken den Unterschied und reagieren darauf."
+],qs:[
+{q:"Wie viele Spielzeugnamen kannte Chaser?",a:["1.022.","22.","10.000."]},
+{q:"Wie ordnete sie unbekannte Namen zu?",a:["Durch Ausschluss.","Durch Zufall.","Gar nicht."]},
+{q:"Womit schnitten Hunde in Studien besser ab als Schimpansen?",a:["Mit dem Verstehen von Zeigegesten.","Mit Rechnen.","Mit Klettern."]},
+{q:"Wohin wedeln Hunde bei positiven Eindrücken eher?",a:["Nach rechts.","Nach links.","Gar nicht."]}
+]},
+{id:"N18",kind:"nerd",icon:"🍰",title:"Tiramisu: Zieh mich hoch",card:"Tirami su heißt wörtlich: zieh mich hoch.",paras:[
+"Das Tiramisu ist eines der bekanntesten italienischen Desserts. Sein Name bedeutet auf Italienisch „zieh mich hoch“, gemeint ist wohl der Muntermacher aus Kaffee, Zucker und Eiern. Das klassische Rezept schichtet in Espresso getränkte Löffelbiskuits, eine Creme aus Mascarpone, Eigelb und Zucker und bestäubt das Ganze mit Kakao.",
+"Woher es stammt, ist umstritten. Viele nennen die Stadt Treviso in Venetien. Dort soll es in den 1960er oder 1970er Jahren im Restaurant Le Beccherie entstanden sein. Auch die Region Friaul-Julisch Venetien beansprucht das Dessert für sich, und 2017 nahm man es in die Liste der traditionellen Lebensmittel der Region auf.",
+"Über Italien hinaus wurde das Tiramisu zum Klassiker, bei dem jeder sein eigenes Rezept hat. Manche geben Marsala oder Amaretto dazu. Weil die klassische Creme rohe Eier enthält, sollte man das Dessert frisch zubereiten und gut gekühlt aufbewahren."
+],qs:[
+{q:"Was bedeutet der Name Tiramisu?",a:["Zieh mich hoch.","Süßer Kuss.","Kleiner Kaffee."]},
+{q:"Welche Zutat gehört zur klassischen Creme?",a:["Mascarpone.","Quark.","Sahnejoghurt."]},
+{q:"Aus welcher Stadt soll es nach vielen Angaben stammen?",a:["Treviso.","Neapel.","Mailand."]},
+{q:"Was ist bei der Zubereitung wegen der rohen Eier wichtig?",a:["Frisch zubereiten und gut kühlen.","Tagelang offen stehen lassen.","Erhitzen auf 100 Grad."]}
+]},
+{id:"N19",kind:"nerd",icon:"🥚",title:"Das erste Easter Egg der Spielegeschichte",card:"Warren Robinett versteckte 1979 im Atari-Spiel Adventure seinen Namen.",paras:[
+"Easter Eggs sind versteckte Überraschungen in Spielen, Filmen und Programmen. Als eines der ersten bekannten gilt ein Raum im Atari-Spiel Adventure von 1979. Der Entwickler Warren Robinett versteckte darin seinen Namen. Atari erlaubte damals nicht, dass Entwickler in den Spielen genannt wurden.",
+"Um zu dem geheimen Raum zu gelangen, musste man einen einzelnen, kaum sichtbaren Pixel im Spiel aufsammeln und damit zu einer bestimmten Wand gehen. Dort öffnete sich ein Raum, in dem in bunten Buchstaben der Name des Programmierers stand.",
+"Atari entdeckte das Geheimnis erst nach der Auslieferung. Eine Rückholung wäre zu teuer gewesen, also ließ man es dabei. Aus dieser Geschichte stammt das Wort: Ein Atari-Verantwortlicher soll den Begriff Easter Egg geprägt haben, weil man Ostereier suchen muss. Heute gehören Easter Eggs zur Kultur von Spielen und Software."
+],qs:[
+{q:"In welchem Spiel steckt das berühmte frühe Easter Egg?",a:["Adventure von Atari.","Pac-Man.","Tetris."]},
+{q:"Wer versteckte es?",a:["Warren Robinett.","Steve Jobs.","Shigeru Miyamoto."]},
+{q:"Was versteckte er?",a:["Seinen Namen in einem geheimen Raum.","Eine Karte.","Ein Lied."]},
+{q:"Warum tat er das?",a:["Entwickler wurden damals nicht in den Spielen genannt.","Er wollte Geld sparen.","Es war ein Fehler."]}
+]},
+{id:"N20",kind:"nerd",icon:"👾",title:"Die 80er: Von Pac-Man zum Game Boy",card:"Der Game Boy kam 1989 auf den Markt und wurde mit Tetris ausgeliefert.",paras:[
+"Die 1980er Jahre waren das goldene Zeitalter der Spielhallen. 1980 erschien in Japan Pac-Man und wurde schnell zur weltweiten Ikone. Ein Jahr später stellte Nintendo Donkey Kong vor. In diesem Spiel tritt zum ersten Mal die Figur auf, die später als Mario berühmt wurde, damals noch unter dem Namen Jumpman.",
+"Zu Hause eroberten Konsolen die Wohnzimmer. Nintendo brachte 1983 in Japan den Famicom heraus, der in Europa und den USA später als NES erschien. Gleichzeitig stiegen Heimcomputer wie der Commodore 64 zum Massenprodukt auf. Dieser Rechner wurde millionenfach verkauft und prägte viele Spieler.",
+"1989 folgte der Game Boy, eine tragbare Konsole mit grünlichem Bildschirm. Das Spiel Tetris, das der Russe Alexei Paschitnow 1984 erfunden hatte, wurde mitgeliefert und machte das Gerät zum Welterfolg. Eine Generation wuchs mit diesen Pixeln auf, und die Nostalgie dafür ist bis heute groß."
+],qs:[
+{q:"In welchem Jahr erschien Pac-Man in Japan?",a:["1980.","1975.","1989."]},
+{q:"Wie hieß Mario in Donkey Kong?",a:["Jumpman.","Luigi.","Wario."]},
+{q:"Mit welchem Spiel wurde der Game Boy ausgeliefert?",a:["Tetris.","Pac-Man.","Pong."]},
+{q:"Welcher Heimcomputer wurde millionenfach verkauft?",a:["Der Commodore 64.","Der Atari 2600.","Der Game Boy."]}
+]},
+{id:"N21",kind:"nerd",icon:"🎮",title:"Der Konami-Code",card:"Hoch, hoch, runter, runter, links, rechts, links, rechts, B, A: der Cheat, den fast jeder Spieler kennt.",paras:[
+"Der Konami-Code ist die vielleicht berühmteste Tastenfolge der Spielegeschichte: Hoch, hoch, runter, runter, links, rechts, links, rechts, B, A, dazu Start. Entwickelt hat ihn Kazuhisa Hashimoto beim Spielehersteller Konami für die Umsetzung des Weltraum-Shooters Gradius auf Nintendos Konsole 1986.",
+"Hashimoto fand das Spiel beim Testen zu schwer und baute sich eine Abkürzung ein, die ihn mit allen Waffen ausstattete. Eigentlich wollte er den Code vor der Veröffentlichung wieder entfernen. Er vergaß es, und so blieb er im Spiel. Spieler entdeckten ihn und verbreiteten ihn weltweit.",
+"Konami baute den Code in viele weitere Spiele ein, zum Beispiel in Contra, wo er dem Spieler 30 Leben schenkt. Inzwischen steckt er in zahlreichen Webseiten und Programmen als Easter Egg. Auch in dieser Lern-App wartet ein Sticker auf alle, die ihn auf der Tastatur eingeben."
+],qs:[
+{q:"Wer entwickelte den Konami-Code?",a:["Kazuhisa Hashimoto.","Shigeru Miyamoto.","Alexei Paschitnow."]},
+{q:"Für welches Spiel entstand er?",a:["Gradius.","Tetris.","Pong."]},
+{q:"Warum baute er ihn ein?",a:["Er fand das Spiel beim Testen zu schwer.","Als Werbung.","Es war ein Befehl."]},
+{q:"Wie viele Leben schenkt er in Contra?",a:["30.","3.","99."]}
+]}
+);
+window.NERD.facts.push(
+"Das erste Tiramisu-Rezept soll in den 1960er oder 1970er Jahren in Treviso aufgetaucht sein.",
+"Hunde haben je nach Rasse 125 bis 300 Millionen Riechzellen, der Mensch nur etwa fünf bis sechs Millionen.",
+"Laika flog am 3. November 1957 mit Sputnik 2 ins All.",
+"Der Game Boy kam 1989 auf den Markt.",
+"Das Wort Easter Egg stammt von versteckten Überraschungen, die schon 1979 in einem Atari-Spiel auftauchten."
+);
+window.PACKS=(window.PACKS||[]).concat([Object.assign({id:"nerd",order:1,course:"basic",icon:"🤓",name:"Nerd-Ecke",eyebrow:"Nerd-Ecke · Comics, Games und nutzloses Wissen",fact:"Nerd-Fakt des Tages",mins:"eine Minute",
+  ranks:[["Kiosk-Gucker","👀"],["Heftchen-Leser","📖"],["Sammler","🎴"],["Kenner","🧐"],["Nerd","🤓"],["Nerd-Legende","👑"]],topic:""},window.NERD)]);
