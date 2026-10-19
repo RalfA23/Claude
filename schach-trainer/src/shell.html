@@ -13,6 +13,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}</style>
 <script>window.SCH_HOSTED = !!(window.SR_CONFIG && window.SR_CONFIG.supabaseUrl && window.SR_CONFIG.supabaseAnonKey);</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<style id="sch-hide">.wrap{display:none}</style>
 <script src="hosted.js"></script>
 </head>
 <body>
@@ -28,6 +29,7 @@ window.addEventListener("DOMContentLoaded", async function () {
   await window.SCH_READY;
   var db = await window.claude.use("db");
   function run(d) {
+    var hide = document.getElementById("sch-hide"); if (hide) hide.remove();
     document.getElementById("wpdata").textContent = JSON.stringify(d.wp || []);
     document.getElementById("linesdata").textContent = JSON.stringify(d.lines || []);
     document.getElementById("efdata").textContent = JSON.stringify(d.ef || []);
