@@ -175,7 +175,7 @@
     const p = document.createElement("p");
     p.id = "sch-account";
     p.style.cssText = "margin:0;padding:8px 16px;font:13px system-ui,sans-serif;opacity:.75;text-align:center";
-    p.innerHTML = '<a href="../portal/" style="color:inherit">Zum Lernportal</a> · ';
+    p.innerHTML = '<a href="../" style="color:inherit">Zum Lernportal</a> · ';
     p.appendChild(document.createTextNode("Angemeldet als " + (user.email || "") + " · "));
     const out = document.createElement("button");
     out.style.cssText = "font:inherit;padding:2px 8px;border:1px solid #D9DDD3;border-radius:6px;background:transparent;color:inherit;cursor:pointer";

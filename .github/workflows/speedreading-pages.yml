@@ -41,20 +41,21 @@ jobs:
       - name: Check Schachtraining script parses
         working-directory: schach-trainer
         run: node -e "const s=require('fs').readFileSync('dist/index.html','utf8');const m=s.match(/<script>([\s\S]*?)<\/script>/g);for(const b of m){new Function(b.replace(/<\/?script>/g,''))}console.log('ok',m.length)"
-      - name: Schachtraining unter /schach/ ablegen
-        # Same Supabase project and public config as the Lesetraining: reuse the config.js built above.
+      - name: Seite zusammenstellen (Portal als Hauptadresse, Kurse in Unterordnern)
+        # One shared Supabase config for everything: the config.js built for the Lesetraining.
         run: |
-          cp speedreading-trainer/dist/config.js schach-trainer/dist/config.js
-          cp -r schach-trainer/dist speedreading-trainer/dist/schach
-      - name: Lernportal unter /portal/ ablegen
-        run: |
-          mkdir -p speedreading-trainer/dist/portal
-          cp portal/index.html speedreading-trainer/dist/portal/index.html
-          cp speedreading-trainer/dist/config.js speedreading-trainer/dist/portal/config.js
+          mkdir -p site/lesen site/portal
+          cp -r speedreading-trainer/dist/. site/lesen/
+          cp -r schach-trainer/dist site/schach
+          cp site/lesen/config.js site/schach/config.js
+          cp portal/index.html site/index.html
+          cp site/lesen/config.js site/config.js
+          cp speedreading-trainer/public/impressum.html speedreading-trainer/public/datenschutz.html site/
+          cp portal/redirect.html site/portal/index.html
       - uses: actions/upload-pages-artifact@v3
         if: github.event_name != 'pull_request'
         with:
-          path: speedreading-trainer/dist
+          path: site
 
   deploy:
     if: github.event_name != 'pull_request'

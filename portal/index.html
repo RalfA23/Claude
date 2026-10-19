@@ -52,7 +52,7 @@ label.chk input{width:auto;margin-top:4px}
   <div class="grid" id="mine"></div>
   <h2>Weitere Kurse</h2>
   <div class="grid" id="more"></div>
-  <footer><a href="../impressum.html">Impressum</a> · <a href="../datenschutz.html">Datenschutz</a></footer>
+  <footer><a href="impressum.html">Impressum</a> · <a href="datenschutz.html">Datenschutz</a></footer>
 </div>
 <div id="login" hidden>
   <form id="lf">
@@ -61,7 +61,7 @@ label.chk input{width:auto;margin-top:4px}
     <label>E-Mail<input id="em" type="email" required autocomplete="username"></label>
     <label>Passwort<input id="pw" type="password" autocomplete="current-password"></label>
     <label id="coderow" hidden>Einladungscode<input id="code" type="text" autocomplete="off" autocapitalize="off"></label>
-    <label class="chk"><input id="consent" type="checkbox" required><span>Ich habe die <a href="../datenschutz.html" target="_blank">Datenschutzerklärung</a> gelesen und bin mindestens 16 Jahre alt.</span></label>
+    <label class="chk"><input id="consent" type="checkbox" required><span>Ich habe die <a href="datenschutz.html" target="_blank">Datenschutzerklärung</a> gelesen und bin mindestens 16 Jahre alt.</span></label>
     <button class="primary" type="submit" id="go">Anmelden</button>
     <button type="button" id="tg" style="border-color:transparent">Neu hier? Mit Einladungscode registrieren</button>
     <p id="msg" aria-live="polite"></p>
@@ -70,8 +70,8 @@ label.chk input{width:auto;margin-top:4px}
 <script>
 // Kursliste: neue Kurse hier eintragen. Der Pfad ist relativ zum Portal.
 var COURSES = [
-  {id: "lesen", icon: "📖", title: "Lesetraining", text: "8 Wochen schneller lesen: feste Lektionen, Lesefenster mit Pacer, Tests und Fortschritt.", href: "../"},
-  {id: "schach", icon: "♞", title: "Schachtraining", text: "Auf dem Weg zu 1500 Elo: Tagesaufgabe, Woodpecker-Methode, Smirnov-Lektionen, tägliche Abfrage.", href: "../schach/"}
+  {id: "lesen", icon: "📖", title: "Lesetraining", text: "8 Wochen schneller lesen: feste Lektionen, Lesefenster mit Pacer, Tests und Fortschritt.", href: "lesen/"},
+  {id: "schach", icon: "♞", title: "Schachtraining", text: "Auf dem Weg zu 1500 Elo: Tagesaufgabe, Woodpecker-Methode, Smirnov-Lektionen, tägliche Abfrage.", href: "schach/"}
 ];
 (function () {
   "use strict";
