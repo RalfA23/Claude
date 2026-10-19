@@ -510,7 +510,8 @@ const wordsOf = t => t.paras.join(" ").split(/\s+/).filter(Boolean).length;
 const nf = n => Math.round(n).toLocaleString("de-DE");
 function hash(s){ let x=2166136261; for(const c of s){ x^=c.charCodeAt(0); x=Math.imul(x,16777619);} return x>>>0; }
 function shuffled(arr, seed){ const a=arr.slice(); let s=seed||1; for(let i=a.length-1;i>0;i--){ s=(Math.imul(s,1103515245)+12345)>>>0; const j=s%(i+1); [a[i],a[j]]=[a[j],a[i]]; } return a; }
-function textById(id){ return TEXTS.find(t=>t.id===id) || (S.ai||[]).find(t=>t.id===id); }
+let BASE=[], IS_ADMIN=false; // gemeinsamer Grundbestand (nur im gehosteten Betrieb)
+function textById(id){ return TEXTS.find(t=>t.id===id) || BASE.find(t=>t.id===id) || (S.ai||[]).find(t=>t.id===id); }
 
 /* ============ ZUSTAND & SPEICHER ============ */
 const LS_KEY="sr-trainer-v1";
@@ -556,8 +557,18 @@ let AI=null;
 async function connectAI(){
   try{
     if(window.SR_READY){ try{ await window.SR_READY; }catch(e){} }
+    loadBase();
     if(window.SR_AI){ AI=window.SR_AI; return; }
     if(window.claude && window.claude.use){ const sm=await window.claude.use("sample"); if(sm) AI={generate:p=>sm.json(p,{modelTier:"default"})}; }
+  }catch(e){}
+}
+async function loadBase(){
+  if(!window.SR_BASE) return;
+  try{
+    const rows=await window.SR_BASE.list();
+    BASE=rows.filter(r=>r&&r.text&&Array.isArray(r.text.paras)).map(r=>Object.assign({},r.text,{id:"base-"+r.id,kind:"ai",base:true}));
+    IS_ADMIN=await window.SR_BASE.isAdmin();
+    if(typeof Tab!=="undefined"&&Tab==="lesen"&&!Run&&!((document.getElementById("fr-own")||{}).value)) render();
   }catch(e){}
 }
 async function generateText(wish,source){
@@ -1001,14 +1012,15 @@ function viewCourse(v){
   v.append(h("p",{class:"muted",style:"font-size:.85rem"},"Grün ist erledigt, gelb ist die nächste Lektion, blau umrandet sind Tests."));
 }
 
-let FR_NEW=null; // frisch geholter Text: nach dem Neuzeichnen vorwählen und bestätigen
+let FR_NEW=null, FR_SEL=null, FR_NOTE=""; // frisch geholter Text: nach dem Neuzeichnen vorwählen und bestätigen
 function viewFree(v){
-  const lib=TEXTS.filter(t=>t.kind!=="test"||S.seen[t.id]).concat(S.ai||[]);
-  const sel=h("select",{id:"fr-text"},lib.map(t=>h("option",{value:t.id},(t.src?(t.src.name.startsWith("Wikipedia")?"Wikipedia · ":"Klassiker · "):t.kind==="ai"?"KI · ":"")+t.title)));
+  const lib=TEXTS.filter(t=>t.kind!=="test"||S.seen[t.id]).concat(BASE,S.ai||[]);
+  const sel=h("select",{id:"fr-text"},lib.map(t=>h("option",{value:t.id},(t.base?"Grundbestand · ":t.src?(t.src.name.startsWith("Wikipedia")?"Wikipedia · ":"Klassiker · "):t.kind==="ai"?"KI · ":"")+t.title)));
   const mode=h("select",{id:"fr-mode"},[["line","Pacer, Zeile"],["chunk","Pacer, Sinngruppen"],["self","Eigenes Tempo mit Zeitmessung"],["rsvp","Wortanzeige"]].map(([k,l])=>h("option",{value:k},l)));
   const speed=h("input",{type:"range",id:"fr-wpm",min:120,max:900,step:10,value:Math.round(tgt())});
   const out=h("span",{class:"wpm",text:speed.value+" WpM"}); speed.addEventListener("input",()=>out.textContent=speed.value+" WpM");
   const quiz=h("input",{type:"checkbox",id:"fr-quiz",checked:true});
+  if(FR_SEL){ if(textById(FR_SEL)) sel.value=FR_SEL; FR_SEL=null; }
   if(FR_NEW){ const t=textById(FR_NEW.id); FR_NEW=null;
     if(t){ sel.value=t.id;
       const how=t.src?`Quelle: ${t.src.name}, Lizenz ${t.src.license}`:"von der KI geschrieben";
@@ -1021,13 +1033,19 @@ function viewFree(v){
   const srcNote=h("p",{class:"muted",id:"fr-src",style:"margin:0;font-size:.9em"});
   const showSrc=()=>{ const t=textById(sel.value), s=t&&t.src; srcNote.replaceChildren(); if(!s) return;
     srcNote.append("Quelle: ",h("a",{href:s.url,target:"_blank",rel:"noopener noreferrer"},s.name)," · Lizenz: ",s.licenseUrl?h("a",{href:s.licenseUrl,target:"_blank",rel:"noopener noreferrer"},s.license):s.license,". Auszug unverändert."); };
-  sel.addEventListener("change",showSrc); showSrc();
+  const admin=h("div",{class:"row",style:"margin:6px 0"}), adminMsg=h("p",{class:"muted",style:"margin:0"});
+  const showAdmin=()=>{ admin.replaceChildren(); adminMsg.textContent=""; if(!IS_ADMIN||!window.SR_BASE) return;
+    const t=textById(sel.value); if(!t) return;
+    if(t.base){ admin.append(h("button",{class:"btn ghost",onclick:async()=>{ try{ await window.SR_BASE.remove(t.id.slice(5)); BASE=BASE.filter(b=>b.id!==t.id); FR_NOTE="✓ Aus dem Grundbestand entfernt."; render(); }catch(e){ adminMsg.textContent="Das hat nicht geklappt."; } }},"Aus dem Grundbestand entfernen")); }
+    else if(t.kind==="ai"){ const dupe=BASE.some(b=>b.title===t.title&&JSON.stringify(b.src||null)===JSON.stringify(t.src||null));
+      admin.append(h("button",{class:"btn ghost",disabled:dupe,onclick:async()=>{ try{ const c=Object.assign({},t); delete c.id; delete c.kind; const id=await window.SR_BASE.add(c); BASE.push(Object.assign({},c,{id:"base-"+id,kind:"ai",base:true})); FR_SEL="base-"+id; FR_NOTE="✓ Im Grundbestand, ab jetzt für alle sichtbar."; render(); }catch(e){ adminMsg.textContent="Das hat nicht geklappt."; } }},dupe?"Schon im Grundbestand":"In den Grundbestand für alle")); } };
+  sel.addEventListener("change",()=>{ showSrc(); showAdmin(); }); showSrc(); showAdmin(); if(FR_NOTE){ adminMsg.textContent=FR_NOTE; FR_NOTE=""; }
   const wish=h("input",{type:"text",class:"txt",id:"fr-topic",maxlength:80,placeholder:"Thema (leer = aus deinen Themen)"});
   const aiBtn=h("button",{class:"btn",onclick:async()=>{ aiBtn.disabled=true; msg.textContent="Ein neuer Text wird geschrieben…"; try{ const t=await generateText(wish.value); FR_NEW={id:t.id}; render(); }catch(e){ msg.textContent=AI?"Das hat nicht geklappt. Versuch es später noch einmal.":"Neue KI-Texte sind hier gerade nicht verfügbar."; aiBtn.disabled=false; } }},"Neuer KI-Text");
   v.append(h("div",{class:"card"},
     h("h2",{text:"Lesefenster"}),
     h("p",{class:"muted"},"Freies Training außerhalb des Kursplans. Das Lesefenster öffnet sich über den ganzen Bildschirm."),
-    h("label",{class:"field",for:"fr-text"},"Text",sel),srcNote,
+    h("label",{class:"field",for:"fr-text"},"Text",sel),srcNote,admin,adminMsg,
     h("label",{class:"field",for:"fr-mode"},"Art",mode),
     h("label",{class:"field",for:"fr-wpm"},h("span",{},"Tempo ",out),speed),
     h("label",{class:"row",for:"fr-quiz"},quiz,"Danach Fragen beantworten, wenn der Text welche hat"),
