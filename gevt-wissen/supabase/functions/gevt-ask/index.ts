@@ -156,7 +156,8 @@ async function rewrite(k: KB, text: string, verlauf: { r: string; t: string }[])
   try {
     const msg = await anthropic.messages.create({
       model: QUICK_MODEL,
-      max_tokens: 400,
+      max_tokens: 4000,
+      output_config: { effort: "low" },
       system: [{ type: "text", text: `Du bereitest Suchanfragen für eine Wissensdatenbank zu GE Ving Tsun vor. Eingaben kommen oft per Diktat; kantonesische Begriffe werden verhört (z. B. „Sie nimm Tao“ = Siu Nim Tao, „Schi Sau“ = Chi Sao, „Tschum Kiu“ = Chum Kiu).\nBekannte Begriffe: ${k.terms}`, cache_control: { type: "ephemeral" } }],
       messages: [{ role: "user", content: `${recent ? "Bisheriges Gespräch:\n" + recent + "\n\n" : ""}Neue Eingabe: "${text}"\n\nAntworte nur mit JSON: {"frage": "die Frage als vollständige, eigenständige Frage mit korrigierten Fachbegriffen (Nachfragen mit dem Bezug aus dem Gespräch auflösen)", "suche": ["3 bis 8 Suchbegriffe in der Schreibweise der Liste"]}` }],
     });
@@ -206,7 +207,8 @@ async function ask(user: { id: string }, body: any) {
       const send = (o: unknown) => ctrl.enqueue(enc.encode(JSON.stringify(o) + "\n"));
       send({ treffer: hits.map((c) => ({ q: c.l, h: c.h.replace(/\s*https?:\/\/\S+/, ""), g: c.g })), frage: rw.frage });
       try {
-        const s = anthropic.messages.stream({ model: ANSWER_MODEL, max_tokens: 1500, system: RULES, messages: turns });
+        // Thinking is on by default on this model and counts against max_tokens, so leave room; low effort suits a chat answer.
+        const s = anthropic.messages.stream({ model: ANSWER_MODEL, max_tokens: 16000, output_config: { effort: "low" }, system: RULES, messages: turns });
         for await (const ev of s) {
           if (ev.type === "content_block_delta" && ev.delta.type === "text_delta") send({ d: ev.delta.text });
         }
