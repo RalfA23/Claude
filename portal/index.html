@@ -156,6 +156,8 @@ var COURSES = [
   {id: "vestaboard", icon: "🪧", title: "Vestaboard", text: "Fallblatt-Anzeige wie dein Bildschirmschoner: Uhr, Wetter für Hamburg, Tagesschau, Zitat der Stunde und Sprüche im Wechsel, dazu eigene Texte und Vollbild.", href: "vestaboard/"}
 ];
 // Nur für einzeln freigeschaltete Konten sichtbar (Zeile in gevt_members). Ohne Freigabe taucht die Kachel nicht auf.
+// Ralfs private Huberman-Checkliste (Claude-Seite mit eigener Speicherung und Abendauswertung). Nur für Admin-Konten sichtbar.
+var HUBERMAN = {id: "huberman", icon: "🌅", title: "Huberman-Protokolle", text: "Deine Tages-Checkliste nach Hubermans „Protocols“: 31 Punkte von morgens bis nachts, ab 80 % ist der Tag geschafft, mit Jahresübersicht und Nachschlagewerk.", href: "https://claude.ai/artifact/RftCQuS68gfCheV5VLbpgn"};
 var GEVT = {id: "gevt", icon: "🥋", title: "Ving Tsun Wissen", text: "Frag deine GEVT-Wissensdatenbank: Göksels Lehre und deine Notizen getrennt, mit Grad und Quellen.", href: "gevt/"};
 (function () {
   "use strict";
@@ -179,6 +181,8 @@ var GEVT = {id: "gevt", icon: "🥋", title: "Ving Tsun Wissen", text: "Frag dei
     try {
       var a = await sb.from("app_admins").select("user_id").eq("user_id", user.id).maybeSingle();
       isAdmin = !a.error && !!a.data;
+      var hi = COURSES.indexOf(HUBERMAN);
+      if (isAdmin && hi < 0) { COURSES.push(HUBERMAN); renderNews(); if (layout) renderDash(); } else if (!isAdmin && hi >= 0) { COURSES.splice(hi, 1); if (layout) renderDash(); }
       var r = await sb.from("progress").select("lessons:state->lessons").eq("user_id", user.id).maybeSingle();
       lessonKeys = !r.error && r.data && r.data.lessons ? Object.keys(r.data.lessons) : (r.error ? null : []);
       lessonsDone = lessonKeys ? lessonKeys.length : null;
