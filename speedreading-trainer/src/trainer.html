@@ -1041,7 +1041,10 @@ function viewFree(v){
       admin.append(h("button",{class:"btn ghost",disabled:dupe,onclick:async()=>{ try{ const c=Object.assign({},t); delete c.id; delete c.kind; const id=await window.SR_BASE.add(c); BASE.push(Object.assign({},c,{id:"base-"+id,kind:"ai",base:true})); FR_SEL="base-"+id; FR_NOTE="✓ Im Grundbestand, ab jetzt für alle sichtbar."; render(); }catch(e){ adminMsg.textContent="Das hat nicht geklappt."; } }},dupe?"Schon im Grundbestand":"In den Grundbestand für alle")); } };
   sel.addEventListener("change",()=>{ showSrc(); showAdmin(); }); showSrc(); showAdmin(); if(FR_NOTE){ adminMsg.textContent=FR_NOTE; FR_NOTE=""; }
   const wish=h("input",{type:"text",class:"txt",id:"fr-topic",maxlength:80,placeholder:"Thema (leer = aus deinen Themen)"});
-  const aiBtn=h("button",{class:"btn",onclick:async()=>{ aiBtn.disabled=true; msg.textContent="Ein neuer Text wird geschrieben…"; try{ const t=await generateText(wish.value); FR_NEW={id:t.id}; render(); }catch(e){ msg.textContent=AI?"Das hat nicht geklappt. Versuch es später noch einmal.":"Neue KI-Texte sind hier gerade nicht verfügbar."; aiBtn.disabled=false; } }},"Neuer KI-Text");
+  const makeAi=async topic=>{ aiBtn.disabled=true; msg.textContent="Ein neuer Text wird geschrieben…"; try{ const t=await generateText(topic); FR_NEW={id:t.id}; render(); }catch(e){ msg.textContent=AI?"Das hat nicht geklappt. Versuch es später noch einmal.":"Neue KI-Texte sind hier gerade nicht verfügbar."; aiBtn.disabled=false; } };
+  const aiBtn=h("button",{class:"btn",onclick:()=>makeAi(wish.value)},"Neuer KI-Text");
+  const myTopics=chosenTopics();
+  const topicRow=AI&&myTopics.length?h("div",{class:"tchips",style:"margin-top:8px"},myTopics.map(t=>h("button",{class:"tchip",title:"Text zu diesem Thema schreiben lassen",onclick:()=>makeAi(t)},t))):null;
   v.append(h("div",{class:"card"},
     h("h2",{text:"Lesefenster"}),
     h("p",{class:"muted"},"Freies Training außerhalb des Kursplans. Das Lesefenster öffnet sich über den ganzen Bildschirm."),
@@ -1056,7 +1059,7 @@ function viewFree(v){
         if(quiz.checked&&t.qs){ Quiz.open(t,(c)=>{ const eff=wpm*c; S.sessions.push({date:today(),type:"free",textId:t.id,wpm:Math.round(wpm),comp:c,eff:Math.round(eff),mode:m}); save(); showFreeResult(wpm,c); }); }
         else { S.sessions.push({date:today(),type:"free",textId:t.id,wpm:Math.round(wpm),mode:m}); save(); render(); }
       }});
-    }},"Lesen")),h("label",{class:"field"},"Neuen KI-Text schreiben lassen",h("div",{class:"row",style:"flex-wrap:nowrap"},wish,aiBtn)),msg));
+    }},"Lesen")),h("label",{class:"field"},"Neuen KI-Text schreiben lassen",h("div",{class:"row",style:"flex-wrap:nowrap"},wish,aiBtn)),topicRow,msg));
   if(window.SR_HOSTED&&AI){
     const q=h("input",{type:"text",class:"txt",id:"fr-orig-q",maxlength:80,placeholder:"Stichwort, zum Beispiel Mondlandung, oder Autor und Titel"});
     const kind=h("select",{id:"fr-orig-kind"},[["wikipedia","Wikipedia-Artikel"],["classic","Klassiker (gemeinfrei)"]].map(([k,l])=>h("option",{value:k},l)));
