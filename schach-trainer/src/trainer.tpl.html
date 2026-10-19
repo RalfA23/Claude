@@ -351,6 +351,7 @@ nav.tabs.dragging button{cursor:grabbing}
         <p class="note" id="gMoves" style="margin:0"></p>
         <div class="btns"><button class="b" type="button" id="gBack">Zug zurücknehmen</button><button class="b" type="button" id="gDraw" hidden>Remis anbieten</button><button class="b" type="button" id="gRes">Aufgeben</button><button class="b" type="button" id="gNewBtn">Neue Partie</button></div>
         <div id="gEnd"></div>
+        <div id="gAna" aria-live="polite"></div>
       </div>
       <div class="card"><h2>Lichess</h2><p class="note" style="margin:0">Kostenlos, ohne Werbung. Für eine Partie dort auf „Spielen“ oder „Gegen den Computer“ gehen.</p>
         <div class="btns"><a class="b primary" href="https://lichess.org/" target="_blank" rel="noopener">Partie auf Lichess</a><a class="b" href="https://lichess.org/training" target="_blank" rel="noopener">Taktikaufgaben</a></div></div>
@@ -447,6 +448,7 @@ __CHESSJS__
 let WP=JSON.parse(document.getElementById('wpdata').textContent);
 const RATE0=JSON.parse(document.getElementById('ratehist').textContent);
 const EF=JSON.parse(document.getElementById('efdata').textContent);
+const EFG=[];
 let LINES=JSON.parse(document.getElementById('linesdata').textContent);
 /* Freie Lichess-Aufgaben (ohne Buchdatei) kommen roh aus dem Konto: Partie plus Lösung. Hier werden sie zu Brettstellungen. */
 if(WP.length&&!Array.isArray(WP[0])){const W=[],L=[];
@@ -581,7 +583,7 @@ function pseudoEf(d){const n=(d*17)%WP.length,p=WP[n],l=LINES[n]||[];const g=new
   const m=l[0]?g.move({from:l[0].slice(0,2),to:l[0].slice(2,4),promotion:l[0][4]||undefined}):null;
   return Object.assign([fen,'?',m?m.san:'','',0,today().replace(/-/g,'.'),1],{pz:true})}
 function quizPlan(){
-  const d=dayNum();const ef=EF.length?EF[(d*31)%EF.length]:pseudoEf(d);const efIdx=EF.length?(d*31)%EF.length:-1;
+  const d=dayNum();const useG=EFG.length&&d%2===0;const ef=useG?EFG[(d*31)%EFG.length]:EF.length?EF[(d*31)%EF.length]:pseudoEf(d);const efIdx=useG?'Partie '+(d*31)%EFG.length:EF.length?(d*31)%EF.length:-1;
   const wps=sitzungen.filter(s=>s.typ==='woodpecker').sort((a,b)=>(a.ts||'')<(b.ts||'')?1:-1);
   let wrong=[];wps.forEach(s=>(s.versuche||[]).forEach(v=>{if(!v.ok&&(LINES[v.n-1]||[]).length&&!wrong.includes(v.n))wrong.push(v.n)}));
   let wn=wrong.length?wrong[d%wrong.length]:null;if(!wn){const n=Math.max(1,(stand.naechste||1)-1);wn=(LINES[n-1]||[]).length?n:1}
@@ -803,7 +805,38 @@ function gEnd(res,why){if(G.over)return;G.over=true;clearInterval(G.tick);if(G.c
   $('gStat').textContent=({S:'Du hast gewonnen',N:'Du hast verloren',R:'Remis'})[res]+' ('+why+').';$('gBack').hidden=true;$('gRes').hidden=true;
   $('gEnd').replaceChildren(h('div',{class:'btns',style:'margin-top:8px'},h('button',{type:'button',class:'b primary',onclick:()=>{
     $('pDate').value=today();$('pMin').value=mins;$('pCol').value=G.me==='w'?'Weiß':'Schwarz';$('pRes').value=res;$('pOpp').value='Sonstiges';
-    $('pErr').value=G.cpu?'Gegen Computer, Stärke '+LEVELS[G.lv][0]+', auf dieser Seite gespielt.':'';$('pLink').value=G.cpu?'':'https://lichess.org/'+G.gid;if(!G.cpu)$('pOpp').value='Mensch Rapid';show('log');$('pBl').focus()}},'In „Eintragen“ übernehmen')))}
+    $('pErr').value=G.cpu?'Gegen Computer, Stärke '+LEVELS[G.lv][0]+', auf dieser Seite gespielt.':'';$('pLink').value=G.cpu?'':'https://lichess.org/'+G.gid;if(!G.cpu)$('pOpp').value='Mensch Rapid';show('log');$('pBl').focus()}},'In „Eintragen“ übernehmen')));gAnalyze(res).catch(()=>{if(G&&G.over)$('gAna').textContent='Die Analyse konnte nicht geladen werden (Stockfish nicht erreichbar).'})}
+
+let anW=null;
+async function anInit(){if(anW)return anW;const code=await (await fetch(SF_URL)).text();const w=new Worker(URL.createObjectURL(new Blob([code],{type:'application/javascript'})));
+  await new Promise((ok,no)=>{const t=setTimeout(()=>no(new Error('timeout')),20000);w.onerror=e=>{clearTimeout(t);no(e)};w.onmessage=e=>{if(String(e.data).indexOf('uciok')===0){clearTimeout(t);ok()}};w.postMessage('uci')});
+  w.postMessage('setoption name Skill Level value 20');anW=w;return w}
+function anEval(w,fen){const ch=new Chess();ch.load(fen);const wt=ch.turn()==='w';
+  if(ch.in_checkmate())return Promise.resolve({sc:wt?-1000:1000,best:''});
+  if(ch.in_draw()||ch.in_stalemate())return Promise.resolve({sc:0,best:''});
+  return new Promise(res=>{let sc=0;w.onmessage=e=>{const t=String(e.data);
+    if(t.indexOf('info')===0&&!/bound/.test(t)){const m=/score (cp|mate) (-?\d+)/.exec(t);if(m){const v=m[1]==='mate'?(+m[2]>0?1000:-1000):Math.max(-1000,Math.min(1000,+m[2]));sc=wt?v:-v}}
+    const b=/^bestmove (\S+)/.exec(t);if(b){w.onmessage=null;res({sc,best:b[1]==='(none)'?'':b[1]})}};
+    w.postMessage('position fen '+fen);w.postMessage('go movetime 150')})}
+function efPersist(){if(db){try{Promise.resolve(db.doc('daten/partien').set({ef:EFG.slice(-150)})).catch(()=>{})}catch(e){}}}
+async function gAnalyze(res){const mine=G;const moves=G.g.history({verbose:true});const box=$('gAna');
+  if(moves.length<6){box.textContent='Die Partie war zu kurz für eine Analyse.';return}
+  box.textContent='Analyse läuft … bitte kurz warten.';
+  const w=await anInit();const ch=new Chess();const fens=[ch.fen()];moves.forEach(m=>{ch.move(m.san);fens.push(ch.fen())});
+  const ev=[];for(let i=0;i<fens.length;i++){if(G!==mine)return;ev.push(await anEval(w,fens[i]));box.textContent='Analyse läuft … Stellung '+(i+1)+' von '+fens.length}
+  if(G!==mine)return;
+  const errs=[];moves.forEach((m,i)=>{if(m.color!==mine.me)return;const loss=(m.color==='w'?1:-1)*(ev[i].sc-ev[i+1].sc);if(loss<70)return;
+    const t=new Chess();t.load(fens[i]);let bs='';const b=ev[i].best;if(b){const bm=t.move({from:b.slice(0,2),to:b.slice(2,4),promotion:b[4]||undefined});if(bm)bs=bm.san}
+    errs.push({i,no:Math.floor(i/2)+1,fen:fens[i],san:m.san,best:bs,loss:Math.round(loss),reply:(moves[i+1]||{}).san||'',kind:loss>=300?'Patzer':loss>=150?'Fehler':'Ungenauigkeit'})});
+  const lost=res==='N';const n=k=>errs.filter(e=>e.kind===k).length;
+  const dt=new Date(),ds=dt.getFullYear()+'.'+pad2(dt.getMonth()+1)+'.'+pad2(dt.getDate());
+  let added=0;errs.filter(e=>e.best&&e.loss>=(lost?100:200)).forEach(e=>{if(EFG.some(x=>x[0]===e.fen&&x[1]===e.san))return;EFG.push([e.fen,e.san,e.best,e.reply,e.loss,ds,e.no,'g']);EF.push(EFG[EFG.length-1]);added++});
+  if(added)efPersist();
+  const sum=errs.length?n('Patzer')+' Patzer, '+n('Fehler')+' Fehler, '+n('Ungenauigkeit')+' Ungenauigkeiten':'keine Fehler gefunden, sehr sauber gespielt';
+  let html='<h3 style="margin:14px 0 6px">Analyse deiner Partie</h3><p style="margin:0 0 8px"><strong>'+sum+'.</strong>'+(added?' '+added+(added===1?' Stellung ist':' Stellungen sind')+' jetzt im Lernprogramm'+(lost?' (verlorene Partie, deshalb auch kleinere Fehler)':'')+'. Du bekommst sie in der Tagesabfrage und bei den Übungen.':'')+'</p>';
+  const gm=['Patzer','Fehler','Ungenauigkeit'];
+  html+='<div class="ex">'+errs.sort((a,b)=>a.i-b.i).map(e=>'<div class="item"><span class="who"><strong>Zug '+e.no+': '+e.kind+'</strong> (−'+(e.loss/100).toFixed(1).replace('.',',')+' Bauern)</span>'+miniBoard(e.fen)+'<span class="note" style="margin:0">Du hast '+figurine(e.san)+' gespielt.'+(e.best?' Besser war '+figurine(e.best)+'.':'')+'</span></div>').join('')+'</div>';
+  box.innerHTML=html}
 function gCheck(){const g=G.g;
   if(g.in_checkmate()){gEnd(g.turn()===G.me?'N':'S','Schachmatt');return true}
   if(g.in_stalemate()){gEnd('R','Patt');return true}
@@ -820,7 +853,7 @@ function gStart(){
   if($('gOpp').value==='human'){liStart();return}
   $('gMsg').textContent='';const lv=+$('gLvl').value;let me=$('gCol').value;if(me==='r')me=Math.random()<.5?'w':'b';
   if(G){clearInterval(G.tick);G.over=true;if(G.ctrl)G.ctrl.abort()}
-  $('gDraw').hidden=true;const clk=+$('gTime').value*60000;$('gPlay').hidden=false;$('gEnd').replaceChildren();$('gBack').hidden=false;$('gRes').hidden=false;
+  $('gDraw').hidden=true;const clk=+$('gTime').value*60000;$('gPlay').hidden=false;$('gEnd').replaceChildren();$('gAna').replaceChildren();$('gBack').hidden=false;$('gRes').hidden=false;
   const b=makeBoard($('gB'),(from,to)=>{if(G.over||G.thinking)return;const g=G.g;const m=g.move({from,to,promotion:'q'});if(!m)return;b.last=[from,to];b.sel=null;b.tg=[];
     if(G.clock){G.t[G.me]+=G.inc}gDraw();if(gCheck())return;gCpu()});
   G={g:new Chess(),b,me,lv,cpu:true,over:false,thinking:false,clock:clk>0,t:{w:clk,b:clk},inc:0,t0:Date.now(),last:Date.now()};
@@ -880,7 +913,7 @@ async function liStart(){
   try{const r=await fetch('https://lichess.org/api/account',{headers:liHdr()});if(r.status===401){localStorage.removeItem('sch-li-token');liBox();$('gMsg').textContent='Die Verbindung ist abgelaufen. Bitte nochmal verbinden.';return}acc=await r.json()}catch(e){$('gMsg').textContent='Lichess ist gerade nicht erreichbar.';return}
   $('gMsg').textContent='';if(G){clearInterval(G.tick);G.over=true;if(G.ctrl)G.ctrl.abort()}
   const mins=+$('gTime').value===15?15:10,inc=mins===15?10:0;let want=$('gCol').value;
-  const ctrl=new AbortController();$('gPlay').hidden=false;$('gEnd').replaceChildren();$('gBack').hidden=true;$('gRes').hidden=false;$('gDraw').hidden=false;
+  const ctrl=new AbortController();$('gPlay').hidden=false;$('gEnd').replaceChildren();$('gAna').replaceChildren();$('gBack').hidden=true;$('gRes').hidden=false;$('gDraw').hidden=false;
   const b=makeBoard($('gB'),(from,to)=>{if(!G||G.over||G.g.turn()!==G.me)return;const m=G.g.move({from,to,promotion:'q'});if(!m)return;b.last=[from,to];b.sel=null;b.tg=[];b.locked=true;gDraw();
     fetch('https://lichess.org/api/board/game/'+G.gid+'/move/'+m.from+m.to+(m.promotion||''),{method:'POST',headers:liHdr()}).then(r=>{if(!r.ok)$('gStat').textContent='Der Zug wurde nicht angenommen.'}).catch(()=>{})});
   G={kind:'li',g:new Chess(),b,me:want==='b'?'b':'w',lv:0,cpu:false,over:false,clock:true,t:{w:mins*60000,b:mins*60000},inc,t0:Date.now(),last:Date.now(),myId:(acc.id||'').toLowerCase(),gid:null,ctrl,opName:'Suche …'};
@@ -1347,6 +1380,7 @@ show(startTab||'heute');renderSide();
   if(window.SCH_READY){try{await window.SCH_READY}catch(e){}}
   try{db=await window.claude?.use?.('db')}catch(e){db=null}
   if(!db){$('dbmsg').hidden=false;renderHeute();return}
+  try{const pg=await db.doc('daten/partien').get();if(pg.exists&&pg.data().ef)pg.data().ef.forEach(x=>{if(!EFG.some(y=>y[0]===x[0]&&y[1]===x[1])){EFG.push(x);EF.push(x)}})}catch(e){}
   try{const ks=await db.doc('einstellungen/konten').get();if(ks.exists){konto=ks.data();if(curView==='an')renderCustomize()}}catch(e){}
   db.doc('einstellungen/ui').onSnapshot(s=>{if(s.exists){P=JSON.parse(JSON.stringify(s.data()));try{localStorage.setItem('sch-prefs',JSON.stringify(P))}catch(e){}applyPrefs();drawTabs();renderSide();if(curView==='an'&&!document.activeElement.closest('#v-an'))renderCustomize()}},()=>{});
   db.doc('stand/woodpecker').onSnapshot(s=>{if(s.exists&&!sess){stand=Object.assign({zyklus:1,naechste:1},s.data());renderStand();showPuzzle(Math.min(SET,stand.naechste||1),'idle')}},()=>{});
