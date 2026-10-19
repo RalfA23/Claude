@@ -15,6 +15,8 @@ const PUBLIC_TEXT = [
   ["<title>Ralfs Lesetraining</title>", "<title>Speedreading-Trainer</title>"],
   ['<h1 id="brand-h">Ralfs <span class="mk">Lesetraining</span></h1>', '<h1 id="brand-h">Dein <span class="mk">Lesetraining</span></h1>'],
   ["Morgen wartet die nächste Lektion. Um 20 Uhr fragt Claude im Projekt kurz nach.", "Morgen wartet die nächste Lektion."],
+  ["otherwise the Claude artifact database is used when available.", "otherwise the host database is used when available."],
+  ["otherwise Claude's sample capability.", "otherwise the host's sample capability."],
 ];
 let trainer = readFileSync(join(root, "src/trainer.html"), "utf8");
 for (const [from, to] of PUBLIC_TEXT) {

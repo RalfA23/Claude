@@ -163,6 +163,7 @@ input[type=text].txt{padding:8px 10px;border-radius:8px;border:1px solid var(--l
 .cgrip:hover{border-color:var(--accent)}
 .cgrip:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 .arr.carrying{outline:2px dashed var(--accent);outline-offset:3px;box-shadow:0 8px 24px var(--shade);z-index:2}
+body.carrying .side{min-height:90px;outline:2px dashed var(--line);outline-offset:-2px;border-radius:12px}
 body.carrying,body.carrying *{cursor:grabbing!important;-webkit-user-select:none;user-select:none}
 .tchip{border:1px solid var(--line);border-radius:999px;padding:6px 12px;background:var(--card);color:var(--ink);font:inherit;font-size:.9rem;cursor:pointer}
 .tchip[aria-pressed="true"]{background:color-mix(in srgb,var(--accent) 15%,var(--card));border-color:var(--accent);font-weight:700}
@@ -709,19 +710,60 @@ function renderSide(){
   const pips=[]; for(let d=1;d<=6;d++){ const k=(w-1)*6+d; pips.push(h("span",{class:"pip"+(S.lessons[k]?" done":"")+(k===n?" next":"")+(TESTS[k]?" test":""),title:`Lektion ${k}`})); }
   const nb=BADGES.find(b=>!S.badges[b.id]);
   L.replaceChildren(
-    h("div",{class:"card"},h("p",{class:"eyebrow"},"Dein Kurs"),h("h3",{text:n?`Woche ${w} von 8`:"Kurs geschafft"}),n?h("p",{class:"muted",style:"margin:0;font-size:.9rem"},`${WEEKS[w-1].name}: ${WEEKS[w-1].goal}`):null,h("div",{class:"pips"},pips),bar(doneCount()/TOTAL),h("p",{class:"muted",style:"margin:0;font-size:.9rem"},`${doneCount()} von ${TOTAL} Lektionen · Serie ${st} ${st===1?"Tag":"Tage"}`)),
-    h("div",{class:"card"},h("p",{class:"eyebrow"},"Stufe"),h("h3",{text:`${lv.n}: ${lv.name}`}),bar(lv.pct),h("p",{class:"muted",style:"margin:0;font-size:.9rem"},lv.toNext?`Noch ${nf(lv.toNext)} Punkte bis zur nächsten Stufe.`:"Höchste Stufe erreicht.")),
-    nb?h("div",{class:"card"},h("p",{class:"eyebrow"},"Nächster Erfolg"),h("h3",{text:nb.name}),h("p",{class:"muted",style:"margin:0;font-size:.9rem"},nb.desc)):null);
+    h("div",{class:"card","data-k":"kurs"},h("p",{class:"eyebrow"},"Dein Kurs"),h("h3",{text:n?`Woche ${w} von 8`:"Kurs geschafft"}),n?h("p",{class:"muted",style:"margin:0;font-size:.9rem"},`${WEEKS[w-1].name}: ${WEEKS[w-1].goal}`):null,h("div",{class:"pips"},pips),bar(doneCount()/TOTAL),h("p",{class:"muted",style:"margin:0;font-size:.9rem"},`${doneCount()} von ${TOTAL} Lektionen · Serie ${st} ${st===1?"Tag":"Tage"}`)),
+    h("div",{class:"card","data-k":"stufe"},h("p",{class:"eyebrow"},"Stufe"),h("h3",{text:`${lv.n}: ${lv.name}`}),bar(lv.pct),h("p",{class:"muted",style:"margin:0;font-size:.9rem"},lv.toNext?`Noch ${nf(lv.toNext)} Punkte bis zur nächsten Stufe.`:"Höchste Stufe erreicht.")),
+    nb?h("div",{class:"card","data-k":"erfolg"},h("p",{class:"eyebrow"},"Nächster Erfolg"),h("h3",{text:nb.name}),h("p",{class:"muted",style:"margin:0;font-size:.9rem"},nb.desc)):null);
   const cs=compSessions().slice(-12), r=recentEff(3), tip=TIPS[Math.floor(Date.now()/864e5)%TIPS.length], ch=chosenTopics();
   R.replaceChildren(
-    h("div",{class:"card"},h("p",{class:"eyebrow"},"Dein Tempo"),
+    h("div",{class:"card","data-k":"tempo"},h("p",{class:"eyebrow"},"Dein Tempo"),
       cs.length>=2?spark(cs.map(x=>x.eff)):h("p",{class:"muted",style:"margin:0;font-size:.9rem"},"Nach zwei gemessenen Texten erscheint hier dein Verlauf."),
       S.baseline&&r?h("p",{class:"muted",style:"margin:0;font-size:.9rem"},`Effektive Rate: ${nf(S.baseline.eff)} am Start, jetzt ${nf(r.eff)}`):null),
-    h("div",{class:"card"},h("p",{class:"eyebrow"},"Tipp des Tages"),h("h3",{text:tip[0]}),h("p",{class:"tip"},tip[1])),
-    h("div",{class:"card"},h("p",{class:"eyebrow"},"Meine Themen"),
+    h("div",{class:"card","data-k":"tipp"},h("p",{class:"eyebrow"},"Tipp des Tages"),h("h3",{text:tip[0]}),h("p",{class:"tip"},tip[1])),
+    h("div",{class:"card","data-k":"themen"},h("p",{class:"eyebrow"},"Meine Themen"),
       h("p",{class:"muted",style:"margin:0;font-size:.9rem"},ch.length?ch.slice(0,5).join(", ")+(ch.length>5?` und ${ch.length-5} weitere`:""):"Noch nichts gewählt, neue Texte kommen aus allen Themen."),
       h("button",{class:"btn ghost",onclick:()=>{ if(Run) return; Tab="anpassen"; render(); }},"Themen wählen")));
+  arrangeSide(L,R);
 }
+/* Seitenleisten: Karten per Griff verschieben, auch zwischen links und rechts. Ablage in S.prefs.sidecards = {L:[...],R:[...]}. */
+function arrangeSide(L,R){
+  const all=[...L.children,...R.children], by={}; all.forEach(e=>{ by[e.dataset.k]=e; });
+  const sv=prefs().sidecards||{}, known=new Set([...(sv.L||[]),...(sv.R||[])]);
+  const list=(name,box)=>[...(sv[name]||[]).filter(k=>by[k]),...[...box.children].map(e=>e.dataset.k).filter(k=>!known.has(k))].map(k=>by[k]);
+  const l=list("L",L), r=list("R",R);
+  L.replaceChildren(...l); R.replaceChildren(...r);
+  [...l,...r].forEach(el=>{ el.classList.add("arr"); el.append(h("button",{type:"button",class:"cgrip","aria-label":"Karte verschieben (ziehen oder Pfeiltasten)",title:"Zum Verschieben ziehen"})); });
+}
+(function(){
+  let st=null;
+  const L=()=>document.getElementById("sideL"), R=()=>document.getElementById("sideR");
+  const cardsOf=box=>[...box.children].filter(e=>e.classList&&e.classList.contains("arr"));
+  const save=()=>setPref("sidecards",{L:cardsOf(L()).map(e=>e.dataset.k),R:cardsOf(R()).map(e=>e.dataset.k)},false);
+  document.addEventListener("pointerdown",e=>{
+    const g=e.target.closest&&e.target.closest(".side .cgrip"); if(!g||e.button>0) return;
+    const card=g.closest(".arr"); st={card,id:e.pointerId}; card.classList.add("carrying"); document.body.classList.add("carrying");
+    try{ g.setPointerCapture(e.pointerId); }catch(_){} e.preventDefault();
+  });
+  document.addEventListener("pointermove",e=>{
+    if(!st||e.pointerId!==st.id) return; e.preventDefault();
+    const l=L(), r=R(), lr=l.getBoundingClientRect(), rr=r.getBoundingClientRect();
+    const box=Math.abs(e.clientX-(lr.left+lr.width/2))<=Math.abs(e.clientX-(rr.left+rr.width/2))?l:r;
+    const others=cardsOf(box).filter(o=>o!==st.card); let before=null;
+    for(const o of others){ const b=o.getBoundingClientRect(); if(e.clientY<b.top+b.height/2){ before=o; break; } }
+    if(st.card.parentNode!==box||st.card.nextElementSibling!==before) box.insertBefore(st.card,before);
+  });
+  const end=e=>{ if(!st||(e&&e.pointerId!==st.id)) return; st.card.classList.remove("carrying"); document.body.classList.remove("carrying"); st=null; save(); };
+  document.addEventListener("pointerup",end); document.addEventListener("pointercancel",end);
+  document.addEventListener("keydown",e=>{
+    const g=e.target.closest&&e.target.closest(".side .cgrip"); if(!g||!["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(e.key)) return;
+    e.preventDefault(); const me=g.closest(".arr"), box=me.parentNode, list=cardsOf(box), i=list.indexOf(me);
+    if(e.key==="ArrowUp"&&i>0) box.insertBefore(me,list[i-1]);
+    else if(e.key==="ArrowDown"&&i<list.length-1) box.insertBefore(me,list[i+1].nextSibling);
+    else if(e.key==="ArrowLeft"&&box===R()) L().append(me);
+    else if(e.key==="ArrowRight"&&box===L()) R().append(me);
+    else return;
+    save(); g.focus();
+  });
+})();
 const OpenGroups=new Set();
 function topicsCard(){
   const sel=new Set(chosenTopics()), custom=chosenTopics().filter(t=>!AI_TOPICS.includes(t));
@@ -730,7 +772,7 @@ function topicsCard(){
   const add=()=>{ const t=inp.value.trim(); if(!t) return; const a=chosenTopics(); if(!a.includes(t)) a.push(t); setPref("topics",a,true); };
   inp.addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); add(); } });
   return h("div",{class:"card pref",style:"margin-top:16px"},h("h3",{text:"Meine Themen"}),
-    h("p",{class:"muted",style:"margin:0"},"Neue Übungstexte schreibt Claude zu den Themen, die du hier wählst. Ist nichts gewählt, kommt alles gemischt. Dazu kannst du eigene Themen eintragen, auch Klassiker der Literatur oder ein Wikipedia-Stichwort."),
+    h("p",{class:"muted",style:"margin:0"},"Neue Übungstexte entstehen zu den Themen, die du hier wählst. Ist nichts gewählt, kommt alles gemischt. Dazu kannst du eigene Themen eintragen, auch Klassiker der Literatur oder ein Wikipedia-Stichwort."),
     ...Object.entries(TOPIC_GROUPS).map(([g,list])=>{
       const d=h("details",{class:"tg"},h("summary",{},`${g}${list.some(t=>sel.has(t))?" · "+list.filter(t=>sel.has(t)).length+" gewählt":""}`),h("div",{class:"tchips"},list.map(t=>h("button",{class:"tchip","aria-pressed":String(sel.has(t)),onclick:()=>flip(t)},t))));
       if(OpenGroups.has(g)||list.some(t=>sel.has(t))) d.open=true;
@@ -743,10 +785,10 @@ function viewCustomize(v){
   v.append(h("div",{class:"card pref"},h("h3",{text:"So machst du die Oberfläche zu deiner"}),
     h("ol",{class:"prose",style:"margin:0;padding-left:1.2em"},
       h("li",{},"Reiter oben: am Punktegriff ziehen, am Handy gedrückt halten und ziehen."),
-      h("li",{},"Karten in jedem Reiter: am Punktegriff oben rechts auf der Karte ziehen. Mit der Tastatur geht es mit Pfeil hoch und runter, wenn der Griff markiert ist."),
+      h("li",{},"Karten in jedem Reiter und in den Seitenleisten: am Punktegriff oben rechts auf der Karte ziehen. Die Karten der Seitenleisten wandern auch von links nach rechts. Mit der Tastatur: Griff markieren, dann Pfeiltasten."),
       h("li",{},"Weiter unten: Name, Farben, Schrift, Reiter ein- und ausblenden und eigene Themen."),
       h("li",{},"Alles wird in deinem Konto gespeichert und gilt auf jedem Gerät.")),
-    h("div",{class:"row"},h("button",{class:"btn ghost",onclick:()=>{ S.prefs=Object.assign({},S.prefs,{cards:{}}); save(); render(); }},"Kartenanordnung zurücksetzen"))));
+    h("div",{class:"row"},h("button",{class:"btn ghost",onclick:()=>{ S.prefs=Object.assign({},S.prefs,{cards:{},sidecards:{}}); save(); render(); }},"Kartenanordnung zurücksetzen"))));
   const p=prefs();
   const colorIn=(label,key,fallback)=>h("label",{class:"field"},label,h("input",{type:"color",value:HEX.test(p[key]||"")?p[key]:fallback,oninput:e=>livePref(key,e.target.value),onchange:()=>save()}));
   const rootCs=getComputedStyle(document.documentElement);
@@ -864,7 +906,7 @@ function saveCards(v){ const keys=cardBlocks(v).map(e=>e.dataset.k); setPref("ca
     const card=g.closest(".arr"); st={card,id:e.pointerId}; card.classList.add("carrying"); document.body.classList.add("carrying");
     try{ g.setPointerCapture(e.pointerId); }catch(_){} e.preventDefault();
   });
-  view.addEventListener("pointermove",e=>{
+  document.addEventListener("pointermove",e=>{
     if(!st||e.pointerId!==st.id) return; e.preventDefault();
     const me=st.card, others=cardBlocks(view).filter(o=>o!==me); let before=null;
     for(const o of others){ const r=o.getBoundingClientRect(); if(e.clientY<r.top+r.height/2){ before=o; break; } }
@@ -872,7 +914,7 @@ function saveCards(v){ const keys=cardBlocks(v).map(e=>e.dataset.k); setPref("ca
     if(e.clientY<70) window.scrollBy(0,-14); else if(e.clientY>window.innerHeight-70) window.scrollBy(0,14);
   });
   const end=e=>{ if(!st||(e&&e.pointerId!==st.id)) return; st.card.classList.remove("carrying"); document.body.classList.remove("carrying"); st=null; saveCards(view); };
-  view.addEventListener("pointerup",end); view.addEventListener("pointercancel",end);
+  document.addEventListener("pointerup",end); document.addEventListener("pointercancel",end);
   view.addEventListener("keydown",e=>{
     const g=e.target.closest&&e.target.closest(".cgrip"); if(!g||(e.key!=="ArrowUp"&&e.key!=="ArrowDown")) return;
     e.preventDefault(); const me=g.closest(".arr"), bl=cardBlocks(view), i=bl.indexOf(me), j=i+(e.key==="ArrowUp"?-1:1);
@@ -928,7 +970,7 @@ function viewFree(v){
   const quiz=h("input",{type:"checkbox",id:"fr-quiz",checked:true});
   if(FR_NEW){ const t=textById(FR_NEW.id); FR_NEW=null;
     if(t){ sel.value=t.id;
-      const how=t.src?`Quelle: ${t.src.name}, Lizenz ${t.src.license}`:"von Claude geschrieben";
+      const how=t.src?`Quelle: ${t.src.name}, Lizenz ${t.src.license}`:"von der KI geschrieben";
       const ok=h("div",{id:"fr-ok",role:"status",style:"border:1px solid var(--good);border-left-width:6px;border-radius:10px;padding:12px 14px;margin-bottom:16px;background:var(--card)"},
         h("strong",{style:"color:var(--good)"},"✓ Text übernommen"),
         h("div",{},`„${t.title}“, ${nf(wordsOf(t))} Wörter, ${t.qs.length} Fragen. ${how}.`),
@@ -940,7 +982,7 @@ function viewFree(v){
     srcNote.append("Quelle: ",h("a",{href:s.url,target:"_blank",rel:"noopener noreferrer"},s.name)," · Lizenz: ",s.licenseUrl?h("a",{href:s.licenseUrl,target:"_blank",rel:"noopener noreferrer"},s.license):s.license,". Auszug unverändert."); };
   sel.addEventListener("change",showSrc); showSrc();
   const wish=h("input",{type:"text",class:"txt",id:"fr-topic",maxlength:80,placeholder:"Thema (leer = aus deinen Themen)"});
-  const aiBtn=h("button",{class:"btn",onclick:async()=>{ aiBtn.disabled=true; msg.textContent="Claude schreibt einen neuen Text…"; try{ const t=await generateText(wish.value); FR_NEW={id:t.id}; render(); }catch(e){ msg.textContent=AI?"Das hat nicht geklappt. Versuch es später noch einmal.":"Neue KI-Texte sind hier gerade nicht verfügbar."; aiBtn.disabled=false; } }},"Neuer KI-Text");
+  const aiBtn=h("button",{class:"btn",onclick:async()=>{ aiBtn.disabled=true; msg.textContent="Ein neuer Text wird geschrieben…"; try{ const t=await generateText(wish.value); FR_NEW={id:t.id}; render(); }catch(e){ msg.textContent=AI?"Das hat nicht geklappt. Versuch es später noch einmal.":"Neue KI-Texte sind hier gerade nicht verfügbar."; aiBtn.disabled=false; } }},"Neuer KI-Text");
   v.append(h("div",{class:"card"},
     h("h2",{text:"Lesefenster"}),
     h("p",{class:"muted"},"Freies Training außerhalb des Kursplans. Das Lesefenster öffnet sich über den ganzen Bildschirm."),
@@ -966,7 +1008,7 @@ function viewFree(v){
       try{ const t=await generateText(q.value,kind.value); FR_NEW={id:t.id}; render(); }
       catch(e){ let c="",d=""; try{ const b=e&&e.context&&e.context.json?await e.context.json():null; c=b&&b.error||""; d=b&&b.detail||""; }catch(_){} om.textContent=(ERR[c]||"Das hat nicht geklappt. Versuch es später noch einmal.")+(d?` (${d})`:""); go.disabled=false; } }},"Text holen");
     v.append(h("div",{class:"card",style:"margin-top:16px"},h("h3",{text:"Originaltext holen"}),
-      h("p",{class:"muted",style:"margin:0"},"Ein Auszug aus Wikipedia oder einem gemeinfreien Klassiker, unverändert. Die Fragen schreibt Claude. Quelle und Lizenz stehen im Lesefenster."),
+      h("p",{class:"muted",style:"margin:0"},"Ein Auszug aus Wikipedia oder einem gemeinfreien Klassiker, unverändert. Die Fragen schreibt die KI. Quelle und Lizenz stehen im Lesefenster."),
       h("label",{class:"field"},"Art",kind),h("label",{class:"field"},"Stichwort",h("div",{class:"row",style:"flex-wrap:nowrap"},q,go)),om));
   }
   const own=h("textarea",{class:"own",id:"fr-own",maxlength:20000,placeholder:"Text hier einfügen, zum Beispiel ein Artikel, ein Urteil oder ein Kapitel aus einem Buch."});
@@ -1071,7 +1113,7 @@ async function measureStep(box,next,testId){
   let t, repeat=false;
   if(testId) t=textById(testId);
   else { const pick=compText(); if(pick) t=pick.text; else {
-      box.append(h("p",{class:"muted"},"Claude schreibt einen neuen Text für dich…"));
+      box.append(h("p",{class:"muted"},"Ein neuer Text wird für dich geschrieben…"));
       try{ t=await generateText(); }catch(e){ t=repeatText(); repeat=true; }
       box.replaceChildren(); } }
   const words=wordsOf(t);
