@@ -516,8 +516,20 @@ async function connectAI(){
     if(window.claude && window.claude.use){ const sm=await window.claude.use("sample"); if(sm) AI={generate:p=>sm.json(p,{modelTier:"default"})}; }
   }catch(e){}
 }
-async function generateText(wish){
+async function generateText(wish,source){
   if(!AI) throw new Error("none");
+  if(source){
+    const query=String(wish||"").trim().slice(0,80);
+    const r=await AI.generate("",{topic:query,source,query});
+    if(!r||!Array.isArray(r.paras)||!Array.isArray(r.qs)||!r.src||!r.src.name||!r.src.url) throw new Error("shape");
+    const t={id:"src-"+Date.now(),kind:"ai",topic:query,title:String(r.title||query).slice(0,80),
+      paras:r.paras.map(p=>String(p)).filter(p=>p.trim()).slice(0,12),
+      qs:r.qs.filter(q=>q&&q.q&&Array.isArray(q.a)&&q.a.length>=2).slice(0,5).map(q=>({q:String(q.q),a:q.a.slice(0,3).map(String)})),
+      src:{name:String(r.src.name).slice(0,160),url:String(r.src.url).slice(0,300),license:String(r.src.license||"").slice(0,160),licenseUrl:String(r.src.licenseUrl||"").slice(0,300)}};
+    if(t.paras.length<1||t.qs.length<3) throw new Error("qs");
+    S.ai=(S.ai||[]).concat(t).slice(-40); save();
+    return t;
+  }
   const used=new Set((S.ai||[]).map(t=>t.topic));
   let topic=String(wish||"").trim().slice(0,80);
   if(!topic){ const ch=chosenTopics(), pool=ch.length?ch:AI_TOPICS, free=pool.filter(t=>!used.has(t)); topic=(free.length?free:pool)[Math.floor(Math.random()*(free.length||pool.length))]; }
@@ -588,12 +600,12 @@ function compText(){
   const train=TEXTS.filter(t=>t.kind==="train");
   const unseen=train.find(t=>!S.seen[t.id]); if(unseen) return {text:unseen};
   const clUnseen=TEXTS.find(t=>t.kind==="classic"&&!S.seen[t.id]); if(clUnseen) return {text:clUnseen};
-  const aiUnseen=(S.ai||[]).find(t=>!S.seen[t.id]); if(aiUnseen) return {text:aiUnseen};
+  const aiUnseen=(S.ai||[]).find(t=>!t.src&&!S.seen[t.id]); if(aiUnseen) return {text:aiUnseen};
   return null;
 }
-function repeatText(){ const pool=TEXTS.filter(t=>t.kind==="train"||t.kind==="classic").concat(S.ai||[]); pool.sort((a,b)=>(S.seen[a.id]||0)-(S.seen[b.id]||0)); return pool[0]; }
+function repeatText(){ const pool=TEXTS.filter(t=>t.kind==="train"||t.kind==="classic").concat((S.ai||[]).filter(t=>!t.src)); pool.sort((a,b)=>(S.seen[a.id]||0)-(S.seen[b.id]||0)); return pool[0]; }
 function drillText(n){
-  const pool=[textById("D1"),textById("D2")].concat(TEXTS.filter(t=>(t.kind==="train"||t.kind==="classic")&&S.seen[t.id]),(S.ai||[]).filter(t=>S.seen[t.id]));
+  const pool=[textById("D1"),textById("D2")].concat(TEXTS.filter(t=>(t.kind==="train"||t.kind==="classic")&&S.seen[t.id]),(S.ai||[]).filter(t=>!t.src&&S.seen[t.id]));
   return pool[(n*7)%pool.length];
 }
 const tgt=()=>S.target||250;
@@ -821,18 +833,22 @@ function viewCourse(v){
 
 function viewFree(v){
   const lib=TEXTS.filter(t=>t.kind!=="test"||S.seen[t.id]).concat(S.ai||[]);
-  const sel=h("select",{id:"fr-text"},lib.map(t=>h("option",{value:t.id},(t.kind==="ai"?"KI · ":"")+t.title)));
+  const sel=h("select",{id:"fr-text"},lib.map(t=>h("option",{value:t.id},(t.src?(t.src.name.startsWith("Wikipedia")?"Wikipedia · ":"Klassiker · "):t.kind==="ai"?"KI · ":"")+t.title)));
   const mode=h("select",{id:"fr-mode"},[["line","Pacer, Zeile"],["chunk","Pacer, Sinngruppen"],["self","Eigenes Tempo mit Zeitmessung"],["rsvp","Wortanzeige"]].map(([k,l])=>h("option",{value:k},l)));
   const speed=h("input",{type:"range",id:"fr-wpm",min:120,max:900,step:10,value:Math.round(tgt())});
   const out=h("span",{class:"wpm",text:speed.value+" WpM"}); speed.addEventListener("input",()=>out.textContent=speed.value+" WpM");
   const quiz=h("input",{type:"checkbox",id:"fr-quiz",checked:true});
   const msg=h("p",{class:"muted"});
+  const srcNote=h("p",{class:"muted",id:"fr-src",style:"margin:0;font-size:.9em"});
+  const showSrc=()=>{ const t=textById(sel.value), s=t&&t.src; srcNote.replaceChildren(); if(!s) return;
+    srcNote.append("Quelle: ",h("a",{href:s.url,target:"_blank",rel:"noopener noreferrer"},s.name)," · Lizenz: ",s.licenseUrl?h("a",{href:s.licenseUrl,target:"_blank",rel:"noopener noreferrer"},s.license):s.license,". Auszug unverändert."); };
+  sel.addEventListener("change",showSrc); showSrc();
   const wish=h("input",{type:"text",class:"txt",id:"fr-topic",maxlength:80,placeholder:"Thema (leer = aus deinen Themen)"});
   const aiBtn=h("button",{class:"btn",onclick:async()=>{ aiBtn.disabled=true; msg.textContent="Claude schreibt einen neuen Text…"; try{ const t=await generateText(wish.value); msg.textContent=`Neuer Text: ${t.title}`; render(); }catch(e){ msg.textContent=AI?"Das hat nicht geklappt. Versuch es später noch einmal.":"Neue KI-Texte sind hier gerade nicht verfügbar."; aiBtn.disabled=false; } }},"Neuer KI-Text");
   v.append(h("div",{class:"card"},
     h("h2",{text:"Lesefenster"}),
     h("p",{class:"muted"},"Freies Training außerhalb des Kursplans. Das Lesefenster öffnet sich über den ganzen Bildschirm."),
-    h("label",{class:"field",for:"fr-text"},"Text",sel),
+    h("label",{class:"field",for:"fr-text"},"Text",sel),srcNote,
     h("label",{class:"field",for:"fr-mode"},"Art",mode),
     h("label",{class:"field",for:"fr-wpm"},h("span",{},"Tempo ",out),speed),
     h("label",{class:"row",for:"fr-quiz"},quiz,"Danach Fragen beantworten, wenn der Text welche hat"),
@@ -844,6 +860,19 @@ function viewFree(v){
         else { S.sessions.push({date:today(),type:"free",textId:t.id,wpm:Math.round(wpm),mode:m}); save(); render(); }
       }});
     }},"Lesen")),h("label",{class:"field"},"Neuen KI-Text schreiben lassen",h("div",{class:"row",style:"flex-wrap:nowrap"},wish,aiBtn)),msg));
+  if(window.SR_HOSTED&&AI){
+    const q=h("input",{type:"text",class:"txt",id:"fr-orig-q",maxlength:80,placeholder:"Stichwort, zum Beispiel Mondlandung, oder Autor und Titel"});
+    const kind=h("select",{id:"fr-orig-kind"},[["wikipedia","Wikipedia-Artikel"],["classic","Klassiker (gemeinfrei)"]].map(([k,l])=>h("option",{value:k},l)));
+    const om=h("p",{class:"muted"});
+    const ERR={not_found:"Dazu habe ich nichts gefunden. Versuch ein anderes Stichwort.",not_public_domain:"Dieses Werk ist noch nicht gemeinfrei und darf nicht verwendet werden.",too_short:"Der Text ist zu kurz oder passt nicht für das Lesetraining.",daily_limit:"Das Tageslimit ist erreicht. Morgen geht es weiter.",fetch_failed:"Die Quelle ist gerade nicht erreichbar.",busy:"Gerade zu viel los. Versuch es gleich noch einmal."};
+    const go=h("button",{class:"btn",onclick:async()=>{ if(q.value.trim().length<2){ om.textContent="Bitte gib ein Stichwort ein."; return; }
+      go.disabled=true; om.textContent="Ich hole den Text…";
+      try{ const t=await generateText(q.value,kind.value); om.textContent=`Neuer Text: ${t.title}`; render(); }
+      catch(e){ let c=""; try{ const b=e&&e.context&&e.context.json?await e.context.json():null; c=b&&b.error||""; }catch(_){} om.textContent=ERR[c]||"Das hat nicht geklappt. Versuch es später noch einmal."; go.disabled=false; } }},"Text holen");
+    v.append(h("div",{class:"card",style:"margin-top:16px"},h("h3",{text:"Originaltext holen"}),
+      h("p",{class:"muted",style:"margin:0"},"Ein Auszug aus Wikipedia oder einem gemeinfreien Klassiker, unverändert. Die Fragen schreibt Claude. Quelle und Lizenz stehen im Lesefenster."),
+      h("label",{class:"field"},"Art",kind),h("label",{class:"field"},"Stichwort",h("div",{class:"row",style:"flex-wrap:nowrap"},q,go)),om));
+  }
   const own=h("textarea",{class:"own",id:"fr-own",maxlength:20000,placeholder:"Text hier einfügen, zum Beispiel ein Artikel, ein Urteil oder ein Kapitel aus einem Buch."});
   const ownMsg=h("p",{class:"muted"});
   v.append(h("div",{class:"card",style:"margin-top:16px"},h("h3",{text:"Eigenen Text einfügen"}),
