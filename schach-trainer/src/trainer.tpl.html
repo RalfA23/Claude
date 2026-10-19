@@ -824,7 +824,7 @@ function gStart(){
   const b=makeBoard($('gB'),(from,to)=>{if(G.over||G.thinking)return;const g=G.g;const m=g.move({from,to,promotion:'q'});if(!m)return;b.last=[from,to];b.sel=null;b.tg=[];
     if(G.clock){G.t[G.me]+=G.inc}gDraw();if(gCheck())return;gCpu()});
   G={g:new Chess(),b,me,lv,cpu:true,over:false,thinking:false,clock:clk>0,t:{w:clk,b:clk},inc:0,t0:Date.now(),last:Date.now()};
-  b.load(G.g.fen());b.flipped=me==='b';b.locked=true;gDraw();
+  b.load(G.g.fen());b.game=G.g;b.flipped=me==='b';b.locked=true;gDraw();
   if(G.clock){G.tick=setInterval(()=>{if(G.over)return;const now=Date.now(),d=now-G.last;G.last=now;const side=G.g.turn();G.t[side]-=d;
     $('gTopT').textContent=gFmt(G.t[G.me==='w'?'b':'w']);$('gBotT').textContent=gFmt(G.t[G.me]);
     if(G.t[side]<=0){G.t[side]=0;gEnd(side===G.me?'N':'S','Zeit abgelaufen')}},250)}
@@ -884,7 +884,7 @@ async function liStart(){
   const b=makeBoard($('gB'),(from,to)=>{if(!G||G.over||G.g.turn()!==G.me)return;const m=G.g.move({from,to,promotion:'q'});if(!m)return;b.last=[from,to];b.sel=null;b.tg=[];b.locked=true;gDraw();
     fetch('https://lichess.org/api/board/game/'+G.gid+'/move/'+m.from+m.to+(m.promotion||''),{method:'POST',headers:liHdr()}).then(r=>{if(!r.ok)$('gStat').textContent='Der Zug wurde nicht angenommen.'}).catch(()=>{})});
   G={kind:'li',g:new Chess(),b,me:want==='b'?'b':'w',lv:0,cpu:false,over:false,clock:true,t:{w:mins*60000,b:mins*60000},inc,t0:Date.now(),last:Date.now(),myId:(acc.id||'').toLowerCase(),gid:null,ctrl,opName:'Suche …'};
-  b.load(G.g.fen());b.flipped=G.me==='b';b.locked=true;gDraw();$('gStat').textContent='Ich suche einen Gegner … (kann einen Moment dauern)';
+  b.load(G.g.fen());b.game=G.g;b.flipped=G.me==='b';b.locked=true;gDraw();$('gStat').textContent='Ich suche einen Gegner … (kann einen Moment dauern)';
   G.tick=setInterval(()=>{if(G.over||!G.gid)return;const now=Date.now(),d=now-G.last;G.last=now;const side=G.g.turn();G.t[side]=Math.max(0,G.t[side]-d);gDraw()},250);
   const mine=G;
   ndjson('https://lichess.org/api/stream/event',{headers:liHdr()},e=>{if(e.type==='gameStart'&&G===mine&&!G.gid){G.gid=(e.game&&(e.game.gameId||e.game.id))||null;if(G.gid)liGame(G.gid,ctrl)}},ctrl.signal).catch(()=>{});
