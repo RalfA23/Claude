@@ -812,11 +812,14 @@ function gPgn(res){const c=new Chess();const day=new Date();const d=day.getFullY
   const wh=G.me==='w'?me:cpu,bl=G.me==='w'?cpu:me;const r=res==='R'?'1/2-1/2':((res==='S')===(G.me==='w')?'1-0':'0-1');
   c.header('Event','Partie auf Schachtraining','Site','Schachtraining','Date',d,'White',wh,'Black',bl,'Result',r);
   G.g.history().forEach(m=>c.move(m));return c.pgn()}
-async function gToLichess(res,btn){const pgn=gPgn(res);btn.disabled=true;
-  try{const r=await fetch('https://lichess.org/api/import',{method:'POST',headers:Object.assign({'Content-Type':'application/x-www-form-urlencoded',Accept:'application/json'},liTok()?liHdr():{}),body:'pgn='+encodeURIComponent(pgn)});
-    const j=await r.json();if(!j.url)throw new Error('keine Adresse');btn.replaceWith(h('span',{class:'note'},liTok()?'Auf Lichess in deinem Verlauf: ':'Auf Lichess abgelegt: ',h('a',{href:j.url,target:'_blank',rel:'noopener'},j.url.replace('https://','')),liTok()?'':' (anonym, ohne Verbindung mit deinem Konto)'))}
+async function liImport(pgn){const r=await fetch('https://lichess.org/api/import',{method:'POST',headers:Object.assign({'Content-Type':'application/x-www-form-urlencoded',Accept:'application/json'},liHdr()),body:'pgn='+encodeURIComponent(pgn)});
+  if(r.status===401){try{localStorage.removeItem('sch-li-token')}catch(e){}throw new Error('abgelaufen')}const j=await r.json();if(!j.url)throw new Error('keine Adresse');return j.url}
+async function gToLichess(res,btn){const pgn=gPgn(res);
+  if(!liTok()){try{localStorage.setItem('sch-li-pgn',pgn)}catch(e){}btn.disabled=true;btn.textContent='Weiterleitung zu Lichess …';liConnect();return}
+  btn.disabled=true;
+  try{const u=await liImport(pgn);btn.replaceWith(h('span',{class:'note'},'Auf Lichess unter deinem Konto abgelegt: ',h('a',{href:u,target:'_blank',rel:'noopener'},u.replace('https://',''))))}
   catch(e){try{await navigator.clipboard.writeText(pgn)}catch(x){}btn.disabled=false;btn.textContent='Nochmal versuchen';
-    $('gAna').prepend(h('p',{class:'note'},'Der direkte Import ging nicht. Die Partie (PGN) ist in der Zwischenablage, du kannst sie auf ',h('a',{href:'https://lichess.org/paste',target:'_blank',rel:'noopener'},'lichess.org/paste'),' einfügen.'))}}
+    $('gAna').prepend(h('p',{class:'note'},'Der Import ging nicht'+(liTok()?'':' (die Verbindung ist abgelaufen, beim nächsten Versuch verbindest du dich neu)')+'. Die Partie (PGN) ist in der Zwischenablage, du kannst sie auch auf ',h('a',{href:'https://lichess.org/paste',target:'_blank',rel:'noopener'},'lichess.org/paste'),' einfügen.'))}}
 let anW=null;
 async function anInit(){if(anW)return anW;const code=await (await fetch(SF_URL)).text();const w=new Worker(URL.createObjectURL(new Blob([code],{type:'application/javascript'})));
   await new Promise((ok,no)=>{const t=setTimeout(()=>no(new Error('timeout')),20000);w.onerror=e=>{clearTimeout(t);no(e)};w.onmessage=e=>{if(String(e.data).indexOf('uciok')===0){clearTimeout(t);ok()}};w.postMessage('uci')});
@@ -892,7 +895,9 @@ async function liReturn(){const q=new URLSearchParams(location.search),code=q.ge
   history.replaceState(null,'',location.pathname+'#spielen');if(!ver||q.get('state')!==st){$('gMsg').textContent='Die Lichess-Anmeldung passte nicht zusammen. Bitte nochmal versuchen.';return}
   try{const r=await fetch('https://lichess.org/api/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({grant_type:'authorization_code',code,code_verifier:ver,redirect_uri:LI_REDIR,client_id:LI_ID})});
     const j=await r.json();if(!j.access_token)throw new Error('kein Token');localStorage.setItem('sch-li-token',j.access_token);sessionStorage.removeItem('sch-li-v');
-    show('sp');$('gOpp').value='human';$('gLvlF').hidden=true;liBox();$('gMsg').textContent='Mit Lichess verbunden. Du kannst jetzt eine Partie starten.'}
+    show('sp');$('gOpp').value='human';$('gLvlF').hidden=true;liBox();$('gMsg').textContent='Mit Lichess verbunden. Du kannst jetzt eine Partie starten.';
+    let pend='';try{pend=localStorage.getItem('sch-li-pgn')||'';localStorage.removeItem('sch-li-pgn')}catch(e){}
+    if(pend){try{const u=await liImport(pend);$('gMsg').replaceChildren('Mit Lichess verbunden. Deine Partie ist auf deinem Konto abgelegt: ',h('a',{href:u,target:'_blank',rel:'noopener'},u.replace('https://','')))}catch(e){try{await navigator.clipboard.writeText(pend)}catch(x){}$('gMsg').textContent='Verbunden, aber der Import der Partie ging nicht. Das PGN ist in der Zwischenablage (lichess.org/paste).'}}}
   catch(e){$('gMsg').textContent='Die Anmeldung bei Lichess hat nicht geklappt.'}}
 function liBox(){const bx=$('gLiBox');if($('gOpp').value!=='human'){bx.hidden=true;return}bx.hidden=false;
   if(liTok()){bx.replaceChildren('Mit Lichess verbunden. Gegen Menschen läuft immer mit Uhr (10 Minuten, bei 15 mit 10 Sekunden Zuschlag), ungewertet. ',h('button',{type:'button',class:'b sm',onclick:()=>{try{localStorage.removeItem('sch-li-token')}catch(e){}liBox()}},'Verbindung trennen'))}
