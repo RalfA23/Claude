@@ -40,6 +40,7 @@ input{font:inherit;padding:10px;border-radius:8px;border:1px solid var(--line);b
 label.chk{flex-direction:row;gap:8px;align-items:flex-start;font-size:.9rem}
 label.chk input{width:auto;margin-top:4px}
 [hidden]{display:none!important}
+.card{position:relative}.badge{position:absolute;top:12px;right:12px;background:var(--accent,#B3261E);color:#fff;border-radius:999px;padding:2px 10px;font-size:.8rem;font-weight:600}.news{background:var(--surface);border:1px solid var(--accent,#B3261E);border-radius:12px;padding:12px 16px;margin:12px 0;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
 </style>
 </head>
 <body>
@@ -48,6 +49,7 @@ label.chk input{width:auto;margin-top:4px}
     <h1>Lernportal<small>Deine Kurse an einem Ort</small></h1>
     <div class="acct"><span id="who"></span> <button class="sm" id="out" type="button">Abmelden</button></div>
   </header>
+  <div class="news" id="news" hidden><span id="newsTxt"></span> <button class="sm" id="newsOk" type="button">Verstanden</button></div>
   <h2>Meine Kurse</h2>
   <div class="grid" id="mine"></div>
   <h2>Weitere Kurse</h2>
@@ -71,7 +73,7 @@ label.chk input{width:auto;margin-top:4px}
 // Kursliste: neue Kurse hier eintragen. Der Pfad ist relativ zum Portal.
 var COURSES = [
   {id: "lesen", icon: "📖", title: "Lesetraining", text: "8 Wochen schneller lesen: feste Lektionen, Lesefenster mit Pacer, Tests und Fortschritt.", href: "lesen/"},
-  {id: "schach", icon: "♞", title: "Schachtraining", text: "Auf dem Weg zu 1500 Elo: Tagesaufgabe, Woodpecker-Methode, Smirnov-Lektionen, tägliche Abfrage.", href: "schach/"}
+  {id: "schach", icon: "♞", title: "Schachtraining", text: "Mehr Wertungspunkte: Tagesaufgabe, Taktikaufgaben, Smirnov-Lektionen, tägliche Abfrage, verbunden mit deinem Lichess- oder chess.com-Konto.", href: "schach/"}
 ];
 (function () {
   "use strict";
@@ -87,18 +89,24 @@ var COURSES = [
     if (r.error) { alert("Das Speichern hat nicht geklappt: " + r.error.message); return; }
     user = r.data.user; render();
   }
+  // Courses the user already knows about. A course not in this list shows "Neu". First visit of a brand-new account: everything counts as known.
+  function seen() { var x = user && user.user_metadata && user.user_metadata.seen; return Array.isArray(x) ? x : null; }
+  function isNew(c) { var x = seen(); return !!x && x.indexOf(c.id) < 0; }
+  async function setSeen(list) { var r = await sb.auth.updateUser({data: {seen: list}}); if (!r.error) { user = r.data.user; render(); } }
+  function allIds() { return COURSES.map(function (k) { return k.id; }); }
   function card(c, own) {
     var d = document.createElement("div"); d.className = "card";
     d.innerHTML = '<div class="ic"></div><h3></h3><p></p><div class="row"></div>';
-    d.children[0].textContent = c.icon; d.children[1].textContent = c.title; d.children[2].textContent = c.text;
-    var row = d.children[3];
+    if (isNew(c)) { var bd = document.createElement("span"); bd.className = "badge"; bd.textContent = "Neu"; d.appendChild(bd); }
+    var k = d.querySelector(".ic"); k.textContent = c.icon; d.querySelector("h3").textContent = c.title; d.querySelector("p").textContent = c.text;
+    var row = d.querySelector(".row");
     if (own) {
       var a = document.createElement("a"); a.className = "btn primary"; a.href = c.href; a.textContent = "Öffnen"; row.appendChild(a);
       var rm = document.createElement("button"); rm.type = "button"; rm.className = "sm"; rm.textContent = "Entfernen";
       rm.addEventListener("click", function () { setMine(mine().filter(function (x) { return x !== c.id; })); }); row.appendChild(rm);
     } else {
       var ad = document.createElement("button"); ad.type = "button"; ad.className = "primary"; ad.textContent = "Zu meinen Kursen";
-      ad.addEventListener("click", function () { setMine(mine().concat([c.id])); }); row.appendChild(ad);
+      ad.addEventListener("click", function () { setMine(mine().concat([c.id])); if (isNew(c)) setSeen((seen() || []).concat([c.id])); }); row.appendChild(ad);
     }
     return d;
   }
@@ -111,8 +119,16 @@ var COURSES = [
     rest.forEach(function (c) { mo.appendChild(card(c, false)); });
     if (!rest.length) { var e2 = document.createElement("p"); e2.className = "empty"; e2.textContent = "Du hast alle Kurse ausgewählt."; mo.appendChild(e2); }
     $("who").textContent = user.email || "";
+    var nw = COURSES.filter(isNew);
+    $("news").hidden = !nw.length;
+    if (nw.length) $("newsTxt").textContent = (nw.length === 1 ? "Neuer Kurs: " : "Neue Kurse: ") + nw.map(function (c) { return c.title; }).join(", ") + ". Du findest ihn unten unter „Weitere Kurse“.";
   }
-  function enter(u) { user = u; $("login").hidden = true; $("app").hidden = false; render(); }
+  $("newsOk").addEventListener("click", function () { setSeen(allIds()); });
+  function enter(u) {
+    user = u; $("login").hidden = true; $("app").hidden = false; render();
+    // Accounts from before this feature: what they already chose counts as known, the rest is new. Brand-new accounts know everything.
+    if (!seen()) setSeen(mine().length ? mine() : allIds());
+  }
   $("out").addEventListener("click", async function () { await sb.auth.signOut(); location.reload(); });
 
   var signup = false, msg = $("msg");
