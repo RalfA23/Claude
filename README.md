@@ -1,5 +1,6 @@
 # Claude-Projekte von Ralf
 
+- [portal](portal/) – Startseite der Lebensplattform: frei anpassbares Dashboard mit Kacheln aus einer Galerie (Kurse, Uhr, Lektion, Schach-Wertung, To-Dos, Notizen, Entspannungsecke, Verkaufsassistent, IStR-Vortrag und mehr). Kacheln lassen sich ziehen, in der Größe ändern, ausblenden und entfernen; das Layout liegt im Konto (Supabase, Tabelle `schach_docs`, Pfad `portal/dashboard`) und lokal als Rückfall.
 - [speedreading-trainer](speedreading-trainer/) – 8-Wochen-Speedreading-Kurs als Web-App für Handy und Rechner.
 - [schach-trainer](schach-trainer/) – Schachtraining auf dem Weg zu 1500 Elo: Woodpecker-Aufgaben am Brett, Smirnov-Lektionen, tägliche Abfrage und Fortschrittskontrolle. Läuft unter `/schach/` auf derselben Seite wie das Lesetraining.
 - [gevt-wissen](gevt-wissen/) – Fragen an die eigene GE-Ving-Tsun-Wissensdatenbank, nur mit privatem Link und Freigabe; die Inhalte liegen verschlüsselt in Supabase, nicht hier.

@@ -53,6 +53,8 @@ jobs:
       - name: Build Murmelbahn
         working-directory: murmelbahn
         run: node build.mjs && node -e "const s=require('fs').readFileSync('dist/index.html','utf8');const m=s.match(/<script>([\s\S]*?)<\/script>/g);for(const b of m){new Function(b.replace(/<\/?script>/g,''))}console.log('ok',m.length)"
+      - name: Check Portal script parses
+        run: node -e "const s=require('fs').readFileSync('portal/index.html','utf8');const m=s.match(/<script>([\s\S]*?)<\/script>/g);for(const b of m){new Function(b.replace(/<\/?script>/g,''))}console.log('ok',m.length)"
       - name: Seite zusammenstellen (Portal als Hauptadresse, Kurse in Unterordnern)
         # One shared Supabase config for everything: the config.js built for the Lesetraining.
         run: |
