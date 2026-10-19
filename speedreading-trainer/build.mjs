@@ -13,7 +13,7 @@ const shell = readFileSync(join(root, "src/shell.html"), "utf8");
 // Personal wording of Ralf's artifact version is swapped for neutral wording in the public app.
 const PUBLIC_TEXT = [
   ["<title>Ralfs Lesetraining</title>", "<title>Speedreading-Trainer</title>"],
-  ['<h1>Ralfs <span class="mk">Lesetraining</span></h1>', '<h1>Dein <span class="mk">Lesetraining</span></h1>'],
+  ['<h1 id="brand-h">Ralfs <span class="mk">Lesetraining</span></h1>', '<h1 id="brand-h">Dein <span class="mk">Lesetraining</span></h1>'],
   ["Morgen wartet die nächste Lektion. Um 20 Uhr fragt Claude im Projekt kurz nach.", "Morgen wartet die nächste Lektion."],
 ];
 let trainer = readFileSync(join(root, "src/trainer.html"), "utf8");
