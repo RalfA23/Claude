@@ -113,7 +113,11 @@
     const p = document.createElement("p");
     p.id = "sr-account";
     p.style.cssText = "margin:0;font-size:.8rem;color:var(--muted)";
-    p.textContent = "Angemeldet als " + (user.email || "") + " · ";
+    const home = document.createElement("a");
+    home.href = "../";
+    home.textContent = "Zum Lernportal";
+    home.style.color = "inherit";
+    p.append(home, " · Angemeldet als " + (user.email || "") + " · ");
     const out = document.createElement("button");
     out.className = "btn ghost";
     out.style.cssText = "min-height:0;padding:2px 8px;font-size:.8rem";
