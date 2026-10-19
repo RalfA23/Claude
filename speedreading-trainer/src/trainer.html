@@ -646,14 +646,13 @@ const wordsOf = t => t.paras.join(" ").split(/\s+/).filter(Boolean).length;
 const nf = n => Math.round(n).toLocaleString("de-DE");
 function hash(s){ let x=2166136261; for(const c of s){ x^=c.charCodeAt(0); x=Math.imul(x,16777619);} return x>>>0; }
 function shuffled(arr, seed){ const a=arr.slice(); let s=seed||1; for(let i=a.length-1;i>0;i--){ s=(Math.imul(s,1103515245)+12345)>>>0; const j=s%(i+1); [a[i],a[j]]=[a[j],a[i]]; } return a; }
-const NERD = (ADV ? window.RECHT : window.NERD) || {texts:[],facts:[]};
-const NL = ADV ? {tab:"Fachmodul Recht",eyebrow:"Fachmodul Recht · Datenschutz, Zivilrecht, Steuerrecht",st:"Sticker",fact:"Rechtsfakt des Tages",mins:"zwei Minuten",
-  ranks:[["Aktenträger","📎"],["Referendar","📚"],["Sachbearbeiter","🗂️"],["Fachanwalt","🎓"],["Richter","⚖️"],["Rechtsgelehrter","👑"]],
-  topic:"Das Fachmodul bringt trockene Fachtexte, zusammengestellt aus Gesetzen, Urteilen und Fachliteratur und in eigenen Worten wiedergegeben."}
- : {tab:"Nerd-Ecke",eyebrow:"Nerd-Ecke · Comics und nutzloses Wissen",st:"Nerd-Sticker",fact:"Nerd-Fakt des Tages",mins:"eine Minute",
-  ranks:[["Kiosk-Gucker","👀"],["Heftchen-Leser","📖"],["Sammler","🎴"],["Kenner","🧐"],["Nerd","🤓"],["Nerd-Legende","👑"]],topic:""};
+/* Wissenspakete: im Grundkurs alle Pakete mit course "basic", im Fortgeschrittenen-Kurs das Fachmodul Recht. NERD ist das gerade geöffnete Paket. */
+const PACKS=(window.PACKS||[]).filter(p=>ADV?p.course==="adv":p.course!=="adv").sort((a,b)=>(a.order||9)-(b.order||9));
+PACKS.forEach(p=>p.texts.forEach(t=>{ t.pk=p.id; }));
+const PACKTEXTS=PACKS.flatMap(p=>p.texts);
+let NERD=PACKS[0]||{id:"",texts:[],facts:[],ranks:[]};
 let BASE=[], IS_ADMIN=false; // gemeinsamer Grundbestand (nur im gehosteten Betrieb)
-function textById(id){ return TEXTS.find(t=>t.id===id) || NERD.texts.find(t=>t.id===id) || ADVT.find(t=>t.id===id) || BASE.find(t=>t.id===id) || (S.ai||[]).find(t=>t.id===id); }
+function textById(id){ return TEXTS.find(t=>t.id===id) || PACKTEXTS.find(t=>t.id===id) || ADVT.find(t=>t.id===id) || BASE.find(t=>t.id===id) || (S.ai||[]).find(t=>t.id===id); }
 
 /* ============ ZUSTAND & SPEICHER ============ */
 const LS_KEY=ADV?"sr-trainer-adv-v1":"sr-trainer-v1";
@@ -824,14 +823,15 @@ const BADGES=(ADV?[
  {id:"sprint10",name:"Sprinter",desc:"10 Sprints gelaufen",ok:()=>S.sprints>=10},
  {id:"half",name:"Halbzeit",desc:"24 Lektionen geschafft",ok:()=>doneCount()>=24},
  {id:"grad",name:"Absolvent",desc:"Alle 48 Lektionen geschafft",ok:()=>doneCount()>=48}
-]).concat(NERD.texts.length?[
- {id:"n1",name:"Erster Sticker",desc:`Ersten ${NL.st} freigeschaltet`,ok:()=>nerdCount()>=1},
- {id:"n7",name:"Halbes Album",desc:`7 ${NL.st} gesammelt`,ok:()=>nerdCount()>=7},
- {id:"nstar",name:"Sternensammler",desc:"20 Sterne im Album",ok:()=>nerdStars()>=20},
+]).concat(PACKS.length?[
+ {id:"n1",name:"Erster Sticker",desc:"Ersten Sticker freigeschaltet",ok:()=>allCount()>=1},
+ {id:"n7",name:"Halbes Album",desc:"7 Sticker gesammelt",ok:()=>allCount()>=7},
+ {id:"n20",name:"Sammler",desc:"20 Sticker gesammelt",ok:()=>allCount()>=20},
+ {id:"nstar",name:"Sternensammler",desc:"20 Sterne gesammelt",ok:()=>allStars()>=20},
  {id:"nfact",name:"Faktenjäger",desc:"7 Fakten des Tages abgeholt",ok:()=>((S.nerd||{}).facts||0)>=7},
  {id:"nsec",name:"Geheimnisjäger",desc:"2 geheime Sticker gefunden",ok:()=>Object.keys((S.nerd||{}).secret||{}).length>=2},
- {id:"nall",name:"Album komplett",desc:`Alle ${NL.st} gesammelt`,ok:()=>nerdCount()>=NERD.texts.length}
-]:[]);
+ {id:"nall",name:"Album komplett",desc:"Alle Sticker aller Pakete gesammelt",ok:()=>allCount()>=allTotal()}
+]:[]);;
 function gain(){ if(!S.baseline) return 0; const r=recentEff(3); if(!r) return 0; return r.eff/S.baseline.eff-1; }
 function checkBadges(){ const fresh=[]; for(const b of BADGES){ if(!S.badges[b.id]&&b.ok()){ S.badges[b.id]=today(); fresh.push(b); } } return fresh; }
 function compText(){
@@ -857,7 +857,7 @@ let Tab="heute", Run=null;
 document.getElementById("tabs").addEventListener("click",e=>{ const b=e.target.closest("button[data-tab]"); if(!b) return; if(Run&&!confirmLeave()) return; Tab=b.dataset.tab; render(); });
 
 /* ============ EIGENE GESTALTUNG ============ */
-const TABS=[["heute","Heute"],["kurs","Kurs"],["lesen","Lesefenster"]].concat(NERD.texts.length?[["nerd",NL.tab]]:[],[["fortschritt","Fortschritt"],["grundlagen","Grundlagen"],["anpassen","Anpassen"]]);
+const TABS=[["heute","Heute"],["kurs","Kurs"],["lesen","Lesefenster"]].concat(PACKS.length?[["nerd",PACKS.length===1?PACKS[0].name:"Wissenspakete"]]:[],[["fortschritt","Fortschritt"],["grundlagen","Grundlagen"],["anpassen","Anpassen"]]);
 const FONTS={serif:{n:"Buchschrift (Literata)",v:'"Literata",Georgia,"Times New Roman",serif'},sans:{n:"Gut lesbar (Atkinson)",v:'"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif'},mono:{n:"Schreibmaschine",v:'ui-monospace,SFMono-Regular,Menlo,Consolas,monospace'}};
 const SIZES={s:{n:"Klein",px:15},m:{n:"Normal",px:16},l:{n:"Groß",px:18},xl:{n:"Sehr groß",px:20}};
 const PRESETS=[
@@ -1212,8 +1212,8 @@ function viewCourse(v){
 
 let FR_NEW=null, FR_SEL=null, FR_NOTE=""; // frisch geholter Text: nach dem Neuzeichnen vorwählen und bestätigen
 function viewFree(v){
-  const lib=TEXTS.filter(t=>t.kind!=="test"||S.seen[t.id]).concat(ADVT,NERD.texts,BASE,S.ai||[]);
-  const sel=h("select",{id:"fr-text"},lib.map(t=>h("option",{value:t.id},(t.kind==="nerd"?"Nerd · ":t.kind==="recht"?"Recht · ":t.kind==="adv"?"Technik · ":t.base?"Grundbestand · ":t.src?(t.src.name.startsWith("Wikipedia")?"Wikipedia · ":"Klassiker · "):t.kind==="ai"?"KI · ":"")+t.title)));
+  const lib=TEXTS.filter(t=>t.kind!=="test"||S.seen[t.id]).concat(ADVT,PACKTEXTS,BASE,S.ai||[]);
+  const sel=h("select",{id:"fr-text"},lib.map(t=>h("option",{value:t.id},(t.pk?((PACKS.find(p=>p.id===t.pk)||{}).name||"Paket")+" · ":t.kind==="adv"?"Technik · ":t.base?"Grundbestand · ":t.src?(t.src.name.startsWith("Wikipedia")?"Wikipedia · ":"Klassiker · "):t.kind==="ai"?"KI · ":"")+t.title)));
   const mode=h("select",{id:"fr-mode"},[["line","Pacer, Zeile"],["chunk","Pacer, Sinngruppen"],["self","Eigenes Tempo mit Zeitmessung"],["rsvp","Wortanzeige"]].map(([k,l])=>h("option",{value:k},l)));
   const speed=h("input",{type:"range",id:"fr-wpm",min:120,max:900,step:10,value:Math.round(tgt())});
   const out=h("span",{class:"wpm",text:speed.value+" WpM"}); speed.addEventListener("input",()=>out.textContent=speed.value+" WpM");
@@ -1464,41 +1464,49 @@ function finishLesson(){
     h("div",{class:"row"},h("button",{class:"btn primary",onclick:()=>{ Tab="heute"; render(); }},"Fertig"),h("button",{class:"btn",onclick:()=>{ Tab="fortschritt"; render(); }},"Fortschritt ansehen"))));
 }
 
-/* ============ NERD-ECKE ============ */
-const NERD_RAR=["gewöhnlich","gewöhnlich","selten","gewöhnlich","episch","selten","gewöhnlich","selten","gewöhnlich","episch","selten","gewöhnlich","legendär"];
-const rarOf=t=>NERD_RAR[NERD.texts.indexOf(t)]||"gewöhnlich";
-const NS=()=>S.nerd||(S.nerd={cards:{},factDay:"",facts:0});
-const nerdCards=()=>(S.nerd||{}).cards||{};
+/* ============ WISSENSPAKETE (Sticker-Alben) ============ */
+/* Jedes Paket (src/*-data.js, window.PACKS) hat Texte mit je vier Fragen, einen Fakt-Vorrat und ein eigenes Album. Der Zustand des Pakets "nerd" liegt in S.nerd (wie bisher), die anderen in S.pk[id]. */
+const RARDEF=["gewöhnlich","gewöhnlich","selten","gewöhnlich","episch","selten","gewöhnlich","selten","gewöhnlich","episch","selten","gewöhnlich","legendär"];
+const rarOf=t=>{ const p=PACKS.find(x=>x.id===t.pk)||NERD, i=p.texts.indexOf(t); return i<0?"gewöhnlich":(i===p.texts.length-1&&p.texts.length>=13?"legendär":RARDEF[i%12]); };
+const GS=()=>S.nerd||(S.nerd={cards:{},factDay:"",facts:0});
+const pkOf=id=>id==="nerd"?(S.nerd||{}):((S.pk||{})[id]||{});
+const NS=()=>NERD.id==="nerd"?GS():((S.pk=S.pk||{})[NERD.id]||(S.pk[NERD.id]={cards:{}}));
+const nerdCards=()=>pkOf(NERD.id).cards||{};
 const nerdCount=()=>Object.keys(nerdCards()).length;
-const nerdStars=()=>Object.values(nerdCards()).reduce((a,c)=>a+c.stars,0);
+const allCount=()=>PACKS.reduce((a,p)=>a+Object.keys(pkOf(p.id).cards||{}).length,0);
+const allStars=()=>PACKS.reduce((a,p)=>a+Object.values(pkOf(p.id).cards||{}).reduce((x,c)=>x+c.stars,0),0);
+const allTotal=()=>PACKS.reduce((a,p)=>a+p.texts.length,0);
 const starTxt=n=>h("span",{class:"stars","aria-label":`${n} von 3 Sternen`},"★".repeat(n),h("i",{},"★".repeat(3-n)));
-function nerdRank(){
-  const K=NL.ranks, R=[[0,K[0][0],K[0][1]],[1,K[1][0],K[1][1]],[4,K[2][0],K[2][1]],[7,K[3][0],K[3][1]],[10,K[4][0],K[4][1]],[NERD.texts.length,K[5][0],K[5][1]]], n=nerdCount();
-  let i=0; while(i+1<R.length&&n>=R[i+1][0]) i++; const nx=R[i+1];
-  return {name:R[i][1],icon:R[i][2],pct:nx?(n-R[i][0])/(nx[0]-R[i][0]):1,next:nx?nx[1]:null,need:nx?nx[0]-n:0};
+function rankOf(p,n){
+  const T=p.texts.length, th=[0,1,Math.round(T*.3),Math.round(T*.55),Math.round(T*.8),T], K=p.ranks;
+  let i=0; while(i+1<th.length&&n>=th[i+1]) i++; const nx=th[i+1]!=null;
+  return {name:K[i][0],icon:K[i][1],pct:nx?(n-th[i])/(th[i+1]-th[i]):1,next:nx?K[i+1][0]:null,need:nx?th[i+1]-n:0};
 }
+const nerdRank=()=>rankOf(NERD,nerdCount());
 function sticker(t,tag,onclick){
-  const c=nerdCards()[t.id], rar=rarOf(t);
+  const c=((pkOf(t.pk).cards)||{})[t.id], rar=rarOf(t);
   return h(tag,{class:"nc r-"+rar+(c?"":" lock"),type:tag==="button"?"button":null,onclick,"aria-label":c?`${t.title}, ${c.stars} von 3 Sternen`:`${t.title}, noch gesperrt`},
     h("span",{class:"rar"},rar),h("span",{class:"ic","aria-hidden":"true"},c?t.icon:"❔"),h("b",{text:c?t.title:"Noch gesperrt"}),
     c?h("small",{text:t.card}):h("small",{text:"Anlesen und Fragen beantworten"}),c?starTxt(c.stars):null);
 }
-let NSEL=null, NMSG="";
-const nerdFact=()=>NERD.facts[Math.floor(Date.now()/864e5)%NERD.facts.length];
+let NSEL=null, NMSG="", PKVIEW=null;
+const allFacts=()=>PACKS.flatMap(p=>p.facts||[]);
+const nerdFact=()=>{ const f=allFacts(); return f[Math.floor(Date.now()/864e5)%f.length]; };
 function claimFact(){
-  const ns=NS(); if(ns.factDay===today()) return; ns.factDay=today(); ns.facts=(ns.facts||0)+1; S.xp+=5;
+  const ns=GS(); if(ns.factDay===today()) return; ns.factDay=today(); ns.facts=(ns.facts||0)+1; S.xp+=5;
   const fresh=checkBadges(); NMSG="+5 Punkte"+(fresh.length?" · Neu: "+fresh.map(b=>b.name).join(", "):""); save(); render();
 }
 function factCard(extra){
   const got=(S.nerd||{}).factDay===today();
-  return h("div",{class:"card","data-k":"nerdfakt"},h("p",{class:"eyebrow"},NL.fact),h("p",{class:"prose",style:"margin:0"},nerdFact()),
+  return h("div",{class:"card","data-k":"nerdfakt"},h("p",{class:"eyebrow"},PACKS.length===1?PACKS[0].fact:"Fakt des Tages"),h("p",{class:"prose",style:"margin:0"},nerdFact()),
     h("div",{class:"row"},got?h("span",{class:"muted"},"✓ Heute abgeholt"+(NMSG?" · "+NMSG:"")):h("button",{class:"btn",onclick:claimFact},"Gewusst? +5 Punkte"),extra||null));
 }
 function nerdTodayCard(){
-  if(!NERD.facts.length) return null;
-  const c=factCard(h("button",{class:"btn ghost",onclick:()=>{ Tab="nerd"; render(); }},"Zum "+NL.tab)); c.style.marginTop="16px"; return c;
+  if(!allFacts().length) return null;
+  const c=factCard(h("button",{class:"btn ghost",onclick:()=>{ if(PACKS.length>1) PKVIEW=null; Tab="nerd"; render(); }},"Zu "+NERD_TAB)); c.style.marginTop="16px"; return c;
 }
 function nerdRead(t){
+  PKVIEW=t.pk; NERD=PACKS.find(p=>p.id===t.pk)||NERD;
   openReader({text:t,mode:"self",title:t.title,onDone:()=>{ S.seen[t.id]=(S.seen[t.id]||0)+1; Quiz.open(t,c=>nerdDone(t,c)); }});
 }
 function nerdDone(t,c){
@@ -1521,14 +1529,13 @@ function nerdDone(t,c){
     h("div",{class:"row"},h("button",{class:"btn primary",onclick:()=>render()},"Zum Album"),stars<3?h("button",{class:"btn",onclick:()=>nerdRead(t)},"Nochmal für mehr Sterne"):null)));
 }
 
-/* Geheimes: Easter Eggs und ein Geheimlevel. Geheime Sticker stehen in S.nerd.secret und tauchen erst nach dem Fund im Album auf. */
-const SECRETS={
+/* Geheimes: Easter Eggs und Geheimlevel je Paket. Geheime Sticker stehen in S.nerd.secret und tauchen erst nach dem Fund im Album auf. */
+const SECRETS=Object.assign({
   konami:{icon:"🕹️",title:"Konami-Code",card:"Hoch, hoch, runter, runter, links, rechts, links, rechts, B, A: der berühmteste Cheat der Spielegeschichte.",hint:"Ein Code aus alten Spielen, auf der Tastatur eingegeben."},
-  ei:{icon:"🥚",title:"Das Osterei",card:"Du hast siebenmal auf den Titel getippt. Easter Eggs heißen so, weil Programmierer sie wie Ostereier verstecken.",hint:"Manche Titel mögen es, wenn man oft auf sie tippt."},
-  blitz:{icon:"🏆",title:"Quiz-Champion",card:"Acht Blitzfragen, höchstens eine falsch. Das schaffen nur Leute, die wirklich gelesen haben.",hint:"Das Geheimlevel mit den Blitzfragen."}
-};
+  ei:{icon:"🥚",title:"Das Osterei",card:"Du hast siebenmal auf den Titel getippt. Easter Eggs heißen so, weil Programmierer sie wie Ostereier verstecken.",hint:"Manche Titel mögen es, wenn man oft auf sie tippt."}
+},...PACKS.map(p=>({["blitz-"+p.id]:{icon:"🏆",title:"Quiz-Champion: "+p.name,card:"Acht Blitzfragen aus dem Paket "+p.name+", höchstens eine falsch.",hint:"Das Geheimlevel im Paket "+p.name+"."}})));
 function findSecret(id){
-  const ns=NS(); if(ns.secret&&ns.secret[id]) return false; ns.secret=Object.assign({},ns.secret,{[id]:today()}); S.xp+=40;
+  const ns=GS(); if(ns.secret&&ns.secret[id]) return false; ns.secret=Object.assign({},ns.secret,{[id]:today()}); S.xp+=40;
   const fresh=checkBadges(); save(); const sc=SECRETS[id];
   const msg=h("div",{role:"status",style:"position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:90;max-width:90vw;background:var(--card);border:2px solid #d9a40c;border-radius:14px;padding:12px 16px;box-shadow:0 8px 24px var(--shade);text-align:center"},
     h("b",{},`${sc.icon} Geheimer Sticker: ${sc.title}`),h("div",{class:"muted"},"+40 Punkte"+(fresh.length?" · Neu: "+fresh.map(b=>b.name).join(", "):"")));
@@ -1536,39 +1543,56 @@ function findSecret(id){
 }
 (function(){
   const seq=["ArrowUp","ArrowUp","ArrowDown","ArrowDown","ArrowLeft","ArrowRight","ArrowLeft","ArrowRight","b","a"]; let k=0, taps=0, tt=0;
-  document.addEventListener("keydown",e=>{ if(!NERD.texts.length||RD.open) return; const key=e.key.length===1?e.key.toLowerCase():e.key; k=key===seq[k]?k+1:(key===seq[0]?1:0); if(k===seq.length){ k=0; findSecret("konami"); } });
-  const b=document.getElementById("brand-h"); if(b) b.addEventListener("click",()=>{ if(!NERD.texts.length) return; clearTimeout(tt); tt=setTimeout(()=>{ taps=0; },1500); if(++taps>=7){ taps=0; findSecret("ei"); } });
+  document.addEventListener("keydown",e=>{ if(!PACKS.length||RD.open) return; const key=e.key.length===1?e.key.toLowerCase():e.key; k=key===seq[k]?k+1:(key===seq[0]?1:0); if(k===seq.length){ k=0; findSecret("konami"); } });
+  const b=document.getElementById("brand-h"); if(b) b.addEventListener("click",()=>{ if(!PACKS.length) return; clearTimeout(tt); tt=setTimeout(()=>{ taps=0; },1500); if(++taps>=7){ taps=0; findSecret("ei"); } });
 })();
 function blitzLevel(){
-  const pool=NERD.texts.flatMap(t=>t.qs.map(q=>({q:q.q,a:q.a}))), picks=shuffled(pool,Date.now()>>>0).slice(0,8);
+  const pool=NERD.texts.flatMap(t=>t.qs.map(q=>({q:q.q,a:q.a}))), picks=shuffled(pool,Date.now()>>>0).slice(0,8), key="blitz-"+NERD.id;
   const t={qs:picks}, v=$("#view");
   Quiz.open(t,c=>{
     const right=Math.round(c*8), ok=right>=7; let got=false;
-    if(ok) got=findSecret("blitz");
+    if(ok) got=findSecret(key);
     v.replaceChildren(h("div",{class:"card"},h("p",{class:"eyebrow"},"Geheimlevel: Blitzquiz"),h("h2",{text:`${right} von 8 richtig`}),
       h("p",{},ok?(got?"Geschafft, der geheime Sticker ist dein.":"Wieder geschafft. Der Sticker gehört dir schon."):"Für den Sticker brauchst du mindestens 7 richtige. Die Fragen sind jedes Mal neu gemischt."),
-      h("div",{class:"row"},h("button",{class:"btn primary",onclick:()=>render()},"Zurück zum "+NL.tab),ok?null:h("button",{class:"btn",onclick:blitzLevel},"Nochmal"))));
+      h("div",{class:"row"},h("button",{class:"btn primary",onclick:()=>render()},"Zurück"),ok?null:h("button",{class:"btn",onclick:blitzLevel},"Nochmal"))));
   });
 }
 function secretCard(){
-  const sec=(S.nerd||{}).secret||{}, open=nerdCount()>=10;
+  const sec=(S.nerd||{}).secret||{};
   const cells=Object.entries(SECRETS).map(([id,sc])=>{ const on=!!sec[id];
     return h("div",{class:"nc r-legendär"+(on?"":" lock")},h("span",{class:"rar"},"geheim"),h("span",{class:"ic","aria-hidden":"true"},on?sc.icon:"🔒"),h("b",{text:on?sc.title:"???"}),h("small",{text:on?sc.card:"Hinweis: "+sc.hint}),on?starTxt(3):null); });
   return h("div",{class:"card","data-k":"geheim",style:"margin-top:16px"},h("h3",{text:"Geheimfach"}),
-    h("p",{class:"muted",style:"margin:0"},"Hier verstecken sich Sticker, die nirgends angekündigt sind. Jeder gefundene bringt 40 Punkte."),
-    h("div",{class:"album"},cells),
-    open?h("div",{class:"row"},h("button",{class:"btn primary",onclick:blitzLevel},"Geheimlevel: Blitzquiz starten"),h("span",{class:"muted"},"8 Fragen aus allen Texten, 7 richtig für den Sticker")):h("p",{class:"muted",style:"margin:0"},`🔒 Ein Geheimlevel wartet. Es öffnet sich bei 10 Stickern (dir fehlen noch ${10-nerdCount()}).`));
+    h("p",{class:"muted",style:"margin:0"},"Hier verstecken sich Sticker, die nirgends angekündigt sind. Jeder gefundene bringt 40 Punkte. Geheimlevel öffnen sich in den Paketen ab 10 Stickern."),
+    h("div",{class:"album"},cells));
 }
+const NERD_TAB=PACKS.length===1?PACKS[0].name:"Wissenspakete";
 function viewNerd(v){
+  if(PACKS.length===1){ NERD=PACKS[0]; return viewPack(v); }
+  const pk=PACKS.find(p=>p.id===PKVIEW);
+  if(pk){ NERD=pk; return viewPack(v); }
+  const total=allTotal(), n=allCount();
+  v.append(h("div",{class:"card"},h("p",{class:"eyebrow"},"Wissenspakete"),h("h2",{text:"Sammle Sticker in allen Paketen"}),bar(n/total),
+    h("p",{class:"muted",style:"margin:0"},`${n} von ${total} Stickern · ${allStars()} von ${total*3} Sternen`),
+    h("p",{class:"muted",style:"margin:0;font-size:.9rem"},"Jedes Paket hat kurze Texte mit je vier Fragen. Für Sticker und Sterne beantwortest du sie: 2 richtig gibt einen Stern, 3 zwei, 4 drei. Neue Sticker bringen 20 Punkte, jeder Stern 10.")));
+  PACKS.forEach(p=>{ const c=Object.keys(pkOf(p.id).cards||{}).length, rk=rankOf(p,c);
+    v.append(h("div",{class:"card","data-k":"pack-"+p.id,style:"margin-top:16px"},h("p",{class:"eyebrow"},p.eyebrow),h("h3",{text:`${p.icon} ${p.name}`}),bar(c/p.texts.length),
+      h("p",{class:"muted",style:"margin:0"},`${c} von ${p.texts.length} Stickern · Rang: ${rk.icon} ${rk.name}`),
+      h("div",{class:"row"},h("button",{class:"btn primary",onclick:()=>{ PKVIEW=p.id; NSEL=null; render(); window.scrollTo(0,0); }},c?"Weitersammeln":"Öffnen")))); });
+  v.append(factCard()); v.lastChild.style.marginTop="16px";
+  v.append(secretCard());
+}
+function viewPack(v){
   const cards=nerdCards(), total=NERD.texts.length, n=nerdCount(), rk=nerdRank();
-  v.append(h("div",{class:"card"},h("p",{class:"eyebrow"},NL.eyebrow),h("h2",{text:`${rk.icon} ${rk.name}`}),bar(rk.pct),
-    h("p",{class:"muted",style:"margin:0"},`${n} von ${total} Stickern · ${nerdStars()} von ${total*3} Sternen`+(rk.next?` · noch ${rk.need} bis ${rk.next}`:" · Album komplett")),
-    h("p",{class:"muted",style:"margin:0;font-size:.9rem"},`Jeder Text dauert etwa ${NL.mins}. Für Sticker und Sterne beantwortest du danach vier Fragen: 2 richtig gibt einen Stern, 3 zwei, 4 drei. Neue Sticker bringen 20 Punkte, jeder Stern 10.`),NL.topic?h("p",{class:"notice",style:"margin:0;font-size:.9rem"},NL.topic+" Das ist keine Rechtsberatung. Gesetze und Rechtsprechung ändern sich: Stand der Texte ist Oktober 2026, prüfe vor einer Entscheidung die aktuelle Fassung und frage bei Bedarf eine Fachperson."):null));
+  if(PACKS.length>1) v.append(h("div",{class:"row"},h("button",{class:"btn ghost",onclick:()=>{ PKVIEW=null; NSEL=null; render(); }},"← Alle Pakete")));
+  const head=h("div",{class:"card",style:PACKS.length>1?"margin-top:16px":""},h("p",{class:"eyebrow"},NERD.eyebrow),h("h2",{text:`${rk.icon} ${rk.name}`}),bar(rk.pct),
+    h("p",{class:"muted",style:"margin:0"},`${n} von ${total} Stickern · ${n?Object.values(cards).reduce((a,c)=>a+c.stars,0):0} von ${total*3} Sternen`+(rk.next?` · noch ${rk.need} bis ${rk.next}`:" · Album komplett")),
+    h("p",{class:"muted",style:"margin:0;font-size:.9rem"},`Jeder Text dauert etwa ${NERD.mins}. Für Sticker und Sterne beantwortest du danach vier Fragen: 2 richtig gibt einen Stern, 3 zwei, 4 drei. Neue Sticker bringen 20 Punkte, jeder Stern 10.`),
+    NERD.topic?h("p",{class:"notice",style:"margin:0;font-size:.9rem"},NERD.topic+" Das ist keine Rechtsberatung. Gesetze und Rechtsprechung ändern sich: Stand der Texte ist Oktober 2026, prüfe vor einer Entscheidung die aktuelle Fassung und frage bei Bedarf eine Fachperson."):null);
+  v.append(head);
   const next=NERD.texts.find(t=>!cards[t.id])||NERD.texts.slice().sort((a,b)=>cards[a.id].stars-cards[b.id].stars)[0];
   v.append(h("div",{class:"card","data-k":"nerdheute",style:"margin-top:16px"},h("p",{class:"eyebrow"},cards[next.id]?"Noch mehr Sterne holen":"Heute zum Anlesen"),
     h("h3",{text:`${next.icon} ${next.title}`}),h("p",{class:"muted",style:"margin:0"},next.card),
     h("div",{class:"row"},h("button",{class:"btn primary",onclick:()=>nerdRead(next)},cards[next.id]?"Nochmal lesen":"Anlesen"))));
-  v.append(factCard());
   const sel=NSEL&&NERD.texts.find(t=>t.id===NSEL);
   if(sel){ const c=cards[sel.id], s=sticker(sel,"div"); s.classList.add("big");
     v.append(h("div",{class:"card","data-k":"nerddetail",style:"margin-top:16px"},h("p",{class:"eyebrow"},c?"Dein Sticker":"Noch gesperrt"),s,
@@ -1577,7 +1601,9 @@ function viewNerd(v){
       h("div",{class:"row"},h("button",{class:"btn primary",onclick:()=>nerdRead(sel)},c?(c.stars<3?"Nochmal lesen für mehr Sterne":"Nochmal lesen"):"Anlesen"),h("button",{class:"btn ghost",onclick:()=>{ NSEL=null; render(); }},"Schließen")))); }
   v.append(h("div",{class:"card","data-k":"album",style:"margin-top:16px"},h("h3",{text:"Sammelalbum"}),h("p",{class:"muted",style:"margin:0"},"Tippe einen Sticker an. Die Farbe zeigt die Seltenheit: grau gewöhnlich, blau selten, lila episch, gold legendär."),
     h("div",{class:"album"},NERD.texts.map(t=>sticker(t,"button",()=>{ NSEL=t.id; render(); window.scrollTo(0,0); })))));
-  v.append(secretCard());
+  if(PACKS.length===1) v.append(factCard()), v.lastChild.style.marginTop="16px", v.append(secretCard());
+  v.append(h("div",{class:"card","data-k":"blitz",style:"margin-top:16px"},h("h3",{text:"Geheimlevel: Blitzquiz"}),
+    n>=10?h("div",{class:"row"},h("button",{class:"btn primary",onclick:blitzLevel},"Blitzquiz starten"),h("span",{class:"muted"},"8 Fragen aus diesem Paket, 7 richtig für einen geheimen Sticker")):h("p",{class:"muted",style:"margin:0"},`🔒 Öffnet sich bei 10 Stickern (dir fehlen noch ${10-n}).`)));
 }
 
 /* ============ QUIZ ============ */

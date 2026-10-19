@@ -147,3 +147,7 @@ facts: [
 "Das Bürgerliche Gesetzbuch trat am 1. Januar 1900 in Kraft."
 ]
 };
+
+window.PACKS=(window.PACKS||[]).concat([Object.assign({id:"recht",order:1,course:"adv",icon:"⚖️",name:"Fachmodul Recht",eyebrow:"Fachmodul Recht · Datenschutz, Zivilrecht, Steuerrecht",fact:"Rechtsfakt des Tages",mins:"zwei Minuten",
+  ranks:[["Aktenträger","📎"],["Referendar","📚"],["Sachbearbeiter","🗂️"],["Fachanwalt","🎓"],["Richter","⚖️"],["Rechtsgelehrter","👑"]],
+  topic:"Das Fachmodul bringt trockene Fachtexte, zusammengestellt aus Gesetzen, Urteilen und Fachliteratur und in eigenen Worten wiedergegeben."},window.RECHT)]);
