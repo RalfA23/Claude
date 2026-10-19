@@ -805,8 +805,18 @@ function gEnd(res,why){if(G.over)return;G.over=true;clearInterval(G.tick);if(G.c
   $('gStat').textContent=({S:'Du hast gewonnen',N:'Du hast verloren',R:'Remis'})[res]+' ('+why+').';$('gBack').hidden=true;$('gRes').hidden=true;
   $('gEnd').replaceChildren(h('div',{class:'btns',style:'margin-top:8px'},h('button',{type:'button',class:'b primary',onclick:()=>{
     $('pDate').value=today();$('pMin').value=mins;$('pCol').value=G.me==='w'?'Weiß':'Schwarz';$('pRes').value=res;$('pOpp').value='Sonstiges';
-    $('pErr').value=G.cpu?'Gegen Computer, Stärke '+LEVELS[G.lv][0]+', auf dieser Seite gespielt.':'';$('pLink').value=G.cpu?'':'https://lichess.org/'+G.gid;if(!G.cpu)$('pOpp').value='Mensch Rapid';show('log');$('pBl').focus()}},'In „Eintragen“ übernehmen')));gAnalyze(res).catch(()=>{if(G&&G.over)$('gAna').textContent='Die Analyse konnte nicht geladen werden (Stockfish nicht erreichbar).'})}
+    $('pErr').value=G.cpu?'Gegen Computer, Stärke '+LEVELS[G.lv][0]+', auf dieser Seite gespielt.':'';$('pLink').value=G.cpu?'':'https://lichess.org/'+G.gid;if(!G.cpu)$('pOpp').value='Mensch Rapid';show('log');$('pBl').focus()}},'In „Eintragen“ übernehmen'),G.cpu?h('button',{type:'button',class:'b',onclick:e=>gToLichess(res,e.target)},'Zu Lichess übertragen'):null));gAnalyze(res).catch(()=>{if(G&&G.over)$('gAna').textContent='Die Analyse konnte nicht geladen werden (Stockfish nicht erreichbar).'})}
 
+function gPgn(res){const c=new Chess();const day=new Date();const d=day.getFullYear()+'.'+pad2(day.getMonth()+1)+'.'+pad2(day.getDate());
+  const me=konto.lichess||'Ich',cpu='Computer (Stockfish, '+LEVELS[G.lv][0]+')';
+  const wh=G.me==='w'?me:cpu,bl=G.me==='w'?cpu:me;const r=res==='R'?'1/2-1/2':((res==='S')===(G.me==='w')?'1-0':'0-1');
+  c.header('Event','Partie auf Schachtraining','Site','Schachtraining','Date',d,'White',wh,'Black',bl,'Result',r);
+  G.g.history().forEach(m=>c.move(m));return c.pgn()}
+async function gToLichess(res,btn){const pgn=gPgn(res);btn.disabled=true;
+  try{const r=await fetch('https://lichess.org/api/import',{method:'POST',headers:Object.assign({'Content-Type':'application/x-www-form-urlencoded',Accept:'application/json'},liTok()?liHdr():{}),body:'pgn='+encodeURIComponent(pgn)});
+    const j=await r.json();if(!j.url)throw new Error('keine Adresse');btn.replaceWith(h('span',{class:'note'},liTok()?'Auf Lichess in deinem Verlauf: ':'Auf Lichess abgelegt: ',h('a',{href:j.url,target:'_blank',rel:'noopener'},j.url.replace('https://','')),liTok()?'':' (anonym, ohne Verbindung mit deinem Konto)'))}
+  catch(e){try{await navigator.clipboard.writeText(pgn)}catch(x){}btn.disabled=false;btn.textContent='Nochmal versuchen';
+    $('gAna').prepend(h('p',{class:'note'},'Der direkte Import ging nicht. Die Partie (PGN) ist in der Zwischenablage, du kannst sie auf ',h('a',{href:'https://lichess.org/paste',target:'_blank',rel:'noopener'},'lichess.org/paste'),' einfügen.'))}}
 let anW=null;
 async function anInit(){if(anW)return anW;const code=await (await fetch(SF_URL)).text();const w=new Worker(URL.createObjectURL(new Blob([code],{type:'application/javascript'})));
   await new Promise((ok,no)=>{const t=setTimeout(()=>no(new Error('timeout')),20000);w.onerror=e=>{clearTimeout(t);no(e)};w.onmessage=e=>{if(String(e.data).indexOf('uciok')===0){clearTimeout(t);ok()}};w.postMessage('uci')});
