@@ -34,6 +34,9 @@ header.top{display:flex;align-items:center;justify-content:space-between;gap:12p
 .chip{border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-size:.85rem;background:var(--card);white-space:nowrap;font-variant-numeric:tabular-nums}
 .chip b{font-weight:700}
 nav.tabs{display:flex;gap:4px;overflow-x:auto;border-bottom:1px solid var(--line);scrollbar-width:none}
+nav.tabs{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+nav.tabs button.drag{background:var(--shade);border-radius:8px 8px 0 0;transform:scale(1.08);box-shadow:0 4px 14px var(--shade);cursor:grabbing;position:relative;z-index:1}
+nav.tabs.dragging button{cursor:grabbing}
 nav.tabs button{background:none;border:0;border-bottom:3px solid transparent;padding:10px 12px;font:inherit;color:var(--muted);cursor:pointer;white-space:nowrap}
 nav.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent);font-weight:700}
 button{font-family:inherit}
@@ -636,10 +639,49 @@ function viewCustomize(v){
       h("input",{type:"text",class:"txt",maxlength:20,value:(prefs().labels||{})[t.id]||"",placeholder:t.def,"aria-label":"Name des Reiters "+t.def,oninput:e=>{ livePref("labels",Object.assign({},prefs().labels,{[t.id]:e.target.value})); drawTabs(); },onchange:()=>save()}),
       h("span"));
   });
-  v.append(h("div",{class:"card pref",style:"margin-top:16px"},h("h3",{text:"Reiter"}),h("p",{class:"muted",style:"margin:0"},"Ordne die Reiter mit den Pfeilen, blende ein, was du nicht brauchst, und gib ihnen eigene Namen."),...rows,
+  v.append(h("div",{class:"card pref",style:"margin-top:16px"},h("h3",{text:"Reiter"}),h("p",{class:"muted",style:"margin:0"},"Am schnellsten: Reiter ganz oben gedrückt halten und verschieben (am Computer einfach ziehen). Hier kannst du sie auch mit den Pfeilen ordnen, ausblenden und umbenennen."),...rows,
     h("div",{class:"row"},h("button",{class:"btn ghost",onclick:()=>{ S.prefs=Object.assign({},S.prefs,{order:[],hidden:[],labels:{}}); save(); render(); }},"Reiter zurücksetzen"))));
   v.append(h("div",{class:"row",style:"margin-top:16px"},h("button",{class:"btn ghost",id:"prefreset",onclick:e=>{ const b=e.currentTarget; if(b.dataset.arm){ S.prefs=undefined; delete S.prefs; save(); render(); } else { b.dataset.arm="1"; b.textContent="Alles Gestalterische zurücksetzen? Nochmal tippen"; } }},"Gestaltung ganz zurücksetzen")));
 }
+/* Reiter oben per Drag & Drop anordnen: mit der Maus ziehen, am Handy gedrückt halten und ziehen. */
+(function(){
+  const nav=document.getElementById("tabs"); let st=null, justDragged=false;
+  const btns=()=>[...nav.querySelectorAll("button[data-tab]")];
+  function begin(){ if(!st||st.active) return; st.active=true; st.b.classList.add("drag"); nav.classList.add("dragging"); try{ navigator.vibrate&&navigator.vibrate(15); }catch(e){} }
+  function moveTo(x){
+    const me=st.b, bs=btns(), others=bs.filter(o=>o!==me); let idx=0;
+    for(const o of others){ const r=o.getBoundingClientRect(); if(x>r.left+r.width/2) idx++; }
+    if(idx!==bs.indexOf(me)) nav.insertBefore(me,others[idx]||null);
+    const nr=nav.getBoundingClientRect(); if(x<nr.left+30) nav.scrollLeft-=12; else if(x>nr.right-30) nav.scrollLeft+=12;
+  }
+  function finish(){
+    if(!st) return; clearTimeout(st.timer); const was=st.active; st.b.classList.remove("drag"); nav.classList.remove("dragging"); st=null;
+    if(!was) return;
+    justDragged=true; setTimeout(()=>{ justDragged=false; },60);
+    const vis=btns().map(b=>b.dataset.tab), full=tabList().map(t=>t.id), inVis=new Set(vis); let k=0;
+    setPref("order",full.map(id=>inVis.has(id)?vis[k++]:id),false);
+    if(Tab==="anpassen"&&!Run) render();
+  }
+  nav.addEventListener("pointerdown",e=>{
+    const b=e.target.closest("button[data-tab]"); if(!b||e.button>0) return;
+    const touch=e.pointerType!=="mouse"; st={b,x0:e.clientX,y0:e.clientY,id:e.pointerId,touch,active:false,timer:null};
+    if(touch) st.timer=setTimeout(begin,380);
+  });
+  document.addEventListener("pointermove",e=>{
+    if(!st||e.pointerId!==st.id) return;
+    if(!st.active){
+      if(st.touch){ if(Math.hypot(e.clientX-st.x0,e.clientY-st.y0)>8){ clearTimeout(st.timer); st=null; } }
+      else if(Math.abs(e.clientX-st.x0)>6) begin();
+      return;
+    }
+    e.preventDefault(); moveTo(e.clientX);
+  });
+  nav.addEventListener("touchmove",e=>{ if(st&&st.active) e.preventDefault(); },{passive:false});
+  nav.addEventListener("contextmenu",e=>{ if(st) e.preventDefault(); });
+  document.addEventListener("pointerup",e=>{ if(st&&e.pointerId===st.id) finish(); });
+  document.addEventListener("pointercancel",e=>{ if(st&&e.pointerId===st.id) finish(); });
+  nav.addEventListener("click",e=>{ if(justDragged){ e.stopImmediatePropagation(); e.preventDefault(); } },true);
+})();
 function drawTabs(){
   const nav=$("#tabs"), list=tabList().filter(t=>!t.hidden);
   if(!list.some(t=>t.id===Tab)&&!Run) Tab=list[0].id;
