@@ -102,9 +102,9 @@ function pickPassage(paras: string[], start: number) {
 }
 
 // One retry, generous timeout; the failing host and status end up in `detail` so a failure can be diagnosed.
-async function fetchOk(url: string, accept: string, timeoutMs: number) {
+async function fetchOk(url: string, accept: string, timeoutMs: number, attempts = 2) {
   let detail = "";
-  for (let attempt = 0; attempt < 2; attempt++) {
+  for (let attempt = 0; attempt < attempts; attempt++) {
     try {
       const r = await fetch(url, { headers: { "User-Agent": UA, Accept: accept }, redirect: "follow", signal: AbortSignal.timeout(timeoutMs) });
       if (r.ok) return r;
@@ -116,8 +116,8 @@ async function fetchOk(url: string, accept: string, timeoutMs: number) {
   throw new SourceError("fetch_failed", 502, detail);
 }
 
-async function getJson(url: string) {
-  const r = await fetchOk(url, "application/json", 20000);
+async function getJson(url: string, attempts = 2, timeoutMs = 20000) {
+  const r = await fetchOk(url, "application/json", timeoutMs, attempts);
   try {
     return await r.json();
   } catch {
@@ -147,21 +147,69 @@ async function fromWikipedia(query: string) {
 // Germany: protection ends 70 years after the death of the author, so authors who died up to 1955 are free in 2026.
 const PD_LAST_DEATH_YEAR = 1955;
 
-async function fromGutenberg(query: string) {
-  const j = await getJson(`https://gutendex.com/books?languages=de&search=${encodeURIComponent(query)}`);
-  const results = (j?.results ?? []) as any[];
-  if (!results.length) throw new SourceError("not_found");
+type Book = { id: number; title: string; authors: string[]; died: number; textUrl: string | null };
+const flipName = (n: string) => String(n).split(",").reverse().join(" ").trim();
+
+// First choice: Gutendex (JSON with author death years).
+async function viaGutendex(query: string): Promise<Book[]> {
+  const j = await getJson(`https://gutendex.com/books?languages=de&search=${encodeURIComponent(query)}`, 1, 12000);
   const free = (people: any[] | undefined) =>
     Array.isArray(people) && people.every((a) => typeof a?.death_year === "number" && a.death_year <= PD_LAST_DEATH_YEAR);
-  const book = results.find((b) =>
-    free(b.authors) && b.authors.length > 0 && (!b.translators?.length || free(b.translators)) &&
-    Object.keys(b.formats ?? {}).some((k) => k.startsWith("text/plain"))
-  );
+  return ((j?.results ?? []) as any[]).filter((b) => Array.isArray(b.authors) && b.authors.length > 0).map((b) => {
+    const key = Object.keys(b.formats ?? {}).find((k) => k.startsWith("text/plain"));
+    const ok = free(b.authors) && (!b.translators?.length || free(b.translators));
+    return {
+      id: b.id, title: String(b.title), authors: b.authors.map((a: any) => flipName(a.name)),
+      died: ok ? Math.max(...b.authors.map((a: any) => a.death_year)) : -1, textUrl: key ? b.formats[key] : null,
+    };
+  });
+}
+
+// Fallback when Gutendex is down: Gutenberg's own search page, then the catalog record (RDF) of each hit for authors and dates.
+async function viaGutenberg(query: string): Promise<Book[]> {
+  const page = await (await fetchOk(
+    `https://www.gutenberg.org/ebooks/search/?query=${encodeURIComponent(query + " l.de")}&submit_search=Go%21`, "text/html", 20000, 1,
+  )).text();
+  const ids = [...new Set([...page.matchAll(/href="\/ebooks\/(\d+)"/g)].map((m) => Number(m[1])))].slice(0, 6);
+  const books: Book[] = [];
+  for (const id of ids) {
+    let rdf: string;
+    try {
+      rdf = await (await fetchOk(`https://www.gutenberg.org/cache/epub/${id}/pg${id}.rdf`, "application/rdf+xml", 15000, 1)).text();
+    } catch {
+      continue;
+    }
+    if (!/<dcterms:language>[\s\S]*?<rdf:value[^>]*>de<\/rdf:value>/.test(rdf)) continue;
+    const agents = [...rdf.matchAll(/<(?:dcterms:creator|marcrel:\w+)>\s*<pgterms:agent[\s\S]*?<\/pgterms:agent>/g)].map((m) => m[0]);
+    if (!agents.length) continue;
+    const years = agents.map((a) => Number(a.match(/<pgterms:deathdate[^>]*>(\d+)</)?.[1] ?? NaN));
+    const names = agents.map((a) => a.match(/<pgterms:name>([^<]*)</)?.[1] ?? "").filter(Boolean);
+    const ok = years.every((y) => Number.isFinite(y) && y <= PD_LAST_DEATH_YEAR);
+    books.push({
+      id, title: (rdf.match(/<dcterms:title>([^<]*)</)?.[1] ?? `Buch ${id}`).replace(/\s+/g, " ").trim(),
+      authors: names.slice(0, 3).map(flipName), died: ok ? Math.max(...years) : -1, textUrl: null,
+    });
+  }
+  return books;
+}
+
+async function fromGutenberg(query: string) {
+  let books: Book[];
+  try {
+    books = await viaGutendex(query);
+  } catch (e) {
+    if (!(e instanceof SourceError) || e.code !== "fetch_failed") throw e;
+    console.error("gutendex failed, using gutenberg.org", e.detail);
+    books = await viaGutenberg(query);
+  }
+  if (!books.length) throw new SourceError("not_found");
+  const book = books.find((b) => b.died > 0);
   if (!book) throw new SourceError("not_public_domain", 422);
-  const key = Object.keys(book.formats).find((k) => k.startsWith("text/plain"))!;
+  const died = book.died;
   let r: Response;
   try {
-    r = await fetchOk(book.formats[key], "text/plain", 25000);
+    if (!book.textUrl) throw new Error("no url");
+    r = await fetchOk(book.textUrl, "text/plain", 25000);
   } catch {
     r = await fetchOk(`https://www.gutenberg.org/cache/epub/${book.id}/pg${book.id}.txt`, "text/plain", 25000);
   }
@@ -180,8 +228,7 @@ async function fromGutenberg(query: string) {
     passage = pickPassage(paras, lo + Math.floor(Math.random() * (hi - lo)));
   }
   if (!passage) throw new SourceError("too_short", 422);
-  const author = String(book.authors.map((x: any) => String(x.name).split(",").reverse().join(" ").trim()).join(", "));
-  const died = Math.max(...book.authors.map((x: any) => x.death_year));
+  const author = book.authors.join(", ");
   return {
     title: String(book.title).slice(0, 80), paras: passage,
     src: {

@@ -397,6 +397,30 @@ const WEEKS = [
  {name:"Abschluss",goal:"Alles zusammen und der Abschlusstest."}
 ];
 
+// Zitat des Tages: Autoren bis 1955 gestorben; Wortlaut nach gängiger Überlieferung (deutsche Fassung).
+const QUOTES = [
+ ["Man hört nur, was man versteht.","Johann Wolfgang von Goethe"],
+ ["Es ist nicht genug zu wissen, man muss auch anwenden; es ist nicht genug zu wollen, man muss auch tun.","Johann Wolfgang von Goethe"],
+ ["Was man nicht versteht, besitzt man nicht.","Johann Wolfgang von Goethe"],
+ ["Wer fremde Sprachen nicht kennt, weiß nichts von seiner eigenen.","Johann Wolfgang von Goethe"],
+ ["Habe Mut, dich deines eigenen Verstandes zu bedienen!","Immanuel Kant"],
+ ["Gedanken ohne Inhalt sind leer, Anschauungen ohne Begriffe sind blind.","Immanuel Kant"],
+ ["Ein Buch ist ein Spiegel: Wenn ein Affe hineinguckt, so kann freilich kein Apostel heraussehen.","Georg Christoph Lichtenberg"],
+ ["Lesen heißt: mit einem fremden Kopfe statt des eigenen denken.","Arthur Schopenhauer"],
+ ["Wissen ist Macht.","Francis Bacon"],
+ ["Nicht weil es schwer ist, wagen wir es nicht, sondern weil wir es nicht wagen, ist es schwer.","Seneca"],
+ ["Lernen ohne zu denken ist eitel, denken ohne zu lernen ist gefährlich.","Konfuzius"],
+ ["Eine Reise von tausend Meilen beginnt mit dem ersten Schritt.","Laotse"],
+ ["Lernen mit Kopf, Herz und Hand.","Johann Heinrich Pestalozzi"],
+ ["Der Mensch spielt nur, wo er in voller Bedeutung des Worts Mensch ist.","Friedrich Schiller"],
+ ["Die Phantasie ist wichtiger als Wissen.","Albert Einstein"],
+];
+function quoteCard(){
+  const q=QUOTES[Math.floor(Date.now()/864e5)%QUOTES.length];
+  return h("figure",{class:"quote",style:"margin:0 0 16px;padding:4px 0 4px 16px;border-left:4px solid var(--accent,var(--line))"},
+    h("blockquote",{style:"margin:0;font-family:var(--f-read);font-size:1.1rem;line-height:1.45"},`„${q[0]}“`),
+    h("figcaption",{class:"muted",style:"margin-top:4px;font-size:.9rem"},`${q[1]} · Zitat des Tages`));
+}
 const TIPS = [
  ["Willkommen","In den nächsten acht Wochen trainierst du an sechs Tagen pro Woche etwa 15 Minuten. Heute misst du nur, wo du stehst: Lies den Text in deinem normalen Tempo, so wie du sonst auch liest, und beantworte danach fünf Fragen. Nicht hetzen, es gibt keine falsche Ausgangslage."],
  ["Der Pacer","Ab heute führt dich ein Leuchtmarker durch den Text. Deine Augen folgen ihm. Das verringert Abschweifen und unnötige Rücksprünge. Halte den Blick locker auf dem Marker."],
@@ -797,6 +821,7 @@ function render(){
 }
 
 function viewToday(v){
+  v.append(quoteCard());
   const n=nextLesson();
   if(!n){ v.append(h("div",{class:"card"},h("p",{class:"eyebrow"},"Kurs abgeschlossen"),h("h2",{text:"Alle 48 Lektionen geschafft"}),h("p",{},"Im Lesefenster kannst du weiter frei trainieren. Im Reiter Fortschritt siehst du deinen Weg vom Einstiegstest bis heute."))); return; }
   const p=plan(n), todayDone=Object.values(S.lessons).filter(l=>l.date===today()).length, late=behind();
