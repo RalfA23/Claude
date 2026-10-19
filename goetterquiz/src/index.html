@@ -10,12 +10,14 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon-192.png">
+<script src="../config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#120C22;--bg2:#1D1536;--panel:#221A3D;--line:#3A2F5E;--ink:#EEE8DA;--muted:#A99FC4;--gold:#F2C14E;--ok:#58C98B;--bad:#EF5B5B;
-  --c0:#C9A94F;--c1:#B5654A;--c2:#5B7FA6;--c3:#6E9160;--tele:#F4F1E8;
+  --c0:#4F79B8;--c1:#D4AE45;--c2:#5E9A5A;--c3:#B9533F;--tele:#F4F1E8;
   --S:320px;
 }
 *{box-sizing:border-box}
@@ -132,6 +134,37 @@ textarea{width:100%;min-height:140px;background:var(--bg);color:var(--ink);borde
 .pad .ring{display:none}
 @media (max-width:600px){.pad.flip{transform:rotate(180deg)}}
 .big{font-size:3rem;text-align:center;margin:4px 0}
+.arena{border-radius:12px;padding:10px 10px 8px;margin-bottom:10px;color:#fff;position:relative;overflow:hidden;box-shadow:inset 0 0 40px rgba(0,0,0,.5)}
+.atitle{display:flex;flex-direction:column;gap:2px;text-align:center;text-shadow:0 1px 2px #000}
+.atitle .cinzel{font-weight:800;color:#FFE7A3}
+.afield{display:grid;grid-template-columns:96px 1fr 96px;align-items:center;gap:6px;margin-top:6px}
+.fighter{text-align:center;text-shadow:0 1px 2px #000}
+.fig{width:46px;height:74px;margin:0 auto}
+.fig svg{width:100%;height:100%;display:block}
+.fname{font-weight:800;font-size:.85rem}
+.hearts{font-size:.72rem;min-height:1em}
+.rope{position:relative;height:34px;display:grid;grid-template-columns:repeat(7,1fr);align-items:center}
+.rope::before{content:"";position:absolute;left:0;right:0;top:50%;height:5px;margin-top:-2px;background:repeating-linear-gradient(90deg,#E2C487 0 6px,#8C6A3A 6px 9px);border-radius:3px;box-shadow:0 2px 3px #0008}
+.rope i{height:12px;width:2px;background:#fff8;justify-self:center;position:relative}
+.rope i.mid{height:28px;background:#fff}
+.rope i.on{background:#F2C14E}
+.knot{position:absolute;top:50%;width:18px;height:18px;margin-top:-8px;border-radius:50%;background:#F2C14E;border:2px solid #140E06;transition:left .6s cubic-bezier(.3,1.6,.5,1);box-shadow:0 0 10px #F2C14E}
+.arena.hitA .fighter.att .fig,.arena.hitD .fighter.def .fig{animation:jump .6s}
+@keyframes jump{30%{transform:translateY(-10px) scale(1.12)}}
+.heroes{display:flex;flex-wrap:wrap;gap:4px;justify-content:center;margin-top:8px}
+.hchip{border:1px solid var(--line);background:transparent;border-radius:999px;padding:3px 8px;font-size:.78rem;min-height:30px}
+.hchip.on{background:var(--gold);color:#1A1205;border-color:var(--gold);font-weight:700}
+.hlist{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px}
+.hlist div{background:var(--bg2);border-radius:10px;padding:8px 10px}
+.event{text-align:center}
+.event .big{font-size:3.4rem}
+.arena::after{content:attr(data-e);position:absolute;left:50%;bottom:-22px;transform:translateX(-50%);font-size:110px;opacity:.16;pointer-events:none}
+.arena>*{position:relative;z-index:1}
+.olist{display:flex;flex-direction:column;gap:6px;margin:6px 0 12px}
+.oitem{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:var(--bg2);border-radius:10px;padding:8px 10px}
+.oitem .grow{flex:1;min-width:160px}
+.win{color:var(--ok);font-weight:700}.loss{color:var(--bad);font-weight:700}
+input.name{background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:9px 10px;font:inherit;min-height:42px}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#000c;border:1px solid var(--gold);color:var(--ink);padding:10px 16px;border-radius:12px;z-index:20;max-width:90vw;text-align:center}
 </style>
 </head>
@@ -146,7 +179,7 @@ textarea{width:100%;min-height:140px;background:var(--bg);color:var(--ink);borde
   <section id="start">
     <div class="hero">
       <h2>Das Spiel der Götter</h2>
-      <p>Vier Götter schicken je vier Krieger in den Tempelhof. Wer richtig antwortet, zieht. Wer klug genug ist, mutiert. Wer ein Duell verliert, stürzt eine Stufe ab.</p>
+      <p>⚡ Zeus ruft zum Turnier. Vier Götter schicken je vier Helden in den Tempelhof. Wer richtig antwortet, zieht. Wer klug genug ist, mutiert. Wer ein Duell verliert, stürzt in die Lava, wird zu Stein oder verirrt sich im Labyrinth.</p>
     </div>
     <div class="card" id="resumeCard" hidden>
       <div class="row" style="justify-content:space-between"><span id="resumeTxt"></span><span class="row"><button class="btn primary" id="resume">Weiterspielen</button><button class="btn ghost" id="discard">Verwerfen</button></span></div>
@@ -163,17 +196,29 @@ textarea{width:100%;min-height:140px;background:var(--bg);color:var(--ink);borde
       </div>
       <div class="row" style="margin-top:14px"><button class="btn primary" id="go">Spiel starten</button><span class="muted small" id="setupHint"></span></div>
     </div>
+    <div class="card" id="onlineCard" hidden></div>
     <div class="card">
       <details>
         <summary>So wird gespielt</summary>
         <div class="small" style="margin-top:8px">
           <p>Jeder Gott führt vier Krieger. Du wählst einen Krieger, und die Farbe seines Feldes bestimmt den Bereich der Frage: <b style="color:var(--c0)">Allgemeinwissen</b>, <b style="color:var(--c1)">Geschichte und Geografie</b>, <b style="color:var(--c2)">Wissenschaft und Technik</b> oder <b style="color:var(--c3)">Sport und Freizeit</b>. Die Antworten liegen in den vier Himmelsrichtungen, mit den Pfeiltasten oder per Tippen.</p>
-          <p>Richtig beantwortet: Der Krieger bekommt Weisheit und zieht ein Feld in eine der acht Richtungen. Falsch oder zu langsam: Der Zug ist vorbei. Die weißen Felder sind Teleporter, sie werfen den Krieger auf ein zufälliges anderes Teleporterfeld.</p>
-          <p>Ziehst du auf einen gegnerischen Krieger, beginnt ein Duell. Beide bekommen dieselbe Frage, wer zuerst richtig antwortet, gewinnt. Eine falsche Antwort schenkt dem Gegner den Sieg, läuft die Zeit ab, verliert der Angreifer. Der Verlierer verliert Weisheit und fällt eine Stufe ab. Wer auf der untersten Stufe verliert, scheidet aus.</p>
-          <p>Mit 25 Weisheitspunkten kann ein Krieger mutieren: Herkules wird zum Zyklopen, dann zum Minotaurus, zuletzt zum Satyr. Höhere Stufen überstehen mehr Niederlagen, bekommen aber schwerere Fragen. Es gewinnt, wer als letzter Gott Krieger auf dem Feld hat. Mit Rundenlimit gewinnt am Ende, wer die meiste Macht hat (Stufen aller Krieger plus Weisheit).</p>
-          <p class="muted">Vorbild ist „Powerplay: The Game of the Gods“ von Arcana (1986, Amiga, Atari ST, C64). Die Stufen und Regeln folgen den damaligen Spielbeschreibungen.</p>
+          <p>Richtig beantwortet: Der Held bekommt Weisheit und zieht ein Feld in eine der acht Richtungen. Falsch oder zu langsam: Der Zug ist vorbei. Die hellen Felder sind Teleporter, sie werfen den Helden auf ein zufälliges anderes Teleporterfeld.</p>
+          <p>Ziehst du auf einen gegnerischen Helden, beginnt ein Duell an einem von fünf Schauplätzen: Lavagrube im Hades, Höhle der Medusa, Gipfel des Olymp, Labyrinth des Minotaurus oder Skylla und Charybdis. Es ist ein Tauziehen über mehrere Fragen. Wer zuerst richtig antwortet, zieht das Seil einen Schritt zu sich, eine falsche Antwort schenkt dem Gegner den Schritt. Drei Schritte Vorsprung gewinnen sofort. Jede Frage kostet beide einen Kraftpunkt (Stufe plus zwei), ist einer erschöpft, verliert er. Jeder Schauplatz hat eine eigene Regel. Der Verlierer fällt eine Stufe ab, auf der untersten scheidet er aus.</p>
+          <p>Mit 25 Weisheitspunkten kann ein Held mutieren: vom Sterblichen zum Helden, zum Halbgott und zuletzt zum Titanen. Höhere Stufen haben mehr Kraft und überstehen mehr Niederlagen, bekommen aber schwerere Fragen. Zu Beginn jeder Runde können die Launen der Götter das Spiel durcheinanderbringen. Es gewinnt, wer als letzter Gott Helden auf dem Feld hat. Mit Rundenlimit gewinnt am Ende, wer die meiste Macht hat (Stufen aller Helden plus Weisheit).</p>
+          <p class="muted">Vorbild ist „Powerplay: The Game of the Gods“ von Arcana (1986, Amiga, Atari ST, C64): Feldfarben, Teleporter, Mutation, Duelle über der Lavagrube und bei Medusa folgen den damaligen Testberichten.</p>
         </div>
       </details>
+    </div>
+    <div class="card">
+      <details>
+        <summary>Die Helden und ihre Fähigkeiten</summary>
+        <div class="hlist small" id="heroList" style="margin-top:8px"></div>
+      </details>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">Übungsrunde</h3>
+      <p class="muted small" style="margin-top:0">Zehn Fragen ohne Brett, wie der Übungsmodus im Original. Die Fragen werden mit der Zeit schwerer.</p>
+      <div class="row"><div class="seg" id="optPractice"></div><button class="btn" id="practiceGo">Üben</button></div>
     </div>
     <div class="card">
       <details>
@@ -224,10 +269,10 @@ const ALLQ = __FRAGEN__;
 /* ============ Konstanten ============ */
 const N = 8;
 const CATS = [
-  {n:"Allgemeinwissen", s:"Allgemein", c:"#C9A94F", i:"📜"},
-  {n:"Geschichte und Geografie", s:"Geschichte", c:"#B5654A", i:"🗺️"},
-  {n:"Wissenschaft und Technik", s:"Wissenschaft", c:"#5B7FA6", i:"⚗️"},
-  {n:"Sport und Freizeit", s:"Sport", c:"#6E9160", i:"🏅"}
+  {n:"Allgemeinwissen", s:"Allgemein", c:"#4F79B8", i:"📜"},
+  {n:"Geschichte und Geografie", s:"Geschichte", c:"#D4AE45", i:"🗺️"},
+  {n:"Wissenschaft und Technik", s:"Wissenschaft", c:"#5E9A5A", i:"⚗️"},
+  {n:"Sport und Freizeit", s:"Sport", c:"#B9533F", i:"🏅"}
 ];
 const GODS = [
   {n:"Apollon", c:"#F2C14E", s:"☀️", d:"Gott des Lichts und der Künste"},
@@ -235,11 +280,26 @@ const GODS = [
   {n:"Hekate", c:"#9B5DE5", s:"🌙", d:"Göttin der Magie und der Wege"},
   {n:"Aphrodite", c:"#F06292", s:"🌹", d:"Göttin der Liebe und Schönheit"}
 ];
-const RANKS = ["", "Herkules", "Zyklop", "Minotaurus", "Satyr"];
-const RANKS_DAT = ["", "Herkules", "Zyklopen", "Minotaurus", "Satyr"];
+const RANKS = ["", "Sterblicher", "Held", "Halbgott", "Titan"];
+const RANKS_DAT = ["", "Sterblichen", "Helden", "Halbgott", "Titanen"];
+// Wählbare Helden, jeder mit einer eigenen Fähigkeit. Jeder Gott schickt vier davon ins Turnier.
+const HEROES = {
+  herakles:{n:"Herakles", e:"🦁", f:"Bärenstark", d:"Hat im Duell einen Kraftpunkt mehr."},
+  achilles:{n:"Achilles", e:"🗡️", f:"Sturmlauf", d:"Zieht nach einer richtigen Antwort bis zu zwei Felder weit."},
+  odysseus:{n:"Odysseus", e:"🐴", f:"List", d:"Bei seinen Zugfragen ist immer eine falsche Antwort gestrichen."},
+  perseus:{n:"Perseus", e:"🪞", f:"Spiegelschild", d:"Das erste verlorene Duell kostet ihn keine Stufe."},
+  atalante:{n:"Atalante", e:"🍏", f:"Flink", d:"Hat bei ihren Fragen und Duellen anderthalbmal so viel Zeit."},
+  pythia:{n:"Pythia", e:"🔮", f:"Orakel", d:"Bekommt für jede richtige Antwort 3 Weisheit extra und mutiert schneller."},
+  hippolyta:{n:"Hippolyta", e:"🏹", f:"Amazone", d:"Greift sie an, beginnt das Tauziehen einen Schritt zu ihren Gunsten."},
+  chiron:{n:"Chiron", e:"🐎", f:"Lehrmeister", d:"Darf den Bereich seiner Zugfrage selbst wählen."}
+};
+const HERO_IDS = Object.keys(HEROES);
+const hasHero = (pc, id) => pc && pc.hero === id;
+const heroOf = pc => HEROES[pc && pc.hero] || null;
+const pcName = pc => heroOf(pc) ? heroOf(pc).n : "Krieger";
 const ROMAN = ["", "I", "II", "III", "IV"];
 const MUTATE_AT = 25;
-// Ecken der Götter und Startaufstellung: drei Herkules, auf dem inneren Eckfeld ein Zyklop.
+// Ecken der Götter und Startaufstellung: drei Sterbliche, auf dem inneren Eckfeld ein Held.
 const CORNERS = [[0,0,1,1],[7,0,-1,1],[7,7,-1,-1],[0,7,1,-1]];
 const SEATS = {2:[0,2], 3:[0,1,2], 4:[0,1,2,3]};
 const TELE = [[2,2],[5,2],[2,5],[5,5]];
@@ -254,7 +314,9 @@ const LS = {
   set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} },
   del(k){ try { localStorage.removeItem(k); } catch(e){} }
 };
-const SET = Object.assign({seats:["human","cpu","off","off"], cpu:"mittel", time:20, rounds:30, src:"alle", sound:true}, LS.get("gq-settings", {}));
+const SET = Object.assign({seats:["human","cpu","off","off"], cpu:"mittel", time:20, rounds:30, src:"alle", sound:true, practice:-1}, LS.get("gq-settings", {}));
+// Startauswahl der Helden: jeder Gott bekommt eine andere Mischung.
+if (!Array.isArray(SET.heroes) || SET.heroes.length !== 4) SET.heroes = [0, 1, 2, 3].map(i => [0, 1, 2, 3].map(k => HERO_IDS[(i * 2 + k) % HERO_IDS.length]));
 const STATS = Object.assign({games:0, wins:0, right:[0,0,0,0], total:[0,0,0,0]}, LS.get("gq-stats", {}));
 const saveSet = () => LS.set("gq-settings", SET);
 const saveStats = () => LS.set("gq-stats", STATS);
@@ -313,8 +375,8 @@ function pool(){
   return q.concat(ownQuestions());
 }
 let POOL = [];
-function pickQuestion(cat, level){
-  const used = G.used || (G.used = {});
+function pickQuestion(cat, level, used){
+  used = used || G.used || (G.used = {});
   const free = x => !used[x.q];
   const inCat = POOL.filter(x => x.c === cat);
   // Erst die passende Stufe, dann die nächstgelegenen Stufen, zuletzt wieder von vorn.
@@ -336,10 +398,11 @@ function newGame(){
   const pieces = [];
   players.forEach((p, pi) => {
     const [cx, cy, dx, dy] = CORNERS[p.corner];
-    [[0,0,1],[1,0,1],[0,1,1],[1,1,2]].forEach(([a, b, r], k) => pieces.push({id:pi*4+k, p:pi, x:cx+a*dx, y:cy+b*dy, rank:r, wis:0}));
+    const heroes = SET.heroes[p.god];
+    [[0,0,1],[1,0,1],[0,1,1],[1,1,2]].forEach(([a, b, r], k) => pieces.push({id:pi*4+k, p:pi, x:cx+a*dx, y:cy+b*dy, rank:r, wis:0, hero:heroes[k], shield:heroes[k] === "perseus"}));
   });
   G = {players, pieces, turn:0, round:1, phase:"select", sel:null, log:[], used:{}, rounds:SET.rounds, over:false};
-  log(`Das Turnier beginnt: ${players.map(p => GODS[p.god].n).join(", ")}.`);
+  log(`Zeus eröffnet das Turnier: ${players.map(p => GODS[p.god].n).join(", ")}.`);
   STATS.games++; saveStats();
 }
 const cur = () => G.players[G.turn];
@@ -350,8 +413,9 @@ const power = pi => G.pieces.filter(p => p.p === pi).reduce((a, p) => a + p.rank
 function log(t){ G.log.push(t); if (G.log.length > 80) G.log.shift(); }
 function save(){ if (G && !G.over) LS.set("gq-game", G); }
 function targets(pc){
-  const out = [];
-  for (const [dx, dy] of DIRS) {
+  const out = [], r = hasHero(pc, "achilles") ? 2 : 1;
+  for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) {
+    if (!dx && !dy) continue;
     const x = pc.x + dx, y = pc.y + dy;
     if (x < 0 || y < 0 || x >= N || y >= N) continue;
     const o = pieceAt(x, y);
@@ -362,7 +426,7 @@ function targets(pc){
 }
 
 /* ============ Darstellung: Brett ============ */
-function figure(god, rank){
+function figure(god, rank, hero){
   const c = GODS[god].c;
   // Krieger mit Helmbusch; je höher die Stufe, desto größer und prächtiger.
   const crest = rank >= 2 ? `<path d="M30 6 C40 0 52 4 54 14 C46 10 38 10 32 14Z" fill="${rank >= 4 ? "#F2C14E" : "#B3261E"}" stroke="#140E06" stroke-width="1.5"/>` : "";
@@ -376,6 +440,7 @@ function figure(god, rank){
     ${horns}${crest}
     <circle cx="30" cy="52" r="9" fill="#F6EFD9" stroke="#140E06" stroke-width="1.5"/>
     <text x="30" y="56.5" text-anchor="middle" font-family="Cinzel,Georgia,serif" font-weight="800" font-size="11" fill="#140E06">${ROMAN[rank]}</text>
+    ${HEROES[hero] ? `<circle cx="49" cy="9" r="9" fill="#F6EFD9" stroke="#140E06" stroke-width="1.5"/><text x="49" y="13.5" text-anchor="middle" font-size="12">${HEROES[hero].e}</text>` : ""}
   </svg>`;
 }
 function sizeBoard(){
@@ -396,8 +461,8 @@ function renderBoard(){
     const pc = pieceAt(x, y);
     if (pc) {
       if (pc.id === G.sel) t.classList.add("sel");
-      const el = h("div", {class:"piece" + (pc.id === G.sel ? " chosen" : ""), html:figure(G.players[pc.p].god, pc.rank),
-        title:`${godOf(pc.p).n}: ${RANKS[pc.rank]}, Weisheit ${pc.wis}`});
+      const el = h("div", {class:"piece" + (pc.id === G.sel ? " chosen" : ""), html:figure(G.players[pc.p].god, pc.rank, pc.hero),
+        title:`${godOf(pc.p).n}: ${pcName(pc)} (${RANKS[pc.rank]}), Weisheit ${pc.wis}`});
       el.style.setProperty("--k", (.78 + pc.rank * .08).toFixed(2));
       if (human && pc.p === G.turn && G.phase === "select") { el.classList.add("mine"); el.addEventListener("click", e => { e.stopPropagation(); selectPiece(pc.id); }); t.addEventListener("click", () => selectPiece(pc.id)); }
       t.append(el);
@@ -416,7 +481,7 @@ function render(){
     const mine = G.pieces.filter(q => q.p === i);
     pl.append(h("div", {class:"pl" + (i === G.turn ? " cur" : "") + (p.out ? " out" : "")},
       h("span", {class:"dot", style:`background:${GODS[p.god].c}`}), h("span", {text:GODS[p.god].n + (p.type === "cpu" ? " 🤖" : "")}),
-      h("span", {class:"pc", text: p.out ? "ausgeschieden" : mine.map(q => ROMAN[q.rank]).join(" · ")})));
+      h("span", {class:"pc", text: p.out ? "ausgeschieden" : mine.map(q => (heroOf(q) ? heroOf(q).e : "") + ROMAN[q.rank]).join(" ")})));
   });
   $("log").replaceChildren(...G.log.slice().reverse().map(t => h("div", {text:t})));
   // Hinweis und Aktionen
@@ -429,7 +494,9 @@ function render(){
   else if (G.phase === "move") hint = "Richtig! Wähle ein leuchtendes Feld. Rot heißt Duell.";
   $("hint").textContent = hint;
   if (sel && !G.over) {
-    info.append(h("div", {class:"small"}, h("b", {text:RANKS[sel.rank]}), ` auf ${isTele(sel.x, sel.y) ? "einem Teleporter" : CATS[catOf(sel.x, sel.y)].n}`),
+    const hr = heroOf(sel);
+    info.append(h("div", {class:"small"}, h("b", {text:(hr ? hr.e + " " + hr.n + ", " : "") + RANKS[sel.rank]}), ` auf ${isTele(sel.x, sel.y) ? "einem Teleporter" : CATS[catOf(sel.x, sel.y)].n}`),
+      hr ? h("div", {class:"muted small", text:`${hr.f}: ${hr.d}` + (hasHero(sel, "perseus") && !sel.shield ? " (Schild schon verbraucht)" : "")}) : null,
       h("div", {class:"wbar"}, h("i", {style:`width:${Math.min(100, sel.wis / MUTATE_AT * 100)}%`})),
       h("div", {class:"muted small", style:"margin-bottom:8px", text:`Weisheit ${sel.wis} von ${MUTATE_AT}` + (sel.rank >= 4 ? " (höchste Stufe)" : "")}));
     if (me.type === "human" && G.phase === "select") {
@@ -448,14 +515,15 @@ function selectPiece(id){
 }
 function mutate(pc){
   pc.rank++; pc.wis = 0; SND.up();
-  log(`${godOf(pc.p).n}: Ein Krieger mutiert zum ${RANKS_DAT[pc.rank]}!`);
+  log(`${godOf(pc.p).n}: ${pcName(pc)} mutiert zum ${RANKS_DAT[pc.rank]}!`);
   save(); render();
 }
 // Eine Frage für den Zug. Teleporterfelder haben keine Farbe: dort kommt ein zufälliger Bereich.
 async function askTurn(pc){
   if (G.busy) return;
   G.busy = true; render();
-  const cat = isTele(pc.x, pc.y) ? rnd(4) : catOf(pc.x, pc.y);
+  let cat = isTele(pc.x, pc.y) ? rnd(4) : catOf(pc.x, pc.y);
+  if (hasHero(pc, "chiron")) cat = cur().type === "cpu" ? rnd(4) : await Question.chooseCat(pc);
   const q = pickQuestion(cat, pc.rank);
   const res = await Question.single(q, cat, pc, cur());
   G.busy = false;
@@ -463,13 +531,13 @@ async function askTurn(pc){
   if (cur().type === "human") { STATS.total[ci]++; if (res.ok) STATS.right[ci]++; saveStats(); }
   if (res.ok) {
     // 5 Punkte plus bis zu 3 für Tempo.
-    const bonus = Math.max(0, Math.round(3 * res.left));
+    const bonus = Math.max(0, Math.round(3 * res.left)) + (hasHero(pc, "pythia") ? 3 : 0);
     pc.wis += 5 + bonus;
-    log(`${godOf(pc.p).n} antwortet richtig (+${5 + bonus} Weisheit).`);
+    log(`${godOf(pc.p).n}: ${pcName(pc)} antwortet richtig (+${5 + bonus} Weisheit).`);
     G.phase = "move"; render();
     if (cur().type === "cpu") cpuMove(pc);
   } else {
-    log(`${godOf(pc.p).n} ${res.timeout ? "war zu langsam" : "lag falsch"}.`);
+    log(`${godOf(pc.p).n}: ${pcName(pc)} ${res.timeout ? "war zu langsam" : "lag falsch"}.`);
     endTurn();
   }
 }
@@ -504,23 +572,85 @@ function nearestFree(x, y){
   }
   return null;
 }
+/* ============ Duelle: Schauplätze ============ */
+// Jedes Duell ist ein Tauziehen über mehrere Fragen. Drei Schritte Vorsprung entscheiden sofort, sonst endet es,
+// wenn einem Kämpfer die Kraft ausgeht (jede Frage kostet beide einen Kraftpunkt). Jeder Schauplatz hat eine eigene Regel.
+const ARENAS = [
+  {id:"hades", n:"Lavagrube im Hades", e:"🔥", bg:"linear-gradient(180deg,#3A0F0A,#7A1E0C 60%,#F06A1E)", rule:"Wer drei Schritte zurückweicht, stürzt in die Lava.", lose:"stürzt in die Lava"},
+  {id:"medusa", n:"Höhle der Medusa", e:"🐍", bg:"linear-gradient(180deg,#132A20,#2E4A3A 60%,#6F8F7A)", rule:"Jede falsche Antwort zählt doppelt, denn Medusas Blick versteinert.", lose:"wird zu Stein"},
+  {id:"olymp", n:"Gipfel des Olymp", e:"⚡", bg:"linear-gradient(180deg,#1B2350,#3B4FA0 60%,#E8E2FF)", rule:"Zeus sieht zu: Die Fragen sind eine Stufe schwerer, der Sieger bekommt doppelte Weisheit.", lose:"wird vom Blitz getroffen"},
+  {id:"labyrinth", n:"Labyrinth des Minotaurus", e:"🐂", bg:"linear-gradient(180deg,#2A2013,#5A4526 60%,#A08355)", rule:"Im Dunkeln ist die Bedenkzeit um ein Drittel kürzer.", lose:"verirrt sich im Labyrinth"},
+  {id:"meer", n:"Skylla und Charybdis", e:"🌊", bg:"linear-gradient(180deg,#0A2238,#14507A 60%,#3FA7C9)", rule:"Die Strudel wirbeln alles durcheinander: Jede Frage kommt aus einem anderen Bereich.", lose:"wird vom Strudel verschlungen"}
+];
+const Arena = {
+  view(D, att, def){
+    const a = D.arena, side = (pc, role) => {
+      const g = godOf(pc.p), hr = heroOf(pc);
+      return h("div", {class:"fighter " + role}, h("div", {class:"fig", html:figure(G.players[pc.p].god, pc.rank, pc.hero)}),
+        h("div", {class:"fname", style:`color:${g.c}`, text:`${g.n}`}), h("div", {class:"small", text:(hr ? hr.e + " " + hr.n : "Krieger") + " · " + RANKS[pc.rank]}),
+        h("div", {class:"hearts", "data-role":role}));
+    };
+    const rope = h("div", {class:"rope"}, ...[-3, -2, -1, 0, 1, 2, 3].map(i => h("i", {"data-i":i, class: i === 0 ? "mid" : ""})), h("b", {class:"knot"}));
+    const el = h("div", {class:"arena", "data-e":a.e, style:`background:${a.bg}`},
+      h("div", {class:"atitle"}, h("span", {class:"cinzel", text:`${a.e} ${a.n}`}), h("span", {class:"small", text:a.rule})),
+      h("div", {class:"afield"}, side(att, "att"), rope, side(def, "def")));
+    Arena.update(el, D, att, def);
+    return el;
+  },
+  update(el, D, att, def, last){
+    // Seil: positiv heißt Richtung Angreifer (links).
+    const k = el.querySelector(".knot"); k.style.left = `calc(${(3 - D.rope) / 6 * 100}% - 9px)`;
+    el.querySelectorAll(".rope i").forEach(i => i.classList.toggle("on", +i.dataset.i === -D.rope));
+    el.querySelectorAll(".hearts").forEach(hh => { const n = Math.max(0, D.str[hh.dataset.role]); hh.textContent = "💪".repeat(n) || "erschöpft"; });
+    if (last) { el.classList.remove("hitA", "hitD"); void el.offsetWidth; el.classList.add(last === "att" ? "hitA" : "hitD"); }
+  }
+};
+function newDuel(att, def){
+  const arena = ARENAS[rnd(ARENAS.length)];
+  const str = pc => pc.rank + 2 + (hasHero(pc, "herakles") ? 1 : 0);
+  const D = {arena, round:1, rope: hasHero(att, "hippolyta") ? 1 : 0, str:{att:str(att), def:str(def)},
+    timeF: (arena.id === "labyrinth" ? 2 / 3 : 1) * ([att, def].some(p => hasHero(p, "atalante")) ? 1.5 : 1)};
+  D.apply = winner => {
+    // Medusa: eine falsche Antwort oder Zeitablauf zählt doppelt (die Runde wird dann vom Fehler entschieden).
+    const step = arena.id === "medusa" && D.lastWrong ? 2 : 1;
+    D.rope += winner === "att" ? step : -step;
+    D.str.att--; D.str.def--;
+    if (D.rope >= 3) return {done:true, winner:"att"};
+    if (D.rope <= -3) return {done:true, winner:"def"};
+    if (D.str.att <= 0 || D.str.def <= 0) {
+      if (D.str.att > 0) return {done:true, winner:"att"};
+      if (D.str.def > 0) return {done:true, winner:"def"};
+      return {done:true, winner: D.rope > 0 ? "att" : "def"};
+    }
+    return {done:false};
+  };
+  return D;
+}
 async function duel(att, def){
   G.busy = true; render(); SND.duel();
-  const cat = isTele(def.x, def.y) ? rnd(4) : catOf(def.x, def.y);
-  const q = pickQuestion(cat, Math.max(att.rank, def.rank));
-  const res = await Question.duel(q, cat, att, def);
-  G.busy = false;
-  const win = res.winner === "att" ? att : def, lose = res.winner === "att" ? def : att;
+  const D = newDuel(att, def);
+  log(`Duell am Schauplatz ${D.arena.n}: ${godOf(att.p).n} (${pcName(att)}) gegen ${godOf(def.p).n} (${pcName(def)}).`);
   const humanSide = [att, def].filter(p => G.players[p.p].type === "human");
-  humanSide.forEach(p => { STATS.total[cat]++; if (p === win) STATS.right[cat]++; });
+  let res;
+  do {
+    const cat = D.arena.id === "meer" || isTele(def.x, def.y) ? rnd(4) : catOf(def.x, def.y);
+    const q = pickQuestion(cat, Math.min(4, Math.max(att.rank, def.rank) + (D.arena.id === "olymp" ? 1 : 0)));
+    D.lastWrong = false;
+    res = await Question.duel(q, cat, att, def, D);
+    humanSide.forEach(p => { STATS.total[cat]++; if ((p === att) === (res.winner === "att")) STATS.right[cat]++; });
+    D.round++;
+  } while (!res.done);
   saveStats();
-  win.wis += 5; lose.wis = Math.max(0, lose.wis - 10); lose.rank--;
-  const why = res.why ? ` (${res.why})` : "";
-  log(`Duell: ${godOf(win.p).n} besiegt ${godOf(lose.p).n}${why}.`);
+  G.busy = false;
+  const win = res.final === "att" ? att : def, lose = res.final === "att" ? def : att;
+  win.wis += D.arena.id === "olymp" ? 10 : 5; lose.wis = Math.max(0, lose.wis - 10);
+  log(`Duell: ${godOf(win.p).n} besiegt ${godOf(lose.p).n} nach ${D.round - 1} Fragen, ${pcName(lose)} ${D.arena.lose}.`);
+  if (lose.shield) { lose.shield = false; log(`${godOf(lose.p).n}: Perseus' Spiegelschild zerbricht, er behält seine Stufe.`); }
+  else lose.rank--;
   if (lose.rank <= 0) {
-    log(`${godOf(lose.p).n} verliert einen Krieger.`);
+    log(`${godOf(lose.p).n} verliert ${pcName(lose)}.`);
     G.pieces = G.pieces.filter(p => p !== lose);
-  } else log(`${godOf(lose.p).n}: Der Krieger fällt auf ${RANKS[lose.rank]} zurück.`);
+  } else log(`${godOf(lose.p).n}: ${pcName(lose)} ist jetzt ${RANKS[lose.rank]}.`);
   if (win === att) {
     const tx = def.x, ty = def.y;
     if (lose.rank > 0) { const f = nearestFree(tx, ty); if (f) { def.x = f[0]; def.y = f[1]; } }
@@ -529,6 +659,42 @@ async function duel(att, def){
   }
   checkOut();
   endTurn();
+}
+// Launen der Götter: zu Beginn mancher Runden greift ein Gott ein.
+const EVENTS = [
+  {e:"⚡", n:"Zeus' Gunst", run(){
+    const weak = alivePlayers().map(p => G.players.indexOf(p)).sort((a, b) => power(a) - power(b))[0];
+    const list = G.pieces.filter(p => p.p === weak), pc = list[rnd(list.length)];
+    pc.wis += 10; return `Zeus hat Mitleid mit ${godOf(weak).n}: ${pcName(pc)} bekommt 10 Weisheit.`; }},
+  {e:"🌫️", n:"Nebel des Hades", run(){
+    // Die Teleporter wandern auf neue freie Felder.
+    const free = [];
+    for (let y = 1; y < N - 1; y++) for (let x = 1; x < N - 1; x++) if (!pieceAt(x, y) && !isTele(x, y)) free.push([x, y]);
+    const pick = shuffle(free).slice(0, 4);
+    if (pick.length === 4) TELE.splice(0, 4, ...pick);
+    G.tele = TELE.map(t => t.slice());
+    return "Hades schickt Nebel: Die Teleporter sind an andere Stellen gewandert."; }},
+  {e:"🦉", n:"Athenes Weisheit", run(){
+    const list = G.pieces.filter(p => p.rank < 4), pc = list[rnd(list.length)];
+    if (!pc) return "Athene nickt zufrieden. Alle Helden sind schon Titanen.";
+    pc.rank++; pc.wis = 0; return `Athene berührt ${pcName(pc)} von ${godOf(pc.p).n}: sofortige Mutation zum ${RANKS_DAT[pc.rank]}.`; }},
+  {e:"🪽", n:"Hermes' Streich", run(){
+    // Zwei zufällige Helden verschiedener Götter tauschen die Plätze.
+    const a = G.pieces[rnd(G.pieces.length)], others = G.pieces.filter(p => p.p !== a.p), b = others[rnd(others.length)];
+    if (!b) return "Hermes findet niemanden zum Ärgern.";
+    [a.x, b.x, a.y, b.y] = [b.x, a.x, b.y, a.y];
+    return `Hermes vertauscht ${pcName(a)} (${godOf(a.p).n}) und ${pcName(b)} (${godOf(b.p).n}).`; }}
+];
+function godEvent(){
+  return new Promise(resolve => {
+    const ev = EVENTS[rnd(EVENTS.length)], txt = ev.run();
+    log(`${ev.n}: ${txt}`); SND.tele(); render();
+    const box = $("qbox"), close = () => { $("ov").hidden = true; resolve(); };
+    box.replaceChildren(h("div", {class:"event"}, h("div", {class:"big", text:ev.e}), h("h2", {class:"cinzel", style:"color:var(--gold);margin:0", text:"Launen der Götter"}),
+      h("h3", {style:"margin:6px 0", text:ev.n}), h("p", {text:txt}), h("button", {class:"btn primary", onclick:close}, "Weiter")));
+    $("ov").hidden = false;
+    if (!G.players.some(p => p.type === "human")) setTimeout(close, 1500);
+  });
 }
 function checkOut(){
   G.players.forEach((p, i) => {
@@ -539,11 +705,14 @@ function endTurn(){
   G.sel = null; G.phase = "select";
   if (alivePlayers().length <= 1) return finish();
   let t = G.turn;
-  do { t = (t + 1) % G.players.length; if (t === 0) G.round++; } while (G.players[t].out);
+  let newRound = false;
+  do { t = (t + 1) % G.players.length; if (t === 0) { G.round++; newRound = true; } } while (G.players[t].out);
   G.turn = t;
   if (G.rounds && G.round > G.rounds) return finish();
   save(); render();
-  if (cur().type === "cpu") cpuTurn();
+  const go = () => { if (cur().type === "cpu") cpuTurn(); };
+  if (newRound && Math.random() < .3) godEvent().then(() => { save(); render(); go(); });
+  else go();
 }
 function finish(){
   G.over = true; LS.del("gq-game");
@@ -556,7 +725,9 @@ function finish(){
   render(); SND.up();
   const box = $("qbox"); $("ov").hidden = false;
   box.replaceChildren(
-    h("div", {class:"big", text:GODS[w.p.god].s}),
+    h("div", {class:"big", text:"⚡"}),
+    h("p", {class:"cinzel", style:"text-align:center;color:var(--gold);margin:0 0 6px", text:"Zeus spricht:"}),
+    h("p", {style:"text-align:center;font-style:italic;margin:0 0 10px", text:`„${GODS[w.p.god].n}, du bist die weiseste Gottheit des Olymp. Deine Helden haben Ehre gemacht.“`}),
     h("h2", {style:`text-align:center;color:${GODS[w.p.god].c};margin:0`, text:`${GODS[w.p.god].n} gewinnt`}),
     h("p", {class:"muted", style:"text-align:center", text: alive.length > 1 ? "Das Rundenlimit ist erreicht. Gezählt wird die Macht: Stufen aller Krieger plus Weisheit." : "Alle anderen Götter haben ihre Krieger verloren."}),
     h("div", {class:"plist"}, ...G.players.map((p, i) => h("div", {class:"pl"}, h("span", {class:"dot", style:`background:${GODS[p.god].c}`}), h("span", {text:GODS[p.god].n}), h("span", {class:"pc", text:p.out ? "ausgeschieden" : `Macht ${power(i).toFixed(1)}`})))),
@@ -613,8 +784,8 @@ const Question = {
     return h("div", {class:"qhead"}, h("span", {class:"chip", style:`background:${c.c}`}, c.i + " " + c.n), extra || null,
       q.src ? h("span", {text:"aus: " + q.src}) : null);
   },
-  // Vier Antworten liegen in den vier Himmelsrichtungen, drei Antworten (Lesetraining) im Norden, Westen und Osten.
-  dirs: n => n === 4 ? [0, 1, 2, 3] : [0, 3, 1],
+  // Vier Antworten liegen in den vier Himmelsrichtungen, drei (Lesetraining) im Norden, Westen und Osten, zwei im Westen und Osten.
+  dirs: n => n === 4 ? [0, 1, 2, 3] : n === 3 ? [0, 3, 1] : [3, 1],
   idx(n, key){ return Question.dirs(n).indexOf(KEYS[key]); },
   compass(answers, onPick, keys){
     const dd = Question.dirs(answers.length);
@@ -638,9 +809,12 @@ const Question = {
     return {stop(){ stop = true; }, left(){ return Math.max(0, secs - (performance.now() - t0) / 1000) / secs; }};
   },
   // Normale Zugfrage: ein Spieler, Mensch oder Computer.
-  single(q, cat, pc, player){
+  single(q, cat, pc, player, label, time){
     return new Promise(resolve => {
-      const order = shuffle(q.a.map((a, i) => ({a, ok:i === 0}))), god = GODS[player.god];
+      let all = q.a.map((a, i) => ({a, ok:i === 0}));
+      // Odysseus: eine falsche Antwort ist gestrichen.
+      if (hasHero(pc, "odysseus") && all.length > 2) all.splice(1 + rnd(all.length - 1), 1);
+      const order = shuffle(all), god = GODS[player.god];
       const box = $("qbox"), cpu = player.type === "cpu";
       let done = false, tm = null;
       const finish = (i, timeout) => {
@@ -652,16 +826,16 @@ const Question = {
         verdict.textContent = ok ? "Richtig!" : timeout ? "Zeit abgelaufen." : "Leider falsch.";
         const close = () => { $("ov").hidden = true; resolve({ok, timeout, left}); };
         if (cpu) setTimeout(close, 1500);
-        else foot.append(h("button", {class:"btn primary", onclick:close}, ok ? "Ziehen" : "Weiter"));
+        else foot.append(h("button", {class:"btn primary", onclick:close}, label ? "Weiter" : ok ? "Ziehen" : "Weiter"));
         if (!cpu) setTimeout(() => { const b = foot.querySelector("button"); b && b.focus(); }, 30);
       };
       const key = e => { if (!(e.key in KEYS) || cpu) return; const i = Question.idx(order.length, e.key); if (i < 0) return; e.preventDefault(); finish(i); };
       const c = Question.compass(order.map(o => o.a), i => !cpu && finish(i), DIRL);
       const verdict = h("span", {class:"verdict"});
-      const foot = h("div", {class:"qfoot"}, h("span", {class:"muted small", text:`${god.s} ${god.n} · ${RANKS[pc.rank]}`}), verdict);
+      const foot = h("div", {class:"qfoot"}, h("span", {class:"muted small", text:label || `${god.s} ${god.n} · ${heroOf(pc) ? heroOf(pc).e + " " + heroOf(pc).n + ", " : ""}${RANKS[pc.rank]}`}), verdict);
       box.replaceChildren(Question.head(q, cat, h("span", {text:`Stufe ${ROMAN[Math.min(4, q.l)]}`})), h("div", {class:"qtext", text:q.q}), c.grid, foot);
       $("ov").hidden = false;
-      tm = Question.timer(c.ring, SET.time, null, () => finish(null, true));
+      tm = Question.timer(c.ring, time || SET.time * (hasHero(pc, "atalante") ? 1.5 : 1), null, () => finish(null, true));
       if (cpu) {
         const knows = cpuKnows(pc.rank), d = 1200 + Math.random() * 1600;
         setTimeout(() => {
@@ -672,8 +846,18 @@ const Question = {
       } else document.addEventListener("keydown", key);
     });
   },
-  // Duell: beide Seiten bekommen dieselbe Frage. Wer zuerst richtig antwortet, gewinnt; wer falsch antwortet, verliert.
-  duel(q, cat, att, def){
+  // Kategorie wählen (Chiron).
+  chooseCat(pc){
+    return new Promise(resolve => {
+      const box = $("qbox");
+      box.replaceChildren(h("h3", {style:"margin-top:0", text:`🐎 ${pcName(pc)} wählt den Bereich`}), h("p", {class:"muted", text:"Lehrmeister Chiron darf sich das Fachgebiet seiner Frage aussuchen."}),
+        h("div", {class:"row"}, ...CATS.map((c, i) => h("button", {class:"btn", style:`border-color:${c.c}`, onclick:() => { $("ov").hidden = true; resolve(i); }}, c.i + " " + c.n))));
+      $("ov").hidden = false;
+    });
+  },
+  // Eine Duellrunde: beide Seiten bekommen dieselbe Frage. Wer zuerst richtig antwortet, holt den Punkt; wer falsch antwortet, schenkt ihn her.
+  // D hält den Stand des ganzen Duells (Seil, Kraft, Schauplatz) und wertet die Runde aus.
+  duel(q, cat, att, def, D){
     return new Promise(resolve => {
       const order = shuffle(q.a.map((a, i) => ({a, ok:i === 0})));
       const box = $("qbox"), sides = [{pc:att, role:"att"}, {pc:def, role:"def"}];
@@ -684,18 +868,21 @@ const Question = {
         if (done) return; done = true; tm && tm.stop(); document.removeEventListener("keydown", key);
         sides.forEach(s => s.c && s.c.btns.forEach((b, k) => { b.disabled = true; if (order[k].ok) b.classList.add("ok"); else if (s === pickSide && k === pickIdx) b.classList.add("bad"); }));
         const w = sides.find(s => s.role === winner);
-        verdict.className = "verdict " + (w.human ? "ok" : "bad");
-        verdict.textContent = `${w.god.n} gewinnt das Duell!`;
-        w.human ? SND.ok() : SND.bad();
-        const close = () => { $("ov").hidden = true; resolve({winner, why}); };
-        if (!humans.length) setTimeout(close, 1600);
-        else foot.append(h("button", {class:"btn primary", onclick:close}, "Weiter"));
+        const r = D.apply(winner);
+        Arena.update(arenaEl, D, att, def, winner);
+        const fw = r.done && sides.find(s => s.role === r.winner);
+        verdict.className = "verdict " + ((fw || w).human ? "ok" : "bad");
+        verdict.textContent = r.done ? `${fw.god.n} gewinnt das Duell!` : `Punkt für ${w.god.n}.`;
+        (w.human || !humans.length) ? SND.ok() : SND.bad();
+        const close = () => { $("ov").hidden = true; resolve({winner, why, done:r.done, final:r.winner}); };
+        if (!humans.length) setTimeout(close, 1700);
+        else { foot.append(h("button", {class:"btn primary", onclick:close}, r.done ? "Weiter" : "Nächste Frage")); setTimeout(() => foot.querySelector("button").focus(), 30); }
       };
       const pick = (s, i) => {
         if (done) return;
         const other = sides.find(o => o !== s);
         if (order[i].ok) end(s.role, `${s.god.n} war schneller`, s, i);
-        else end(other.role, `${s.god.n} lag falsch`, s, i);
+        else { D.lastWrong = true; end(other.role, `${s.god.n} lag falsch`, s, i); }
       };
       // Tastatur: mit einem Menschen die Pfeiltasten, mit zwei Menschen Pfeiltasten für den Angreifer und WASD für den Verteidiger.
       const key = e => {
@@ -707,10 +894,10 @@ const Question = {
         e.preventDefault(); pick(s, i);
       };
       const verdict = h("span", {class:"verdict"});
-      const foot = h("div", {class:"qfoot"}, h("span", {class:"muted small", text:"Wer zuerst richtig antwortet, gewinnt. Läuft die Zeit ab, verliert der Angreifer."}), verdict);
-      const bar = h("div", {class:"duelbar"}, h("span", {style:`color:${sides[0].god.c}`, text:`${sides[0].god.s} ${sides[0].god.n} (${RANKS[att.rank]})`}), h("span", {class:"vs", text:"⚔ Duell"}), h("span", {style:`color:${sides[1].god.c}`, text:`${sides[1].god.n} (${RANKS[def.rank]}) ${sides[1].god.s}`}));
+      const foot = h("div", {class:"qfoot"}, h("span", {class:"muted small", text:`Frage ${D.round}. Wer zuerst richtig antwortet, zieht das Seil zu sich. Zeit abgelaufen: Punkt für den Verteidiger.`}), verdict);
+      const arenaEl = Arena.view(D, att, def);
       let ring;
-      const nodes = [Question.head(q, cat), bar, h("div", {class:"qtext", text:q.q})];
+      const nodes = [arenaEl, Question.head(q, cat), h("div", {class:"qtext", text:q.q})];
       if (humans.length === 2) {
         const pads = h("div", {class:"pads"});
         humans.slice().reverse().forEach((s, idx) => {
@@ -729,7 +916,7 @@ const Question = {
       }
       nodes.push(foot);
       box.replaceChildren(...nodes); $("ov").hidden = false;
-      tm = Question.timer(ring, SET.time, null, () => end("def", "Zeit abgelaufen"));
+      tm = Question.timer(ring, SET.time * D.timeF, null, () => { D.lastWrong = true; end("def", "Zeit abgelaufen"); });
       // Computer-Seiten antworten nach einer zufälligen Bedenkzeit.
       sides.filter(s => !s.human).forEach(s => {
         const [a, b] = CPU[SET.cpu].t, d = (a + Math.random() * (b - a)) * 1000 * Math.min(1, SET.time / 20);
@@ -747,6 +934,120 @@ const Question = {
   }
 };
 
+/* ============ Götterduell online ============ */
+// Asynchrone Duelle gegen andere Nutzer der Plattform: dieselben sieben Fragen, mehr Richtige gewinnt, bei Gleichstand die kürzere Zeit.
+// Anmeldung und Datenbank teilen sich alle Kurse (Supabase, Sitzung aus dem Lernportal). Tabelle: supabase/migrations/0001_goetterquiz.sql.
+const Online = {
+  sb:null, user:null, ready:false, missing:false, duels:[],
+  ONLINE_TIME:20, COUNT:7,
+  async init(){
+    const cfg = window.SR_CONFIG || {};
+    if (!cfg.supabaseUrl || !window.supabase) return;
+    Online.sb = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+    const r = await Online.sb.auth.getSession();
+    Online.user = r.data && r.data.session ? r.data.session.user : null;
+    Online.ready = true;
+    if (Online.user) await Online.load();
+    Online.render();
+  },
+  name(){ const m = Online.user.user_metadata || {}; return m.gq_name || (Online.user.email || "Gott").split("@")[0]; },
+  async load(){
+    const r = await Online.sb.from("gq_duels").select("*").order("created_at", {ascending:false}).limit(200);
+    if (r.error) { Online.missing = true; Online.duels = []; return; }
+    Online.missing = false; Online.duels = r.data || [];
+  },
+  makeSet(){
+    POOL = pool();
+    const used = {};
+    return Array.from({length:Online.COUNT}, (_, i) => { const c = rnd(4), q = pickQuestion(c, Math.min(4, 1 + Math.floor(i / 2)), used); return {c, l:q.l, q:q.q, a:q.a, src:q.src || null}; });
+  },
+  async play(set, arena, title){
+    const player = {god:0, type:"human"};
+    let right = 0, ms = 0;
+    await Online.intro(arena, title);
+    for (let i = 0; i < set.length; i++) {
+      const q = set[i];
+      const res = await Question.single(q, q.c, {rank:q.l}, player, `${arena.e} Götterduell · Frage ${i + 1} von ${set.length}`, Online.ONLINE_TIME);
+      if (res.ok) right++;
+      ms += Math.round((res.ok ? 1 - res.left : 1) * Online.ONLINE_TIME * 1000);
+      STATS.total[q.c]++; if (res.ok) STATS.right[q.c]++;
+    }
+    saveStats();
+    return {right, ms, of:set.length};
+  },
+  intro(arena, title){
+    return new Promise(resolve => {
+      $("qbox").replaceChildren(h("div", {class:"arena", "data-e":arena.e, style:`background:${arena.bg}`},
+        h("div", {class:"atitle"}, h("span", {class:"cinzel", text:`${arena.e} ${arena.n}`}), h("span", {text:title}), h("span", {class:"small", text:`${Online.COUNT} Fragen, je ${Online.ONLINE_TIME} Sekunden. Mehr Richtige gewinnt, bei Gleichstand die kürzere Zeit.`}))),
+        h("div", {class:"row", style:"justify-content:center"}, h("button", {class:"btn primary", onclick:() => { $("ov").hidden = true; resolve(); }}, "Los geht's")));
+      $("ov").hidden = false;
+    });
+  },
+  async challenge(){
+    const arena = ARENAS[rnd(ARENAS.length)], set = Online.makeSet();
+    const res = await Online.play(set, arena, "Du forderst die anderen Götter heraus.");
+    const r = await Online.sb.from("gq_duels").insert({challenger:Online.user.id, challenger_name:Online.name(), arena:arena.id, questions:set, challenger_result:res});
+    Online.done(r.error ? "Das Speichern hat nicht geklappt: " + r.error.message : `${res.right} von ${res.of} richtig in ${(res.ms / 1000).toFixed(1)} Sekunden. Deine Herausforderung steht jetzt in der Arena.`, res.right >= 5 ? "🏛️" : "📜");
+    await Online.load(); Online.render();
+  },
+  async accept(d){
+    const arena = ARENAS.find(a => a.id === d.arena) || ARENAS[0];
+    const res = await Online.play(d.questions, arena, `${d.challenger_name} hat dich herausgefordert.`);
+    const r = await Online.sb.rpc("gq_answer", {duel:d.id, name:Online.name(), result:res});
+    if (r.error || !r.data) { Online.done("Das hat nicht geklappt" + (r.error ? ": " + r.error.message : ", jemand war schneller.")); await Online.load(); Online.render(); return; }
+    const w = Online.cmp(res, d.challenger_result);
+    Online.done(`Du: ${res.right} von ${res.of} (${(res.ms / 1000).toFixed(1)} s). ${d.challenger_name}: ${d.challenger_result.right} von ${d.challenger_result.of} (${(d.challenger_result.ms / 1000).toFixed(1)} s). ` + (w > 0 ? "Du gewinnst das Götterduell!" : w < 0 ? `${d.challenger_name} gewinnt.` : "Unentschieden."), w > 0 ? "🏆" : w < 0 ? "💀" : "🤝");
+    await Online.load(); Online.render();
+  },
+  // > 0: a gewinnt gegen b.
+  cmp(a, b){ return a.right !== b.right ? a.right - b.right : b.ms - a.ms; },
+  done(txt, icon){
+    $("qbox").replaceChildren(h("div", {class:"event"}, h("div", {class:"big", text:icon || "⚡"}), h("p", {text:txt}), h("button", {class:"btn primary", onclick:() => { $("ov").hidden = true; }}, "OK")));
+    $("ov").hidden = false;
+  },
+  ago(t){ const m = Math.round((Date.now() - new Date(t)) / 60000); return m < 60 ? `vor ${m} Min.` : m < 1440 ? `vor ${Math.round(m / 60)} Std.` : `vor ${Math.round(m / 1440)} Tagen`; },
+  render(){
+    const c = $("onlineCard");
+    if (!Online.ready) { c.hidden = true; return; }
+    c.hidden = false;
+    const head = [h("h3", {style:"margin-top:0", text:"⚔ Götterduell online"}), h("p", {class:"muted small", style:"margin-top:0", text:"Fordere andere Nutzer der Lernplattform heraus. Beide spielen dieselben sieben Fragen, jeder wann er will. Mehr Richtige gewinnt, bei Gleichstand die kürzere Zeit."})];
+    if (!Online.user) return c.replaceChildren(...head, h("p", {}, "Melde dich im ", h("a", {href:"../", text:"Lernportal"}), " an, dann kannst du hier gegen andere spielen."));
+    if (Online.missing) return c.replaceChildren(...head, h("p", {class:"muted", text:"Die Online-Arena ist noch nicht eingerichtet. Sobald die Datenbanktabelle angelegt ist, geht es hier los."}));
+    const me = Online.user.id, D = Online.duels;
+    const open = D.filter(d => d.status === "open" && d.challenger !== me);
+    const mineOpen = D.filter(d => d.status === "open" && d.challenger === me);
+    const mineDone = D.filter(d => d.status === "done" && (d.challenger === me || d.opponent === me)).slice(0, 8);
+    const nm = h("input", {class:"name", value:Online.name(), maxlength:"24", "aria-label":"Dein Name in der Arena"});
+    const arenaOf = d => ARENAS.find(a => a.id === d.arena) || ARENAS[0];
+    // Ruhmeshalle: Siege aus allen fertigen Duellen.
+    const fame = {};
+    D.filter(d => d.status === "done").forEach(d => {
+      const w = Online.cmp(d.challenger_result, d.opponent_result);
+      const add = (id, name, k) => { fame[id] = fame[id] || {name, w:0, n:0}; fame[id].name = name; fame[id].n++; fame[id].w += k; };
+      add(d.challenger, d.challenger_name, w > 0 ? 1 : 0); add(d.opponent, d.opponent_name, w < 0 ? 1 : 0);
+    });
+    const top = Object.values(fame).sort((a, b) => b.w - a.w || a.n - b.n).slice(0, 5);
+    c.replaceChildren(...[...head,
+      h("div", {class:"row"}, h("button", {class:"btn primary", onclick:Online.challenge}, "Herausforderung stellen"), h("button", {class:"btn ghost", onclick:async () => { await Online.load(); Online.render(); }}, "Aktualisieren")),
+      h("div", {class:"row", style:"margin-top:10px"}, h("span", {class:"muted small", text:"Dein Name in der Arena:"}), nm,
+        h("button", {class:"btn", onclick:async () => { const v = nm.value.trim().slice(0, 24); if (!v) return; const r = await Online.sb.auth.updateUser({data:{gq_name:v}}); if (!r.error) { Online.user = r.data.user; toast("Name gespeichert."); } }}, "Speichern")),
+      h("h4", {text:"Offene Herausforderungen"}),
+      h("div", {class:"olist"}, ...(open.length ? open.map(d => h("div", {class:"oitem"}, h("span", {class:"grow"}, h("b", {text:d.challenger_name}), ` · ${arenaOf(d).e} ${arenaOf(d).n} · ${Online.ago(d.created_at)}`),
+        h("button", {class:"btn primary", onclick:() => Online.accept(d)}, "Annehmen"))) : [h("span", {class:"muted small", text:"Gerade wartet niemand. Stell selbst eine Herausforderung."})])),
+      mineOpen.length ? h("h4", {text:"Deine offenen Herausforderungen"}) : null,
+      mineOpen.length ? h("div", {class:"olist"}, ...mineOpen.map(d => h("div", {class:"oitem"}, h("span", {class:"grow", text:`${arenaOf(d).e} ${d.challenger_result.right} von ${d.challenger_result.of} richtig · ${Online.ago(d.created_at)}`}),
+        h("button", {class:"btn ghost", onclick:async () => { await Online.sb.from("gq_duels").delete().eq("id", d.id); await Online.load(); Online.render(); }}, "Zurückziehen")))) : null,
+      mineDone.length ? h("h4", {text:"Deine letzten Duelle"}) : null,
+      mineDone.length ? h("div", {class:"olist"}, ...mineDone.map(d => {
+        const iAmC = d.challenger === me, mine = iAmC ? d.challenger_result : d.opponent_result, theirs = iAmC ? d.opponent_result : d.challenger_result, other = iAmC ? d.opponent_name : d.challenger_name;
+        const w = Online.cmp(mine, theirs);
+        return h("div", {class:"oitem"}, h("span", {class:"grow", text:`${arenaOf(d).e} gegen ${other}: ${mine.right} zu ${theirs.right}`}), h("span", {class: w > 0 ? "win" : w < 0 ? "loss" : "", text: w > 0 ? "Sieg" : w < 0 ? "Niederlage" : "Unentschieden"}));
+      })) : null,
+      top.length ? h("h4", {text:"🏛️ Ruhmeshalle"}) : null,
+      top.length ? h("div", {class:"olist"}, ...top.map((t, i) => h("div", {class:"oitem"}, h("span", {class:"grow", text:`${["🥇", "🥈", "🥉", "4.", "5."][i]} ${t.name}`}), h("span", {class:"muted small", text:`${t.w} ${t.w === 1 ? "Sieg" : "Siege"} aus ${t.n} ${t.n === 1 ? "Duell" : "Duellen"}`})))) : null].filter(Boolean));
+  }
+};
+
 /* ============ Startseite ============ */
 function seg(el, opts, val, set){
   el.replaceChildren(...opts.map(([v, t]) => h("button", {type:"button", class:v === val ? "on" : "", onclick:() => { set(v); saveSet(); renderStart(); }}, t)));
@@ -756,18 +1057,29 @@ function renderStart(){
   GODS.forEach((g, i) => {
     const s = h("div", {class:"seg"});
     seg(s, [["human", "Mensch"], ["cpu", "Computer"], ["off", "Frei"]], SET.seats[i], v => SET.seats[i] = v);
+    const mine = SET.heroes[i];
+    const hs = h("div", {class:"heroes"}, ...HERO_IDS.map(id => h("button", {type:"button", class:"hchip" + (mine.includes(id) ? " on" : ""), title:`${HEROES[id].f}: ${HEROES[id].d}`,
+      onclick:() => {
+        const k = mine.indexOf(id);
+        if (k >= 0) mine.splice(k, 1); else if (mine.length < 4) mine.push(id); else return toast("Vier Helden sind gewählt. Nimm erst einen heraus.");
+        saveSet(); renderStart();
+      }}, HEROES[id].e + " " + HEROES[id].n)));
     gs.append(h("div", {class:"god", style:SET.seats[i] === "off" ? "opacity:.55" : `border-color:${g.c}`},
-      h("div", {class:"sym", text:g.s}), h("h3", {style:`color:${g.c}`, text:g.n}), h("div", {class:"muted small", style:"margin:-4px 0 8px", text:g.d}), s));
+      h("div", {class:"sym", text:g.s}), h("h3", {style:`color:${g.c}`, text:g.n}), h("div", {class:"muted small", style:"margin:-4px 0 8px", text:g.d}), s,
+      SET.seats[i] === "off" ? null : h("div", {class:"muted small", style:"margin-top:8px", text:`Helden: ${mine.length} von 4`}), SET.seats[i] === "off" ? null : hs));
   });
+  $("heroList").replaceChildren(...HERO_IDS.map(id => h("div", {}, h("b", {text:`${HEROES[id].e} ${HEROES[id].n}: ${HEROES[id].f}`}), h("br"), HEROES[id].d)));
+  seg($("optPractice"), [[-1, "Alle"], ...CATS.map((c, i) => [i, c.s])], SET.practice, v => SET.practice = v);
   seg($("optCpu"), [["leicht", "Leicht"], ["mittel", "Mittel"], ["schwer", "Schwer"]], SET.cpu, v => SET.cpu = v);
   seg($("optTime"), [[10, "10 s"], [15, "15 s"], [20, "20 s"], [30, "30 s"]], SET.time, v => SET.time = v);
   seg($("optRounds"), [[15, "Kurz (15 Runden)"], [30, "Mittel (30)"], [0, "Bis zum Ende"]], SET.rounds, v => SET.rounds = v);
   seg($("optSrc"), [["alle", "Alle"], ["eigen", "Nur Wissensfragen"], ["lesen", "Nur Lesetraining"]], SET.src, v => SET.src = v);
   seg($("optSound"), [[true, "An"], [false, "Aus"]], SET.sound, v => SET.sound = v);
   const n = SET.seats.filter(s => s !== "off").length, hu = SET.seats.filter(s => s === "human").length;
-  const ok = n >= 2 && hu >= 1;
+  const heroesOk = SET.seats.every((t, i) => t === "off" || SET.heroes[i].length === 4);
+  const ok = n >= 2 && hu >= 1 && heroesOk;
   $("go").disabled = !ok;
-  $("setupHint").textContent = ok ? `${n} Götter, ${hu === 1 ? "du gegen den Computer" : hu + " Menschen an einem Gerät"}.` : "Mindestens zwei Götter und ein Mensch.";
+  $("setupHint").textContent = !heroesOk ? "Jeder Gott braucht vier Helden." : ok ? `${n} Götter, ${hu === 1 ? "du gegen den Computer" : hu + " Menschen an einem Gerät"}.` : "Mindestens zwei Götter und ein Mensch.";
   const st = $("stats"); st.replaceChildren(
     h("div", {class:"stat"}, h("b", {text:STATS.games}), "Spiele"),
     h("div", {class:"stat"}, h("b", {text:STATS.wins}), "Siege gegen den Computer"),
@@ -785,9 +1097,28 @@ function showGame(){
   sizeBoard(); render(); scrollTo(0, 0);
   if (cur().type === "cpu" && !G.over) cpuTurn();
 }
-function start(){ newGame(); save(); showGame(); }
+function start(){ TELE.splice(0, 4, [2,2],[5,2],[2,5],[5,5]); newGame(); save(); showGame(); }
+// Übungsrunde: zehn Fragen ohne Brett, Stufe steigt alle drei Fragen.
+async function practice(){
+  POOL = pool();
+  const used = {}, player = {god:0, type:"human"};
+  let right = 0;
+  for (let i = 0; i < 10; i++) {
+    const cat = SET.practice >= 0 ? SET.practice : rnd(4), lvl = Math.min(4, 1 + Math.floor(i / 3));
+    const q = pickQuestion(cat, lvl, used);
+    const res = await Question.single(q, cat, {rank:lvl}, player, `Übungsrunde · Frage ${i + 1} von 10`);
+    STATS.total[cat]++; if (res.ok) { STATS.right[cat]++; right++; }
+  }
+  saveStats(); renderStart();
+  const box = $("qbox");
+  box.replaceChildren(h("div", {class:"event"}, h("div", {class:"big", text: right >= 8 ? "🏆" : right >= 5 ? "🦉" : "📜"}), h("h2", {class:"cinzel", style:"color:var(--gold);margin:0", text:`${right} von 10 richtig`}),
+    h("p", {text: right >= 8 ? "Zeus ist beeindruckt. Zeit für ein echtes Turnier." : right >= 5 ? "Solide. Athene sieht Potenzial." : "Übung macht den Halbgott."}),
+    h("div", {class:"row", style:"justify-content:center"}, h("button", {class:"btn primary", onclick:() => { $("ov").hidden = true; practice(); }}, "Nochmal"), h("button", {class:"btn", onclick:() => { $("ov").hidden = true; }}, "Fertig"))));
+  $("ov").hidden = false;
+}
+$("practiceGo").addEventListener("click", practice);
 $("go").addEventListener("click", start);
-$("resume").addEventListener("click", () => { G = LS.get("gq-game", null); if (!G) return renderStart(); G.busy = false; G.phase = "select"; G.sel = null; showGame(); });
+$("resume").addEventListener("click", () => { G = LS.get("gq-game", null); if (!G) return renderStart(); if (G.tele) TELE.splice(0, 4, ...G.tele); G.busy = false; G.phase = "select"; G.sel = null; showGame(); });
 $("discard").addEventListener("click", () => { LS.del("gq-game"); renderStart(); });
 $("quit").addEventListener("click", () => { if (G && !G.over) save(); showStart(); });
 $("sndBtn").addEventListener("click", () => { SET.sound = !SET.sound; saveSet(); render(); });
@@ -806,6 +1137,7 @@ $("ownSave").addEventListener("click", () => {
   renderStart();
 });
 renderStart();
+Online.init().catch(() => {});
 </script>
 </body>
 </html>
