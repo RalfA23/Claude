@@ -104,12 +104,23 @@
     return { doc: docRef, collection: colRef };
   }
 
+
+  function portalBar() {
+    if (document.getElementById("portal-back")) return;
+    const a = document.createElement("a");
+    a.id = "portal-back";
+    a.href = "../";
+    a.textContent = "← Zurück zum Lernportal";
+    a.style.cssText = "display:block;margin:0;padding:10px 16px;font:600 14px system-ui,sans-serif;text-decoration:none;color:var(--ink,#1E241F);background:var(--card,var(--surface,#fff));border-bottom:1px solid var(--line,#D9DDD3)";
+    document.body.prepend(a);
+  }
   function setup(user) {
     if (ready) return;
     ready = true;
     const db = makeDb(user);
     window.claude = Object.assign(window.claude || {}, { use: async (name) => (name === "db" ? db : null) });
     hideLogin();
+    portalBar();
     accountBar(user);
     resolveReady();
   }
