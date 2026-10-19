@@ -169,7 +169,14 @@ body.carrying,body.carrying *{cursor:grabbing!important;-webkit-user-select:none
 .tchip[aria-pressed="true"]{background:color-mix(in srgb,var(--accent) 15%,var(--card));border-color:var(--accent);font-weight:700}
 .tchips{display:flex;gap:8px;flex-wrap:wrap}
 details.tg{border:1px solid var(--line);border-radius:12px;padding:8px 12px;background:var(--card)}
-details.tg summary{cursor:pointer;font-weight:700;padding:4px 0}
+details.tg summary{cursor:pointer;font-weight:700;padding:4px 0;display:flex;align-items:center;gap:8px}
+details.tg summary .tl{flex:1}
+.tgrip{flex:none;width:28px;height:28px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--muted);cursor:grab;touch-action:none;display:flex;align-items:center;justify-content:center;padding:0;-webkit-user-select:none;user-select:none}
+.tgrip::before{content:"";width:10px;height:16px;opacity:.7;background:radial-gradient(circle,currentColor 1.3px,transparent 1.7px) 0 0/5px 5px}
+.tgrip:hover{border-color:var(--accent)}
+.tgrip:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+details.tg.carrying{outline:2px dashed var(--accent);outline-offset:3px;box-shadow:0 8px 24px var(--shade)}
+.tgs{display:flex;flex-direction:column;gap:12px}
 details.tg .tchips{padding:6px 0 4px}
 textarea.own{width:100%;min-height:140px;padding:10px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;resize:vertical}
 .big{font-size:2.2rem;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.1}
@@ -764,31 +771,61 @@ function arrangeSide(L,R){
     save(); g.focus();
   });
 })();
-const OpenGroups=new Set();
+const OpenGroups=new Set(), CUSTOM_G="Meine eigenen Themen";
+(function(){
+  let st=null; const box=()=>document.getElementById("tgs"), gs=()=>box()?[...box().querySelectorAll(":scope>details.tg")]:[];
+  const keep=()=>setPref("topicorder",gs().map(d=>d.dataset.g),false);
+  document.addEventListener("pointerdown",e=>{
+    const g=e.target.closest&&e.target.closest(".tgrip"); if(!g||e.button>0) return;
+    const d=g.closest("details.tg"); st={d,id:e.pointerId}; d.classList.add("carrying"); document.body.classList.add("carrying");
+    try{ g.setPointerCapture(e.pointerId); }catch(_){} e.preventDefault();
+  });
+  document.addEventListener("click",e=>{ if(e.target.closest&&e.target.closest(".tgrip")){ e.preventDefault(); e.stopPropagation(); } },true);
+  document.addEventListener("pointermove",e=>{
+    if(!st||e.pointerId!==st.id) return; e.preventDefault();
+    const others=gs().filter(o=>o!==st.d); let before=null;
+    for(const o of others){ const r=o.getBoundingClientRect(); if(e.clientY<r.top+r.height/2){ before=o; break; } }
+    if(st.d.nextElementSibling!==before) box().insertBefore(st.d,before);
+    if(e.clientY<70) window.scrollBy(0,-14); else if(e.clientY>window.innerHeight-70) window.scrollBy(0,14);
+  });
+  const end=e=>{ if(!st||(e&&e.pointerId!==st.id)) return; st.d.classList.remove("carrying"); document.body.classList.remove("carrying"); st=null; keep(); };
+  document.addEventListener("pointerup",end); document.addEventListener("pointercancel",end);
+  document.addEventListener("keydown",e=>{
+    const g=e.target.closest&&e.target.closest(".tgrip"); if(!g||(e.key!=="ArrowUp"&&e.key!=="ArrowDown")) return;
+    e.preventDefault(); const d=g.closest("details.tg"), l=gs(), i=l.indexOf(d), j=i+(e.key==="ArrowUp"?-1:1);
+    if(j<0||j>=l.length) return;
+    if(j<i) box().insertBefore(d,l[j]); else box().insertBefore(d,l[j].nextSibling);
+    keep(); g.focus();
+  });
+})();
 function topicsCard(){
   const sel=new Set(chosenTopics()), custom=chosenTopics().filter(t=>!AI_TOPICS.includes(t));
   const flip=t=>{ const a=chosenTopics(); const i=a.indexOf(t); if(i>=0) a.splice(i,1); else a.push(t); setPref("topics",a,true); };
   const inp=h("input",{type:"text",class:"txt",maxlength:80,placeholder:"Eigenes Thema, z. B. Die Brüder Grimm"});
   const add=()=>{ const t=inp.value.trim(); if(!t) return; const a=chosenTopics(); if(!a.includes(t)) a.push(t); setPref("topics",a,true); };
   inp.addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); add(); } });
+  const grip=()=>h("button",{type:"button",class:"tgrip","aria-label":"Gruppe verschieben (ziehen oder Pfeil hoch und runter)",title:"Zum Verschieben ziehen"});
+  const groups=Object.entries(TOPIC_GROUPS).map(([g,list])=>{
+    const d=h("details",{class:"tg","data-g":g},h("summary",{},h("span",{class:"tl"},`${g}${list.some(t=>sel.has(t))?" · "+list.filter(t=>sel.has(t)).length+" gewählt":""}`),grip()),h("div",{class:"tchips"},list.map(t=>h("button",{class:"tchip","aria-pressed":String(sel.has(t)),onclick:()=>flip(t)},t))));
+    if(OpenGroups.has(g)||list.some(t=>sel.has(t))) d.open=true;
+    d.addEventListener("toggle",()=>{ if(d.open) OpenGroups.add(g); else OpenGroups.delete(g); });
+    return {g,el:d}; });
+  if(custom.length) groups.push({g:CUSTOM_G,el:h("details",{class:"tg",open:true,"data-g":CUSTOM_G},h("summary",{},h("span",{class:"tl"},`Meine eigenen Themen · ${custom.length}`),grip()),h("div",{class:"tchips"},custom.map(t=>h("button",{class:"tchip","aria-pressed":"true",title:"Zum Entfernen anklicken",onclick:()=>flip(t)},t+" ✕"))),h("p",{class:"muted",style:"margin:4px 0 0;font-size:.85rem"},"Antippen entfernt ein Thema."))});
+  const ord=Array.isArray(prefs().topicorder)?prefs().topicorder:[], rk=g=>{ const i=ord.indexOf(g); return i<0?1e6:i; };
+  groups.sort((a,b)=>rk(a.g)-rk(b.g));
   return h("div",{class:"card pref",style:"margin-top:16px"},h("h3",{text:"Meine Themen"}),
     h("p",{class:"muted",style:"margin:0"},"Neue Übungstexte entstehen zu den Themen, die du hier wählst. Ist nichts gewählt, kommt alles gemischt. Dazu kannst du eigene Themen eintragen, auch Klassiker der Literatur oder ein Wikipedia-Stichwort."),
-    ...Object.entries(TOPIC_GROUPS).map(([g,list])=>{
-      const d=h("details",{class:"tg"},h("summary",{},`${g}${list.some(t=>sel.has(t))?" · "+list.filter(t=>sel.has(t)).length+" gewählt":""}`),h("div",{class:"tchips"},list.map(t=>h("button",{class:"tchip","aria-pressed":String(sel.has(t)),onclick:()=>flip(t)},t))));
-      if(OpenGroups.has(g)||list.some(t=>sel.has(t))) d.open=true;
-      d.addEventListener("toggle",()=>{ if(d.open) OpenGroups.add(g); else OpenGroups.delete(g); });
-      return d; }),
-    h("label",{class:"field"},"Eigenes Thema hinzufügen",h("div",{class:"row",style:"flex-wrap:nowrap"},inp,h("button",{class:"btn",onclick:add},"Hinzufügen"))),
-    custom.length?h("details",{class:"tg",open:true},h("summary",{},`Meine eigenen Themen · ${custom.length}`),h("div",{class:"tchips"},custom.map(t=>h("button",{class:"tchip","aria-pressed":"true",title:"Zum Entfernen anklicken",onclick:()=>flip(t)},t+" ✕"))),h("p",{class:"muted",style:"margin:4px 0 0;font-size:.85rem"},"Antippen entfernt ein Thema.")):null);
+    h("div",{class:"tgs",id:"tgs"},groups.map(x=>x.el)),
+    h("label",{class:"field"},"Eigenes Thema hinzufügen",h("div",{class:"row",style:"flex-wrap:nowrap"},inp,h("button",{class:"btn",onclick:add},"Hinzufügen"))));
 }
 function viewCustomize(v){
   v.append(h("div",{class:"card pref"},h("h3",{text:"So machst du die Oberfläche zu deiner"}),
     h("ol",{class:"prose",style:"margin:0;padding-left:1.2em"},
       h("li",{},"Reiter oben: am Punktegriff ziehen, am Handy gedrückt halten und ziehen."),
       h("li",{},"Karten in jedem Reiter und in den Seitenleisten: am Punktegriff oben rechts auf der Karte ziehen. Die Karten der Seitenleisten wandern auch von links nach rechts. Mit der Tastatur: Griff markieren, dann Pfeiltasten."),
-      h("li",{},"Weiter unten: Name, Farben, Schrift, Reiter ein- und ausblenden und eigene Themen."),
+      h("li",{},"Weiter unten: Name, Farben, Schrift, Reiter ein- und ausblenden und eigene Themen. Auch die Themengruppen lassen sich am Griff rechts in ihrer Zeile verschieben."),
       h("li",{},"Alles wird in deinem Konto gespeichert und gilt auf jedem Gerät.")),
-    h("div",{class:"row"},h("button",{class:"btn ghost",onclick:()=>{ S.prefs=Object.assign({},S.prefs,{cards:{},sidecards:{}}); save(); render(); }},"Kartenanordnung zurücksetzen"))));
+    h("div",{class:"row"},h("button",{class:"btn ghost",onclick:()=>{ S.prefs=Object.assign({},S.prefs,{cards:{},sidecards:{},topicorder:[]}); save(); render(); }},"Kartenanordnung zurücksetzen"))));
   const p=prefs();
   const colorIn=(label,key,fallback)=>h("label",{class:"field"},label,h("input",{type:"color",value:HEX.test(p[key]||"")?p[key]:fallback,oninput:e=>livePref(key,e.target.value),onchange:()=>save()}));
   const rootCs=getComputedStyle(document.documentElement);
