@@ -3,9 +3,9 @@ name: Trainer veröffentlichen (Lesetraining und Schachtraining)
 on:
   push:
     branches: [main]
-    paths: ["speedreading-trainer/**", "schach-trainer/**", "gevt-wissen/**", "goetterquiz/**", "wortwuerfel/**", "portal/**", ".github/workflows/speedreading-pages.yml"]
+    paths: ["speedreading-trainer/**", "schach-trainer/**", "gevt-wissen/**", "goetterquiz/**", "wortwuerfel/**", "murmelbahn/**", "portal/**", ".github/workflows/speedreading-pages.yml"]
   pull_request:
-    paths: ["speedreading-trainer/**", "schach-trainer/**", "gevt-wissen/**", "goetterquiz/**", "wortwuerfel/**", "portal/**", ".github/workflows/speedreading-pages.yml"]
+    paths: ["speedreading-trainer/**", "schach-trainer/**", "gevt-wissen/**", "goetterquiz/**", "wortwuerfel/**", "murmelbahn/**", "portal/**", ".github/workflows/speedreading-pages.yml"]
   workflow_dispatch:
 
 permissions:
@@ -50,6 +50,9 @@ jobs:
       - name: Build Wortwürfel
         working-directory: wortwuerfel
         run: node build.mjs && node -e "const s=require('fs').readFileSync('dist/index.html','utf8');const m=s.match(/<script>([\s\S]*?)<\/script>/g);for(const b of m){new Function(b.replace(/<\/?script>/g,''))}console.log('ok',m.length)"
+      - name: Build Murmelbahn
+        working-directory: murmelbahn
+        run: node build.mjs && node -e "const s=require('fs').readFileSync('dist/index.html','utf8');const m=s.match(/<script>([\s\S]*?)<\/script>/g);for(const b of m){new Function(b.replace(/<\/?script>/g,''))}console.log('ok',m.length)"
       - name: Seite zusammenstellen (Portal als Hauptadresse, Kurse in Unterordnern)
         # One shared Supabase config for everything: the config.js built for the Lesetraining.
         run: |
@@ -59,6 +62,7 @@ jobs:
           cp -r gevt-wissen/dist site/gevt
           cp -r goetterquiz/dist site/quiz
           cp -r wortwuerfel/dist site/wortwuerfel
+          cp -r murmelbahn/dist site/murmelbahn
           cp site/lesen/config.js site/schach/config.js
           cp portal/index.html site/index.html
           cp site/lesen/config.js site/config.js
