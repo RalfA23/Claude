@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#B3261E">
+<meta name="description" content="Schachtraining: Woodpecker-Aufgaben, Smirnov-Lektionen und tägliche Abfrage mit Fortschrittskontrolle.">
+<meta name="robots" content="noindex,nofollow">
+<script src="config.js"></script>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}</style>
+<script>window.SCH_HOSTED = !!(window.SR_CONFIG && window.SR_CONFIG.supabaseUrl && window.SR_CONFIG.supabaseAnonKey);</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="hosted.js"></script>
+</head>
+<body>
+<!--TRAINER-->
+<footer style="text-align:center;font:13px system-ui,sans-serif;padding:0 16px 24px;opacity:.7"><a href="../impressum.html" style="color:inherit">Impressum</a> · <a href="../datenschutz.html" style="color:inherit">Datenschutz</a></footer>
+<script>
+// Hosted: the trainer script starts after login, once the user's own training data ("daten/start") is loaded.
+// First visit on an account: the data is not there yet, so a one-time setup asks for the seed file.
+window.addEventListener("DOMContentLoaded", async function () {
+  var main = document.getElementById("sch-main");
+  if (!main) return;
+  await window.SCH_READY;
+  var db = await window.claude.use("db");
+  function run(d) {
+    document.getElementById("wpdata").textContent = JSON.stringify(d.wp || []);
+    document.getElementById("linesdata").textContent = JSON.stringify(d.lines || []);
+    document.getElementById("efdata").textContent = JSON.stringify(d.ef || []);
+    document.getElementById("ratehist").textContent = JSON.stringify(d.rate || {});
+    var s = document.createElement("script");
+    s.textContent = main.textContent;
+    document.body.appendChild(s);
+  }
+  var snap;
+  try { snap = await db.doc("daten/start").get(); } catch (e) { snap = null; }
+  if (snap && snap.exists) return run(snap.data());
+  var box = document.createElement("div");
+  box.style.cssText = "max-width:420px;margin:48px auto;padding:20px;font-family:system-ui,sans-serif;border:1px solid #D9DDD3;border-radius:12px;background:#fff;color:#1E241F;display:flex;flex-direction:column;gap:12px";
+  box.innerHTML = "<h2 style='margin:0'>Einrichtung</h2><p style='margin:0;color:#5E6A61'>Die Aufgaben und deine Daten liegen nur in deinem Konto, nicht in der Seite. Wähle einmal die Datei <b>schach-daten.json</b>, die Claude dir gegeben hat.</p><input id='sch-seed' type='file' accept='application/json,.json'><button id='sch-seed-go' style='font:inherit;font-weight:600;padding:10px 16px;border-radius:6px;border:1px solid #B3261E;background:#B3261E;color:#fff;cursor:pointer'>Einlesen</button><p id='sch-seed-msg' style='margin:0;color:#5E6A61' aria-live='polite'></p>";
+  document.body.prepend(box);
+  box.querySelector("#sch-seed-go").addEventListener("click", async function () {
+    var msg = box.querySelector("#sch-seed-msg"), f = box.querySelector("#sch-seed").files[0];
+    if (!f) { msg.textContent = "Bitte die Datei wählen."; return; }
+    try {
+      var j = JSON.parse(await f.text()), docs = j.docs || {}, n = 0;
+      if (!docs["daten/start"] || !docs["daten/start"].wp) throw new Error("Das ist nicht die Datei schach-daten.json.");
+      msg.textContent = "Einen Moment…";
+      for (var path in docs) {
+        if (!/^[a-z]+\/[A-Za-z0-9_.:-]+$/.test(path) || !docs[path] || typeof docs[path] !== "object") continue;
+        await db.doc(path).set(docs[path]);
+        n++;
+      }
+      msg.textContent = n + " Einträge gespeichert. Die Seite lädt neu …";
+      setTimeout(function () { location.reload(); }, 600);
+    } catch (e) { msg.textContent = "Das hat nicht geklappt: " + (e && e.message || "Fehler"); }
+  });
+});
+</script>
+<script>if("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(()=>{});</script>
+</body>
+</html>
