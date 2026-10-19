@@ -89,8 +89,8 @@ h3{font-family:var(--f-display);font-weight:600;font-size:1.1rem;letter-spacing:
 .progress{height:8px;background:var(--line);border-radius:4px;overflow:hidden}
 .progress>span{display:block;height:100%;background:var(--accent)}
 .btns{display:flex;flex-wrap:wrap;gap:8px}
-button.b{font-family:var(--f-body);font-weight:600;font-size:.95rem;padding:10px 16px;border-radius:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
-button.b.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+button.b,a.b{text-decoration:none;display:inline-block;font-family:var(--f-body);font-weight:600;font-size:.95rem;padding:10px 16px;border-radius:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+button.b.primary,a.b.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
 button.b.ok{background:var(--good);border-color:var(--good);color:#fff}
 button.b.no{background:var(--bad);border-color:var(--bad);color:#fff}
 button.b:disabled{opacity:.45;cursor:not-allowed}
@@ -326,6 +326,20 @@ nav.tabs.dragging button{cursor:grabbing}
   <section class="view" id="v-an" hidden></section>
 
   <!-- Eintragen -->
+  <!-- Spielen -->
+  <section class="view" id="v-sp" hidden>
+    <p class="note" style="margin:0 0 14px"><span class="here">▶ Wann?</span> Nach dem Lernen, wenn du noch eine Partie spielen willst. Gespielt wird auf Lichess oder chess.com, das öffnet sich in einem neuen Fenster. Danach holst du das Ergebnis hier ab.</p>
+    <div class="forms">
+      <div class="card"><h2>Lichess</h2><p class="note" style="margin:0">Kostenlos, ohne Werbung. Für eine Partie dort auf „Spielen“ oder „Gegen den Computer“ gehen.</p>
+        <div class="btns"><a class="b primary" href="https://lichess.org/" target="_blank" rel="noopener">Partie auf Lichess</a><a class="b" href="https://lichess.org/training" target="_blank" rel="noopener">Taktikaufgaben</a></div></div>
+      <div class="card"><h2>chess.com</h2><p class="note" style="margin:0">Online gegen Menschen oder gegen den Computer.</p>
+        <div class="btns"><a class="b primary" href="https://www.chess.com/play/online" target="_blank" rel="noopener">Online spielen</a><a class="b" href="https://www.chess.com/play/computer" target="_blank" rel="noopener">Gegen den Computer</a></div></div>
+      <div class="card"><h2>Letzte Partie abholen</h2><p class="note" style="margin:0" id="spNote">Holt deine letzte Partie von dem Konto, das du unter Anpassen eingetragen hast, und füllt „Eintragen“ für dich vor.</p>
+        <div class="btns"><button class="b" type="button" id="spLi">Letzte Partie von Lichess</button><button class="b" type="button" id="spCc">Letzte Partie von chess.com</button></div>
+        <div id="spRes" role="status" aria-live="polite"></div></div>
+    </div>
+  </section>
+
   <section class="view" id="v-log" hidden>
     <p class="note" style="margin:0 0 14px"><span class="here">▶ Wann?</span> Nur nach einer gespielten Partie (Di, Do, Sa) und einmal pro Woche die Wertung. Alles andere erfasst die Seite von selbst.</p>
     <div class="forms">
@@ -630,7 +644,7 @@ function renderHeute(){
 }
 
 /* Gestaltung: Reiter, Farben, Schrift, Seitenleisten. Gespeichert im Konto (Dokument einstellungen/ui) und lokal als Rückfall. */
-const TABS=[['heute','Heute'],['wp','Woodpecker'],['sm','Smirnov'],['fs','Fortschritt'],['an','Anpassen'],['log','Eintragen']];
+const TABS=[['heute','Heute'],['wp','Woodpecker'],['sm','Smirnov'],['sp','Spielen'],['fs','Fortschritt'],['an','Anpassen'],['log','Eintragen']];
 const VIEWS=TABS.map(t=>t[0]);
 const FONTS={'':{n:'Standard (IBM Plex)',v:''},read:{n:'Gut lesbar (Atkinson)',v:'"Atkinson Hyperlegible",system-ui,sans-serif'},serif:{n:'Buchschrift (Literata)',v:'"Literata",Georgia,serif'},mono:{n:'Schreibmaschine',v:'ui-monospace,Menlo,Consolas,monospace'}};
 const SIZES={'':{n:'Standard',px:''},s:{n:'Klein',px:'14px'},l:{n:'Groß',px:'17px'},xl:{n:'Sehr groß',px:'19px'}};
@@ -735,7 +749,7 @@ $('tabs').addEventListener('click',e=>{const b=e.target.closest('button[data-v]'
   [['v-heute','heute'],['v-an','an'],['sideL','sideL'],['sideR','sideR']].forEach(([id,key])=>{const c=document.getElementById(id);if(!c)return;
     new MutationObserver(()=>enhance(c,key)).observe(c,{childList:true,subtree:true});enhance(c,key)});
 })();
-const hashV={heute:'heute',woodpecker:'wp',eintragen:'log',fortschritt:'fs',anpassen:'an'}[location.hash.slice(1)];
+const hashV={heute:'heute',spielen:'sp',woodpecker:'wp',eintragen:'log',fortschritt:'fs',anpassen:'an'}[location.hash.slice(1)];
 let startTab=hashV;try{startTab=startTab||localStorage.getItem('tab')}catch(e){}
 
 /* Anpassen */
@@ -743,6 +757,33 @@ function h(tag,attrs,...kids){const e=document.createElement(tag);
   for(const k in (attrs||{})){const v=attrs[k];if(k==='text')e.textContent=v;else if(k.startsWith('on'))e.addEventListener(k.slice(2),v);else if(v===true)e.setAttribute(k,'');else if(v!==false&&v!=null)e.setAttribute(k,v)}
   kids.flat().forEach(c=>{if(c!=null)e.append(c)});return e}
 let konto={};
+/* Letzte Partie von Lichess oder chess.com holen und in "Eintragen" vorfüllen */
+async function letztePartie(wo){
+  const out=$('spRes'),name=(wo==='li'?konto.lichess:konto.chesscom)||'';
+  const say=t=>{out.textContent=t};
+  if(!name){say('Trag zuerst unter „Anpassen“ deinen '+(wo==='li'?'Lichess':'chess.com')+'-Benutzernamen ein.');return}
+  say('Ich hole deine letzte Partie …');
+  try{let g;
+    if(wo==='li'){const r=await fetch('https://lichess.org/api/games/user/'+encodeURIComponent(name)+'?max=1',{headers:{Accept:'application/x-ndjson'}});
+      const j=JSON.parse((await r.text()).split('\n').filter(Boolean)[0]||'null');if(!j){say('Keine Partie gefunden.');return}
+      const white=((j.players.white.user||{}).name||'').toLowerCase()===name.toLowerCase();
+      const opp=(white?j.players.black:j.players.white);
+      g={farbe:white?'Weiß':'Schwarz',res:!j.winner?'R':((j.winner==='white')===white?'S':'N'),gegner:(opp.user&&opp.user.name)||(opp.aiLevel?'Computer Stufe '+opp.aiLevel:'Gegner'),art:j.speed,ts:j.createdAt,link:'https://lichess.org/'+j.id}
+    }else{const base='https://api.chess.com/pub/player/'+encodeURIComponent(name.toLowerCase());
+      const arch=(await (await fetch(base+'/games/archives')).json()).archives||[];if(!arch.length){say('Keine Partie gefunden.');return}
+      const games=(await (await fetch(arch[arch.length-1])).json()).games||[];const j=games[games.length-1];if(!j){say('Keine Partie gefunden.');return}
+      const white=(j.white.username||'').toLowerCase()===name.toLowerCase();const me=white?j.white:j.black,opp=white?j.black:j.white;
+      g={farbe:white?'Weiß':'Schwarz',res:me.result==='win'?'S':['checkmated','timeout','resigned','abandoned','lose'].includes(me.result)?'N':'R',gegner:opp.username,art:j.time_class,ts:(j.end_time||0)*1000,link:j.url}}
+    const d=new Date(g.ts),ds=d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate());
+    const resT={S:'Sieg',R:'Remis',N:'Niederlage'}[g.res];
+    out.replaceChildren(h('p',{style:'margin:8px 0'},resT+' als '+g.farbe+' gegen '+g.gegner+' ('+g.art+') am '+deDate(ds)+'.'),
+      h('div',{class:'btns'},h('button',{type:'button',class:'b primary',onclick:()=>{
+        $('pDate').value=ds;$('pCol').value=g.farbe;$('pRes').value=g.res;$('pLink').value=g.link;
+        $('pOpp').value=g.gegner.toLowerCase().startsWith('computer')?'Computer Stufe 3':g.art==='rapid'?'Mensch Rapid':g.art==='classical'||g.art==='daily'?'Mensch Classical':'Sonstiges';
+        show('log');$('pBl').focus()}},'In „Eintragen“ übernehmen')))
+  }catch(e){say('Das hat nicht geklappt. Prüfe den Benutzernamen unter „Anpassen“ und versuch es nochmal.')}
+}
+$('spLi').addEventListener('click',()=>letztePartie('li'));$('spCc').addEventListener('click',()=>letztePartie('cc'));
 function pad2(n){return String(n).padStart(2,'0')}
 async function ladeKonten(k){
   const out={ef:[],rate:{},stand:new Date().toISOString()},info=[];
