@@ -1,0 +1,831 @@
+<title>Ralfs Schachtraining</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: Kopfzeile mit Reitern, darunter je Reiter eine Arbeitsfläche; Brett links, Steuerung rechts, mobil gestapelt */
+:root{
+  --bg:#F3F4EF; --surface:#FFFFFF; --ink:#1E241F; --muted:#5E6A61; --line:#D9DDD3;
+  --accent:#B3261E; --accent-ink:#FFFFFF;
+  --sq-light:#E9E2CF; --sq-dark:#7D9473;
+  --good:#2E7D4F; --bad:#B3261E; --warn:#A86B00;
+  --c-wp:#B3261E; --c-partie:#2F5D8A; --c-smirnov:#7D9473; --c-abfrage:#A86B00; --c-puzzle:#8A6FB0;
+  --f-display:"Barlow Condensed","Arial Narrow",sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  --f-piece:"DejaVu Sans","Segoe UI Symbol","Noto Sans Symbols 2","Apple Symbols",serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#151916; --surface:#1E2420; --ink:#E7EBE4; --muted:#9AA69C; --line:#323A34;
+  --accent:#E0574C; --accent-ink:#1A0E0D;
+  --sq-light:#CFC6AE; --sq-dark:#5E7556;
+  --good:#5DBB82; --bad:#E0574C; --warn:#E0A440;
+  --c-wp:#E0574C; --c-partie:#6E9FCF; --c-smirnov:#9DB58F; --c-abfrage:#E0A440; --c-puzzle:#B39AD6;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#151916; --surface:#1E2420; --ink:#E7EBE4; --muted:#9AA69C; --line:#323A34;
+  --accent:#E0574C; --accent-ink:#1A0E0D;
+  --sq-light:#CFC6AE; --sq-dark:#5E7556;
+  --good:#5DBB82; --bad:#E0574C; --warn:#E0A440;
+  --c-wp:#E0574C; --c-partie:#6E9FCF; --c-smirnov:#9DB58F; --c-abfrage:#E0A440; --c-puzzle:#B39AD6;
+  color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5}
+.wrap{max-width:1000px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
+header.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px;border-bottom:2px solid var(--ink);padding-bottom:10px}
+h1{font-family:var(--f-display);font-weight:700;font-size:2.1rem;letter-spacing:.01em;margin:0;line-height:1;text-wrap:balance}
+h1 small{display:block;font-family:var(--f-body);font-weight:400;font-size:.85rem;color:var(--muted);letter-spacing:0;margin-top:6px}
+nav.tabs{display:flex;gap:4px;flex-wrap:wrap}
+nav.tabs button{font-family:var(--f-display);font-weight:600;font-size:1.05rem;letter-spacing:.04em;text-transform:uppercase;background:none;border:0;color:var(--muted);padding:6px 10px;border-bottom:3px solid transparent;cursor:pointer}
+nav.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+nav.tabs button:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.note{font-size:.85rem;color:var(--muted)}
+.banner{margin-top:14px;padding:10px 12px;border:1px solid var(--warn);border-radius:6px;color:var(--ink);font-size:.9rem}
+section.view{padding-top:20px}
+h2{font-family:var(--f-display);font-weight:600;font-size:1.45rem;letter-spacing:.02em;margin:0 0 8px;text-wrap:balance}
+h3{font-family:var(--f-display);font-weight:600;font-size:1.1rem;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin:0 0 8px}
+.label{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+
+/* Woodpecker */
+.wp-grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:24px;align-items:start}
+@media (max-width:760px){
+  .wp-grid{grid-template-columns:minmax(0,1fr);gap:12px}
+  .boardbox{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-bottom:8px;gap:6px}
+  .board{max-width:min(100%,56vh);margin:0 auto}
+  .boardbox .head{display:none}
+  .boardbox .inline{display:none}
+  .boardbox .inline.top{display:flex}
+  .panel #sessCard{order:-1}
+  .pc{font-size:min(9.2vw,7vh)}
+}
+.boardbox{display:flex;flex-direction:column;gap:8px;min-width:0}
+.board{display:grid;grid-template-columns:repeat(8,1fr);width:100%;max-width:520px;aspect-ratio:1/1;border:3px solid var(--ink);border-radius:2px;position:relative;user-select:none}
+.sq{position:relative;display:flex;align-items:center;justify-content:center}
+.sq.l{background:var(--sq-light)} .sq.d{background:var(--sq-dark)}
+.pc{font-family:var(--f-piece);font-size:min(9.2vw,50px);line-height:1}
+.pc.w{color:#FFFFFF;-webkit-text-stroke:1.4px #1A1A1A;paint-order:stroke fill;text-shadow:0 1px 0 rgba(0,0,0,.25)}
+.pc.b{color:#161616;-webkit-text-stroke:.6px #161616}
+.co{position:absolute;font-family:var(--f-mono);font-size:.62rem;line-height:1;opacity:.8}
+.co.f{right:3px;bottom:2px} .co.r{left:3px;top:3px}
+.sq.l .co{color:#5E7556} .sq.d .co{color:#F1EBDA}
+.board.live .sq{cursor:pointer}
+.sq.last{box-shadow:inset 0 0 0 100px rgba(245,200,66,.45)}
+.sq.sel{box-shadow:inset 0 0 0 100px rgba(30,120,220,.45)}
+.sq.tgt::before{content:"";position:absolute;width:26%;height:26%;border-radius:50%;background:rgba(20,40,20,.35)}
+.sq.tgt.has::before{width:92%;height:92%;background:none;border:4px solid rgba(20,40,20,.35);box-sizing:border-box}
+.sq.chk{box-shadow:inset 0 0 0 100px rgba(200,40,30,.5)}
+.fb{padding:10px 12px;border-radius:6px;font-weight:600;margin-bottom:10px;border:1px solid var(--line)}
+.fb.ok{border-color:var(--good);color:var(--good)} .fb.no{border-color:var(--bad);color:var(--bad)} .fb.hint{color:var(--ink)}
+.turn{display:flex;align-items:center;gap:8px;font-weight:600}
+.turn i{width:14px;height:14px;border-radius:50%;border:2px solid var(--ink);display:inline-block}
+.turn i.w{background:#fff} .turn i.b{background:#161616}
+.panel{display:flex;flex-direction:column;gap:14px;min-width:0}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:14px}
+.stat-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.stat .v{font-family:var(--f-display);font-weight:600;font-size:1.7rem;line-height:1.1;font-variant-numeric:tabular-nums}
+.stat .v small{font-size:.9rem;color:var(--muted);font-weight:500}
+.progress{height:8px;background:var(--line);border-radius:4px;overflow:hidden}
+.progress>span{display:block;height:100%;background:var(--accent)}
+.btns{display:flex;flex-wrap:wrap;gap:8px}
+button.b{font-family:var(--f-body);font-weight:600;font-size:.95rem;padding:10px 16px;border-radius:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+button.b.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+button.b.ok{background:var(--good);border-color:var(--good);color:#fff}
+button.b.no{background:var(--bad);border-color:var(--bad);color:#fff}
+button.b:disabled{opacity:.45;cursor:not-allowed}
+button.b.sm{padding:4px 9px;font-size:.9rem;line-height:1}
+.boardbox .inline.top .inline{display:flex;gap:8px;align-items:center}
+.timer{font-family:var(--f-mono);font-size:1.05rem}
+.solution{font-size:.95rem;line-height:1.6;white-space:pre-line;border-left:3px solid var(--accent);padding-left:12px;overflow-wrap:anywhere}
+.head{font-size:.9rem;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-family:var(--f-mono);font-size:.8rem;padding:3px 8px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.chip.bad{border-color:var(--bad);color:var(--bad)}
+.inline{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.inline input{width:90px}
+
+/* Heute */
+.week{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 0}
+.week span{font-family:var(--f-mono);font-size:.75rem;padding:4px 8px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+.week span.done{border-color:var(--good);color:var(--good)}
+.week span.cur{border-color:var(--accent);color:var(--ink);font-weight:600}
+.task-title{font-family:var(--f-display);font-size:1.5rem;font-weight:600;margin:4px 0 6px}
+.carry{display:inline-block;font-size:.8rem;color:var(--bad);border:1px solid var(--bad);border-radius:999px;padding:2px 8px;margin-bottom:8px}
+/* Abfrage */
+.qz .board{max-width:min(100%,56vh);margin:10px auto}
+.qz .opt{display:flex;flex-direction:column;gap:8px;margin:10px 0}
+.qz .opt button{text-align:left;white-space:normal;line-height:1.4}
+.qz .q{font-weight:600;margin:8px 0 0}
+.qz .res{display:flex;gap:6px;margin:6px 0}
+.qz .res span{font-family:var(--f-mono);font-size:.8rem;padding:3px 8px;border-radius:999px;border:1px solid var(--line)}
+.qz .res span.ok{border-color:var(--good);color:var(--good)} .qz .res span.no{border-color:var(--bad);color:var(--bad)}
+/* Übungen */
+.ex{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;margin-top:10px}
+.ex .item{display:flex;flex-direction:column;gap:6px}
+.mini{display:grid;grid-template-columns:repeat(8,1fr);aspect-ratio:1/1;border:2px solid var(--ink);border-radius:2px;user-select:none}
+.mini .sq{overflow:hidden} .mini .pc{font-size:clamp(16px,5.5vw,30px);line-height:1}
+.ex .who{font-size:.85rem;font-weight:600}
+.ex .ans{font-size:.85rem;line-height:1.4;min-height:1.2em}
+.ex .ans b{color:var(--good)}
+/* Smirnov */
+.lessons{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+.lesson h3{margin:0 0 6px;font-family:var(--f-display);font-size:1.1rem}
+.lesson .tag{display:inline-block;font-family:var(--f-mono);font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.lesson p{margin:0 0 8px;line-height:1.5}
+.lesson p.rule{font-weight:600;border-left:3px solid var(--accent);padding-left:10px}
+.lesson ul{margin:0 0 10px;padding-left:18px;line-height:1.5}
+.lesson .foot{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:auto}
+.lesson a.clip{display:inline-flex;align-items:center;gap:6px;font-weight:600;color:var(--ink);text-decoration:none;border:1px solid var(--line);border-radius:6px;padding:8px 12px;background:var(--bg)}
+.lesson a.clip:hover{border-color:var(--accent)}
+.lesson a.clip i{width:0;height:0;border-left:9px solid var(--accent);border-top:6px solid transparent;border-bottom:6px solid transparent;display:inline-block}
+.lesson .done{font-size:.85rem;color:var(--good)}
+.lesson{display:flex;flex-direction:column}
+
+/* Forms */
+.forms{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+form{display:flex;flex-direction:column;gap:10px}
+.field{display:flex;flex-direction:column;gap:4px}
+.field label{font-size:.8rem;color:var(--muted)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+input,select,textarea{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:8px 10px;width:100%;min-width:0}
+textarea{min-height:64px;resize:vertical}
+.saved{font-size:.85rem;color:var(--good);min-height:1.2em}
+
+/* Fortschritt */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:2px}
+.kpi .v{font-family:var(--f-display);font-weight:600;font-size:1.9rem;line-height:1.1;font-variant-numeric:tabular-nums}
+.kpi .s{font-size:.82rem;color:var(--muted)}
+.pill{display:inline-block;font-size:.72rem;font-weight:600;padding:1px 7px;border-radius:999px;border:1px solid currentColor}
+.pill.good{color:var(--good)} .pill.bad{color:var(--bad)} .pill.warn{color:var(--warn)}
+.charts{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin-top:16px}
+.chart svg{width:100%;height:auto;display:block}
+.chart svg text{fill:var(--muted);font-family:var(--f-mono);font-size:10px}
+.legend{display:flex;flex-wrap:wrap;gap:10px;font-size:.78rem;color:var(--muted);margin-top:6px}
+.legend span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px;background:var(--c)}
+.tablewrap{overflow-x:auto;margin-top:16px}
+table{border-collapse:collapse;width:100%;min-width:620px;font-size:.88rem}
+th{text-align:left;font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600;border-bottom:2px solid var(--ink);padding:6px 8px}
+td{border-bottom:1px solid var(--line);padding:7px 8px;vertical-align:top}
+td.typ{white-space:nowrap}
+td.typ b{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:6px;background:var(--c)}
+.empty{color:var(--muted);font-size:.9rem;padding:12px 0}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <h1>Ralfs Schachtraining<small>Ziel Lichess Rapid 1500 · 30 Minuten am Tag</small></h1>
+    <nav class="tabs" role="tablist">
+      <button role="tab" id="tab-heute" aria-selected="true" data-v="heute">Heute</button>
+      <button role="tab" id="tab-wp" aria-selected="false" data-v="wp">Woodpecker</button>
+      <button role="tab" id="tab-sm" aria-selected="false" data-v="sm">Smirnov</button>
+      <button role="tab" id="tab-fs" aria-selected="false" data-v="fs">Fortschritt</button>
+      <button role="tab" id="tab-log" aria-selected="false" data-v="log">Eintragen</button>
+    </nav>
+  </header>
+  <div id="dbmsg" class="banner" hidden>Speichern ist in dieser Ansicht nicht möglich. Öffne die Seite über die veröffentlichte Adresse und melde dich an, damit deine Ergebnisse gespeichert werden.</div>
+
+  <!-- Heute -->
+  <section class="view" id="v-heute">
+    <div class="card" id="taskCard">
+      <span class="tag" id="taskTag">Aufgabe des Tages</span>
+      <div id="taskBody"><p class="note" style="margin:0">Lade den Wochenplan …</p></div>
+      <div class="week" id="weekRow"></div>
+    </div>
+    <div class="card" id="quizCard" style="margin-top:14px">
+      <div class="inline" style="justify-content:space-between"><h3 style="margin:0">Abfrage des Tages</h3><span class="timer" id="qzTimer"></span></div>
+      <div id="qzBody"><p class="note" style="margin:6px 0 0">Lade …</p></div>
+    </div>
+    <p class="note" style="margin-top:14px">Jeden Tag eine Aufgabe, mal Woodpecker, mal Smirnov, zufällig gemischt. Was du nicht schaffst, bleibt stehen und ist am nächsten Tag dran. Willst du gezielt etwas anderes machen, nimm die Reiter Woodpecker oder Smirnov, das zählt genauso.</p>
+  </section>
+
+  <!-- Woodpecker -->
+  <section class="view" id="v-wp">
+    <div class="wp-grid">
+      <div class="boardbox">
+        <div class="inline top" style="justify-content:space-between">
+          <div class="turn"><i id="turnDot" class="w"></i><span id="turnTxt">Weiß am Zug</span></div>
+          <div class="inline"><span class="head num" id="pNo">Aufgabe 1</span><button class="b sm" id="flip" type="button" title="Brett drehen">⟲</button></div>
+        </div>
+        <div class="board" id="board" aria-label="Schachbrett"></div>
+        <div class="head" id="pHead"></div>
+        <div class="inline">
+          <span class="note" id="badPos" hidden>Für diese Aufgabe ist das Diagramm in der Datei unsicher, im Zweifel im Buch nachsehen.</span>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="card">
+          <h3 id="cycTitle">Runde 1</h3>
+          <div class="stat-row">
+            <div class="stat"><div class="label">Erledigt</div><div class="v num" id="sDone">0<small>/222</small></div></div>
+            <div class="stat"><div class="label">Heute Ziel</div><div class="v num" id="sGoal">8</div></div>
+            <div class="stat"><div class="label">Trefferquote</div><div class="v num" id="sAcc">–</div></div>
+          </div>
+          <div class="progress" style="margin-top:10px"><span id="sBar" style="width:0%"></span></div>
+          <p class="note" id="cycInfo" style="margin:8px 0 0"></p>
+        </div>
+        <div class="card" id="sessCard">
+          <div class="inline" style="justify-content:space-between">
+            <h3 style="margin:0">Sitzung</h3>
+            <div class="timer" id="tSess">00:00</div>
+          </div>
+          <p class="note" id="sessInfo" style="margin:6px 0 10px">Starte die Sitzung, dann läuft die Uhr. Du ziehst die Figuren direkt auf dem Brett: Figur antippen, Zielfeld antippen. Die Seite prüft jeden Zug gegen die Lösung und spielt die Antwort des Gegners.</p>
+          <div class="btns" id="bStartRow"><button class="b primary" id="bStart" type="button">Sitzung starten</button></div>
+          <div id="solveRow" hidden>
+            <div class="inline" style="justify-content:space-between;margin-bottom:8px"><span class="label">Diese Aufgabe</span><span class="timer" id="tPuz">0:00</span></div>
+            <div class="fb" id="fb" hidden></div>
+            <div class="btns" id="playBtns"><button class="b" id="bGiveUp" type="button">Lösung zeigen (zählt als falsch)</button></div>
+            <div class="btns" id="fallbackBtns" hidden><button class="b primary" id="bShow" type="button">Lösung zeigen</button></div>
+            <div id="solBox" hidden style="margin-top:12px">
+              <div class="solution" id="solTxt"></div>
+              <p class="note" id="solNote" style="margin:8px 0">◆ markiert Züge, die einen Punkt geben.</p>
+              <div class="btns" id="rateBtns" hidden><button class="b ok" id="bOk" type="button">Richtig</button><button class="b no" id="bNo" type="button">Falsch</button></div>
+              <div class="btns" id="doneBtns" hidden><button class="b" id="bReplay" type="button">Lösung abspielen</button><button class="b primary" id="bNext" type="button">Weiter</button></div>
+            </div>
+            <div class="btns" style="margin-top:14px"><button class="b" id="bEnd" type="button">Sitzung beenden</button></div>
+          </div>
+          <p class="saved" id="sessSaved"></p>
+        </div>
+        <div class="card">
+          <h3>Zum Wiederholen</h3>
+          <p class="note" style="margin:0 0 8px">Aufgaben, die du in dieser Runde falsch hattest. Antippen zeigt die Stellung ohne Wertung.</p>
+          <div class="chips" id="wrongChips"><span class="empty">Noch keine.</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Smirnov -->
+  <section class="view" id="v-sm" hidden>
+    <p class="note" style="margin:0 0 14px">Die Kernregeln von GM Igor Smirnov, kurz zusammengefasst aus seinen frei zugänglichen Lektionen und Newslettern. Jeder Clip öffnet sich auf YouTube (Einbetten geht hier nicht). Zu jeder Lektion gibt es drei Stellungen aus deinen eigenen Partien, an denen du die Regel anwendest. Danach „Gelernt“ drücken, die Zeit wird gemessen.</p>
+    <div class="lessons" id="lessons"></div>
+    <p class="note" style="margin-top:14px">Die gekauften Kurse (Super Pack, Boost Your ELO) liegen nur auf deinem Rechner. Wenn du daraus PDFs oder PGNs hochlädst, bauen wir die Inhalte hier ein.</p>
+  </section>
+
+  <!-- Eintragen -->
+  <section class="view" id="v-log" hidden>
+    <div class="forms">
+      <form class="card" id="fPartie">
+        <h2>Partie</h2>
+        <div class="two">
+          <div class="field"><label for="pDate">Datum</label><input type="date" id="pDate" required></div>
+          <div class="field"><label for="pMin">Minuten</label><input type="number" id="pMin" min="1" max="300" value="25"></div>
+        </div>
+        <div class="two">
+          <div class="field"><label for="pOpp">Gegner</label><select id="pOpp"><option>Mensch Rapid</option><option>Mensch Classical</option><option>Computer Stufe 3</option><option>Computer Stufe 4</option><option>Computer Stufe 5</option><option>Sonstiges</option></select></div>
+          <div class="field"><label for="pCol">Farbe</label><select id="pCol"><option>Weiß</option><option>Schwarz</option></select></div>
+        </div>
+        <div class="two">
+          <div class="field"><label for="pRes">Ergebnis</label><select id="pRes"><option value="S">Sieg</option><option value="R">Remis</option><option value="N">Niederlage</option></select></div>
+          <div class="field"><label for="pBl">Grobe Fehler</label><input type="number" id="pBl" min="0" max="20" value="0"></div>
+        </div>
+        <div class="field"><label for="pErr">Größter Fehler, in einem Satz</label><textarea id="pErr" placeholder="Zug 12: Läufer auf f4 hing, Gegner hatte die Dame schon auf d6."></textarea></div>
+        <div class="field"><label for="pLink">Lichess-Link (optional)</label><input type="url" id="pLink" placeholder="https://lichess.org/…"></div>
+        <button class="b primary" type="submit">Partie speichern</button>
+        <p class="saved" id="pSaved"></p>
+      </form>
+      <form class="card" id="fSmir">
+        <h2>Smirnov-Lektion</h2>
+        <div class="two">
+          <div class="field"><label for="sDate">Datum</label><input type="date" id="sDate" required></div>
+          <div class="field"><label for="sMin">Minuten</label><input type="number" id="sMin" min="1" max="180" value="10"></div>
+        </div>
+        <div class="field"><label for="sCourse">Kurs</label><input id="sCourse" value="My Thinking System"></div>
+        <div class="field"><label for="sLesson">Lektion</label><input id="sLesson" placeholder="z. B. Lektion 3"></div>
+        <div class="field"><label for="sTake">Was nehme ich mit?</label><textarea id="sTake" placeholder="Vor jedem Zug zuerst fragen: Was will mein Gegner?"></textarea></div>
+        <button class="b primary" type="submit">Lektion speichern</button>
+        <p class="saved" id="sSaved"></p>
+      </form>
+      <form class="card" id="fImp">
+        <h2>Daten übernehmen</h2>
+        <p class="note" style="margin:0">Einmalig: Sicherungsdatei aus der bisherigen Claude-Seite einlesen. Vorhandene Einträge mit gleicher Kennung werden überschrieben.</p>
+        <div class="field"><label for="impFile">Sicherung (.json)</label><input type="file" id="impFile" accept="application/json,.json"></div>
+        <button class="b primary" type="submit">Einlesen</button>
+        <p class="saved" id="impSaved"></p>
+      </form>
+      <form class="card" id="fRate">
+        <h2>Lichess-Wertung</h2>
+        <p class="note" style="margin:0">Einmal pro Woche reicht, am besten sonntags.</p>
+        <div class="two">
+          <div class="field"><label for="rDate">Datum</label><input type="date" id="rDate" required></div>
+          <div class="field"><label for="rVal">Rapid</label><input type="number" id="rVal" min="400" max="3000" required></div>
+        </div>
+        <button class="b primary" type="submit">Wertung speichern</button>
+        <p class="saved" id="rSaved"></p>
+      </form>
+    </div>
+  </section>
+
+  <!-- Fortschritt -->
+  <section class="view" id="v-fs" hidden>
+    <div class="kpis" id="kpis"></div>
+    <div class="charts">
+      <div class="card chart"><h3>Trainingsminuten, letzte 28 Tage</h3><div id="chMin"></div>
+        <div class="legend"><span style="--c:var(--c-wp)">Woodpecker</span><span style="--c:var(--c-partie)">Partie</span><span style="--c:var(--c-smirnov)">Smirnov</span><span style="--c:var(--c-abfrage)">Abfrage</span></div></div>
+      <div class="card chart"><h3>Lichess Rapid</h3><div id="chRate"></div></div>
+      <div class="card chart"><h3>Woodpecker je Runde</h3><div id="chWp"></div>
+        <div class="legend"><span style="--c:var(--accent)">Trefferquote</span><span style="--c:var(--muted)">Sekunden pro Aufgabe</span></div></div>
+      <div class="card chart"><h3>Grobe Fehler pro Partie</h3><div id="chBl"></div></div>
+    </div>
+    <h2 style="margin-top:24px">Trainingstagebuch</h2>
+    <p class="note" style="margin:0">Wann, was, wie lange, Ergebnis und was zu verbessern ist. Die Abfragen und Wochenauswertungen trägt Claude hier ein.</p>
+    <div class="tablewrap"><table><thead><tr><th>Datum</th><th>Was</th><th>Min.</th><th>Ergebnis</th><th>Fehler und Verbesserung</th></tr></thead><tbody id="journal"></tbody></table></div>
+    <div class="empty" id="journalEmpty" hidden>Noch keine Einträge. Starte eine Woodpecker-Sitzung oder trag eine Partie ein.</div>
+  </section>
+</div>
+
+<script type="application/json" id="wpdata">__WP__</script>
+<script type="application/json" id="efdata">__EF__</script>
+<script type="application/json" id="ratehist">__RATE__</script>
+<script type="application/json" id="linesdata">__LINES__</script>
+<script>
+/* chess.js 0.13.4, Jeff Hlywa, BSD-2-Clause, inline */
+__CHESSJS__
+</script>
+<script>
+(function(){
+const WP=JSON.parse(document.getElementById('wpdata').textContent);
+const RATE0=JSON.parse(document.getElementById('ratehist').textContent);
+const EF=JSON.parse(document.getElementById('efdata').textContent);
+const LINES=JSON.parse(document.getElementById('linesdata').textContent);
+const SET=222, CYCLE_DAYS=[28,14,7,4,2,1,1];
+const $=id=>document.getElementById(id);
+const pad=n=>String(n).padStart(2,'0');
+const today=()=>{const d=new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())};
+const fmt=s=>{s=Math.max(0,Math.round(s));return Math.floor(s/60)+':'+pad(s%60)};
+const deDate=s=>{if(!s)return'';const [y,m,d]=s.split('-');return d+'.'+m+'.'+y.slice(2)};
+const addDays=(s,n)=>{const d=new Date(s+'T12:00:00');d.setDate(d.getDate()+n);return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())};
+const daysBetween=(a,b)=>Math.round((new Date(b+'T12:00:00')-new Date(a+'T12:00:00'))/864e5);
+
+/* Smirnov-Lektionen */
+const LESSONS=[
+ {id:'anti-blunder',tag:'Lektion 1 · Dein Hauptproblem',title:'Der Anti-Patzer-Check',
+  rule:'Bevor du ziehst: Welche Schachs, Schlagzüge und Drohungen hat mein Gegner nach meinem Zug?',
+  why:'Deine Partien verlierst du nicht an Strategie, sondern an ungedeckten Figuren, im Schnitt drei grobe Fehler pro Partie. Smirnov nennt das die CCT-Regel: Checks, Captures, Threats.',
+  how:['Zug im Kopf ausführen, noch nicht loslassen.','Alle gegnerischen Schachs und Schlagzüge durchgehen.','Erst dann ziehen. Dauert 5 Sekunden, spart 300 Punkte.'],
+  clip:'https://youtu.be/NakGgR8g9Z8',clipTitle:'You’ll never blunder after this idea (5 Min)'},
+ {id:'gegner-plan',tag:'Lektion 2',title:'Was will mein Gegner?',
+  rule:'Frag nach jedem gegnerischen Zug zuerst: Warum hat er das gezogen? Was droht er?',
+  why:'Die meisten Fehler unter 1500 entstehen, weil man nur den eigenen Plan sieht. Smirnov: Reagiere aber nur auf echte Drohungen, nicht auf Scheindrohungen.',
+  how:['Nach jedem Gegnerzug: Was greift er an? Was hat er freigegeben?','Ist die Drohung echt? Wenn nein, eigenen Plan weiterspielen.','Wenn ja: Kann ich mit einer stärkeren Gegendrohung antworten statt passiv zu decken?'],
+  clip:'https://youtu.be/5TDZ4UzUqdA',clipTitle:'4 Fehler, die dich unter 2000 halten'},
+ {id:'cctv',tag:'Lektion 3 · Denksystem',title:'Zugwahl in drei Schritten',
+  rule:'Erst Schachs, dann Schlagzüge, dann Drohungen prüfen. Erst wenn nichts Erzwungenes geht: Welche Figur ist am wenigsten aktiv?',
+  why:'Das ist der Kern von „My Thinking System“: eine feste Reihenfolge statt Herumsuchen. Erzwungene Züge zuerst, weil sie das Spiel entscheiden.',
+  how:['Kandidatenzüge in der Reihenfolge CCT sammeln.','Wenn kein erzwungener Zug gut ist: schlechteste eigene Figur verbessern.','Gegenangriff vor Verteidigung: Wenn er droht, schau zuerst, ob du stärker drohen kannst.'],
+  clip:'https://youtu.be/6hObCAIzsCE',clipTitle:'So denken 1000er und 2000er unterschiedlich'},
+ {id:'rechnen',tag:'Lektion 4',title:'Richtig rechnen: Gib dem Gegner einen guten Zug',
+  rule:'Rechne eine Variante nie mit dem Zug, den du dir wünschst, sondern mit der lästigsten Antwort des Gegners.',
+  why:'Smirnov: Starke Spieler rechnen nicht weiter, sie rechnen das Richtige. Wunschdenken ist der häufigste Rechenfehler bei Vereinsspielern.',
+  how:['Kandidatenzug wählen, dann bewusst die beste Verteidigung suchen.','Varianten, die offensichtlich nicht gehen, sofort streichen.','Erst bewerten, dann rechnen: Wer steht besser, was ist das Ziel?'],
+  clip:'https://youtu.be/0M_7HCpDvAg',clipTitle:'Die richtige Rechenmethode'},
+ {id:'fischer',tag:'Lektion 5',title:'Fischers Goldene Regel',
+  rule:'Steht eine gegnerische Figur aktiv in deiner Hälfte, kümmere dich zuerst um sie: vertreiben, tauschen oder einsperren.',
+  why:'Eingedrungene Figuren sind die Quelle der meisten Taktiken gegen dich. Smirnov leitet die Regel aus Fischers Partien ab.',
+  how:['Nach dem Gegnerzug: Steht eine Figur auf meiner Bretthälfte?','Kann ich sie mit einem Bauern vertreiben oder abtauschen?','Lass umgekehrt keine Figur kampflos in dein Lager.'],
+  clip:'https://youtu.be/X6-tjicM_h8',clipTitle:'10 schlechte Gewohnheiten (Regel 3 und 4)'},
+ {id:'aktiv',tag:'Lektion 6',title:'Angriff mit allen, nicht mit einer',
+  rule:'Greife nie mit ein oder zwei Figuren an. Bring erst alle Figuren ins Spiel, dann schlag zu.',
+  why:'Dein Frühangriff mit Dame und Läufer gewinnt gegen Stufe 3, scheitert aber gegen Menschen. Smirnov: Entwicklung geht vor Angriff.',
+  how:['Eröffnung: Beide Springer, beide Läufer, Rochade, erst dann Pläne.','Zähle vor dem Angriff: Wie viele meiner Figuren wirken mit, wie viele verteidigen?','Keine Flügelbauern schieben, wenn du keinen Plan hast.'],
+  clip:'https://youtu.be/TzUBh2iEU30',clipTitle:'14 Positionsregeln'},
+];
+function lessonLogged(){const logged={};sitzungen.filter(s=>s.typ==='smirnov').forEach(s=>{const k=(s.lektion||'').trim();if(k&&(!logged[k]||logged[k]<s.datum))logged[k]=s.datum});return logged}
+function lessonCard(l,logged){const d=logged[l.title];return `<div class="card lesson" data-id="${l.id}">
+    <span class="tag">${l.tag}</span><h3>${l.title}</h3>
+    <p class="rule">${l.rule}</p><p>${l.why}</p>
+    <ul>${l.how.map(h=>'<li>'+h+'</li>').join('')}</ul>
+    <div class="foot"><a class="clip" href="${l.clip}" target="_blank" rel="noopener"><i></i>${l.clipTitle}</a>
+    <button class="b sm" data-learn="${l.id}">Gelernt</button>
+    <span class="done">${d?'Zuletzt am '+deDate(d):''}</span></div></div>`}
+function bindLearn(box){box.querySelectorAll('[data-learn]').forEach(b=>b.addEventListener('click',()=>{const l=LESSONS.find(x=>x.id===b.dataset.learn);b.disabled=true;const mins=lessonShownAt?Math.max(1,Math.min(60,Math.round((Date.now()-lessonShownAt)/60000))):10;
+    const span=b.parentElement.querySelector('.done');span.id='ls-'+l.id+'-'+Date.now();
+    addEntry({typ:'smirnov',datum:today(),minuten:mins,kurs:'Smirnov-Lektion (Seite)',lektion:l.title,notiz:l.rule},span.id);
+    const cur=curTask();if(cur&&cur.typ==='sm'&&cur.lesson===l.id)advanceTask();}))}
+function miniBoard(fen){const parts=fen.split(' ');const rows=parts[0].split('/');const black=parts[1]==='b';let h='<div class="mini">';
+  for(let i=0;i<8;i++){const r=black?7-i:i;let f=0;const cells=[];for(const ch of rows[r]){if(/\d/.test(ch)){for(let k=0;k<+ch;k++)cells.push(null)}else cells.push(ch)}
+    for(let j=0;j<8;j++){const c=black?7-j:j;const p=cells[c];const col=((r+c)%2===0)?'l':'d';
+      h+='<div class="sq '+col+'">'+(p?'<span class="pc '+(p===p.toUpperCase()?'w':'b')+'">'+GL[p.toLowerCase()]+'\uFE0E</span>':'')+'</div>'}}
+  return h+'</div>'}
+function exercisesHtml(lessonIdx){const seed=(+today().replace(/-/g,'')+lessonIdx*7919)%EF.length;const picks=[0,1,2].map(k=>EF[(seed+k*61)%EF.length]);
+  return '<p class="note" style="margin:12px 0 0"><strong>Üben an deinen eigenen Partien.</strong> Wende die Regel an, bevor du auflöst: Was droht der Gegner, was ziehst du?</p><div class="ex">'+picks.map((e,k)=>{const w=e[0].split(' ')[1]==='w';
+    return '<div class="item"><span class="who">Stellung '+(k+1)+', '+(w?'Weiß':'Schwarz')+' am Zug (Partie vom '+e[5].replace(/\./g,'-').split('-').reverse().join('.')+')</span>'+miniBoard(e[0])+'<div class="btns"><button class="b sm" type="button" data-ans="'+k+'">Auflösen</button><a class="chip" href="https://lichess.org/analysis/'+e[0].replace(/ /g,'_')+'" target="_blank" rel="noopener">Auf Lichess</a></div><div class="ans" id="ans-'+lessonIdx+'-'+k+'"></div></div>'}).join('')+'</div>'}
+function bindExercises(box,lessonIdx){const seed=(+today().replace(/-/g,'')+lessonIdx*7919)%EF.length;box.querySelectorAll('[data-ans]').forEach(b=>b.addEventListener('click',()=>{const k=+b.dataset.ans;const e=EF[(seed+k*61)%EF.length];b.disabled=true;
+  $('ans-'+lessonIdx+'-'+k).innerHTML='Du hast <b>'+e[1]+'</b> gespielt, danach kam '+e[3]+'. Besser war <b>'+e[2]+'</b>. Das hat dich etwa '+(e[4]/100).toFixed(1)+' Bauerneinheiten gekostet.'}))}
+let lessonShownAt=0;
+function renderLessons(){const box=$('lessons');if(!box)return;const logged=lessonLogged();box.innerHTML=LESSONS.map((l,i)=>lessonCard(l,logged).replace('</div></div>','<button class="b sm" type="button" data-ex="'+i+'">Üben</button></div><div class="exbox"></div></div>')).join('');bindLearn(box);lessonShownAt=Date.now();
+  box.querySelectorAll('[data-ex]').forEach(b=>b.addEventListener('click',()=>{const i=+b.dataset.ex;const eb=b.closest('.lesson').querySelector('.exbox');eb.innerHTML=exercisesHtml(i);bindExercises(eb,i);b.hidden=true}))}
+
+/* Abfrage des Tages */
+const QBANK={
+ 'anti-blunder':[['Was prüfst du beim Gegner, bevor du den Zug loslässt?',['Schachs, Schlagzüge, Drohungen, in dieser Reihenfolge','Nur, ob mein Zug eine Figur hängen lässt','Ob ich selbst ein Schach geben kann']],['Wann machst du den Anti-Patzer-Check?',['Vor jedem Zug, auch bei scheinbar sicheren','Nur in taktischen Stellungen','Nur, wenn ich viel Zeit habe']]],
+ 'gegner-plan':[['Der Gegner greift eine Figur an. Was zuerst?',['Prüfen, ob die Drohung echt ist, dann eine stärkere Gegendrohung suchen','Sofort die Figur wegziehen','Ignorieren und den eigenen Plan weiterspielen']],['Erste Frage nach jedem Gegnerzug?',['Warum hat er das gezogen, was droht er?','Welche Figur kann ich jetzt angreifen?','Wie viele Züge bis zum Matt?']]],
+ 'cctv':[['Reihenfolge der Kandidatenzüge?',['Schachs, Schlagzüge, Drohungen, dann Figur verbessern','Drohungen zuerst, dann Schachs','Bauernzüge zuerst']],['Nichts Erzwungenes geht. Was dann?',['Die am wenigsten aktive Figur verbessern','Einen Flügelbauern schieben','Abwarten und tauschen']]],
+ 'rechnen':[['Mit welcher Antwort des Gegners rechnest du?',['Mit der lästigsten, besten Verteidigung','Mit der, die ich mir wünsche','Mit der ersten, die mir einfällt']],['Was kommt vor dem Rechnen?',['Bewerten: Wer steht besser, was ist das Ziel?','So viele Varianten wie möglich sammeln','Die Uhr prüfen']]],
+ 'fischer':[['Eine gegnerische Figur steht aktiv in deiner Hälfte. Was tust du?',['Zuerst vertreiben, tauschen oder einsperren','Ignorieren und selbst angreifen','Den König sofort wegziehen']],['Warum sind eingedrungene Figuren gefährlich?',['Sie sind die Quelle der meisten Taktiken gegen dich','Sie zählen mehr Material','Sie blockieren nur Bauern']]],
+ 'aktiv':[['Du willst angreifen. Voraussetzung?',['Alle Figuren entwickelt, König rochiert','Dame möglichst früh draußen','Zwei Figuren reichen für den Angriff']],['Kein Plan in der Stellung?',['Schlechteste Figur verbessern, keine Flügelbauern schieben','Flügelbauern vorschieben','Möglichst viel tauschen']]]
+};
+function dayNum(){return +today().replace(/-/g,'')}
+function makeBoard(el,onMove){
+  const B={game:null,flipped:false,sel:null,tg:[],last:null,locked:true,
+    load(fen){B.game=new Chess();B.game.load(fen);B.flipped=B.game.turn()==='b';B.sel=null;B.tg=[];B.last=null;B.draw()},
+    draw(){const g=B.game;if(!g)return;el.innerHTML='';el.classList.toggle('live',!B.locked);const turn=g.turn(),chk=g.in_check();
+      for(let i=0;i<8;i++)for(let j=0;j<8;j++){const r=B.flipped?7-i:i,f=B.flipped?7-j:j;const name=FILES[f]+(8-r);
+        const sq=document.createElement('div');sq.className='sq '+(((r+f)%2===0)?'l':'d');const p=g.get(name);
+        if(p){const s=document.createElement('span');s.className='pc '+p.color;s.textContent=GL[p.type]+'\uFE0E';sq.appendChild(s);if(chk&&p.type==='k'&&p.color===turn)sq.classList.add('chk')}
+        if(B.last&&(B.last[0]===name||B.last[1]===name))sq.classList.add('last');if(B.sel===name)sq.classList.add('sel');
+        if(B.tg.includes(name)){sq.classList.add('tgt');if(p)sq.classList.add('has')}
+        if(i===7){const c=document.createElement('span');c.className='co f';c.textContent=FILES[f];sq.appendChild(c)}
+        if(j===0){const c=document.createElement('span');c.className='co r';c.textContent=8-r;sq.appendChild(c)}
+        sq.addEventListener('click',()=>B.click(name));el.appendChild(sq)}},
+    click(name){if(B.locked||!B.game)return;const g=B.game,p=g.get(name);
+      if(B.sel){if(B.tg.includes(name)){const from=B.sel;B.sel=null;B.tg=[];onMove(from,name);return}
+        if(p&&p.color===g.turn()&&name!==B.sel){B.sel=name;B.tg=g.moves({square:name,verbose:true}).map(m=>m.to);B.draw();return}
+        B.sel=null;B.tg=[];B.draw();return}
+      if(p&&p.color===g.turn()){B.sel=name;B.tg=g.moves({square:name,verbose:true}).map(m=>m.to);B.draw()}}
+  };return B;
+}
+let quiz=null, qzBoard=null, qzTick=null;
+const sanKey=s=>String(s||'').replace(/[+#!?]/g,'');
+function quizPlan(){
+  const d=dayNum();const ef=EF[(d*31)%EF.length];const efIdx=(d*31)%EF.length;
+  const wps=sitzungen.filter(s=>s.typ==='woodpecker').sort((a,b)=>(a.ts||'')<(b.ts||'')?1:-1);
+  let wrong=[];wps.forEach(s=>(s.versuche||[]).forEach(v=>{if(!v.ok&&(LINES[v.n-1]||[]).length&&!wrong.includes(v.n))wrong.push(v.n)}));
+  let wn=wrong.length?wrong[d%wrong.length]:null;if(!wn){const n=Math.max(1,(stand.naechste||1)-1);wn=(LINES[n-1]||[]).length?n:1}
+  const sm=sitzungen.filter(s=>s.typ==='smirnov').sort((a,b)=>(a.ts||'')<(b.ts||'')?1:-1)[0];
+  let lid=sm?(LESSONS.find(l=>l.title===(sm.lektion||'').trim())||{}).id:null;if(!lid||!QBANK[lid])lid=Object.keys(QBANK)[d%6];
+  const qs=QBANK[lid];const q=qs[d%qs.length];const opts=q[1].map((o,i)=>({o,ok:i===0}));for(let i=opts.length-1;i>0;i--){const j=(d*(i+7))%(i+1);[opts[i],opts[j]]=[opts[j],opts[i]]}
+  return {efIdx,ef,wn,lid,q:q[0],opts};
+}
+function qzStart(){quiz={plan:quizPlan(),step:0,t0:Date.now(),res:[],notes:[]};qzTick=setInterval(()=>{if(quiz)$('qzTimer').textContent=fmt((Date.now()-quiz.t0)/1000)},500);qzRender()}
+function qzRender(){
+  const box=$('qzBody');box.className='qz';const P=quiz.plan;const s=quiz.step;
+  const resHtml='<div class="res">'+quiz.res.map((r,i)=>'<span class="'+(r?'ok':'no')+'">'+(i+1)+(r?' ✓':' ✗')+'</span>').join('')+'</div>';
+  if(s===0){const e=P.ef;const w=e[0].split(' ')[1]==='w';
+    box.innerHTML='<p class="q">1 von 3: Aus deiner Partie vom '+e[5].split('.').reverse().join('.')+', '+(w?'Weiß':'Schwarz')+' am Zug. Zieh den besten Zug.</p><div class="board" id="qzB"></div><div class="fb" id="qzFb" hidden></div><div class="btns" id="qzBtns"></div>';
+    qzBoard=makeBoard($('qzB'),(from,to)=>{const g=qzBoard.game;const m=g.move({from,to,promotion:'q'});qzBoard.last=[from,to];qzBoard.locked=true;qzBoard.draw();
+      const ok=sanKey(m.san)===sanKey(e[2]);quiz.res.push(ok);quiz.notes.push('Stellung '+P.efIdx+': '+(ok?'richtig ('+m.san+')':'falsch, gezogen '+m.san+', best '+e[2]));
+      const f=$('qzFb');f.hidden=false;f.className='fb '+(ok?'ok':'no');f.textContent=ok?'Richtig, '+figurine(m.san)+' war der beste Zug.':'Nicht der beste. Du hast '+figurine(m.san)+' gezogen. Am besten war '+figurine(e[2])+'. In der Partie kam '+figurine(e[1])+', danach '+figurine(e[3])+'.';
+      $('qzBtns').innerHTML='<button class="b primary" type="button" id="qzNext">Weiter</button>';$('qzNext').addEventListener('click',()=>{quiz.step=1;qzRender()})});
+    qzBoard.load(e[0]);qzBoard.locked=false;qzBoard.draw();
+  }else if(s===1){const n=P.wn;const p=WP[n-1];const line=LINES[n-1];
+    box.innerHTML=resHtml+'<p class="q">2 von 3: Woodpecker Nr. '+n+', '+(p[1]==='w'?'Weiß':'Schwarz')+' am Zug. Zieh den Schlüsselzug.</p><div class="head">'+p[2]+'</div><div class="board" id="qzB"></div><div class="fb" id="qzFb" hidden></div><div class="btns" id="qzBtns"></div>';
+    qzBoard=makeBoard($('qzB'),(from,to)=>{const g=qzBoard.game;const exp=line[0];const cands=g.moves({square:from,verbose:true}).filter(m=>m.to===to);const promo=cands[0]&&cands[0].promotion?(exp.slice(0,4)===from+to&&exp[4]?exp[4]:'q'):undefined;
+      const uci=from+to+(promo||'');const best=g.moves({verbose:true}).find(m=>m.from+m.to+(m.promotion||'')===exp);const bestSan=best?best.san:exp;
+      const m=g.move({from,to,promotion:promo});qzBoard.last=[from,to];qzBoard.locked=true;qzBoard.draw();const ok=uci===exp;quiz.res.push(ok);quiz.notes.push('Woodpecker Nr. '+n+': '+(ok?'richtig':'falsch, gezogen '+m.san+', Lösung '+bestSan));
+      const f=$('qzFb');f.hidden=false;f.className='fb '+(ok?'ok':'no');f.textContent=(ok?'Richtig. ':'Falsch, du hast '+figurine(m.san)+' gezogen. ')+'Lösung: '+figurine(p[3]);
+      $('qzBtns').innerHTML='<button class="b primary" type="button" id="qzNext">Weiter</button>';$('qzNext').addEventListener('click',()=>{quiz.step=2;qzRender()})});
+    qzBoard.load(p[0]+' '+p[1]+' - - 0 1');qzBoard.locked=false;qzBoard.draw();
+  }else if(s===2){const l=LESSONS.find(x=>x.id===P.lid);
+    box.innerHTML=resHtml+'<p class="q">3 von 3, '+l.title+': '+P.q+'</p><div class="opt">'+P.opts.map((o,i)=>'<button class="b" type="button" data-o="'+i+'">'+o.o+'</button>').join('')+'</div><div class="fb" id="qzFb" hidden></div><div class="btns" id="qzBtns"></div>';
+    box.querySelectorAll('[data-o]').forEach(b=>b.addEventListener('click',()=>{const o=P.opts[+b.dataset.o];box.querySelectorAll('[data-o]').forEach(x=>x.disabled=true);quiz.res.push(o.ok);quiz.notes.push('Theorie ('+l.title+'): '+(o.ok?'richtig':'falsch, gewählt „'+o.o+'“'));
+      const f=$('qzFb');f.hidden=false;f.className='fb '+(o.ok?'ok':'no');f.textContent=o.ok?'Richtig.':'Nein. Richtig: '+P.opts.find(x=>x.ok).o;
+      $('qzBtns').innerHTML='<button class="b primary" type="button" id="qzNext">Abschließen</button>';$('qzNext').addEventListener('click',qzFinish)}));
+  }
+}
+async function qzFinish(){
+  clearInterval(qzTick);const mins=Math.max(1,Math.round((Date.now()-quiz.t0)/60000));const richtig=quiz.res.filter(Boolean).length;
+  const doc={typ:'abfrage',datum:today(),ts:new Date().toISOString(),minuten:mins,richtig,gesamt:3,notiz:quiz.notes.join(' · '),stellung:quiz.plan.efIdx,woodpecker:quiz.plan.wn,lektion:quiz.plan.lid,ergebnisse:quiz.res};
+  sitzungen.push({id:'abfrage-'+today(),...doc});
+  if(db){try{await db.doc('sitzungen/abfrage-'+today()).set(doc)}catch(e){}}
+  quiz=null;$('qzTimer').textContent='';renderQuiz();
+}
+function renderQuiz(){
+  const box=$('qzBody');if(!box||quiz)return;box.className='qz';
+  const done=sitzungen.find(s=>s.typ==='abfrage'&&s.datum===today());
+  if(done){box.innerHTML='<div class="res">'+(done.ergebnisse||[]).map((r,i)=>'<span class="'+(r?'ok':'no')+'">'+(i+1)+(r?' ✓':' ✗')+'</span>').join('')+'</div><p style="margin:6px 0 0">Heute erledigt: '+done.richtig+' von '+done.gesamt+' richtig, '+done.minuten+' Minuten. '+(done.notiz||'')+'</p>';return}
+  box.innerHTML='<p class="note" style="margin:6px 0 10px">Drei Fragen, etwa fünf Minuten: eine Stellung aus deinen Partien, eine Woodpecker-Aufgabe von gestern, eine Frage zur Lektion. Du ziehst am Brett, die Seite wertet. Das Ergebnis liest Claude abends mit.</p><div class="btns"><button class="b primary" type="button" id="qzGo">Abfrage starten</button></div>';
+  $('qzGo').addEventListener('click',qzStart);
+}
+
+/* Heute: Tagesaufgabe */
+let heute=null;
+function makePlan(rot){
+  const items=[{typ:'wp',anzahl:8},{typ:'wp',anzahl:8},{typ:'wp',anzahl:8},{typ:'wp',anzahl:8}];
+  for(let i=0;i<3;i++)items.push({typ:'sm',lesson:LESSONS[(rot+i)%LESSONS.length].id});
+  for(let i=items.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[items[i],items[j]]=[items[j],items[i]]}
+  return {plan:items,idx:0,ab:today(),abTs:new Date().toISOString(),start:today(),rot:(rot+3)%LESSONS.length};
+}
+function curTask(){return heute&&heute.plan&&heute.idx<heute.plan.length?heute.plan[heute.idx]:null}
+async function saveHeute(){if(db){try{await db.doc('stand/heute').set(heute)}catch(e){}}renderHeute()}
+function advanceTask(){if(!heute)return;heute.idx++;heute.ab=today();heute.abTs=new Date().toISOString();if(heute.idx>=heute.plan.length)heute=makePlan(heute.rot||0);saveHeute()}
+function wpToday(){return sitzungen.filter(s=>s.typ==='woodpecker'&&s.datum===today()&&(!heute||!heute.abTs||(s.ts||'')>=heute.abTs)).reduce((a,s)=>a+(s.versuche||[]).length,0)}
+function checkWpTask(){const c=curTask();if(c&&c.typ==='wp'&&wpToday()>=c.anzahl)advanceTask()}
+
+function renderHeute(){
+  renderQuiz();
+  const body=$('taskBody');if(!body)return;
+  if(!heute){body.innerHTML='<p class="note" style="margin:0">'+(db?'Lade den Wochenplan …':'Ohne Speicherung gibt es keinen Tagesplan. Öffne die Seite angemeldet in claude.ai.')+'</p>';$('weekRow').innerHTML='';return}
+  const c=curTask();if(!c){body.innerHTML='';return}
+  const carry=heute.ab&&heute.ab<today()?'<span class="carry">Übernommen vom '+deDate(heute.ab)+'</span><br>':'';
+  if(c.typ==='wp'){const n=wpToday();
+    body.innerHTML=carry+'<div class="task-title">Woodpecker, '+c.anzahl+' Aufgaben</div><p style="margin:0 0 10px">Heute schon gelöst: '+n+' von '+c.anzahl+'. Sobald '+c.anzahl+' erreicht sind, ist die Aufgabe erledigt.</p><div class="btns"><button class="b primary" type="button" id="goWp">Zum Brett</button><button class="b" type="button" id="swapTask">Lieber Smirnov heute</button></div>';
+    $('goWp').addEventListener('click',()=>show('wp'));
+  }else{const l=LESSONS.find(x=>x.id===c.lesson)||LESSONS[0];
+    const li=LESSONS.indexOf(l);body.innerHTML=carry+'<div class="task-title">Smirnov-Lektion</div>'+lessonCard(l,lessonLogged())+exercisesHtml(li)+'<div class="btns" style="margin-top:12px"><button class="b" type="button" id="swapTask">Lieber Woodpecker heute</button></div>';
+    bindLearn(body);bindExercises(body,li);if(!lessonShownAt)lessonShownAt=Date.now();
+  }
+  $('swapTask').addEventListener('click',()=>{heute.abTs=new Date().toISOString();const i=heute.idx;const j=heute.plan.findIndex((x,k)=>k>i&&x.typ!==heute.plan[i].typ);if(j<0){const alt=heute.plan[i].typ==='wp'?{typ:'sm',lesson:LESSONS[(heute.rot||0)%LESSONS.length].id}:{typ:'wp',anzahl:8};heute.plan.splice(i,0,alt)}else{[heute.plan[i],heute.plan[j]]=[heute.plan[j],heute.plan[i]]}saveHeute()});
+  $('weekRow').innerHTML=heute.plan.map((x,k)=>'<span class="'+(k<heute.idx?'done':k===heute.idx?'cur':'')+'">'+(k+1)+' '+(x.typ==='wp'?'Woodpecker':'Smirnov')+(k<heute.idx?' ✓':'')+'</span>').join('');
+}
+
+/* Tabs */
+const tabs=[...document.querySelectorAll('nav.tabs button')];
+function show(v){tabs.forEach(b=>b.setAttribute('aria-selected',b.dataset.v===v));['heute','wp','sm','log','fs'].forEach(k=>$('v-'+k).hidden=k!==v);try{localStorage.setItem('tab',v)}catch(e){}if(v==='fs')renderProgress();if(v==='sm')renderLessons();if(v==='heute')renderHeute()}
+tabs.forEach(b=>b.addEventListener('click',()=>show(b.dataset.v)));
+const hashV={heute:'heute',woodpecker:'wp',eintragen:'log',fortschritt:'fs'}[location.hash.slice(1)];
+let startTab=hashV;try{startTab=startTab||localStorage.getItem('tab')}catch(e){}
+
+/* Board */
+const GL={k:'\u265A',q:'\u265B',r:'\u265C',b:'\u265D',n:'\u265E',p:'\u265F'};
+const FILES='abcdefgh';
+let flipped=false, game=null, selected=null, legalTargets=[], lastMove=null, boardLocked=true;
+function drawBoard(){
+  if(!game)return;
+  const el=$('board');el.innerHTML='';el.classList.toggle('live',!boardLocked);
+  const turn=game.turn();const inCheck=game.in_check();
+  for(let i=0;i<8;i++)for(let j=0;j<8;j++){
+    const r=flipped?7-i:i, f=flipped?7-j:j;const name=FILES[f]+(8-r);
+    const sq=document.createElement('div');sq.className='sq '+(((r+f)%2===0)?'l':'d');sq.dataset.sq=name;
+    const p=game.get(name);
+    if(p){const s=document.createElement('span');s.className='pc '+p.color;s.textContent=GL[p.type]+'\uFE0E';sq.appendChild(s);
+      if(inCheck&&p.type==='k'&&p.color===turn)sq.classList.add('chk')}
+    if(lastMove&&(lastMove[0]===name||lastMove[1]===name))sq.classList.add('last');
+    if(selected===name)sq.classList.add('sel');
+    if(legalTargets.includes(name)){sq.classList.add('tgt');if(p)sq.classList.add('has')}
+    if(i===7){const c=document.createElement('span');c.className='co f';c.textContent=FILES[f];sq.appendChild(c)}
+    if(j===0){const c=document.createElement('span');c.className='co r';c.textContent=8-r;sq.appendChild(c)}
+    sq.addEventListener('click',()=>onSquare(name));
+    el.appendChild(sq);
+  }
+  $('turnDot').className=turn==='w'?'w':'b';$('turnTxt').textContent=(turn==='w'?'Weiß':'Schwarz')+' am Zug';
+}
+function onSquare(name){
+  if(boardLocked||!game)return;
+  const p=game.get(name);
+  if(selected){
+    if(legalTargets.includes(name)){const from=selected;selected=null;legalTargets=[];userMove(from,name);return}
+    if(p&&p.color===game.turn()&&name!==selected){selectSq(name);return}
+    selected=null;legalTargets=[];drawBoard();return;
+  }
+  if(p&&p.color===game.turn())selectSq(name);
+}
+function selectSq(name){selected=name;legalTargets=game.moves({square:name,verbose:true}).map(m=>m.to);drawBoard()}
+const FIG={K:'♔',Q:'♕',R:'♖',B:'♗',N:'♘'};
+const figurine=t=>t.replace(/(^|[\s.(])([KQRBN])(?=[a-h1-8x])/g,(m,a,b)=>a+FIG[b]);
+
+/* State */
+let db=null, stand={zyklus:1,naechste:1,start:null,pauseBis:null}, sitzungen=[], wertungen=[];
+let shownNo=1, sess=null, puzStart=0, tick=null;
+
+function cycleStats(z){
+  const att=[];sitzungen.filter(s=>s.typ==='woodpecker'&&s.zyklus===z).forEach(s=>(s.versuche||[]).forEach(v=>att.push(v)));
+  const last={};att.forEach(v=>{last[v.n]=v});
+  const vals=Object.values(last);const ok=vals.filter(v=>v.ok).length;
+  const secs=att.reduce((a,v)=>a+(v.sec||0),0);
+  return {done:vals.length,ok,acc:vals.length?ok/vals.length:null,secPer:att.length?secs/att.length:null,wrong:vals.filter(v=>!v.ok).map(v=>v.n).sort((a,b)=>a-b),att:att.length};
+}
+function renderStand(){
+  const z=stand.zyklus||1, st=cycleStats(z);
+  const done=Math.min(SET,(stand.naechste||1)-1);
+  $('cycTitle').textContent='Runde '+z+' von 7';
+  $('sDone').innerHTML=done+'<small>/'+SET+'</small>';
+  $('sBar').style.width=(done/SET*100)+'%';
+  $('sAcc').textContent=st.acc==null?'–':Math.round(st.acc*100)+' %';
+  const days=CYCLE_DAYS[z-1]||1;const start=stand.start||today();
+  const end=addDays(start,days-1);const left=Math.max(1,daysBetween(today(),end)+1);
+  const todayDone=sitzungen.filter(s=>s.typ==='woodpecker'&&s.datum===today()&&s.zyklus===z).reduce((a,s)=>a+(s.versuche||[]).length,0);
+  const remaining=SET-done;
+  const goal=Math.max(0,Math.ceil((remaining+todayDone)/left)-todayDone);
+  $('sGoal').textContent=remaining<=0?'✓':goal;
+  let info='Runde '+z+': '+days+(days===1?' Tag':' Tage')+', Ziel bis '+deDate(end)+'.';
+  if(st.secPer)info+=' Im Schnitt '+Math.round(st.secPer)+' Sekunden pro Aufgabe.';
+  if(stand.pauseBis&&today()<=stand.pauseBis)info='Runde '+(z-1)+' ist geschafft. Laut Methode heute Pause, Runde '+z+' startet am '+deDate(addDays(stand.pauseBis,1))+'.';
+  $('cycInfo').textContent=info;
+  const wc=$('wrongChips');wc.innerHTML='';
+  if(!st.wrong.length){wc.innerHTML='<span class="empty">Noch keine.</span>'}
+  st.wrong.forEach(n=>{const c=document.createElement('button');c.type='button';c.className='chip bad';c.textContent='Nr. '+n;c.addEventListener('click',()=>{if(sess){$('solveRow').hidden=false}else{$('solveRow').hidden=false;$('bStartRow').hidden=true}showPuzzle(n,'review')});wc.appendChild(c)});
+}
+let line=[], step=0, puzMode='idle', replayTimer=null;
+function setFb(cls,txt){const f=$('fb');if(!txt){f.hidden=true;return}f.hidden=false;f.className='fb '+cls;f.textContent=txt}
+function showPuzzle(n,mode){
+  shownNo=n;const p=WP[n-1];clearTimeout(replayTimer);
+  game=new Chess();game.load(p[0]+' '+p[1]+' - - 0 1');
+  line=LINES[n-1]||[];step=0;selected=null;legalTargets=[];lastMove=null;flipped=(p[1]==='b');
+  $('pNo').textContent='Aufgabe '+n+(n<=222?' · leicht':n<=984?' · mittel':' · schwer');
+  $('pHead').textContent=p[2];$('badPos').hidden=!!p[4];
+  $('solTxt').textContent=figurine(p[3]);
+  $('solBox').hidden=true;$('rateBtns').hidden=true;$('doneBtns').hidden=true;$('fallbackBtns').hidden=true;$('playBtns').hidden=true;setFb('',null);
+  puzMode=mode;
+  if(mode==='idle'){boardLocked=true}
+  else if(line.length){boardLocked=false;$('playBtns').hidden=false;setFb('hint',mode==='review'?'Wiederholung, ohne Wertung. Du bist dran.':'Du bist dran. Finde den stärksten Zug.')}
+  else{boardLocked=true;puzMode='fallback';$('fallbackBtns').hidden=false;setFb('hint','Diese Lösung ist Prosa ohne feste Zugfolge. Denk sie durch und bewerte dich selbst.')}
+  drawBoard();puzStart=Date.now();
+}
+function sanOf(uci){const m=game.moves({verbose:true}).find(m=>m.from+m.to+(m.promotion||'')===uci);return m?figurine(m.san):uci}
+function userMove(from,to){
+  const exp=line[step];
+  const cands=game.moves({square:from,verbose:true}).filter(m=>m.to===to);if(!cands.length)return;
+  let promo;if(cands[0].promotion)promo=(exp&&exp.slice(0,4)===from+to&&exp[4])?exp[4]:'q';
+  const uci=from+to+(promo||'');
+  if(uci===exp){
+    game.move({from,to,promotion:promo});lastMove=[from,to];step++;drawBoard();
+    if(step<line.length){
+      boardLocked=true;drawBoard();setFb('hint','Richtig. Der Gegner antwortet …');
+      setTimeout(()=>{const o=line[step];game.move({from:o.slice(0,2),to:o.slice(2,4),promotion:o[4]||undefined});lastMove=[o.slice(0,2),o.slice(2,4)];step++;
+        if(step<line.length){boardLocked=false;drawBoard();setFb('hint','Weiter, du bist dran.')}else{drawBoard();finish(true)}},500);
+    }else finish(true);
+  }else{
+    const played=figurine(cands[0].san),best=sanOf(exp);
+    game.move({from,to,promotion:promo});lastMove=[from,to];drawBoard();
+    finish(false,'Falsch. Du hast '+played+' gespielt, die Lösung ist '+best+'.');
+  }
+}
+function finish(ok,msg){
+  boardLocked=true;drawBoard();if(window.innerWidth<=760)$('sessCard').scrollIntoView({block:'nearest'});const wasMode=puzMode;puzMode='done';
+  setFb(ok?'ok':'no',msg||(ok?'Richtig! Ganze Variante gefunden.':'Falsch.'));
+  $('playBtns').hidden=true;$('solBox').hidden=false;$('doneBtns').hidden=false;
+  $('bNext').dataset.ok=ok?'1':'0';$('bNext').dataset.review=wasMode==='review'?'1':'0';
+}
+$('bGiveUp').addEventListener('click',()=>{if(puzMode==='play'||puzMode==='review')finish(false,'Aufgedeckt, zählt als falsch. Die Lösung beginnt mit '+sanOf(line[step])+'.')});
+$('bReplay').addEventListener('click',()=>{
+  clearTimeout(replayTimer);const p=WP[shownNo-1];game=new Chess();game.load(p[0]+' '+p[1]+' - - 0 1');lastMove=null;drawBoard();let k=0;
+  const stepFn=()=>{if(k>=line.length)return;const o=line[k++];game.move({from:o.slice(0,2),to:o.slice(2,4),promotion:o[4]||undefined});lastMove=[o.slice(0,2),o.slice(2,4)];drawBoard();replayTimer=setTimeout(stepFn,700)};
+  replayTimer=setTimeout(stepFn,400);
+});
+$('bNext').addEventListener('click',()=>{const b=$('bNext');if(b.dataset.review==='1'){showPuzzle(Math.min(SET,stand.naechste||1),sess?'play':'idle');return}answer(b.dataset.ok==='1')});
+$('flip').addEventListener('click',()=>{flipped=!flipped;drawBoard()});
+
+/* Session */
+function startTick(){clearInterval(tick);tick=setInterval(()=>{if(!sess)return;$('tSess').textContent=fmt((Date.now()-sess.t0)/1000).padStart(5,'0');$('tPuz').textContent=fmt((Date.now()-puzStart)/1000)},500)}
+$('bStart').addEventListener('click',()=>{
+  if((stand.naechste||1)>SET){return}
+  if(!stand.start){stand.start=today()}
+  sess={id:'wp-'+Date.now(),t0:Date.now(),datum:today(),zyklus:stand.zyklus||1,versuche:[]};
+  $('bStartRow').hidden=true;$('solveRow').hidden=false;$('sessSaved').textContent='';
+  $('sessInfo').textContent='Uhr läuft. Figur antippen, Zielfeld antippen.';
+  showPuzzle(stand.naechste||1,'play');startTick();
+});
+$('bShow').addEventListener('click',()=>{$('solBox').hidden=false;$('fallbackBtns').hidden=true;$('rateBtns').hidden=puzMode==='review';if(puzMode==='review'){$('doneBtns').hidden=false;$('bNext').dataset.review='1'}});
+async function answer(ok){
+  if(!sess)return;
+  const sec=Math.round((Date.now()-puzStart)/1000);
+  sess.versuche.push({n:shownNo,ok,sec});
+  stand.naechste=shownNo+1;
+  await saveSession(false);
+  renderStand();
+  if(stand.naechste>SET){await finishCycle();return}
+  showPuzzle(stand.naechste,'play');
+}
+$('bOk').addEventListener('click',()=>answer(true));
+$('bNo').addEventListener('click',()=>answer(false));
+$('bEnd').addEventListener('click',async()=>{if(sess){await saveSession(true)}else{$('solveRow').hidden=true;$('bStartRow').hidden=false;showPuzzle(Math.min(SET,stand.naechste||1),'idle')}});
+async function saveSession(end){
+  if(!sess)return;
+  const mins=Math.max(1,Math.round((Date.now()-sess.t0)/60000));
+  const ok=sess.versuche.filter(v=>v.ok).length;
+  const doc={typ:'woodpecker',datum:sess.datum,ts:new Date(sess.t0).toISOString(),zyklus:sess.zyklus,von:sess.versuche.length?sess.versuche[0].n:null,bis:sess.versuche.length?sess.versuche[sess.versuche.length-1].n:null,anzahl:sess.versuche.length,richtig:ok,minuten:mins,versuche:sess.versuche};
+  const i=sitzungen.findIndex(s=>s.id===sess.id);if(i>=0)sitzungen[i]={id:sess.id,...doc};else sitzungen.push({id:sess.id,...doc});
+  if(db){try{if(sess.versuche.length)await db.collection('sitzungen').doc(sess.id).set(doc);await db.doc('stand/woodpecker').set(stand)}catch(e){$('sessSaved').textContent='Speichern ging nicht: '+(e&&e.code||'Fehler')+'.'}}
+  checkWpTask();
+  if(end){
+    clearInterval(tick);
+    $('sessSaved').textContent=sess.versuche.length?('Gespeichert: '+sess.versuche.length+' Aufgaben, '+ok+' richtig, '+mins+' Minuten.'):'Sitzung ohne Aufgaben beendet.';
+    sess=null;$('solveRow').hidden=true;$('bStartRow').hidden=false;$('tSess').textContent='00:00';
+    $('sessInfo').textContent='Starte die Sitzung, dann läuft die Uhr. Du ziehst die Figuren direkt auf dem Brett: Figur antippen, Zielfeld antippen. Die Seite prüft jeden Zug gegen die Lösung und spielt die Antwort des Gegners.';
+    showPuzzle(Math.min(SET,stand.naechste||1),'idle');
+  }
+}
+async function finishCycle(){
+  await saveSession(true);
+  const z=stand.zyklus||1;
+  if(z>=7){$('sessSaved').textContent='Alle sieben Runden geschafft. Die Woodpecker-Methode ist abgeschlossen.';return}
+  stand={zyklus:z+1,naechste:1,start:addDays(today(),2),pauseBis:addDays(today(),1)};
+  if(db){try{await db.doc('stand/woodpecker').set(stand)}catch(e){}}
+  $('sessSaved').textContent='Runde '+z+' geschafft! Morgen Pause, danach Runde '+(z+1)+' in '+CYCLE_DAYS[z]+(CYCLE_DAYS[z]===1?' Tag.':' Tagen.');
+  renderStand();
+}
+
+/* Forms */
+['pDate','sDate','rDate'].forEach(id=>$(id).value=today());
+async function addEntry(doc,msgEl,form){
+  doc.ts=new Date().toISOString();
+  if(!db){$(msgEl).textContent='Nicht gespeichert, diese Ansicht kann nicht speichern.';return}
+  try{const ref=await db.collection(doc.typ==='wertung'?'wertungen':'sitzungen').add(doc);$(msgEl).textContent='Gespeichert.';setTimeout(()=>{$(msgEl).textContent=''},3000)}catch(e){$(msgEl).textContent='Speichern ging nicht: '+(e&&e.code||'Fehler')+'.'}
+}
+$('fPartie').addEventListener('submit',e=>{e.preventDefault();addEntry({typ:'partie',datum:$('pDate').value,minuten:+$('pMin').value||0,gegner:$('pOpp').value,farbe:$('pCol').value,ergebnis:$('pRes').value,patzer:+$('pBl').value||0,fehler:$('pErr').value.trim(),link:$('pLink').value.trim()},'pSaved');$('pErr').value='';$('pLink').value='';$('pBl').value=0});
+$('fImp').addEventListener('submit',async e=>{e.preventDefault();const out=$('impSaved'),f=$('impFile').files[0];
+  if(!f){out.textContent='Bitte eine Datei wählen.';return}if(!db){out.textContent='Nicht angemeldet, nichts gespeichert.';return}
+  try{const j=JSON.parse(await f.text());const docs=j.docs||{};let n=0;
+    for(const [path,data] of Object.entries(docs)){if(!/^[a-z]+\/[A-Za-z0-9_.:-]+$/.test(path)||typeof data!=='object'||!data)continue;await db.doc(path).set(data);n++}
+    out.textContent=n+' Einträge übernommen. Seite neu laden.'}catch(err){out.textContent='Das hat nicht geklappt: '+(err&&err.message||'Fehler')}});
+$('fSmir').addEventListener('submit',e=>{e.preventDefault();addEntry({typ:'smirnov',datum:$('sDate').value,minuten:+$('sMin').value||0,kurs:$('sCourse').value.trim(),lektion:$('sLesson').value.trim(),notiz:$('sTake').value.trim()},'sSaved');$('sLesson').value='';$('sTake').value=''});
+$('fRate').addEventListener('submit',e=>{e.preventDefault();addEntry({typ:'wertung',datum:$('rDate').value,rapid:+$('rVal').value},'rSaved');$('rVal').value=''});
+
+/* Progress */
+const svgNS='http://www.w3.org/2000/svg';
+function el(t,a,parent){const e=document.createElementNS(svgNS,t);for(const k in a)e.setAttribute(k,a[k]);if(parent)parent.appendChild(e);return e}
+function txt(parent,x,y,s,anchor){const t=el('text',{x,y,'text-anchor':anchor||'start'},parent);t.textContent=s;return t}
+const COL={woodpecker:'var(--c-wp)',partie:'var(--c-partie)',smirnov:'var(--c-smirnov)',abfrage:'var(--c-abfrage)',puzzles:'var(--c-puzzle)',analyse:'var(--c-abfrage)'};
+const NAME={woodpecker:'Woodpecker',partie:'Partie',smirnov:'Smirnov',abfrage:'Abfrage',puzzles:'Puzzles',analyse:'Auswertung'};
+function emptyChart(id,msg){$(id).innerHTML='<div class="empty">'+msg+'</div>'}
+function chartMinutes(){
+  const W=320,H=160,L=28,B=22,T=8;const days=[];for(let i=27;i>=0;i--)days.push(addDays(today(),-i));
+  const per={};days.forEach(d=>per[d]={});
+  sitzungen.forEach(s=>{if(per[s.datum]){per[s.datum][s.typ]=(per[s.datum][s.typ]||0)+(+s.minuten||0)}});
+  const tot=days.map(d=>Object.values(per[d]).reduce((a,b)=>a+b,0));
+  const max=Math.max(45,...tot);const yMax=Math.ceil(max/15)*15;
+  const svg=el('svg',{viewBox:`0 0 ${W} ${H}`,role:'img','aria-label':'Trainingsminuten pro Tag'});
+  const ph=H-B-T, bw=(W-L-4)/28;
+  [0,yMax/2,yMax].forEach(v=>{const y=T+ph-ph*v/yMax;el('line',{x1:L,x2:W-2,y1:y,y2:y,stroke:'var(--line)','stroke-width':1},svg);txt(svg,L-4,y+3,String(v),'end')});
+  const y30=T+ph-ph*30/yMax;el('line',{x1:L,x2:W-2,y1:y30,y2:y30,stroke:'var(--accent)','stroke-dasharray':'3 3','stroke-width':1},svg);txt(svg,W-2,y30-3,'Ziel 30','end');
+  days.forEach((d,i)=>{let y=T+ph;['woodpecker','partie','smirnov','abfrage','puzzles','analyse'].forEach(k=>{const m=per[d][k];if(!m)return;const h=ph*m/yMax;y-=h;el('rect',{x:L+i*bw+1,y,width:Math.max(1,bw-2),height:h,fill:COL[k]},svg)});
+    if(i%7===0||i===27)txt(svg,i===27?W-2:L+i*bw+bw/2,H-6,deDate(d).slice(0,5),i===27?'end':'middle')});
+  $('chMin').innerHTML='';$('chMin').appendChild(svg);
+}
+function lineChart(id,pts,opts){
+  if(pts.length<1){emptyChart(id,opts.empty);return}
+  const W=320,H=160,L=36,R=10,B=22,T=12;
+  const xs=pts.map(p=>p.x),ys=pts.map(p=>p.y);
+  const x0=Math.min(...xs),x1=Math.max(...xs)||x0+1;
+  let y0=opts.y0!=null?opts.y0:Math.min(...ys),y1=opts.y1!=null?opts.y1:Math.max(...ys);
+  if(opts.target!=null){y0=Math.min(y0,opts.target);y1=Math.max(y1,opts.target)}
+  const step=opts.step||1;y0=Math.floor(y0/step)*step;y1=Math.ceil(y1/step)*step;if(y1===y0)y1=y0+step;
+  const sx=x=>L+(W-L-R)*((x-x0)/((x1-x0)||1)),sy=y=>T+(H-T-B)*(1-(y-y0)/(y1-y0));
+  const svg=el('svg',{viewBox:`0 0 ${W} ${H}`,role:'img','aria-label':opts.label});
+  [y0,(y0+y1)/2,y1].forEach(v=>{el('line',{x1:L,x2:W-R,y1:sy(v),y2:sy(v),stroke:'var(--line)'},svg);txt(svg,L-4,sy(v)+3,String(Math.round(v)),'end')});
+  if(opts.target!=null){el('line',{x1:L,x2:W-R,y1:sy(opts.target),y2:sy(opts.target),stroke:'var(--accent)','stroke-dasharray':'3 3'},svg);txt(svg,W-R,sy(opts.target)-4,opts.targetLabel,'end')}
+  const d=pts.map((p,i)=>(i?'L':'M')+sx(p.x).toFixed(1)+' '+sy(p.y).toFixed(1)).join(' ');
+  if(pts.length>1){el('path',{d:d+` L${sx(pts[pts.length-1].x).toFixed(1)} ${sy(y0)} L${sx(pts[0].x).toFixed(1)} ${sy(y0)} Z`,fill:opts.color,opacity:.12},svg);el('path',{d,fill:'none',stroke:opts.color,'stroke-width':2},svg)}
+  const lp=pts[pts.length-1];el('circle',{cx:sx(lp.x),cy:sy(lp.y),r:3.5,fill:opts.color},svg);
+  txt(svg,Math.min(sx(lp.x),W-R-2),sy(lp.y)-7,String(lp.y),sx(lp.x)>W-60?'end':'middle');
+  (opts.xlabels||[]).forEach(([x,s],i,a)=>txt(svg,sx(x),H-6,s,a.length>1&&i===a.length-1?'end':(i===0?'start':'middle')));
+  $(id).innerHTML='';$(id).appendChild(svg);
+}
+function renderProgress(){
+  const t=today();
+  const last7=[...Array(7)].map((_,i)=>addDays(t,-i));
+  const active=new Set(sitzungen.filter(s=>last7.includes(s.datum)).map(s=>s.datum));
+  const weekMin=sitzungen.filter(s=>last7.includes(s.datum)).reduce((a,s)=>a+(+s.minuten||0),0);
+  const z=stand.zyklus||1,st=cycleStats(z);
+  const rates=[...Object.entries(RATE0).map(([d,v])=>({datum:d,rapid:v})),...wertungen].sort((a,b)=>a.datum<b.datum?-1:1);
+  const cur=rates.length?rates[rates.length-1].rapid:null;
+  const games=sitzungen.filter(s=>s.typ==='partie').sort((a,b)=>a.datum<b.datum?-1:1);
+  const lastG=games.slice(-5),prevG=games.slice(-10,-5);
+  const avg=a=>a.length?a.reduce((x,g)=>x+(+g.patzer||0),0)/a.length:null;
+  const aL=avg(lastG),aP=avg(prevG);
+  const k=[];
+  k.push(['Trainingstage, 7 Tage',active.size+' / 7',active.size>=6?['good','im Plan']:active.size>=4?['warn','knapp']:['bad','zu wenig']]);
+  k.push(['Minuten, 7 Tage',weekMin+'',weekMin>=180?['good','Ziel 210']:weekMin>=100?['warn','Ziel 210']:['bad','Ziel 210']]);
+  k.push(['Woodpecker Runde '+z,Math.min(SET,(stand.naechste||1)-1)+' / '+SET,st.acc==null?null:[st.acc>=.8?'good':st.acc>=.6?'warn':'bad',Math.round(st.acc*100)+' % richtig']]);
+  k.push(['Lichess Rapid',cur==null?'–':String(cur),cur==null?null:[cur>=1500?'good':'warn','noch '+Math.max(0,1500-cur)+' bis 1500']]);
+  k.push(['Grobe Fehler pro Partie',aL==null?'–':aL.toFixed(1).replace('.',','),aL==null?['warn','Start: 2,7']:[aL<=1.5?'good':aL<2.7?'warn':'bad',aP!=null?('vorher '+aP.toFixed(1).replace('.',',')):'Start: 2,7']]);
+  $('kpis').innerHTML='';
+  k.forEach(([l,v,p])=>{const d=document.createElement('div');d.className='kpi';d.innerHTML='<div class="label"></div><div class="v"></div><div class="s"></div>';d.children[0].textContent=l;d.children[1].textContent=v;if(p){const s=document.createElement('span');s.className='pill '+p[0];s.textContent=p[1];d.children[2].appendChild(s)}$('kpis').appendChild(d)});
+  chartMinutes();
+  const rp=rates.map(r=>({x:new Date(r.datum+'T12:00:00').getTime(),y:r.rapid}));
+  const fx=rp.length?[[rp[0].x,deDate(rates[0].datum).slice(3)],[rp[rp.length-1].x,deDate(rates[rates.length-1].datum).slice(3)]]:[];
+  lineChart('chRate',rp,{color:'var(--c-partie)',target:1500,targetLabel:'Ziel 1500',step:100,xlabels:fx,label:'Rapid-Wertung',empty:'Noch keine Wertung.'});
+  // Woodpecker per cycle
+  const cy=[];for(let i=1;i<=7;i++){const s=cycleStats(i);if(s.att)cy.push({z:i,...s})}
+  if(!cy.length)emptyChart('chWp','Noch keine Woodpecker-Sitzung. Nach der ersten Sitzung steht hier Trefferquote und Tempo je Runde.');
+  else{const W=320,H=160,L=30,B=22,T=12,R=30;const svg=el('svg',{viewBox:`0 0 ${W} ${H}`,role:'img','aria-label':'Woodpecker je Runde'});const ph=H-T-B,cw=(W-L-R)/7;const maxS=Math.max(30,...cy.map(c=>c.secPer||0));
+    [0,50,100].forEach(v=>{const y=T+ph-ph*v/100;el('line',{x1:L,x2:W-R,y1:y,y2:y,stroke:'var(--line)'},svg);txt(svg,L-4,y+3,v+'%','end')});
+    txt(svg,W-R+4,T+3,Math.round(maxS)+'s');txt(svg,W-R+4,T+ph+3,'0s');
+    for(let i=1;i<=7;i++)txt(svg,L+(i-.5)*cw,H-6,'R'+i,'middle');
+    cy.forEach(c=>{const x=L+(c.z-1)*cw;const h=ph*(c.acc||0);el('rect',{x:x+cw*.18,y:T+ph-h,width:cw*.4,height:h,fill:'var(--accent)'},svg);
+      const y2=T+ph-ph*(c.secPer||0)/maxS;el('circle',{cx:x+cw*.75,cy:y2,r:4,fill:'var(--muted)'},svg);txt(svg,x+cw*.38,T+ph-h-4,Math.round((c.acc||0)*100)+'','middle')});
+    $('chWp').innerHTML='';$('chWp').appendChild(svg)}
+  lineChart('chBl',games.map((g,i)=>({x:i+1,y:+g.patzer||0})),{color:'var(--c-wp)',y0:0,target:1.5,targetLabel:'Ziel unter 1,5',step:1,label:'Grobe Fehler pro Partie',empty:'Noch keine Partie eingetragen.',xlabels:games.length?[[1,'1'],[games.length,String(games.length)]]:[]});
+  // Journal
+  const rows=[...sitzungen,...wertungen.map(w=>({...w,typ:'wertung'}))].sort((a,b)=>(b.datum+(b.ts||''))>(a.datum+(a.ts||''))?1:-1);
+  const tb=$('journal');tb.innerHTML='';$('journalEmpty').hidden=rows.length>0;
+  const RES={S:'Sieg',R:'Remis',N:'Niederlage'};
+  rows.forEach(s=>{const tr=document.createElement('tr');let was='',erg='',fe='';
+    if(s.typ==='woodpecker'){was='Woodpecker R'+s.zyklus+(s.von?(', Nr. '+s.von+'–'+s.bis):'');erg=(s.richtig||0)+' von '+(s.anzahl||0)+' richtig';const w=(s.versuche||[]).filter(v=>!v.ok).map(v=>v.n);fe=w.length?'Falsch: Nr. '+w.join(', '):''}
+    else if(s.typ==='partie'){was='Partie, '+(s.gegner||'')+(s.farbe?', '+s.farbe:'');erg=(RES[s.ergebnis]||'')+(s.patzer!=null?', '+s.patzer+' grobe Fehler':'');fe=s.fehler||''}
+    else if(s.typ==='smirnov'){was='Smirnov: '+(s.kurs||'')+(s.lektion?', '+s.lektion:'');fe=s.notiz||''}
+    else if(s.typ==='abfrage'){was='Abfrage';erg=(s.richtig!=null?s.richtig+' von '+(s.gesamt||3)+' richtig':'');fe=s.notiz||''}
+    else if(s.typ==='wertung'){was='Lichess-Wertung';erg='Rapid '+s.rapid}
+    else {was=NAME[s.typ]||s.typ;erg=s.ergebnis||'';fe=s.notiz||''}
+    const cells=[deDate(s.datum),was,s.minuten?String(s.minuten):'',erg,fe];
+    cells.forEach((c,i)=>{const td=document.createElement('td');if(i===1){td.className='typ';td.style.setProperty('--c',COL[s.typ]||'var(--muted)');td.appendChild(document.createElement('b'))}td.appendChild(document.createTextNode(c));if(i===2)td.className='num';tr.appendChild(td)});
+    tb.appendChild(tr)});
+}
+
+/* Boot */
+showPuzzle(1,'idle');renderStand();
+show(startTab||'heute');
+(async()=>{
+  if(window.SCH_READY){try{await window.SCH_READY}catch(e){}}
+  try{db=await window.claude?.use?.('db')}catch(e){db=null}
+  if(!db){$('dbmsg').hidden=false;renderHeute();return}
+  db.doc('stand/woodpecker').onSnapshot(s=>{if(s.exists&&!sess){stand=Object.assign({zyklus:1,naechste:1},s.data());renderStand();showPuzzle(Math.min(SET,stand.naechste||1),'idle')}},()=>{});
+  db.collection('sitzungen').onSnapshot(q=>{const live=sess?sitzungen.find(s=>s.id===sess.id):null;sitzungen=q.docs.map(d=>({id:d.id,...d.data()}));if(live&&!sitzungen.find(s=>s.id===live.id))sitzungen.push(live);renderStand();checkWpTask();if(!$('v-heute').hidden){renderHeute()}if(!$('v-sm').hidden)renderLessons();if(!$('v-fs').hidden)renderProgress()},()=>{});
+  db.doc('stand/heute').onSnapshot(s=>{if(s.exists&&s.data().plan){heute=JSON.parse(JSON.stringify(s.data()));if(heute.idx>=heute.plan.length){heute=makePlan(heute.rot||0);saveHeute();return}renderHeute()}else{heute=makePlan(0);saveHeute()}},()=>{});
+  db.collection('wertungen').onSnapshot(q=>{wertungen=q.docs.map(d=>({id:d.id,...d.data()}));if(!$('v-fs').hidden)renderProgress()},()=>{});
+})();
+})();
+</script>
