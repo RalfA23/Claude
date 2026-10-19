@@ -24,6 +24,7 @@ button.primary,.btn.primary{background:var(--accent);border-color:var(--accent);
 button.sm{padding:4px 10px;font-size:.85rem;font-weight:500}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:8px}
+.card.locked{opacity:.8;border-style:dashed}
 .card .ic{font-size:2rem;line-height:1}
 .card h3{margin:0;font-size:1.25rem}
 .card p{margin:0;color:var(--muted);font-size:.95rem;flex:1}
@@ -73,6 +74,7 @@ label.chk input{width:auto;margin-top:4px}
 // Kursliste: neue Kurse hier eintragen. Der Pfad ist relativ zum Portal.
 var COURSES = [
   {id: "lesen", icon: "📖", title: "Lesetraining", text: "8 Wochen schneller lesen: feste Lektionen, Lesefenster mit Pacer, Tests und Fortschritt.", href: "lesen/"},
+  {id: "lesen-fortgeschritten", icon: "🎓", title: "Lesetraining Fortgeschritten", text: "24 Lektionen für alle, die das Lesetraining geschafft haben: Lesen mit Plan, Abruf, kritisches Lesen, dazu das Fachmodul Recht mit Datenschutz, Zivilrecht und Steuerrecht.", href: "lesen/?kurs=fortgeschritten", needs: "lesen"},
   {id: "schach", icon: "♞", title: "Schachtraining", text: "Mehr Wertungspunkte: Tagesaufgabe, Taktikaufgaben, Smirnov-Lektionen, tägliche Abfrage, verbunden mit deinem Lichess- oder chess.com-Konto.", href: "schach/"}
 ];
 // Nur für einzeln freigeschaltete Konten sichtbar (Zeile in gevt_members). Ohne Freigabe taucht die Kachel nicht auf.
@@ -84,6 +86,18 @@ var GEVT = {id: "gevt", icon: "🥋", title: "Ving Tsun Wissen", text: "Frag dei
   if (!cfg.supabaseUrl || !cfg.supabaseAnonKey || !window.supabase) { $("login").hidden = false; $("lf").innerHTML = "<h2>Nicht eingerichtet</h2><p>Das Portal ist ohne Anmeldung nicht verfügbar.</p>"; return; }
   var sb = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
   var user = null;
+  // Freischaltung: Kurse mit needs sind sichtbar, öffnen sich aber erst nach den 48 Lektionen des Grundkurses (oder für Admins). Der Kurs prüft das beim Öffnen selbst noch einmal.
+  var lessonsDone = null, isAdmin = false;
+  function unlocked(c) { return !c.needs || isAdmin || (lessonsDone !== null && lessonsDone >= 48); }
+  async function checkUnlock() {
+    try {
+      var a = await sb.from("app_admins").select("user_id").eq("user_id", user.id).maybeSingle();
+      isAdmin = !a.error && !!a.data;
+      var r = await sb.from("progress").select("lessons:state->lessons").eq("user_id", user.id).maybeSingle();
+      lessonsDone = !r.error && r.data && r.data.lessons ? Object.keys(r.data.lessons).length : (r.error ? null : 0);
+    } catch (e) {}
+    render();
+  }
 
   function mine() { var c = (user && user.user_metadata && user.user_metadata.courses) || []; return Array.isArray(c) ? c.filter(function (x) { return COURSES.some(function (k) { return k.id === x; }); }) : []; }
   async function setMine(list) {
@@ -102,6 +116,13 @@ var GEVT = {id: "gevt", icon: "🥋", title: "Ving Tsun Wissen", text: "Frag dei
     if (isNew(c)) { var bd = document.createElement("span"); bd.className = "badge"; bd.textContent = "Neu"; d.appendChild(bd); }
     var k = d.querySelector(".ic"); k.textContent = c.icon; d.querySelector("h3").textContent = c.title; d.querySelector("p").textContent = c.text;
     var row = d.querySelector(".row");
+    if (!unlocked(c)) {
+      d.classList.add("locked");
+      var lk = document.createElement("button"); lk.type = "button"; lk.disabled = true; lk.textContent = "🔒 Noch gesperrt"; row.appendChild(lk);
+      var hint = document.createElement("p"); hint.className = "hint"; hint.style.cssText = "margin:8px 0 0;font-size:.85rem;opacity:.8";
+      hint.textContent = lessonsDone === null ? "Ich prüfe, wie weit du im Lesetraining bist." : "Schließe zuerst alle 48 Lektionen des Lesetrainings ab. Du bist bei " + lessonsDone + " von 48.";
+      d.appendChild(hint); return d;
+    }
     if (own) {
       var a = document.createElement("a"); a.className = "btn primary"; a.href = c.href; a.textContent = "Öffnen"; row.appendChild(a);
       var rm = document.createElement("button"); rm.type = "button"; rm.className = "sm"; rm.textContent = "Entfernen";
@@ -127,7 +148,7 @@ var GEVT = {id: "gevt", icon: "🥋", title: "Ving Tsun Wissen", text: "Frag dei
   }
   $("newsOk").addEventListener("click", function () { setSeen(allIds()); });
   function enter(u) {
-    user = u; $("login").hidden = true; $("app").hidden = false; render();
+    user = u; $("login").hidden = true; $("app").hidden = false; render(); checkUnlock();
     // Accounts from before this feature: what they already chose counts as known, the rest is new. Brand-new accounts know everything.
     if (!seen()) setSeen(mine().length ? mine() : allIds());
     // Merken, ob das Konto freigeschaltet ist, damit die Kachel beim nächsten Öffnen gleich mit den anderen erscheint. Die Abfrage bestätigt oder entfernt sie danach.

@@ -242,6 +242,9 @@ textarea.own{width:100%;min-height:140px;padding:10px;border-radius:8px;border:1
 <!--DATA-->
 <script>
 "use strict";
+/* Fortgeschrittenen-Kurs: gleiche App, aufgerufen mit ?kurs=fortgeschritten. Daten in src/advanced-data.js und src/recht-data.js. */
+const ADV = /[?&]kurs=fortgeschritten\b/.test(location.search) && !!window.ADVDATA;
+const ADVT = ADV ? window.ADVDATA.texts : [];
 /* ============ TEXTE ============ */
 const TEXTS = [
 {id:"T1",kind:"test",title:"Der Hamburger Hafen",paras:[
@@ -536,7 +539,7 @@ qs:[
 "Bevor du einen längeren Text beginnst, stell dir deshalb kurz zwei Fragen: Was will ich aus diesem Text wissen? Und wie genau muss ich es wissen? Die Antworten entscheiden, welchen Gang du einlegst."]}
 ];
 
-const WEEKS = [
+const WEEKS_B = [
  {name:"Startlinie",goal:"Ausgangswert messen und den Pacer kennenlernen."},
  {name:"Pacer",goal:"Dem Marker folgen und das Tempo leicht anheben. Am Ende der Woche ein Zwischentest."},
  {name:"Tempo",goal:"Sprints über dem Wohlfühltempo, dazu Blickspanne trainieren."},
@@ -571,7 +574,7 @@ function quoteCard(){
     h("blockquote",{style:"margin:0;font-family:var(--f-read);font-size:1.1rem;line-height:1.45"},`„${q[0]}“`),
     h("figcaption",{class:"muted",style:"margin-top:4px;font-size:.9rem"},`${q[1]} · Zitat des Tages`));
 }
-const TIPS = [
+const TIPS_B = [
  ["Willkommen","In den nächsten acht Wochen trainierst du an sechs Tagen pro Woche etwa 15 Minuten. Heute misst du nur, wo du stehst: Lies den Text in deinem normalen Tempo, so wie du sonst auch liest, und beantworte danach fünf Fragen. Nicht hetzen, es gibt keine falsche Ausgangslage."],
  ["Der Pacer","Ab heute führt dich ein Leuchtmarker durch den Text. Deine Augen folgen ihm. Das verringert Abschweifen und unnötige Rücksprünge. Halte den Blick locker auf dem Marker."],
  ["Effektive Leserate","Gemessen wird nicht nur dein Tempo, sondern Tempo mal Verständnis. 300 Wörter pro Minute mit 50 Prozent Verständnis sind schlechter als 250 mit 90 Prozent. Diese effektive Leserate ist deine wichtigste Zahl."],
@@ -592,7 +595,7 @@ const TIPS = [
  ["Abschluss","Heute misst du dich zum letzten Mal mit einem neuen Text. Lies wie im ersten Test in deinem natürlichen Tempo und vergleiche danach mit deinem Ausgangswert."]
 ];
 
-const BASICS = [
+const BASICS_B = [
  ["Wie das Auge liest","Das Auge gleitet nicht über die Zeile, es springt. Zwischen den Sprüngen hält es etwa eine Viertelsekunde an, und nur dann nimmt es Informationen auf. Scharf sieht es dabei nur wenige Buchstaben."],
  ["Der echte Engpass","Nicht die Augen begrenzen das Lesetempo, sondern das Verstehen im Kopf. Darum versprechen seriöse Kurse keine 1.000 Wörter pro Minute. Realistisch sind mit Training etwa 20 bis 50 Prozent mehr bei gutem Verständnis."],
  ["Normalwerte","Erwachsene lesen deutsche Sachtexte still mit etwa 200 bis 300 Wörtern pro Minute, im Schnitt um 250. Über 500 bis 600 Wörter pro Minute ist es kein Lesen mehr, sondern Überfliegen."],
@@ -603,6 +606,7 @@ const BASICS = [
  ["Nachholen","Der Kurs zählt Lektionen, nicht Kalendertage. Hast du einen Tag verpasst, machst du einfach die nächste Lektion. Wer im Rückstand ist, kann zwei Lektionen an einem Tag machen."]
 ];
 
+const WEEKS = ADV ? ADVDATA.weeks : WEEKS_B, TIPS = ADV ? ADVDATA.tips : TIPS_B, BASICS = ADV ? ADVDATA.basics : BASICS_B;
 const TOPIC_GROUPS = {
   "Natur & Tiere":["Das Wattenmeer","Das Leben der Eichhörnchen","Warum Zugvögel ihren Weg finden","Wie Gletscher entstehen","Wie Vulkane entstehen","Wie Bienen miteinander kommunizieren","Wie Wale tauchen"],
   "Geschichte":["Die Geschichte der Hanse","Die Geschichte der Eisenbahn in Deutschland","Die Entstehung des Grundgesetzes","Die Geschichte des Geldes","Der Fall der Berliner Mauer","Der Alltag im alten Rom"],
@@ -642,17 +646,29 @@ const wordsOf = t => t.paras.join(" ").split(/\s+/).filter(Boolean).length;
 const nf = n => Math.round(n).toLocaleString("de-DE");
 function hash(s){ let x=2166136261; for(const c of s){ x^=c.charCodeAt(0); x=Math.imul(x,16777619);} return x>>>0; }
 function shuffled(arr, seed){ const a=arr.slice(); let s=seed||1; for(let i=a.length-1;i>0;i--){ s=(Math.imul(s,1103515245)+12345)>>>0; const j=s%(i+1); [a[i],a[j]]=[a[j],a[i]]; } return a; }
-const NERD = window.NERD || {texts:[],facts:[]};
+const NERD = (ADV ? window.RECHT : window.NERD) || {texts:[],facts:[]};
+const NL = ADV ? {tab:"Fachmodul Recht",eyebrow:"Fachmodul Recht · Datenschutz, Zivilrecht, Steuerrecht",st:"Sticker",fact:"Rechtsfakt des Tages",mins:"zwei Minuten",
+  ranks:[["Aktenträger","📎"],["Referendar","📚"],["Sachbearbeiter","🗂️"],["Fachanwalt","🎓"],["Richter","⚖️"],["Rechtsgelehrter","👑"]],
+  topic:"Das Fachmodul bringt trockene Fachtexte, zusammengestellt aus Gesetzen, Urteilen und Fachliteratur und in eigenen Worten wiedergegeben."}
+ : {tab:"Nerd-Ecke",eyebrow:"Nerd-Ecke · Comics und nutzloses Wissen",st:"Nerd-Sticker",fact:"Nerd-Fakt des Tages",mins:"eine Minute",
+  ranks:[["Kiosk-Gucker","👀"],["Heftchen-Leser","📖"],["Sammler","🎴"],["Kenner","🧐"],["Nerd","🤓"],["Nerd-Legende","👑"]],topic:""};
 let BASE=[], IS_ADMIN=false; // gemeinsamer Grundbestand (nur im gehosteten Betrieb)
-function textById(id){ return TEXTS.find(t=>t.id===id) || NERD.texts.find(t=>t.id===id) || BASE.find(t=>t.id===id) || (S.ai||[]).find(t=>t.id===id); }
+function textById(id){ return TEXTS.find(t=>t.id===id) || NERD.texts.find(t=>t.id===id) || ADVT.find(t=>t.id===id) || BASE.find(t=>t.id===id) || (S.ai||[]).find(t=>t.id===id); }
 
 /* ============ ZUSTAND & SPEICHER ============ */
-const LS_KEY="sr-trainer-v1";
+const LS_KEY=ADV?"sr-trainer-adv-v1":"sr-trainer-v1";
 function freshState(){ return {v:1, updatedAt:0, baseline:null, target:null, lessons:{}, sessions:[], xp:0, badges:{}, schulteBest:null, sprints:0, seen:{}, ai:[], spanBest:0}; }
 const HOSTED=!!window.SR_HOSTED;
 function localLoad(){ if(HOSTED) return null; try{ const s=JSON.parse(localStorage.getItem(LS_KEY)); return s&&s.v?s:null; }catch(e){ return null; } }
 function localSave(s){ if(HOSTED) return; try{ localStorage.setItem(LS_KEY, JSON.stringify(s)); }catch(e){} }
 let S = localLoad() || freshState();
+/* Im Fortgeschrittenen-Kurs ist S nur der Teil S.adv des Kontodokuments (ROOT). Gespeichert wird immer das ganze Dokument, damit der Grundkurs unberührt bleibt. */
+let ROOT=null;
+const GATE={store:false,admin:false};
+function adopt(r){ if(!(ADV&&HOSTED)) return Object.assign(freshState(),r); ROOT=r; const a=Object.assign(freshState(),r.adv||{}); a.prefs=r.prefs; a.updatedAt=r.updatedAt||0; ROOT.adv=a; return a; }
+function serial(){ if(!(ADV&&HOSTED)) return S; if(!ROOT) ROOT=freshState(); const rest=Object.assign({},S); delete rest.prefs; ROOT.adv=rest; ROOT.updatedAt=S.updatedAt; if(S.prefs) ROOT.prefs=S.prefs; return ROOT; }
+const baseDone=()=>!!ROOT&&Object.keys(ROOT.lessons||{}).length>=48;
+const advOpen=()=>!ADV||!HOSTED||IS_ADMIN||baseDone();
 
 /* Optional external storage: window.SR_STORAGE = {load():Promise<state|null>, save(state):Promise} (hosted app),
    otherwise the Claude artifact database is used when available. */
@@ -669,16 +685,18 @@ const Store = {
       }
       if(!this.backend){ setSync("Fortschritt wird nur in diesem Browser gespeichert."); return; }
       const remote = await this.backend.load();
-      if(remote && remote.v && (remote.updatedAt||0) > (S.updatedAt||0)){ S=Object.assign(freshState(),remote); localSave(S); render(); }
+      if(remote && remote.v && (remote.updatedAt||0) > (S.updatedAt||0)){ S=adopt(remote); localSave(S); render(); }
+      else if(remote && remote.v && ADV && HOSTED){ ROOT=remote; }
       else if(S.updatedAt){ this.push(); }
       setSync("Fortschritt wird gespeichert und auf Handy und Rechner abgeglichen.");
     }catch(e){ setSync("Speichern online gerade nicht möglich, der Fortschritt bleibt in diesem Browser."); }
+    finally{ GATE.store=true; if(ADV) render(); }
   },
-  async refresh(){ if(!this.backend) return; try{ const r=await this.backend.load(); if(r&&r.v&&(r.updatedAt||0)>(S.updatedAt||0)&&!Run){ S=Object.assign(freshState(),r); localSave(S); render(); } }catch(e){} },
+  async refresh(){ if(!this.backend) return; try{ const r=await this.backend.load(); if(r&&r.v&&(r.updatedAt||0)>(S.updatedAt||0)&&!Run){ S=adopt(r); localSave(S); render(); } }catch(e){} },
   push(){
     if(!this.backend) return;
     if(this.pending) return; this.pending=true;
-    this.chain=this.chain.then(async()=>{ this.pending=false; try{ await this.backend.save(S); }catch(e){ setSync("Letzte Speicherung online fehlgeschlagen, wird beim nächsten Schritt erneut versucht."); } });
+    this.chain=this.chain.then(async()=>{ this.pending=false; try{ await this.backend.save(serial()); }catch(e){ setSync("Letzte Speicherung online fehlgeschlagen, wird beim nächsten Schritt erneut versucht."); } });
   }
 };
 function save(){ S.updatedAt=Date.now(); localSave(S); Store.push(); }
@@ -696,13 +714,14 @@ async function connectAI(){
   }catch(e){}
 }
 async function loadBase(){
-  if(!window.SR_BASE) return;
+  if(!window.SR_BASE){ GATE.admin=true; return; }
   try{
     const rows=await window.SR_BASE.list();
     BASE=rows.filter(r=>r&&r.text&&Array.isArray(r.text.paras)).map(r=>Object.assign({},r.text,{id:"base-"+r.id,kind:"ai",base:true}));
     IS_ADMIN=await window.SR_BASE.isAdmin();
     if(typeof Tab!=="undefined"&&Tab==="lesen"&&!Run&&!((document.getElementById("fr-own")||{}).value)) render();
   }catch(e){}
+  finally{ GATE.admin=true; if(ADV) render(); }
 }
 async function generateText(wish,source){
   if(!AI) throw new Error("none");
@@ -733,8 +752,16 @@ async function generateText(wish,source){
 }
 
 /* ============ KURSLOGIK ============ */
-const TOTAL=48, TESTS={1:"T1",12:"T2",24:"T3",36:"T4",48:"T5"};
+const TOTAL=ADV?24:48, TESTS=ADV?{1:"AT1",12:"AT2",24:"AT3"}:{1:"T1",12:"T2",24:"T3",36:"T4",48:"T5"};
+const ADV_LESSONS={2:"pre comp",3:"span pacer:chunk:1.1 comp",4:"scan comp",5:"recall comp",6:"skim recall",7:"schulte pacer:line:1.1 sprint:chunk:1.4 comp",8:"span rsvp:1.3 comp",9:"pacer:chunk:1.15 sprint:line:1.5 scan",10:"skim pre comp",11:"span pacer:chunk:1.2 review",13:"recall review",14:"pacer:chunk:1.15 recall",15:"scan recall review",16:"rsvp:1.3 comp review",17:"pre recall review",18:"sprint:chunk:1.5 recall review",19:"pre comp review",20:"scan skim recall",21:"span pacer:chunk:1.2 sprint:line:1.5 comp",22:"pre recall review",23:"schulte comp review"};
+function stepOf(sp){ const [t,a,b]=sp.split(":"); if(t==="pacer"||t==="sprint") return {t,m:a,f:+b}; if(t==="rsvp") return {t,f:+a}; return {t}; }
+function planAdv(n){
+  const w=Math.ceil(n/6), d=n-(w-1)*6, tip=(n-1)%TIPS.length;
+  const steps=[{t:"tip",i:tip}].concat(TESTS[n]?(n===1?[]:[{t:"schulte"}]).concat({t:"test",id:TESTS[n]}):ADV_LESSONS[n].split(" ").map(stepOf));
+  return {n,w,d,title:n===1?"Einstiegstest":TESTS[n]?(n===TOTAL?"Abschlusstest":"Zwischentest"):WEEKS[w-1].name,steps,test:!!TESTS[n]};
+}
 function plan(n){
+  if(ADV) return planAdv(n);
   const w=Math.ceil(n/6), d=n-(w-1)*6, wk=WEEKS[w-1];
   const tip = n===1?0 : n===48?17 : ((n-2)%16)+1;
   let steps;
@@ -752,7 +779,7 @@ function plan(n){
   const title = n===1?"Einstiegstest": TESTS[n]?(n===48?"Abschlusstest":"Zwischentest"): wk.name;
   return {n,w,d,title,steps,test:!!TESTS[n]};
 }
-const STEP_NAMES={tip:"Kurz erklärt",schulte:"Aufwärmen: Zahlentafel",span:"Aufwärmen: Blickspanne",pacer:"Pacer-Lesen",sprint:"Sprint",rsvp:"Wortanzeige",skim:"Überfliegen",comp:"Lesen mit Fragen",test:"Test"};
+const STEP_NAMES={pre:"Vorher fragen",scan:"Gezielt suchen",recall:"Abruf aus dem Gedächtnis",review:"Wiederholung",tip:"Kurz erklärt",schulte:"Aufwärmen: Zahlentafel",span:"Aufwärmen: Blickspanne",pacer:"Pacer-Lesen",sprint:"Sprint",rsvp:"Wortanzeige",skim:"Überfliegen",comp:"Lesen mit Fragen",test:"Test"};
 const doneCount=()=>Object.keys(S.lessons).length;
 const nextLesson=()=>{ for(let n=1;n<=TOTAL;n++) if(!S.lessons[n]) return n; return null; };
 function trainingDays(from,to){ let c=0; const d=parseDay(from), e=parseDay(to); while(d<=e){ if(d.getDay()!==0) c++; d.setDate(d.getDate()+1);} return c; }
@@ -763,11 +790,27 @@ function streak(){
   let c=0; for(let guard=0;guard<400;guard++){ if(d.getDay()===0){ d.setDate(d.getDate()-1); continue; } if(days.has(today(d))){ c++; d.setDate(d.getDate()-1);} else break; }
   return c;
 }
-const LEVELS=[[0,"Buchstabierer"],[200,"Zeilenleser"],[500,"Seitenwender"],[900,"Kapitelstürmer"],[1400,"Vielleser"],[2000,"Bücherwurm"],[2700,"Lesefuchs"],[3400,"Textkenner"],[4100,"Schnellleser"],[4800,"Lesemeister"]];
+const LEVELS_B=[[0,"Buchstabierer"],[200,"Zeilenleser"],[500,"Seitenwender"],[900,"Kapitelstürmer"],[1400,"Vielleser"],[2000,"Bücherwurm"],[2700,"Lesefuchs"],[3400,"Textkenner"],[4100,"Schnellleser"],[4800,"Lesemeister"]];
+const LEVELS=ADV?[[0,"Leser mit Plan"],[150,"Fragensteller"],[400,"Strukturfinder"],[700,"Abrufer"],[1000,"Kritischer Leser"],[1400,"Fachleser"],[1800,"Lesestratege"],[2300,"Wissensarbeiter"],[2900,"Textprofi"],[3500,"Lesemeister Pro"]]:LEVELS_B;
 function level(){ let i=0; while(i+1<LEVELS.length&&S.xp>=LEVELS[i+1][0]) i++; const cur=LEVELS[i][0], nxt=LEVELS[i+1]?LEVELS[i+1][0]:null; return {n:i+1,name:LEVELS[i][1],pct:nxt?(S.xp-cur)/(nxt-cur):1,toNext:nxt?nxt-S.xp:0}; }
 const compSessions=()=>S.sessions.filter(s=>s.type==="comp"||s.type==="test");
 function recentEff(k=3){ const c=compSessions().filter(s=>!s.repeat).slice(-k); if(!c.length) return null; return {wpm:c.reduce((a,s)=>a+s.wpm,0)/c.length, comp:c.reduce((a,s)=>a+s.comp,0)/c.length, eff:c.reduce((a,s)=>a+s.eff,0)/c.length}; }
-const BADGES=[
+const BADGES=(ADV?[
+ {id:"start",name:"Startschuss",desc:"Einstiegstest gemacht",ok:()=>!!S.baseline},
+ {id:"s3",name:"Drei in Folge",desc:"3 Trainingstage am Stück",ok:()=>streak()>=3},
+ {id:"s6",name:"Volle Woche",desc:"6 Trainingstage am Stück",ok:()=>streak()>=6},
+ {id:"full",name:"Alles verstanden",desc:"100 % in einem Fragenblock",ok:()=>compSessions().some(s=>s.comp>=1)},
+ {id:"p10",name:"Plus 10",desc:"Effektive Rate 10 % über Start",ok:()=>gain()>=.10},
+ {id:"p25",name:"Plus 25",desc:"Effektive Rate 25 % über Start",ok:()=>gain()>=.25},
+ {id:"p40",name:"Plus 40",desc:"Effektive Rate 40 % über Start",ok:()=>gain()>=.40},
+ {id:"schulte",name:"Adlerblick",desc:"Zahlentafel unter 30 Sekunden",ok:()=>S.schulteBest!=null&&S.schulteBest<30000},
+ {id:"span5",name:"Weiter Blick",desc:"5 Wörter in der Blickspanne",ok:()=>S.spanBest>=5},
+ {id:"rec3",name:"Gedächtnisprofi",desc:"3 Abrufe mit allen Kernaussagen",ok:()=>(S.recallAll||0)>=3},
+ {id:"rev8",name:"Wiederholer",desc:"8 Wiederholungen gemacht",ok:()=>(S.revDone||0)>=8},
+ {id:"scan5",name:"Spürnase",desc:"5 Suchaufgaben richtig gelöst",ok:()=>(S.scanOk||0)>=5},
+ {id:"half",name:"Halbzeit",desc:"12 Lektionen geschafft",ok:()=>doneCount()>=12},
+ {id:"grad",name:"Fortgeschritten",desc:"Alle 24 Lektionen geschafft",ok:()=>doneCount()>=24}
+]:[
  {id:"start",name:"Startschuss",desc:"Einstiegstest gemacht",ok:()=>!!S.baseline},
  {id:"s3",name:"Drei in Folge",desc:"3 Trainingstage am Stück",ok:()=>streak()>=3},
  {id:"s6",name:"Volle Woche",desc:"6 Trainingstage am Stück",ok:()=>streak()>=6},
@@ -781,24 +824,28 @@ const BADGES=[
  {id:"sprint10",name:"Sprinter",desc:"10 Sprints gelaufen",ok:()=>S.sprints>=10},
  {id:"half",name:"Halbzeit",desc:"24 Lektionen geschafft",ok:()=>doneCount()>=24},
  {id:"grad",name:"Absolvent",desc:"Alle 48 Lektionen geschafft",ok:()=>doneCount()>=48}
-].concat(NERD.texts.length?[
- {id:"n1",name:"Erster Sticker",desc:"Ersten Nerd-Sticker freigeschaltet",ok:()=>nerdCount()>=1},
- {id:"n7",name:"Halbes Album",desc:"7 Nerd-Sticker gesammelt",ok:()=>nerdCount()>=7},
- {id:"nstar",name:"Sternensammler",desc:"20 Sterne im Nerd-Album",ok:()=>nerdStars()>=20},
- {id:"nfact",name:"Faktenjäger",desc:"7 Nerd-Fakten des Tages abgeholt",ok:()=>((S.nerd||{}).facts||0)>=7},
+]).concat(NERD.texts.length?[
+ {id:"n1",name:"Erster Sticker",desc:`Ersten ${NL.st} freigeschaltet`,ok:()=>nerdCount()>=1},
+ {id:"n7",name:"Halbes Album",desc:`7 ${NL.st} gesammelt`,ok:()=>nerdCount()>=7},
+ {id:"nstar",name:"Sternensammler",desc:"20 Sterne im Album",ok:()=>nerdStars()>=20},
+ {id:"nfact",name:"Faktenjäger",desc:"7 Fakten des Tages abgeholt",ok:()=>((S.nerd||{}).facts||0)>=7},
  {id:"nsec",name:"Geheimnisjäger",desc:"2 geheime Sticker gefunden",ok:()=>Object.keys((S.nerd||{}).secret||{}).length>=2},
- {id:"nall",name:"Album komplett",desc:"Alle Nerd-Sticker gesammelt",ok:()=>nerdCount()>=NERD.texts.length}
+ {id:"nall",name:"Album komplett",desc:`Alle ${NL.st} gesammelt`,ok:()=>nerdCount()>=NERD.texts.length}
 ]:[]);
 function gain(){ if(!S.baseline) return 0; const r=recentEff(3); if(!r) return 0; return r.eff/S.baseline.eff-1; }
 function checkBadges(){ const fresh=[]; for(const b of BADGES){ if(!S.badges[b.id]&&b.ok()){ S.badges[b.id]=today(); fresh.push(b); } } return fresh; }
 function compText(){
+  if(ADV){
+    const u=ADVT.find(t=>t.kind==="adv"&&!S.seen[t.id])||BASE.find(t=>!S.seen[t.id])||TEXTS.find(t=>(t.kind==="train"||t.kind==="classic")&&!S.seen[t.id])||(S.ai||[]).find(t=>!t.src&&!S.seen[t.id]);
+    return u?{text:u}:null;
+  }
   const train=TEXTS.filter(t=>t.kind==="train");
   const unseen=train.find(t=>!S.seen[t.id]); if(unseen) return {text:unseen};
   const clUnseen=TEXTS.find(t=>t.kind==="classic"&&!S.seen[t.id]); if(clUnseen) return {text:clUnseen};
   const aiUnseen=(S.ai||[]).find(t=>!t.src&&!S.seen[t.id]); if(aiUnseen) return {text:aiUnseen};
   return null;
 }
-function repeatText(){ const pool=TEXTS.filter(t=>t.kind==="train"||t.kind==="classic").concat((S.ai||[]).filter(t=>!t.src)); pool.sort((a,b)=>(S.seen[a.id]||0)-(S.seen[b.id]||0)); return pool[0]; }
+function repeatText(){ const pool=(ADV?ADVT.filter(t=>t.kind==="adv"):[]).concat(TEXTS.filter(t=>t.kind==="train"||t.kind==="classic"),(S.ai||[]).filter(t=>!t.src)); pool.sort((a,b)=>(S.seen[a.id]||0)-(S.seen[b.id]||0)); return pool[0]; }
 function drillText(n){
   const pool=[textById("D1"),textById("D2")].concat(TEXTS.filter(t=>(t.kind==="train"||t.kind==="classic")&&S.seen[t.id]),(S.ai||[]).filter(t=>!t.src&&S.seen[t.id]));
   return pool[(n*7)%pool.length];
@@ -810,7 +857,7 @@ let Tab="heute", Run=null;
 document.getElementById("tabs").addEventListener("click",e=>{ const b=e.target.closest("button[data-tab]"); if(!b) return; if(Run&&!confirmLeave()) return; Tab=b.dataset.tab; render(); });
 
 /* ============ EIGENE GESTALTUNG ============ */
-const TABS=[["heute","Heute"],["kurs","Kurs"],["lesen","Lesefenster"]].concat(NERD.texts.length?[["nerd","Nerd-Ecke"]]:[],[["fortschritt","Fortschritt"],["grundlagen","Grundlagen"],["anpassen","Anpassen"]]);
+const TABS=[["heute","Heute"],["kurs","Kurs"],["lesen","Lesefenster"]].concat(NERD.texts.length?[["nerd",NL.tab]]:[],[["fortschritt","Fortschritt"],["grundlagen","Grundlagen"],["anpassen","Anpassen"]]);
 const FONTS={serif:{n:"Buchschrift (Literata)",v:'"Literata",Georgia,"Times New Roman",serif'},sans:{n:"Gut lesbar (Atkinson)",v:'"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif'},mono:{n:"Schreibmaschine",v:'ui-monospace,SFMono-Regular,Menlo,Consolas,monospace'}};
 const SIZES={s:{n:"Klein",px:15},m:{n:"Normal",px:16},l:{n:"Groß",px:18},xl:{n:"Sehr groß",px:20}};
 const PRESETS=[
@@ -847,7 +894,8 @@ function applyPrefs(){
   document.body.classList.toggle("noside",p.side==="off");
   const nm=(p.name||"").trim(), hh=$("#brand-h"), sub=$("#brand-s");
   if(nm){ const parts=nm.split(/\s+/), last=parts.pop(); hh.replaceChildren(...(parts.length?[parts.join(" ")+" "]:[]),h("span",{class:"mk",text:last})); document.title=nm; }
-  if(typeof p.tagline==="string") sub.textContent=p.tagline;
+  if(ADV&&!nm){ hh.replaceChildren("Lesetraining ",h("span",{class:"mk",text:"Fortgeschritten"})); document.title="Lesetraining Fortgeschritten"; }
+  if(typeof p.tagline==="string") sub.textContent=p.tagline; else if(ADV) sub.textContent="Lesen mit Plan, Abruf und kritischem Blick";
 }
 function tabList(){
   const p=prefs(), order=(p.order||[]).filter(id=>TABS.some(t=>t[0]===id));
@@ -868,11 +916,11 @@ function spark(vals){
 }
 function renderSide(){
   const L=$("#sideL"), R=$("#sideR"); if(!L||!R) return;
-  const n=nextLesson(), w=n?plan(n).w:8, lv=level(), st=streak();
+  const n=nextLesson(), w=n?plan(n).w:WEEKS.length, lv=level(), st=streak();
   const pips=[]; for(let d=1;d<=6;d++){ const k=(w-1)*6+d; pips.push(h("span",{class:"pip"+(S.lessons[k]?" done":"")+(k===n?" next":"")+(TESTS[k]?" test":""),title:`Lektion ${k}`})); }
   const nb=BADGES.find(b=>!S.badges[b.id]);
   L.replaceChildren(
-    h("div",{class:"card","data-k":"kurs"},h("p",{class:"eyebrow"},"Dein Kurs"),h("h3",{text:n?`Woche ${w} von 8`:"Kurs geschafft"}),n?h("p",{class:"muted",style:"margin:0;font-size:.9rem"},`${WEEKS[w-1].name}: ${WEEKS[w-1].goal}`):null,h("div",{class:"pips"},pips),bar(doneCount()/TOTAL),h("p",{class:"muted",style:"margin:0;font-size:.9rem"},`${doneCount()} von ${TOTAL} Lektionen · Serie ${st} ${st===1?"Tag":"Tage"}`)),
+    h("div",{class:"card","data-k":"kurs"},h("p",{class:"eyebrow"},"Dein Kurs"),h("h3",{text:n?`Woche ${w} von ${WEEKS.length}`:"Kurs geschafft"}),n?h("p",{class:"muted",style:"margin:0;font-size:.9rem"},`${WEEKS[w-1].name}: ${WEEKS[w-1].goal}`):null,h("div",{class:"pips"},pips),bar(doneCount()/TOTAL),h("p",{class:"muted",style:"margin:0;font-size:.9rem"},`${doneCount()} von ${TOTAL} Lektionen · Serie ${st} ${st===1?"Tag":"Tage"}`)),
     h("div",{class:"card","data-k":"stufe"},h("p",{class:"eyebrow"},"Stufe"),h("h3",{text:`${lv.n}: ${lv.name}`}),bar(lv.pct),h("p",{class:"muted",style:"margin:0;font-size:.9rem"},lv.toNext?`Noch ${nf(lv.toNext)} Punkte bis zur nächsten Stufe.`:"Höchste Stufe erreicht.")),
     nb?h("div",{class:"card","data-k":"erfolg"},h("p",{class:"eyebrow"},"Nächster Erfolg"),h("h3",{text:nb.name}),h("p",{class:"muted",style:"margin:0;font-size:.9rem"},nb.desc)):null);
   const cs=compSessions().slice(-12), r=recentEff(3), tip=TIPS[Math.floor(Date.now()/864e5)%TIPS.length], ch=chosenTopics();
@@ -988,7 +1036,7 @@ function viewCustomize(v){
   v.append(h("div",{class:"card pref"},h("h2",{text:"Dein Kurs, deine Optik"}),h("p",{class:"muted",style:"margin:0"},"Alles hier gehört dir und wird mit deinem Konto auf allen Geräten gespeichert.")));
   v.append(h("div",{class:"card pref",style:"margin-top:16px"},h("h3",{text:"Name"}),
     h("label",{class:"field"},"Name deines Kurses",h("input",{type:"text",class:"txt",maxlength:40,value:p.name||"",placeholder:"z. B. Annas Lesetraining",oninput:e=>livePref("name",e.target.value),onchange:()=>{ save(); }})),
-    h("label",{class:"field"},"Untertitel",h("input",{type:"text",class:"txt",maxlength:90,value:typeof p.tagline==="string"?p.tagline:"8 Wochen schneller lesen, ohne Verständnis zu verlieren",oninput:e=>livePref("tagline",e.target.value),onchange:()=>save()}))));
+    h("label",{class:"field"},"Untertitel",h("input",{type:"text",class:"txt",maxlength:90,value:typeof p.tagline==="string"?p.tagline:(ADV?"Lesen mit Plan, Abruf und kritischem Blick":"8 Wochen schneller lesen, ohne Verständnis zu verlieren"),oninput:e=>livePref("tagline",e.target.value),onchange:()=>save()}))));
   const sw=h("div",{class:"swatches"},PRESETS.map(pr=>h("button",{class:"swatch","aria-pressed":String(["paper","accent","marker"].every(k=>(pr.c[k]||"")===(p[k]||""))),onclick:()=>{ S.prefs=Object.assign({},S.prefs,{paper:pr.c.paper||"",accent:pr.c.accent||"",marker:pr.c.marker||""}); save(); render(); }},h("i",{style:`background:${pr.c.paper||"var(--paper)"};box-shadow:inset 0 0 0 5px ${pr.c.accent||"var(--accent)"}`}),pr.n)));
   const modeSel=h("select",{onchange:e=>setPref("mode",e.target.value,true)},[["","Automatisch (wie dein Gerät)"],["light","Immer hell"],["dark","Immer dunkel"]].map(([k,l])=>h("option",{value:k,selected:(p.mode||"")===k},l)));
   v.append(h("div",{class:"card pref",style:"margin-top:16px"},h("h3",{text:"Farben"}),sw,
@@ -1056,6 +1104,15 @@ function drawTabs(){
   if(!list.some(t=>t.id===Tab)&&!Run) Tab=list[0].id;
   nav.replaceChildren(...list.map(t=>h("button",{role:"tab","data-tab":t.id,title:"Zum Verschieben ziehen, am Handy gedrückt halten","aria-selected":String(t.id===Tab&&!Run)},t.label)));
 }
+function renderGate(v){
+  const wait=!(GATE.store&&GATE.admin), n=ROOT?Object.keys(ROOT.lessons||{}).length:0;
+  $("#chips").replaceChildren(); $("#tabs").replaceChildren(); $("#sideL").replaceChildren(); $("#sideR").replaceChildren();
+  v.append(h("div",{class:"card"},h("p",{class:"eyebrow"},"Fortgeschrittenen-Kurs"),
+    wait?h("h2",{text:"Einen Moment, ich prüfe die Freischaltung"}):h("h2",{text:"Noch gesperrt"}),
+    wait?null:h("p",{class:"prose"},`Dieser Kurs öffnet sich, sobald du alle 48 Lektionen des Lesetrainings geschafft hast. Du bist bei ${n} von 48.`),
+    wait?null:bar(n/48),
+    wait?null:h("div",{class:"row"},h("a",{class:"btn primary",href:"./"},"Zum Grundkurs"),h("a",{class:"btn",href:"../"},"Zurück zum Lernportal"))));
+}
 function confirmLeave(){ Run=null; return true; }
 function render(){
   applyPrefs(); drawTabs(); renderSide();
@@ -1065,6 +1122,7 @@ function render(){
     h("span",{class:"chip"},"Serie ",h("b",{text:st})," ",st===1?"Tag":"Tage"),
     h("span",{class:"chip"},"Tempo ",h("b",{text:nf(tgt())})," WpM"));
   const v=$("#view"); v.replaceChildren();
+  if(ADV&&HOSTED&&!advOpen()){ renderGate(v); return; }
   if(Run){ renderRun(v); return; }
   ({heute:v=>{ viewToday(v); const c=nerdTodayCard(); if(c) v.append(c); },kurs:viewCourse,lesen:viewFree,nerd:viewNerd,fortschritt:viewProgress,grundlagen:viewBasics,anpassen:viewCustomize})[Tab](v);
   arrangeCards(v);
@@ -1119,7 +1177,7 @@ function saveCards(v){ const keys=cardBlocks(v).map(e=>e.dataset.k); setPref("ca
 function viewToday(v){
   v.append(quoteCard());
   const n=nextLesson();
-  if(!n){ v.append(h("div",{class:"card"},h("p",{class:"eyebrow"},"Kurs abgeschlossen"),h("h2",{text:"Alle 48 Lektionen geschafft"}),h("p",{},"Im Lesefenster kannst du weiter frei trainieren. Im Reiter Fortschritt siehst du deinen Weg vom Einstiegstest bis heute."))); return; }
+  if(!n){ v.append(h("div",{class:"card"},h("p",{class:"eyebrow"},"Kurs abgeschlossen"),h("h2",{text:`Alle ${TOTAL} Lektionen geschafft`}),h("p",{},"Im Lesefenster kannst du weiter frei trainieren. Im Reiter Fortschritt siehst du deinen Weg vom Einstiegstest bis heute."))); return; }
   const p=plan(n), todayDone=Object.values(S.lessons).filter(l=>l.date===today()).length, late=behind();
   const card=h("div",{class:"card"},
     h("p",{class:"eyebrow"},`Lektion ${n} von ${TOTAL} · Woche ${p.w}, Tag ${p.d}`),
@@ -1137,7 +1195,7 @@ function viewToday(v){
       stat("Aktuell",r?nf(r.wpm)+" WpM":"–",r?`${Math.round(r.comp*100)} % Verständnis`:""),
       stat("Effektive Rate",r?nf(r.eff):"–",S.baseline&&r?deltaTxt(r.eff/S.baseline.eff-1):"",true)));
   } else {
-    v.append(h("div",{class:"card",style:"margin-top:16px"},h("h3",{text:"So geht es los"}),h("p",{class:"prose"},"Die erste Lektion ist ein Einstiegstest: ein Text über den Hamburger Hafen, den du in deinem normalen Tempo liest, dann fünf Fragen. Daraus berechnet das Training dein Startempo für den Pacer.")));
+    v.append(h("div",{class:"card",style:"margin-top:16px"},h("h3",{text:"So geht es los"}),h("p",{class:"prose"},ADV?"Die erste Lektion ist ein Einstiegstest: ein Text über den Panamakanal, den du in deinem normalen Tempo liest, dann fünf Fragen. Er ist dein Vergleichswert für diesen Kurs. Danach kommen die Techniken: Fragen vor dem Lesen, gezieltes Suchen, Abruf und Wiederholung.":"Die erste Lektion ist ein Einstiegstest: ein Text über den Hamburger Hafen, den du in deinem normalen Tempo liest, dann fünf Fragen. Daraus berechnet das Training dein Startempo für den Pacer.")));
   }
 }
 function stat(l,v,d,trend){ return h("div",{class:"stat"},h("span",{class:"l",text:l}),h("span",{class:"v",text:v}),d?h("span",{class:"d "+(trend&&typeof d==="string"&&d.startsWith("+")?"up":trend&&d.startsWith("−")?"down":"muted"),text:d}):null); }
@@ -1154,8 +1212,8 @@ function viewCourse(v){
 
 let FR_NEW=null, FR_SEL=null, FR_NOTE=""; // frisch geholter Text: nach dem Neuzeichnen vorwählen und bestätigen
 function viewFree(v){
-  const lib=TEXTS.filter(t=>t.kind!=="test"||S.seen[t.id]).concat(NERD.texts,BASE,S.ai||[]);
-  const sel=h("select",{id:"fr-text"},lib.map(t=>h("option",{value:t.id},(t.kind==="nerd"?"Nerd · ":t.base?"Grundbestand · ":t.src?(t.src.name.startsWith("Wikipedia")?"Wikipedia · ":"Klassiker · "):t.kind==="ai"?"KI · ":"")+t.title)));
+  const lib=TEXTS.filter(t=>t.kind!=="test"||S.seen[t.id]).concat(ADVT,NERD.texts,BASE,S.ai||[]);
+  const sel=h("select",{id:"fr-text"},lib.map(t=>h("option",{value:t.id},(t.kind==="nerd"?"Nerd · ":t.kind==="recht"?"Recht · ":t.kind==="adv"?"Technik · ":t.base?"Grundbestand · ":t.src?(t.src.name.startsWith("Wikipedia")?"Wikipedia · ":"Klassiker · "):t.kind==="ai"?"KI · ":"")+t.title)));
   const mode=h("select",{id:"fr-mode"},[["line","Pacer, Zeile"],["chunk","Pacer, Sinngruppen"],["self","Eigenes Tempo mit Zeitmessung"],["rsvp","Wortanzeige"]].map(([k,l])=>h("option",{value:k},l)));
   const speed=h("input",{type:"range",id:"fr-wpm",min:120,max:900,step:10,value:Math.round(tgt())});
   const out=h("span",{class:"wpm",text:speed.value+" WpM"}); speed.addEventListener("input",()=>out.textContent=speed.value+" WpM");
@@ -1246,7 +1304,7 @@ function viewProgress(v){
   v.append(chartCard);
   v.append(h("div",{class:"card",style:"margin-top:16px"},h("h3",{text:"Erfolge"}),h("div",{class:"badges"},BADGES.map(b=>h("div",{class:"badge"+(S.badges[b.id]?" on":"")},h("b",{text:b.name}),h("span",{text:S.badges[b.id]?`${b.desc} · ${fmtDay(S.badges[b.id])}`:b.desc}))))));
   if(cs.length) v.append(h("div",{class:"card",style:"margin-top:16px"},h("h3",{text:"Alle Messungen"}),h("div",{class:"tablewrap"},h("table",{},h("thead",{},h("tr",{},["Datum","Art","Text","WpM","Verständnis","Effektiv"].map(x=>h("th",{text:x})))),h("tbody",{},cs.slice().reverse().map(s=>h("tr",{},h("td",{text:fmtDay(s.date)}),h("td",{text:s.type==="test"?"Test":s.repeat?"Wiederholung":"Lektion"}),h("td",{text:(textById(s.textId)||{}).title||s.textId}),h("td",{text:nf(s.wpm)}),h("td",{text:Math.round(s.comp*100)+" %"}),h("td",{text:nf(s.eff)}))))))));
-  v.append(h("div",{class:"row",style:"margin-top:16px"},h("button",{class:"btn ghost",id:"reset",onclick:e=>{ const b=e.currentTarget; if(b.dataset.arm){ const pr=S.prefs; S=freshState(); if(pr) S.prefs=pr; save(); render(); } else { b.dataset.arm="1"; b.textContent="Wirklich alles löschen? Nochmal tippen"; } }},"Fortschritt zurücksetzen")));
+  v.append(h("div",{class:"row",style:"margin-top:16px"},h("button",{class:"btn ghost",id:"reset",onclick:e=>{ const b=e.currentTarget; if(b.dataset.arm){ const pr=S.prefs, ad=S.adv; S=freshState(); if(pr) S.prefs=pr; if(ad) S.adv=ad; save(); render(); } else { b.dataset.arm="1"; b.textContent="Wirklich alles löschen? Nochmal tippen"; } }},"Fortschritt zurücksetzen")));
 }
 function chart(cs){
   const W=600,H=230,pl=40,pr=52,pt=12,pb=26;
@@ -1275,7 +1333,7 @@ function chart(cs){
 function viewBasics(v){
   v.append(h("div",{class:"card"},h("h2",{text:"Grundlagen in fünf Minuten"}),h("p",{class:"muted"},"Was die Forschung zum schnellen Lesen sagt, kurz und ohne Versprechen, die nicht halten.")));
   for(const [t,x] of BASICS) v.append(h("div",{class:"card",style:"margin-top:12px"},h("h3",{text:t}),h("p",{class:"prose",style:"margin:0"},x)));
-  v.append(h("p",{class:"muted",style:"font-size:.8rem;margin-top:12px"},"Quellen: Rayner u. a. 2016, Psychological Science in the Public Interest; Brysbaert 2019, Journal of Memory and Language; Schotter u. a. 2014, Psychological Science."));
+  v.append(h("p",{class:"muted",style:"font-size:.8rem;margin-top:12px"},ADV?"Quellen: Dunlosky u. a. 2013, Psychological Science in the Public Interest; Roediger und Karpicke 2006, Psychological Science; Cepeda u. a. 2006, Psychological Bulletin; Robinson 1946, Effective Study; Adler und Van Doren 1972, How to Read a Book; Keshav 2007, ACM SIGCOMM Computer Communication Review.":"Quellen: Rayner u. a. 2016, Psychological Science in the Public Interest; Brysbaert 2019, Journal of Memory and Language; Schotter u. a. 2014, Psychological Science."));
 }
 
 /* ============ LEKTION ============ */
@@ -1302,8 +1360,59 @@ const STEPS={
       h("div",{class:"row"},h("button",{class:"btn primary",onclick:()=>openReader({text:t,mode:"skim",limitMs:secs*1000,title:t.title,onDone:()=>{ S.seen[t.id]=(S.seen[t.id]||0)+1; Quiz.open(t,c=>{ save(); next({t:"skim",comp:c}); },box); }})},"Überfliegen starten")));
   },
   comp(box,s,next){ measureStep(box,next,false); },
+  pre(box,s,next){ preStep(box,next); },
+  scan(box,s,next){ scanStep(box,next); },
+  recall(box,s,next){ recallStep(box,next); },
+  review(box,s,next){ reviewStep(box,next); },
   test(box,s,next){ measureStep(box,next,s.id); }
 };
+/* Fortgeschrittenen-Kurs: Schritte für Lesetechniken. Gemerkt werden gelesene Texte in S.rev für die Wiederholung an späteren Tagen. */
+function markRead(t){
+  S.seen[t.id]=(S.seen[t.id]||0)+1; if(!ADV) return; S.rev=S.rev||[];
+  if(!S.rev.some(e=>e.id===t.id)) S.rev.push({id:t.id,date:today(),n:0});
+}
+const bonus=x=>{ Run.bonus=(Run.bonus||0)+x; };
+function pickText(){ const pk=compText(); return pk?pk.text:repeatText(); }
+function preStep(box,next){
+  const t=pickText(), firsts=t.paras.map(p=>(p.match(/^.*?[.!?](?=\s|$)/)||[p])[0]);
+  const qa=h("textarea",{class:"own",maxlength:400,placeholder:"Zwei Fragen, auf die du beim Lesen eine Antwort suchst (bleibt nur hier, wird nicht gespeichert)",style:"min-height:80px"});
+  box.append(h("p",{class:"eyebrow"},STEP_NAMES.pre),h("h2",{text:t.title}),
+    h("p",{class:"prose"},"Erst der Überblick, dann die Fragen, dann das Lesen. Das sind die ersten Sätze der Absätze:"),
+    h("ul",{class:"prose",style:"margin:0;padding-left:1.2em"},firsts.map(f=>h("li",{},f))),
+    qa,h("div",{class:"row"},h("button",{class:"btn primary",onclick:()=>openReader({text:t,mode:"self",title:t.title,onDone:()=>{ markRead(t); Quiz.open(t,c=>{ bonus(Math.round(c*15)); save(); next({t:"pre",comp:c}); },box); }})},"Lesen"),h("button",{class:"btn ghost",onclick:()=>next()},"Überspringen")));
+}
+function scanStep(box,next){
+  const t=pickText(), q=t.qs[0];
+  box.append(h("p",{class:"eyebrow"},STEP_NAMES.scan),h("h2",{text:t.title}),
+    h("p",{class:"prose"},`Du suchst eine Antwort, du liest nicht alles. Die Frage lautet: ${q.q}`),
+    h("p",{class:"muted"},"Der Text ist bis zum Start unscharf. Lass den Blick über den Text gleiten, halte beim Schlüsselwort an und tippe auf „Fertig gelesen“, sobald du die Antwort hast."),
+    h("div",{class:"row"},h("button",{class:"btn primary",onclick:()=>openReader({text:t,mode:"self",title:t.title,onDone:r=>{ markRead(t);
+      Quiz.open({qs:[q]},c=>{ if(c>=1){ S.scanOk=(S.scanOk||0)+1; bonus(15); } save(); box.replaceChildren(h("p",{class:"eyebrow"},"Ergebnis"),h("div",{class:"big",text:fmtTime(r.ms)}),h("p",{},c>=1?"Richtig gefunden, +15 Punkte.":"Das war nicht die richtige Antwort. Beim nächsten Mal zuerst das Schlüsselwort der Frage festhalten."),h("div",{class:"row"},h("button",{class:"btn primary",onclick:()=>next({t:"scan",ms:r.ms,ok:c>=1})},"Weiter"))); },box); }})},"Suchen starten"),h("button",{class:"btn ghost",onclick:()=>next()},"Überspringen")));
+}
+function recallStep(box,next){
+  const t=pickText();
+  box.append(h("p",{class:"eyebrow"},STEP_NAMES.recall),h("h2",{text:t.title}),
+    h("p",{class:"prose"},"Lies den Text einmal in deinem Tempo. Danach sagst du dir die Kernaussagen aus dem Kopf vor, ohne hinzusehen. Erst dann kommt die Lösung."),
+    h("div",{class:"row"},h("button",{class:"btn primary",onclick:()=>openReader({text:t,mode:"self",title:t.title,onDone:()=>{ markRead(t); stage2(); }})},"Lesen"),h("button",{class:"btn ghost",onclick:()=>next()},"Überspringen")));
+  function stage2(){
+    const ta=h("textarea",{class:"own",maxlength:600,placeholder:"Schreibe oder denke die Kernaussagen (bleibt nur hier, wird nicht gespeichert)",style:"min-height:100px"});
+    const toQuiz=()=>Quiz.open(t,c=>{ bonus(Math.round(c*15)); save(); next({t:"recall",comp:c}); },box);
+    box.replaceChildren(h("p",{class:"eyebrow"},STEP_NAMES.recall),h("h3",{text:"Was waren die Kernaussagen?"}),ta,
+      h("div",{class:"row"},h("button",{class:"btn primary",onclick:()=>{
+        if(!t.key){ toQuiz(); return; }
+        const rate=k=>{ bonus(k*5); if(k===3) S.recallAll=(S.recallAll||0)+1; toQuiz(); };
+        box.replaceChildren(h("p",{class:"eyebrow"},STEP_NAMES.recall),h("h3",{text:"Das waren die Kernaussagen"}),h("ol",{class:"prose",style:"margin:0;padding-left:1.2em"},t.key.map(k=>h("li",{},k))),
+          h("p",{},"Wie viele hattest du?"),h("div",{class:"row"},[3,2,1,0].map(k=>h("button",{class:"btn"+(k===3?" primary":""),onclick:()=>rate(k)},k===3?"Alle drei":k===0?"Keine":k===1?"Eine":"Zwei"))));
+      }},t.key?"Lösung zeigen":"Weiter zu den Fragen")));
+  }
+}
+function reviewStep(box,next){
+  const cand=(S.rev||[]).filter(e=>e.date<today()&&e.n<2&&textById(e.id)).sort((a,b)=>a.n-b.n||(a.date<b.date?-1:1))[0];
+  if(!cand){ box.append(h("p",{class:"eyebrow"},STEP_NAMES.review),h("h2",{text:"Heute nichts zu wiederholen"}),h("p",{class:"prose"},"Wiederholt wird, was du an einem früheren Tag gelesen hast. Heute ist noch nichts dran."),h("div",{class:"row"},h("button",{class:"btn primary",onclick:()=>next()},"Weiter"))); return; }
+  const t=textById(cand.id);
+  box.append(h("p",{class:"eyebrow"},STEP_NAMES.review),h("h2",{text:t.title}),h("p",{class:"prose"},`Den Text hast du am ${fmtDay(cand.date)} gelesen. Ohne ihn noch einmal anzusehen beantwortest du jetzt Fragen dazu. Das ist verteiltes Wiederholen.`),
+    h("div",{class:"row"},h("button",{class:"btn primary",onclick:()=>Quiz.open(t,c=>{ cand.n++; S.revDone=(S.revDone||0)+1; bonus(Math.round(c*15)); save(); next({t:"review",comp:c}); },box)},"Fragen beantworten"),h("button",{class:"btn ghost",onclick:()=>next()},"Überspringen")));
+}
 function readerStep(box,s,next,kind){
   const t=drillText(Run.n+(kind==="sprint"?3:0)), w=Math.round(tgt()*s.f);
   const how = kind==="sprint"?"Der Marker ist absichtlich zu schnell. Folge ihm trotzdem, Verständnis ist hier egal." : kind==="rsvp" ? "Die Wörter erscheinen nacheinander in der Mitte. Halte den Blick ruhig, Verständnis ist zweitrangig." : s.m==="chunk" ? "Der Marker springt in kleinen Wortgruppen. Erfasse jede Gruppe mit einem Blick." : "Folge dem Leuchtmarker unter der Zeile. Verpasst du ein Wort, lass es los.";
@@ -1319,12 +1428,12 @@ async function measureStep(box,next,testId){
       try{ t=await generateText(); }catch(e){ t=repeatText(); repeat=true; }
       box.replaceChildren(); } }
   const words=wordsOf(t);
-  box.append(h("p",{class:"eyebrow"},testId?(Run.n===1?"Einstiegstest":Run.n===48?"Abschlusstest":"Zwischentest"):STEP_NAMES.comp, t.kind==="ai"?" · ":"", t.kind==="ai"?h("span",{class:"tag"},"KI-Text"):null),
+  box.append(h("p",{class:"eyebrow"},testId?(Run.n===1?"Einstiegstest":Run.n===TOTAL?"Abschlusstest":"Zwischentest"):STEP_NAMES.comp, t.kind==="ai"?" · ":"", t.kind==="ai"?h("span",{class:"tag"},"KI-Text"):null),
     h("h2",{text:t.title}),
     h("p",{class:"prose"},testId?`Lies den Text in deinem natürlichen Tempo, so wie du sonst liest. ${words} Wörter. Die Zeit läuft ab Start, danach kommen ${t.qs.length} Fragen ohne Text.`:`Lies den Text in deinem eigenen Tempo, gern etwas zügiger als gewohnt. ${words} Wörter. Danach kommen ${t.qs.length} Fragen.`),
     repeat?h("p",{class:"notice"},"Alle Übungstexte sind schon gelesen und ein neuer KI-Text war nicht möglich. Dieser Text ist eine Wiederholung und zählt nicht für das Pacer-Ziel."):null,
     h("div",{class:"row"},h("button",{class:"btn primary",onclick:()=>openReader({text:t,mode:"self",title:t.title,onDone:r=>{
-      const wpm=Math.min(1500,words/(Math.max(1000,r.ms)/60000)); S.seen[t.id]=(S.seen[t.id]||0)+1;
+      const wpm=Math.min(1500,words/(Math.max(1000,r.ms)/60000)); markRead(t);
       Quiz.open(t,c=>{
         const eff=wpm*c, rec={date:today(),type:testId?"test":"comp",textId:t.id,wpm:Math.round(wpm),comp:c,eff:Math.round(eff),lesson:Run.n,repeat};
         S.sessions.push(rec);
@@ -1344,14 +1453,14 @@ function resultScreen(box,rec,note,go){
 }
 function finishLesson(){
   const n=Run.n, comp=Run.res.find(r=>r.t==="comp");
-  let xp=50+(comp?Math.round(comp.comp*50):0)+(TESTS[n]?50:0);
+  let xp=50+(comp?Math.round(comp.comp*50):0)+(TESTS[n]?50:0)+(Run.bonus||0);
   const st=streak(); S.lessons[n]={date:today(),xp}; const st2=streak(); if(st2>st&&st2%6===0) xp+=30;
   S.lessons[n].xp=xp; S.xp+=xp;
   const fresh=checkBadges(); save();
   const v=$("#view"); Run=null; render();
   v.replaceChildren(h("div",{class:"card"},h("p",{class:"eyebrow"},`Lektion ${n} geschafft`),h("div",{class:"big",text:`+${xp} Punkte`}),
     fresh.length?h("div",{class:"badges"},fresh.map(b=>h("div",{class:"badge on"},h("b",{text:"Neu: "+b.name}),h("span",{text:b.desc})))):null,
-    h("p",{},n===48?"Du hast den Kurs abgeschlossen. Im Reiter Fortschritt siehst du den Vergleich mit deinem Einstiegstest.":"Morgen wartet die nächste Lektion. Um 20 Uhr fragt Claude im Projekt kurz nach."),
+    h("p",{},n===TOTAL?"Du hast den Kurs abgeschlossen. Im Reiter Fortschritt siehst du den Vergleich mit deinem Einstiegstest.":"Morgen wartet die nächste Lektion. Um 20 Uhr fragt Claude im Projekt kurz nach."),
     h("div",{class:"row"},h("button",{class:"btn primary",onclick:()=>{ Tab="heute"; render(); }},"Fertig"),h("button",{class:"btn",onclick:()=>{ Tab="fortschritt"; render(); }},"Fortschritt ansehen"))));
 }
 
@@ -1364,7 +1473,7 @@ const nerdCount=()=>Object.keys(nerdCards()).length;
 const nerdStars=()=>Object.values(nerdCards()).reduce((a,c)=>a+c.stars,0);
 const starTxt=n=>h("span",{class:"stars","aria-label":`${n} von 3 Sternen`},"★".repeat(n),h("i",{},"★".repeat(3-n)));
 function nerdRank(){
-  const R=[[0,"Kiosk-Gucker","👀"],[1,"Heftchen-Leser","📖"],[4,"Sammler","🎴"],[7,"Kenner","🧐"],[10,"Nerd","🤓"],[NERD.texts.length,"Nerd-Legende","👑"]], n=nerdCount();
+  const K=NL.ranks, R=[[0,K[0][0],K[0][1]],[1,K[1][0],K[1][1]],[4,K[2][0],K[2][1]],[7,K[3][0],K[3][1]],[10,K[4][0],K[4][1]],[NERD.texts.length,K[5][0],K[5][1]]], n=nerdCount();
   let i=0; while(i+1<R.length&&n>=R[i+1][0]) i++; const nx=R[i+1];
   return {name:R[i][1],icon:R[i][2],pct:nx?(n-R[i][0])/(nx[0]-R[i][0]):1,next:nx?nx[1]:null,need:nx?nx[0]-n:0};
 }
@@ -1382,12 +1491,12 @@ function claimFact(){
 }
 function factCard(extra){
   const got=(S.nerd||{}).factDay===today();
-  return h("div",{class:"card","data-k":"nerdfakt"},h("p",{class:"eyebrow"},"Nerd-Fakt des Tages"),h("p",{class:"prose",style:"margin:0"},nerdFact()),
+  return h("div",{class:"card","data-k":"nerdfakt"},h("p",{class:"eyebrow"},NL.fact),h("p",{class:"prose",style:"margin:0"},nerdFact()),
     h("div",{class:"row"},got?h("span",{class:"muted"},"✓ Heute abgeholt"+(NMSG?" · "+NMSG:"")):h("button",{class:"btn",onclick:claimFact},"Gewusst? +5 Punkte"),extra||null));
 }
 function nerdTodayCard(){
   if(!NERD.facts.length) return null;
-  const c=factCard(h("button",{class:"btn ghost",onclick:()=>{ Tab="nerd"; render(); }},"Zur Nerd-Ecke")); c.style.marginTop="16px"; return c;
+  const c=factCard(h("button",{class:"btn ghost",onclick:()=>{ Tab="nerd"; render(); }},"Zum "+NL.tab)); c.style.marginTop="16px"; return c;
 }
 function nerdRead(t){
   openReader({text:t,mode:"self",title:t.title,onDone:()=>{ S.seen[t.id]=(S.seen[t.id]||0)+1; Quiz.open(t,c=>nerdDone(t,c)); }});
@@ -1405,6 +1514,7 @@ function nerdDone(t,c){
     h("p",{class:"eyebrow"},old?"Sticker verbessert":"Neuer Sticker"),
     (()=>{ const s=sticker(t,"div"); s.classList.add("big","pop"); return s; })(),
     h("p",{style:"text-align:center;margin:0"},`${right} von ${t.qs.length} richtig · `+(xp?`+${xp} Punkte`:"keine neuen Punkte, du hattest schon so viele Sterne")),
+    t.ref?h("p",{class:"muted",style:"margin:0;text-align:center;font-size:.85rem"},"Rechtsgrundlage: "+t.ref):null,
     rk0!==rk1.name?h("p",{class:"notice",style:"border-left-color:var(--good)"},`Neuer Rang: ${rk1.icon} ${rk1.name}`):null,
     done?h("p",{class:"notice",style:"border-left-color:var(--good)"},"Das Album ist komplett."):null,
     fresh.length?h("div",{class:"badges"},fresh.map(b=>h("div",{class:"badge on"},h("b",{text:"Neu: "+b.name}),h("span",{text:b.desc})))):null,
@@ -1437,7 +1547,7 @@ function blitzLevel(){
     if(ok) got=findSecret("blitz");
     v.replaceChildren(h("div",{class:"card"},h("p",{class:"eyebrow"},"Geheimlevel: Blitzquiz"),h("h2",{text:`${right} von 8 richtig`}),
       h("p",{},ok?(got?"Geschafft, der geheime Sticker ist dein.":"Wieder geschafft. Der Sticker gehört dir schon."):"Für den Sticker brauchst du mindestens 7 richtige. Die Fragen sind jedes Mal neu gemischt."),
-      h("div",{class:"row"},h("button",{class:"btn primary",onclick:()=>render()},"Zurück zur Nerd-Ecke"),ok?null:h("button",{class:"btn",onclick:blitzLevel},"Nochmal"))));
+      h("div",{class:"row"},h("button",{class:"btn primary",onclick:()=>render()},"Zurück zum "+NL.tab),ok?null:h("button",{class:"btn",onclick:blitzLevel},"Nochmal"))));
   });
 }
 function secretCard(){
@@ -1451,9 +1561,9 @@ function secretCard(){
 }
 function viewNerd(v){
   const cards=nerdCards(), total=NERD.texts.length, n=nerdCount(), rk=nerdRank();
-  v.append(h("div",{class:"card"},h("p",{class:"eyebrow"},"Nerd-Ecke · Comics und nutzloses Wissen"),h("h2",{text:`${rk.icon} ${rk.name}`}),bar(rk.pct),
+  v.append(h("div",{class:"card"},h("p",{class:"eyebrow"},NL.eyebrow),h("h2",{text:`${rk.icon} ${rk.name}`}),bar(rk.pct),
     h("p",{class:"muted",style:"margin:0"},`${n} von ${total} Stickern · ${nerdStars()} von ${total*3} Sternen`+(rk.next?` · noch ${rk.need} bis ${rk.next}`:" · Album komplett")),
-    h("p",{class:"muted",style:"margin:0;font-size:.9rem"},"Jeder Text dauert etwa eine Minute. Für Sticker und Sterne beantwortest du danach vier Fragen: 2 richtig gibt einen Stern, 3 zwei, 4 drei. Neue Sticker bringen 20 Punkte, jeder Stern 10.")));
+    h("p",{class:"muted",style:"margin:0;font-size:.9rem"},`Jeder Text dauert etwa ${NL.mins}. Für Sticker und Sterne beantwortest du danach vier Fragen: 2 richtig gibt einen Stern, 3 zwei, 4 drei. Neue Sticker bringen 20 Punkte, jeder Stern 10.`),NL.topic?h("p",{class:"notice",style:"margin:0;font-size:.9rem"},NL.topic+" Das ist keine Rechtsberatung. Gesetze und Rechtsprechung ändern sich: Stand der Texte ist Oktober 2026, prüfe vor einer Entscheidung die aktuelle Fassung und frage bei Bedarf eine Fachperson."):null));
   const next=NERD.texts.find(t=>!cards[t.id])||NERD.texts.slice().sort((a,b)=>cards[a.id].stars-cards[b.id].stars)[0];
   v.append(h("div",{class:"card","data-k":"nerdheute",style:"margin-top:16px"},h("p",{class:"eyebrow"},cards[next.id]?"Noch mehr Sterne holen":"Heute zum Anlesen"),
     h("h3",{text:`${next.icon} ${next.title}`}),h("p",{class:"muted",style:"margin:0"},next.card),
@@ -1463,6 +1573,7 @@ function viewNerd(v){
   if(sel){ const c=cards[sel.id], s=sticker(sel,"div"); s.classList.add("big");
     v.append(h("div",{class:"card","data-k":"nerddetail",style:"margin-top:16px"},h("p",{class:"eyebrow"},c?"Dein Sticker":"Noch gesperrt"),s,
       c?h("p",{class:"prose",style:"margin:0"},sel.card):h("p",{class:"muted",style:"margin:0"},"Lies den Text und beantworte mindestens die Hälfte der Fragen, dann gehört dir der Sticker."),
+      sel.ref?h("p",{class:"muted",style:"margin:0;font-size:.85rem"},"Rechtsgrundlage: "+sel.ref):null,
       h("div",{class:"row"},h("button",{class:"btn primary",onclick:()=>nerdRead(sel)},c?(c.stars<3?"Nochmal lesen für mehr Sterne":"Nochmal lesen"):"Anlesen"),h("button",{class:"btn ghost",onclick:()=>{ NSEL=null; render(); }},"Schließen")))); }
   v.append(h("div",{class:"card","data-k":"album",style:"margin-top:16px"},h("h3",{text:"Sammelalbum"}),h("p",{class:"muted",style:"margin:0"},"Tippe einen Sticker an. Die Farbe zeigt die Seltenheit: grau gewöhnlich, blau selten, lila episch, gold legendär."),
     h("div",{class:"album"},NERD.texts.map(t=>sticker(t,"button",()=>{ NSEL=t.id; render(); window.scrollTo(0,0); })))));
