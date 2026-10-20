@@ -155,8 +155,8 @@ var COURSES = [
   {id: "wortwuerfel", icon: "🎲", title: "Wortwürfel", text: "Buchstabenwürfel-Wortspiel nach dem Vorbild von Boggle: 16 Würfel, drei Minuten, so viele deutsche Wörter wie möglich. Allein oder zu zweit.", href: "wortwuerfel/"},
   {id: "murmelbahn", icon: "🔮", title: "Murmelbahn", text: "Zum Abschalten: Bei jedem Start eine neue, zufällig gebaute Bahn mit Rampen, Stiften, Schaufelrädern und Pilzen. Murmeln setzen und zuschauen.", href: "murmelbahn/"},
   {id: "vestaboard", icon: "🪧", title: "Vestaboard", text: "Fallblatt-Anzeige wie dein Bildschirmschoner: Uhr, Wetter für Hamburg, Tagesschau, Zitat der Stunde und Sprüche im Wechsel, dazu eigene Texte und Vollbild.", href: "vestaboard/"},
-  // Ralfs private Huberman-Checkliste (Claude-Seite mit eigener Speicherung und Abendauswertung). Im Katalog für alle, öffnen kann sie nur Ralf.
-  {id: "huberman", icon: "🌅", title: "Huberman-Protokolle", text: "Deine Tages-Checkliste nach Hubermans „Protocols“: 31 Punkte von morgens bis nachts, ab 80 % ist der Tag geschafft, mit Jahresübersicht und Nachschlagewerk.", href: "https://claude.ai/artifact/RftCQuS68gfCheV5VLbpgn"}
+  // Jedes Konto hat seine eigene Checkliste (huberman/, gespeichert im eigenen Konto). Admins öffnen weiter Ralfs bisherige Claude-Seite mit Verlauf und Abendauswertung.
+  {id: "huberman", icon: "🌅", title: "Huberman-Protokolle", text: "Deine Tages-Checkliste nach Hubermans „Protocols“: 31 Punkte von morgens bis nachts, ab 80 % ist der Tag geschafft, mit Jahresübersicht und Nachschlagewerk.", href: "huberman/", adminHref: "https://claude.ai/artifact/RftCQuS68gfCheV5VLbpgn"}
 ];
 // Nur für einzeln freigeschaltete Konten sichtbar (Zeile in gevt_members). Ohne Freigabe taucht die Kachel nicht auf.
 var GEVT = {id: "gevt", icon: "🥋", title: "Ving Tsun Wissen", text: "Frag deine GEVT-Wissensdatenbank: Göksels Lehre und deine Notizen getrennt, mit Grad und Quellen.", href: "gevt/"};
@@ -186,7 +186,7 @@ var GEVT = {id: "gevt", icon: "🥋", title: "Ving Tsun Wissen", text: "Frag dei
       lessonKeys = !r.error && r.data && r.data.lessons ? Object.keys(r.data.lessons) : (r.error ? null : []);
       lessonsDone = lessonKeys ? lessonKeys.length : null;
     } catch (e) {}
-    refreshType(/^kurs:/); refreshType(/^lektion$/);
+    if (isAdmin && layout) renderDash(); else { refreshType(/^kurs:/); refreshType(/^lektion$/); }
   }
 
   // Kurse, die der Nutzer schon kennt. Ein Kurs, der hier fehlt, zeigt „Neu“. Erster Besuch eines neuen Kontos: alles gilt als bekannt.
@@ -210,13 +210,15 @@ var GEVT = {id: "gevt", icon: "🥋", title: "Ving Tsun Wissen", text: "Frag dei
     countdown: {group: "Werkzeuge", icon: "⏳", title: "Countdown", desc: "Tage bis zu einem Termin, etwa Urlaub, Prüfung oder Turnier.", w: 2, h: 1, multi: true, render: renderCountdown},
     entspannung: {group: "Werkzeuge", icon: "🌿", title: "Entspannungsecke", desc: "Geführte Box-Atmung 4-4-4-4 zum kurzen Runterkommen, dazu die Murmelbahn.", w: 1, h: 2, render: renderBreath},
     kleinanzeigen: {group: "Projekte", icon: "🏷️", title: "Kleinanzeigen-Verkaufsassistent", desc: "Artikel, Zustand und Preis eingeben und einen fertigen Anzeigentext kopieren.", w: 2, h: 3, multi: true, render: renderAd},
-    istr: {group: "Projekte", icon: "⚖️", title: "IStR-Vortrag", desc: "Vortragstermin mit Countdown und Checkliste der Punkte und BFH-Entscheidungen.", w: 2, h: 2, render: renderIstr}
+    // admin: nur für Konten in app_admins (Ralf), für alle anderen weder in der Galerie noch auf dem Dashboard.
+    istr: {group: "Projekte", icon: "⚖️", title: "IStR-Vortrag", desc: "Vortragstermin mit Countdown und Checkliste der Punkte und BFH-Entscheidungen.", w: 2, h: 2, admin: true, render: renderIstr}
   };
   function courseList() { return COURSES; }
   function courseOf(type) { var id = type.slice(5); return courseList().filter(function (c) { return c.id === id; })[0] || null; }
   function typeOf(type) {
     if (type.slice(0, 5) === "kurs:") { var c = courseOf(type); return c ? {group: "Kurse", icon: c.icon, title: c.title, desc: c.text, w: 1, h: 2, course: c, render: renderCourse} : null; }
-    return TYPES[type] || null;
+    var ty = TYPES[type] || null;
+    return ty && ty.admin && !isAdmin ? null : ty;
   }
 
   /* ---------- Layout laden und speichern: Supabase (Tabelle schach_docs, Pfad portal/dashboard), sonst localStorage ---------- */
@@ -371,7 +373,7 @@ var GEVT = {id: "gevt", icon: "🥋", title: "Ving Tsun Wissen", text: "Frag dei
   /* ---------- Galerie ---------- */
   function allTypes() {
     var list = courseList().map(function (c) { return "kurs:" + c.id; });
-    return list.concat(Object.keys(TYPES));
+    return list.concat(Object.keys(TYPES).filter(function (k) { return typeOf(k); }));
   }
   function renderGallery() {
     var body = $("galBody"); body.replaceChildren();
@@ -435,7 +437,7 @@ var GEVT = {id: "gevt", icon: "🥋", title: "Ving Tsun Wissen", text: "Frag dei
       b.appendChild(el("p", {style: "font-size:.85rem", text: lessonsDone === null ? "Ich prüfe, wie weit du im Lesetraining bist." : "Schließe zuerst alle 48 Lektionen des Lesetrainings ab. Du bist bei " + lessonsDone + " von 48."}));
       return;
     }
-    row.appendChild(el("a", {class: "btn primary", href: c.href, text: "Öffnen", onclick: function () { if (isNew(c)) setSeen((seen() || []).concat([c.id])); }}));
+    row.appendChild(el("a", {class: "btn primary", href: (isAdmin && c.adminHref) || c.href, text: "Öffnen", onclick: function () { if (isNew(c)) setSeen((seen() || []).concat([c.id])); }}));
   }
 
   var ticks = [];

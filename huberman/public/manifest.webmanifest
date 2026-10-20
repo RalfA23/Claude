@@ -1,0 +1,14 @@
+{
+  "name": "Huberman-Protokolle",
+  "short_name": "Huberman",
+  "description": "Tages-Checkliste nach Hubermans Protocols mit Jahresüberblick und Nachschlagewerk.",
+  "lang": "de",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f3f6f7",
+  "theme_color": "#14232b",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}
