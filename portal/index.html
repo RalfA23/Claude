@@ -140,6 +140,7 @@ dialog::backdrop{background:rgba(0,0,0,.45)}
     <label id="coderow" hidden>Einladungscode<input id="code" type="text" autocomplete="off" autocapitalize="off"></label>
     <label class="chk"><input id="consent" type="checkbox" required><span>Ich habe die <a href="datenschutz.html" target="_blank">Datenschutzerklärung</a> gelesen und bin mindestens 16 Jahre alt.</span></label>
     <button class="primary" type="submit" id="go">Anmelden</button>
+    <button type="button" id="ml">Stattdessen Anmeldelink per Mail</button>
     <button type="button" id="tg" style="border-color:transparent">Neu hier? Mit Einladungscode registrieren</button>
     <p id="msg" aria-live="polite"></p>
   </form>
@@ -230,7 +231,7 @@ var GEVT = {id: "gevt", icon: "🥋", title: "Ving Tsun Wissen", text: "Frag dei
     return {v: 1, ts: 0, tiles: t.map(newTile)};
   }
   function newTile(t) { var ty = typeOf(t.type) || {w: 1, h: 1}; return {id: uid(), type: t.type, w: ty.w, h: ty.h, cfg: {}}; }
-  function valid(l) { return l && Array.isArray(l.tiles); }
+  function valid(l) { if (!l || !Array.isArray(l.tiles)) return false; l.tiles = l.tiles.filter(function (t) { return t && typeof t.type === "string"; }); return true; }
   function readLocal() { try { var x = JSON.parse(localStorage.getItem(lkey()) || "null"); return valid(x) ? x : null; } catch (e) { return null; } }
   function writeLocal() { try { localStorage.setItem(lkey(), JSON.stringify(layout)); return true; } catch (e) { return false; } }
   async function loadLayout() {
@@ -691,6 +692,7 @@ var GEVT = {id: "gevt", icon: "🥋", title: "Ving Tsun Wissen", text: "Frag dei
   var signup = false, msg = $("msg");
   $("tg").addEventListener("click", function () {
     signup = !signup; $("coderow").hidden = !signup; $("go").textContent = signup ? "Registrieren" : "Anmelden";
+    $("ml").hidden = signup;
     $("tg").textContent = signup ? "Schon registriert? Anmelden" : "Neu hier? Mit Einladungscode registrieren";
     $("pw").autocomplete = signup ? "new-password" : "current-password"; msg.textContent = "";
   });
@@ -707,10 +709,21 @@ var GEVT = {id: "gevt", icon: "🥋", title: "Ving Tsun Wissen", text: "Frag dei
         : /database error|invite|not allowed|signups/i.test(r.error.message) ? "Der Einladungscode stimmt nicht oder ist abgelaufen." : "Das hat nicht geklappt: " + r.error.message;
       return;
     }
-    if (!pw) { msg.textContent = "Bitte gib dein Passwort ein."; return; }
+    if (!pw) { msg.textContent = "Bitte gib dein Passwort ein oder nutze den Anmeldelink per Mail."; return; }
     msg.textContent = "Einen Moment…";
     var s = await sb.auth.signInWithPassword({email: email, password: pw});
     if (s.error) msg.textContent = /invalid login/i.test(s.error.message) ? "E-Mail oder Passwort stimmt nicht." : "Das hat nicht geklappt: " + s.error.message;
+  });
+  // Anmeldelink per Mail wie im Lesetraining: für vergessene Passwörter und Konten, die bisher nur so angemeldet waren.
+  $("ml").addEventListener("click", async function () {
+    var addr = $("em").value.trim();
+    if (!addr || !$("consent").checked) { msg.textContent = "Bitte gib deine E-Mail an und bestätige die Datenschutzerklärung."; return; }
+    msg.textContent = "Einen Moment…";
+    var r = await sb.auth.signInWithOtp({email: addr, options: {emailRedirectTo: location.origin + location.pathname, shouldCreateUser: false}});
+    msg.textContent = !r.error ? "Der Link ist unterwegs. Öffne ihn auf diesem Gerät."
+      : /rate limit/i.test(r.error.message) ? "Es wurden gerade zu viele Mails verschickt. Bitte melde dich mit Passwort an oder warte etwa eine Stunde."
+      : /signup|not allowed|not found/i.test(r.error.message) ? "Diese E-Mail-Adresse ist nicht eingeladen."
+      : "Das hat nicht geklappt: " + r.error.message;
   });
   sb.auth.onAuthStateChange(function (_e, session) { if (session && session.user && !user) enter(session.user); });
   sb.auth.getSession().then(function (r) { if (r.data.session) enter(r.data.session.user); else $("login").hidden = false; });
