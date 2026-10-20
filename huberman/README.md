@@ -4,7 +4,7 @@ Tages-Checkliste nach Andrew Hubermans „Protocols“ als Kurs der Lebensplattf
 
 - Jedes Konto hat seine eigene Checkliste. Häkchen und Aufsteh-/Bettzeit liegen in Supabase (Tabelle `schach_docs`, Pfade `huberman/tag/JJJJ-MM-TT` und `huberman/einstellungen`), dazu als Rückfall im Browser, getrennt nach Konto.
 - Ohne Anmeldung zeigt die Seite einen Hinweis aufs Portal.
-- Admins (Ralf) öffnen aus dem Portal weiter die bisherige Claude-Seite mit Verlauf und Abendauswertung.
+- Admins (Ralf) öffnen aus dem Portal weiter die bisherige Claude-Seite mit Verlauf und Abendauswertung. Wer als Admin `/huberman/` direkt öffnet (Lesezeichen, Startbildschirm), wird dorthin weitergeleitet, damit die Häkchen nicht auf zwei Seiten verteilt landen.
 
 | Pfad | Inhalt |
 |---|---|
