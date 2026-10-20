@@ -409,7 +409,10 @@ body.saver.moved { cursor: default; }
   const $ = id => document.getElementById(id);
   const msg = $('msg'), center = $('center'), status = $('status'), count = $('count');
 
+  // Hinterlegte Nachricht: erscheint einmal pro Browser beim nächsten Öffnen, danach als Beispiel.
+  const GRUSS = { id: 'capicop', text: '{lila}{blau}{gruen}\nHALLO CAPICOP\n{gruen}{blau}{lila}' };
   const PRESETS = [
+    ['Hallo Capicop', GRUSS.text],
     ['Guten Morgen', '{gelb}{gelb}{gelb}\nGUTEN MORGEN!\nHEUTE WIRD EIN\nGUTER TAG\n{gelb}{gelb}{gelb}'],
     ['Kaffee', 'ERST KAFFEE,\nDANN DIE WELT.\n\n{orange}{rot}{orange}'],
     ['Wochenende', '{blau}{gruen}{gelb}{orange}{rot}{lila}{blau}{gruen}{gelb}{orange}{rot}{lila}\nENDLICH\nWOCHENENDE!\n{blau}{gruen}{gelb}{orange}{rot}{lila}{blau}{gruen}{gelb}{orange}{rot}{lila}'],
@@ -850,6 +853,9 @@ body.saver.moved { cursor: default; }
   if (saved && typeof saved.center === 'boolean') center.checked = saved.center;
   updateCount();
   if (location.hash === '#bildschirmschoner' || document.documentElement.dataset.saver === '1') { setTimeout(startSaver, 250); return; }
+  let gruss = false;
+  try { gruss = localStorage.getItem('vb-gruss') !== GRUSS.id; localStorage.setItem('vb-gruss', GRUSS.id); } catch {}
+  if (gruss || !saved) { msg.value = GRUSS.text; center.checked = true; updateCount(); setTimeout(() => { setMode('msg'); send(); }, 250); return; }
   setTimeout(() => { const m = saved ? saved.mode : 'rot'; if (m && m !== 'msg') setMode(m); else send(); }, 250);
 })();
 </script>
