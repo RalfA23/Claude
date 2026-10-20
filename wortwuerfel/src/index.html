@@ -10,6 +10,8 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon-192.png">
+<script src="../config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <style>
 :root{
   --bg:#13261F;--bg2:#1B332A;--panel:#1F3A30;--line:#2F5446;--ink:#EEF2EA;--muted:#9DB5A8;
@@ -104,6 +106,15 @@ button.chip:hover,button.chip.sel{border-color:var(--accent)}
 .vs{display:grid;grid-template-columns:1fr 1fr;gap:10px;text-align:center}
 .vs .stat.win{outline:2px solid var(--accent)}
 .toggle{background:none;border:0;color:var(--accent);padding:4px 0;text-decoration:underline}
+
+/* Online */
+.olist{display:flex;flex-direction:column;gap:6px}
+.oitem{display:flex;align-items:center;gap:10px;background:var(--bg2);border-radius:10px;padding:8px 10px;flex-wrap:wrap}
+.oitem .grow{flex:1;min-width:160px}
+.oitem .btn{min-height:38px;padding:6px 12px}
+.win{color:var(--ok);font-weight:700}.loss{color:var(--bad);font-weight:700}
+h4{margin:16px 0 8px}
+.note{margin-top:12px;padding:10px;border-radius:10px;background:var(--bg2)}
 </style>
 </head>
 <body>
@@ -130,6 +141,7 @@ button.chip:hover,button.chip.sel{border-color:var(--accent)}
       </div>
       <div class="row" style="margin-top:16px"><button class="btn primary" id="go" disabled>Wörterbuch lädt …</button><span class="muted small" id="dictInfo"></span></div>
     </div>
+    <div class="card" id="onlineCard" hidden></div>
     <div class="card" id="statCard" hidden>
       <h3>Deine Bilanz</h3>
       <div class="stats" id="stats"></div>
@@ -329,7 +341,7 @@ function showStats(){
   const s = store.get("ww-stats", null);
   $("statCard").hidden = !s || !s.games;
   if (!s || !s.games) return;
-  const items = [["Spiele", s.games], ["Bestwert", s.best + " Punkte"], ["Schnitt", Math.round(s.total / s.games) + " Punkte"], ["Wörter gesamt", s.words], ["Längstes Wort", s.longest || "–"]];
+  const items = [["Spiele", s.games], ["Bestwert", s.best + (s.best === 1 ? " Punkt" : " Punkte")], ["Schnitt", Math.round(s.total / s.games) + (Math.round(s.total / s.games) === 1 ? " Punkt" : " Punkte")], ["Wörter gesamt", s.words], ["Längstes Wort", s.longest || "–"]];
   $("stats").replaceChildren(...items.map(([k, v]) => { const d = document.createElement("div"); d.className = "stat"; d.innerHTML = '<span class="muted small"></span><b></b>'; d.firstChild.textContent = k; d.lastChild.textContent = v; return d; }));
 }
 
@@ -556,8 +568,10 @@ function finish(){
   $("missMore").textContent = "Alle " + missed.length + " zeigen";
   $("missMore").onclick = () => { m.replaceChildren(...missed.map((w) => chip(w, PTS(w.length), "miss", "button"))); $("missMore").hidden = true; };
   renderGrid(false, "endGrid", 0); drawPath([], "endPath", 0); $("endWord").textContent = "";
-  $("endCode").textContent = "Brett-Code " + G.seed + ". Mit diesem Code spielt jemand anderes dasselbe Brett.";
+  $("endCode").textContent = G.online ? "Wortduell online" : "Brett-Code " + G.seed + ". Mit diesem Code spielt jemand anderes dasselbe Brett.";
+  $("again").textContent = G.online ? "Zum Wortduell" : "Neues Brett";
   cur = null;
+  if (G.online) Online.save(head);
 }
 // Weg eines Wortes auf dem Ergebnisbrett zeigen
 document.addEventListener("click", (e) => {
@@ -575,13 +589,107 @@ function saveStats(p){
   for (const w of p.words) if (w.length > (s.longest || "").length) s.longest = w;
   store.set("ww-stats", s);
 }
-$("again").addEventListener("click", startGame);
-$("home").addEventListener("click", () => { show("start"); setup(); });
+$("again").addEventListener("click", () => { if (G && G.online) { show("start"); setup(); Online.refresh(); } else startGame(); });
+$("home").addEventListener("click", () => { show("start"); setup(); Online.refresh(); });
 $("go").addEventListener("click", startGame);
 $("code").addEventListener("keydown", (e) => { if (e.key === "Enter" && !$("go").disabled) startGame(); });
 
+// ---------- Wortduell online ----------
+// Asynchrone Duelle gegen andere Nutzer der Plattform: dasselbe Brett, dieselbe Zeit, jeder wann er will.
+// Gemeinsame Wörter zählen nicht. Anmeldung kommt aus dem Lernportal (gleiche Supabase-Sitzung).
+// Tabelle: supabase/migrations/0001_wortwuerfel.sql.
+const Online = {
+  sb: null, user: null, ready: false, missing: false, duels: [], SECONDS: 180, MIN: 3,
+  async init(){
+    const cfg = window.SR_CONFIG || {};
+    if (!cfg.supabaseUrl || !window.supabase) return;
+    Online.sb = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+    const r = await Online.sb.auth.getSession();
+    Online.user = r.data && r.data.session ? r.data.session.user : null;
+    Online.ready = true;
+    await Online.refresh();
+  },
+  name(){ const m = Online.user.user_metadata || {}; return m.ww_name || m.gq_name || (Online.user.email || "Spieler").split("@")[0]; },
+  async refresh(){
+    if (!Online.ready) return;
+    if (Online.user) {
+      const r = await Online.sb.from("ww_duels").select("*").order("created_at", { ascending: false }).limit(200);
+      Online.missing = !!r.error; Online.duels = r.error ? [] : r.data || [];
+    }
+    Online.render();
+  },
+  // Punkte nach Original-Regel: Wörter, die beide haben, zählen nicht. Ergebnis > 0: a gewinnt.
+  score(a, b){ const o = new Set(b); return a.reduce((s, w) => s + (o.has(w) ? 0 : PTS(w.length)), 0); },
+  cmp(a, b){ return Online.score(a.words, b.words) - Online.score(b.words, a.words); },
+  challenge(){
+    if (!WORDS.length) return;
+    const b = newBoard(10000 + Math.floor(Math.random() * 90000), Online.MIN);
+    G = { seed: b.seed, cells: b.cells, all: b.all, min: Online.MIN, time: Online.SECONDS, players: [{ name: Online.name(), words: [] }], turn: 0, online: { kind: "challenge" } };
+    show("play"); beginTurn();
+  },
+  accept(d){
+    if (!WORDS.length) return;
+    G = { seed: d.seed, cells: d.cells, all: solve(d.cells, d.min_len), min: d.min_len, time: d.seconds,
+      players: [{ name: d.challenger_name, words: d.challenger_result.words || [] }, { name: Online.name(), words: [] }], turn: 1, online: { kind: "answer", duel: d } };
+    show("play"); beginTurn();
+  },
+  async save(head){
+    const note = document.createElement("div"); note.className = "note small"; note.textContent = "Speichere …"; head.appendChild(note);
+    const me = G.players[G.players.length - 1], res = { words: me.words, score: me.words.reduce((a, w) => a + PTS(w.length), 0) };
+    if (G.online.kind === "challenge") {
+      const r = await Online.sb.from("ww_duels").insert({ challenger: Online.user.id, challenger_name: Online.name(), cells: G.cells, seed: G.seed, seconds: G.time, min_len: G.min, challenger_result: res });
+      note.textContent = r.error ? "Das Speichern hat nicht geklappt: " + r.error.message : "Deine Herausforderung steht jetzt offen. Sobald jemand dasselbe Brett gespielt hat, siehst du das Ergebnis im Wortduell.";
+    } else {
+      const r = await Online.sb.rpc("ww_answer", { duel: G.online.duel.id, name: Online.name(), result: res });
+      note.textContent = r.error || !r.data ? "Das Speichern hat nicht geklappt" + (r.error ? ": " + r.error.message : ", jemand anderes war schneller.") : "Das Duell ist gewertet und steht in deiner Liste.";
+    }
+  },
+  ago(t){ const m = Math.round((Date.now() - new Date(t)) / 60000); return m < 60 ? "vor " + m + " Min." : m < 1440 ? "vor " + Math.round(m / 60) + " Std." : "vor " + Math.round(m / 1440) + " Tagen"; },
+  render(){
+    const c = $("onlineCard");
+    if (!Online.ready) { c.hidden = true; return; }
+    c.hidden = false;
+    const el = (tag, props = {}, ...kids) => { const e = document.createElement(tag); for (const [k, v] of Object.entries(props)) { if (k === "text") e.textContent = v; else if (k.startsWith("on")) e.addEventListener(k.slice(2), v); else e.setAttribute(k, v); } e.append(...kids.filter((x) => x != null)); return e; };
+    const head = [el("h3", { text: "⚔ Wortduell online" }), el("p", { class: "muted small", style: "margin-top:0", text: "Fordere andere Nutzer der Lernplattform heraus. Beide spielen dasselbe Brett drei Minuten lang, jeder wann er will. Wörter, die beide gefunden haben, zählen nicht." })];
+    if (!Online.user) return c.replaceChildren(...head, el("p", {}, "Melde dich im ", el("a", { href: "../", text: "Lernportal" }), " an, dann kannst du hier gegen andere spielen."));
+    if (Online.missing) return c.replaceChildren(...head, el("p", { class: "muted", text: "Das Wortduell ist noch nicht eingerichtet. Sobald die Datenbanktabelle angelegt ist, geht es hier los." }));
+    const me = Online.user.id, D = Online.duels, ok = WORDS.length > 0;
+    const open = D.filter((d) => d.status === "open" && d.challenger !== me);
+    const mineOpen = D.filter((d) => d.status === "open" && d.challenger === me);
+    const mineDone = D.filter((d) => d.status === "done" && (d.challenger === me || d.opponent === me)).slice(0, 8);
+    const fame = {};
+    D.filter((d) => d.status === "done").forEach((d) => {
+      const w = Online.cmp(d.challenger_result, d.opponent_result);
+      const add = (id, name, k) => { fame[id] = fame[id] || { name, w: 0, n: 0 }; fame[id].name = name; fame[id].n++; fame[id].w += k; };
+      add(d.challenger, d.challenger_name, w > 0 ? 1 : 0); add(d.opponent, d.opponent_name, w < 0 ? 1 : 0);
+    });
+    const top = Object.values(fame).sort((a, b) => b.w - a.w || a.n - b.n).slice(0, 5);
+    const nm = el("input", { type: "text", maxlength: "24", "aria-label": "Dein Name im Wortduell" }); nm.value = Online.name();
+    const btn = (label, cls, fn) => { const b = el("button", { class: "btn " + cls, onclick: fn, text: label }); if (!ok && cls.includes("primary")) b.disabled = true; return b; };
+    c.replaceChildren(...[...head,
+      el("div", { class: "row" }, btn("Herausforderung stellen", "primary", Online.challenge), btn("Aktualisieren", "ghost", () => Online.refresh())),
+      el("div", { class: "row", style: "margin-top:10px" }, el("span", { class: "muted small", text: "Dein Name:" }), nm,
+        btn("Speichern", "", async () => { const v = nm.value.trim().slice(0, 24); if (!v) return; const r = await Online.sb.auth.updateUser({ data: { ww_name: v } }); if (!r.error) { Online.user = r.data.user; Online.render(); } })),
+      el("h4", { text: "Offene Herausforderungen" }),
+      el("div", { class: "olist" }, ...(open.length ? open.map((d) => el("div", { class: "oitem" }, el("span", { class: "grow" }, el("b", { text: d.challenger_name }), " · " + Online.ago(d.created_at)), btn("Annehmen", "primary", () => Online.accept(d))))
+        : [el("span", { class: "muted small", text: "Gerade wartet niemand. Stell selbst eine Herausforderung." })])),
+      mineOpen.length ? el("h4", { text: "Deine offenen Herausforderungen" }) : null,
+      mineOpen.length ? el("div", { class: "olist" }, ...mineOpen.map((d) => el("div", { class: "oitem" }, el("span", { class: "grow", text: d.challenger_result.score + (d.challenger_result.score === 1 ? " Punkt, " : " Punkte, ") + d.challenger_result.words.length + (d.challenger_result.words.length === 1 ? " Wort · " : " Wörter · ") + Online.ago(d.created_at) }),
+        btn("Zurückziehen", "ghost", async () => { await Online.sb.from("ww_duels").delete().eq("id", d.id); Online.refresh(); })))) : null,
+      mineDone.length ? el("h4", { text: "Deine letzten Duelle" }) : null,
+      mineDone.length ? el("div", { class: "olist" }, ...mineDone.map((d) => {
+        const iAmC = d.challenger === me, mine = iAmC ? d.challenger_result : d.opponent_result, theirs = iAmC ? d.opponent_result : d.challenger_result, other = iAmC ? d.opponent_name : d.challenger_name;
+        const w = Online.cmp(mine, theirs);
+        return el("div", { class: "oitem" }, el("span", { class: "grow", text: "gegen " + other + ": " + Online.score(mine.words, theirs.words) + " zu " + Online.score(theirs.words, mine.words) }), el("span", { class: w > 0 ? "win" : w < 0 ? "loss" : "", text: w > 0 ? "Sieg" : w < 0 ? "Niederlage" : "Unentschieden" }));
+      })) : null,
+      top.length ? el("h4", { text: "🏆 Bestenliste" }) : null,
+      top.length ? el("div", { class: "olist" }, ...top.map((t, i) => el("div", { class: "oitem" }, el("span", { class: "grow", text: ["🥇", "🥈", "🥉", "4.", "5."][i] + " " + t.name }), el("span", { class: "muted small", text: t.w + (t.w === 1 ? " Sieg" : " Siege") + " aus " + t.n + (t.n === 1 ? " Duell" : " Duellen") })))) : null].filter(Boolean));
+  }
+};
+
 setup();
-loadDict();
+loadDict().then(() => Online.render());
+Online.init();
 </script>
 </body>
 </html>
