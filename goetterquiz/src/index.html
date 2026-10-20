@@ -976,10 +976,10 @@ const Online = {
     if (r.error) { Online.missing = true; Online.duels = []; return; }
     Online.missing = false; Online.duels = r.data || [];
   },
-  makeSet(){
+  makeSet(n){
     POOL = pool();
     const used = {};
-    return Array.from({length:Online.COUNT}, (_, i) => { const c = rnd(4), q = pickQuestion(c, Math.min(4, 1 + Math.floor(i / 2)), used); return {c, l:q.l, q:q.q, a:q.a, src:q.src || null}; });
+    return Array.from({length:n || Online.COUNT}, (_, i) => { const c = rnd(4), q = pickQuestion(c, Math.min(4, 1 + Math.floor(i / 2)), used); return {c, l:q.l, q:q.q, a:q.a, src:q.src || null}; });
   },
   async play(set, arena, title){
     const player = {god:0, type:"human"};
@@ -1031,9 +1031,12 @@ const Online = {
     const c = $("onlineCard");
     if (!Online.ready) { c.hidden = true; return; }
     c.hidden = false;
-    const head = [h("h3", {style:"margin-top:0", text:"⚔ Götterduell online"}), h("p", {class:"muted small", style:"margin-top:0", text:"Fordere andere Nutzer der Lernplattform heraus. Beide spielen dieselben sieben Fragen, jeder wann er will. Mehr Richtige gewinnt, bei Gleichstand die kürzere Zeit."})];
+    const head = [h("h3", {style:"margin-top:0", text:"⚔ Götterduell online"}), h("p", {class:"muted small", style:"margin-top:0", text:"Spiel gegen andere Nutzer der Lernplattform: live gleichzeitig im Tauziehen, oder auf Zeit mit Herausforderung, bei der beide dieselben sieben Fragen spielen, jeder wann er will."})];
     if (!Online.user) return c.replaceChildren(...head, h("p", {}, "Melde dich im ", h("a", {href:"../", text:"Lernportal"}), " an, dann kannst du hier gegen andere spielen."));
-    if (Online.missing) return c.replaceChildren(...head, h("p", {class:"muted", text:"Die Online-Arena ist noch nicht eingerichtet. Sobald die Datenbanktabelle angelegt ist, geht es hier los."}));
+    const lb = LS.get("gq-live", null);
+    const live = h("div", {class:"row", style:"margin-bottom:10px"}, h("button", {class:"btn primary", onclick:Live.open}, "⚡ Live-Duell"),
+      h("span", {class:"muted small", text:"Gleichzeitig gegen jemanden, der gerade online ist." + (lb ? ` Deine Live-Bilanz: ${lb.w} ${lb.w === 1 ? "Sieg" : "Siege"}, ${lb.l} ${lb.l === 1 ? "Niederlage" : "Niederlagen"}, ${lb.d} unentschieden.` : "")}));
+    if (Online.missing) return c.replaceChildren(...head, live, h("p", {class:"muted", text:"Die Online-Arena für Duelle auf Zeit ist noch nicht eingerichtet. Sobald die Datenbanktabelle angelegt ist, geht es hier los."}));
     const me = Online.user.id, D = Online.duels;
     const open = D.filter(d => d.status === "open" && d.challenger !== me);
     const mineOpen = D.filter(d => d.status === "open" && d.challenger === me);
@@ -1048,8 +1051,8 @@ const Online = {
       add(d.challenger, d.challenger_name, w > 0 ? 1 : 0); add(d.opponent, d.opponent_name, w < 0 ? 1 : 0);
     });
     const top = Object.values(fame).sort((a, b) => b.w - a.w || a.n - b.n).slice(0, 5);
-    c.replaceChildren(...[...head,
-      h("div", {class:"row"}, h("button", {class:"btn primary", onclick:Online.challenge}, "Herausforderung stellen"), h("button", {class:"btn ghost", onclick:async () => { await Online.load(); Online.render(); }}, "Aktualisieren")),
+    c.replaceChildren(...[...head, live,
+      h("div", {class:"row"}, h("button", {class:"btn", onclick:Online.challenge}, "Herausforderung stellen"), h("button", {class:"btn ghost", onclick:async () => { await Online.load(); Online.render(); }}, "Aktualisieren")),
       h("div", {class:"row", style:"margin-top:10px"}, h("span", {class:"muted small", text:"Dein Name in der Arena:"}), nm,
         h("button", {class:"btn", onclick:async () => { const v = nm.value.trim().slice(0, 24); if (!v) return; const r = await Online.sb.auth.updateUser({data:{gq_name:v}}); if (!r.error) { Online.user = r.data.user; toast("Name gespeichert."); } }}, "Speichern")),
       h("h4", {text:"Offene Herausforderungen"}),
@@ -1066,6 +1069,181 @@ const Online = {
       })) : null,
       top.length ? h("h4", {text:"🏛️ Ruhmeshalle"}) : null,
       top.length ? h("div", {class:"olist"}, ...top.map((t, i) => h("div", {class:"oitem"}, h("span", {class:"grow", text:`${["🥇", "🥈", "🥉", "4.", "5."][i]} ${t.name}`}), h("span", {class:"muted small", text:`${t.w} ${t.w === 1 ? "Sieg" : "Siege"} aus ${t.n} ${t.n === 1 ? "Duell" : "Duellen"}`})))) : null].filter(Boolean));
+  }
+};
+
+/* ============ Live-Duell ============ */
+// Zwei angemeldete Spieler gleichzeitig, über Supabase Realtime (Broadcast und Presence, keine Tabelle nötig).
+// In der Lobby fordert, wer später kommt, den an, der am längsten wartet. Beide sehen dieselbe Frage: Wer zuerst richtig antwortet,
+// zieht das Seil einen Schritt zu sich, eine falsche Antwort schenkt dem Gegner den Schritt. Drei Schritte Vorsprung gewinnen sofort,
+// sonst entscheidet nach neun Fragen der Stand des Seils. Wer herausfordert, ist Schiedsrichter: Bei ihm zählt, welche Antwort zuerst ankam.
+const Live = {
+  ROUNDS:9, TIME:20, lobby:null, room:null, M:null, pending:null, waiting:[], tried:new Set(),
+  me(){ return {id:Online.user.id, name:Online.name()}; },
+  open(){
+    if (Live.lobby || Live.M) return;
+    const me = Live.me(), since = Date.now();
+    Live.waiting = []; Live.tried = new Set(); Live.since = since;
+    const ch = Online.sb.channel("gq-live-lobby", {config:{presence:{key:me.id}}});
+    Live.lobby = ch;
+    ch.on("presence", {event:"sync"}, () => {
+      Live.waiting = Object.entries(ch.presenceState()).filter(([id]) => id !== me.id).map(([id, m]) => ({id, name:m[0].name, since:m[0].since})).sort((a, b) => a.since - b.since);
+      Live.lobbyView(); Live.autoMatch();
+    })
+    .on("broadcast", {event:"invite"}, ({payload:p}) => { if (p.to === me.id && !Live.M && !Live.pending) Live.join(p, false); })
+    .on("broadcast", {event:"accept"}, ({payload:p}) => {
+      if (p.to === me.id && Live.pending && Live.pending.room === p.room && !Live.M) { clearTimeout(Live.pending.timer); Live.join(Live.pending, true); }
+    })
+    .subscribe(async s => {
+      if (s === "SUBSCRIBED") await ch.track({name:me.name, since});
+      else if ((s === "CHANNEL_ERROR" || s === "TIMED_OUT") && Live.lobby === ch) { Live.close(); Online.done("Die Live-Arena ist gerade nicht erreichbar. Versuch es später noch einmal.", "🌩️"); }
+    });
+    Live.lobbyView();
+  },
+  // Nur wer später gekommen ist, fordert heraus, damit sich zwei nicht gleichzeitig gegenseitig einladen.
+  autoMatch(){
+    if (Live.pending || Live.M) return;
+    const me = Live.me();
+    const o = Live.waiting.find(w => !Live.tried.has(w.id) && (w.since < Live.since || (w.since === Live.since && w.id < me.id)));
+    if (!o) return;
+    const arena = ARENAS[rnd(ARENAS.length)];
+    const p = {to:o.id, room:Math.random().toString(36).slice(2, 10), arena:arena.id, set:Online.makeSet(Live.ROUNDS), host:me, guest:{id:o.id, name:o.name}};
+    // Antwortet der andere nicht (schon in einem anderen Duell), kommt der Nächste dran.
+    p.timer = setTimeout(() => { Live.tried.add(o.id); Live.pending = null; Live.autoMatch(); }, 6000);
+    Live.pending = p;
+    Live.lobby.send({type:"broadcast", event:"invite", payload:{...p, timer:undefined}});
+  },
+  lobbyView(){
+    if (Live.M || !Live.lobby) return;
+    const others = Live.waiting.map(w => w.name);
+    $("qbox").replaceChildren(h("div", {class:"event"}, h("div", {class:"big", text:"⚡"}), h("h3", {class:"cinzel", text:"Live-Duell"}),
+      h("p", {class:"muted", text:"Du wartest in der Arena. Sobald ein zweiter Spieler da ist, geht es los: dieselbe Frage für beide, wer zuerst richtig antwortet, zieht das Seil zu sich."}),
+      h("p", {class:"small", text: others.length ? "Gerade da: " + others.join(", ") + (Live.pending ? ". Herausforderung läuft …" : "") : "Sonst wartet gerade niemand. Lass das Fenster offen oder sag jemandem Bescheid."}),
+      h("button", {class:"btn", onclick:() => { Live.close(); $("ov").hidden = true; }}, "Abbrechen")));
+    $("ov").hidden = false;
+  },
+  async join(p, isHost){
+    const me = Live.me();
+    Live.pending = null;
+    const M = Live.M = {room:p.room, arena:ARENAS.find(a => a.id === p.arena) || ARENAS[0], set:p.set, isHost, me, op:isHost ? p.guest : p.host,
+      i:0, rope:0, pts:{me:0, op:0}, res:{}, started:false, over:false, seen:false};
+    if (!isHost) await Live.lobby.send({type:"broadcast", event:"accept", payload:{to:p.host.id, room:p.room}});
+    const lobby = Live.lobby; Live.lobby = null;
+    lobby.untrack().finally(() => Online.sb.removeChannel(lobby));
+    $("qbox").replaceChildren(h("div", {class:"arena", "data-e":M.arena.e, style:`background:${M.arena.bg}`},
+      h("div", {class:"atitle"}, h("span", {class:"cinzel", text:`${M.arena.e} ${M.arena.n}`}), h("span", {text:`Gegner gefunden: ${M.op.name}`}), h("span", {class:"small", text:"Gleich geht es los …"}))));
+    $("ov").hidden = false; SND.duel();
+    const ch = Live.room = Online.sb.channel("gq-live-" + p.room, {config:{presence:{key:me.id}}});
+    ch.on("presence", {event:"sync"}, () => {
+      const here = M.op.id in ch.presenceState();
+      if (here) M.seen = true;
+      if (here && isHost && !M.started) { M.started = true; setTimeout(Live.go, 600); }
+      if (!here && M.seen && !M.over && !M.ending) Live.finish(1, `${M.op.name} hat die Arena verlassen.`);
+    })
+    .on("broadcast", {event:"go"}, ({payload:x}) => { if (!isHost && !M.over) { M.started = true; M.i = x.i; Live.ask(x.i); } })
+    .on("broadcast", {event:"ans"}, ({payload:x}) => { if (isHost) Live.judge(x); })
+    .on("broadcast", {event:"res"}, ({payload:x}) => { if (!isHost) Live.show(x); })
+    .subscribe(async s => { if (s === "SUBSCRIBED") await ch.track({name:me.name}); });
+    setTimeout(() => { if (Live.M === M && !M.started) Live.finish(0, `${M.op.name} ist nicht in die Arena gekommen.`, true); }, 20000);
+  },
+  // Schiedsrichter: nächste Frage für beide.
+  go(){
+    const M = Live.M;
+    if (!M || M.over) return;
+    Live.room.send({type:"broadcast", event:"go", payload:{i:M.i}});
+    Live.ask(M.i);
+    const i = M.i;
+    M.rt = setTimeout(() => Live.judge({i, from:null}), (Live.TIME + 1.5) * 1000);
+  },
+  // Schiedsrichter: die erste Antwort entscheidet die Runde.
+  judge(a){
+    const M = Live.M;
+    if (!M || M.over || a.i !== M.i || M.res[a.i]) return;
+    clearTimeout(M.rt);
+    const name = id => id === M.me.id ? M.me.name : M.op.name, other = id => id === M.me.id ? M.op.id : M.me.id;
+    const x = !a.from ? {i:a.i, winner:null, why:"Zeit abgelaufen, keiner bekommt den Punkt."}
+      : a.ok ? {i:a.i, winner:a.from, why:`${name(a.from)} war schneller.`}
+      : {i:a.i, winner:other(a.from), why:`${name(a.from)} lag falsch.`};
+    Live.room.send({type:"broadcast", event:"res", payload:x});
+    Live.show(x);
+  },
+  ask(i){
+    const M = Live.M, q = M.set[i];
+    const order = shuffle(q.a.map((a, k) => ({a, ok:k === 0})));
+    let picked = false;
+    const pick = k => {
+      if (picked || M.res[i]) return;
+      picked = true; M.myOk = order[k].ok;
+      c.btns.forEach((b, n) => { b.disabled = true; if (n === k) b.classList.add("cpu"); });
+      verdict.className = "verdict"; verdict.textContent = "Antwort abgegeben …";
+      const a = {i, ok:order[k].ok, from:M.me.id};
+      M.isHost ? Live.judge(a) : Live.room.send({type:"broadcast", event:"ans", payload:a});
+    };
+    const key = e => { if (!(e.key in KEYS)) return; const k = Question.idx(order.length, e.key); if (k < 0) return; e.preventDefault(); pick(k); };
+    const c = Question.compass(order.map(o => o.a), pick, DIRL);
+    const verdict = h("span", {class:"verdict"});
+    M.myOk = null;
+    M.view = Live.view();
+    M.cur = {order, c, verdict, key, tm:Question.timer(c.ring, Live.TIME, null, () => { if (!picked) { picked = true; c.btns.forEach(b => b.disabled = true); verdict.textContent = "Zeit abgelaufen."; } })};
+    document.addEventListener("keydown", key);
+    $("qbox").replaceChildren(M.view, Question.head(q, q.c, h("span", {text:`Stufe ${ROMAN[Math.min(4, q.l)]}`})), h("div", {class:"qtext", text:q.q}), c.grid,
+      h("div", {class:"qfoot"}, h("span", {class:"muted small", text:`Live gegen ${M.op.name} · Frage ${i + 1} von ${Live.ROUNDS}`}), verdict));
+    $("ov").hidden = false;
+  },
+  view(){
+    const M = Live.M, a = M.arena;
+    const side = (n, p, role) => h("div", {class:"fighter " + role}, h("div", {class:"fname", text:n}), h("div", {class:"small", text:`${p} ${p === 1 ? "Punkt" : "Punkte"}`}));
+    const rope = h("div", {class:"rope"}, ...[-3, -2, -1, 0, 1, 2, 3].map(i => h("i", {"data-i":i, class: i === 0 ? "mid" : ""})), h("b", {class:"knot"}));
+    const el = h("div", {class:"arena", "data-e":a.e, style:`background:${a.bg}`},
+      h("div", {class:"atitle"}, h("span", {class:"cinzel", text:`${a.e} ${a.n}`}), h("span", {class:"small", text:"Live-Duell: Drei Schritte Vorsprung gewinnen."})),
+      h("div", {class:"afield"}, side(M.me.name, M.pts.me, "att"), rope, side(M.op.name, M.pts.op, "def")));
+    Arena.update(el, {rope:M.rope, str:{}});
+    return el;
+  },
+  show(x){
+    const M = Live.M;
+    if (!M || M.over || M.res[x.i]) return;
+    M.res[x.i] = x;
+    const cur = M.cur;
+    if (cur) {
+      cur.tm.stop(); document.removeEventListener("keydown", cur.key);
+      cur.c.btns.forEach((b, k) => { b.disabled = true; if (cur.order[k].ok) b.classList.add("ok"); else if (b.classList.contains("cpu") && !M.myOk) b.classList.add("bad"); });
+      const mine = x.winner === M.me.id;
+      if (x.winner) { M.rope += mine ? 1 : -1; M.pts[mine ? "me" : "op"]++; }
+      x.winner ? (mine ? SND.ok() : SND.bad()) : SND.bad();
+      cur.verdict.className = "verdict " + (mine ? "ok" : x.winner ? "bad" : "");
+      cur.verdict.textContent = x.why + (x.winner ? ` Punkt für ${mine ? "dich" : M.op.name}.` : "");
+      const fresh = Live.view(); M.view.replaceWith(fresh); M.view = fresh;
+      Arena.update(fresh, {rope:M.rope, str:{}}, null, null, x.winner ? (mine ? "att" : "def") : null);
+      const q = M.set[x.i];
+      STATS.total[q.c]++; if (M.myOk) STATS.right[q.c]++; saveStats();
+    }
+    // Ist das Duell entschieden, zählt das Verlassen des Gegners nicht mehr als Aufgabe.
+    if (Math.abs(M.rope) >= 3 || x.i + 1 >= Live.ROUNDS) M.ending = true;
+    setTimeout(() => {
+      if (Live.M !== M || M.over) return;
+      if (M.ending) return Live.finish(Math.sign(M.rope));
+      if (M.isHost) { M.i++; Live.go(); }
+    }, 2600);
+  },
+  // w > 0: gewonnen, < 0: verloren, 0: unentschieden.
+  finish(w, why, aborted){
+    const M = Live.M;
+    if (!M || M.over) return;
+    M.over = true; clearTimeout(M.rt);
+    if (M.cur) { M.cur.tm.stop(); document.removeEventListener("keydown", M.cur.key); }
+    if (!aborted) { const b = LS.get("gq-live", {w:0, l:0, d:0}); b[w > 0 ? "w" : w < 0 ? "l" : "d"]++; LS.set("gq-live", b); }
+    Live.close();
+    const score = `${M.pts.me} zu ${M.pts.op} gegen ${M.op.name}.`;
+    Online.done(aborted ? why : (why ? why + " " : "") + score + " " + (w > 0 ? "Du gewinnst das Live-Duell!" : w < 0 ? `${M.op.name} gewinnt.` : "Unentschieden."), aborted ? "🌫️" : w > 0 ? "🏆" : w < 0 ? "💀" : "🤝");
+    Online.render();
+  },
+  close(){
+    if (Live.pending) { clearTimeout(Live.pending.timer); Live.pending = null; }
+    if (Live.lobby) { const ch = Live.lobby; Live.lobby = null; ch.untrack().finally(() => Online.sb.removeChannel(ch)); }
+    if (Live.room) { const ch = Live.room; Live.room = null; ch.untrack().finally(() => Online.sb.removeChannel(ch)); }
+    if (Live.M && !Live.M.over) Live.M.over = true;
+    Live.M = null;
   }
 };
 

@@ -11,7 +11,8 @@ So wird gespielt:
 - Mit 25 Weisheitspunkten mutiert ein Held: Sterblicher, Held, Halbgott, Titan. Höhere Stufen haben mehr Kraft im Duell und bekommen schwerere Fragen.
 - Launen der Götter: Zu Beginn mancher Runden greift ein Gott ein (Zeus' Gunst, Nebel des Hades, Athenes Weisheit, Hermes' Streich).
 - Übungsrunde mit zehn Fragen ohne Brett.
-- Götterduell online: asynchrone Duelle gegen andere angemeldete Nutzer (sieben gleiche Fragen), mit Ruhmeshalle. Braucht die Tabelle aus `supabase/migrations/0001_goetterquiz.sql`, einmal im SQL-Editor ausführen. Die Anmeldung kommt aus dem Lernportal (gleiche Supabase-Sitzung).
+- Live-Duell: zwei angemeldete Nutzer gleichzeitig, verbunden über Supabase Realtime (Broadcast und Presence, ohne Tabelle). Wer später in die Lobby kommt, fordert den an, der am längsten wartet. Beide sehen dieselbe Frage, wer zuerst richtig antwortet, zieht das Seil einen Schritt zu sich, eine falsche Antwort schenkt dem Gegner den Schritt. Drei Schritte Vorsprung gewinnen, sonst nach neun Fragen der Stand des Seils. Wer herausfordert, ist Schiedsrichter. Die Live-Bilanz liegt im Browser (`gq-live`).
+- Götterduell online auf Zeit: asynchrone Duelle gegen andere angemeldete Nutzer (sieben gleiche Fragen), mit Ruhmeshalle. Braucht die Tabelle aus `supabase/migrations/0001_goetterquiz.sql`, einmal im SQL-Editor ausführen. Die Anmeldung kommt aus dem Lernportal (gleiche Supabase-Sitzung).
 - Gewonnen hat, wer als letzter Krieger hat, mit Rundenlimit der Gott mit der meisten Macht.
 - Eigene Fragen lassen sich auf der Startseite eintragen (wie der Fragen-Compiler des Originals).
 - Das Spiel merkt sich im Browser, welche Fragen schon dran waren (`gq-seen`), über alle Spiele hinweg. Erst wenn alle Fragen eines Bereichs gestellt sind, kommen die am längsten zurückliegenden wieder.
