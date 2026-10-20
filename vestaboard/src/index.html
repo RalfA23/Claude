@@ -409,10 +409,19 @@ body.saver.moved { cursor: default; }
   const $ = id => document.getElementById(id);
   const msg = $('msg'), center = $('center'), status = $('status'), count = $('count');
 
-  // Hinterlegte Nachricht: erscheint einmal pro Browser beim nächsten Öffnen, danach als Beispiel.
-  const GRUSS = { id: 'capicop', text: '{lila}{blau}{gruen}\nHALLO CAPICOP\n{gruen}{blau}{lila}' };
+  // Hinterlegte Nachricht nur für ein bestimmtes Konto: erscheint dort einmal beim nächsten Öffnen und bleibt als Beispiel.
+  // Das Konto kommt aus der Portal-Anmeldung (Supabase-Sitzung im Browser), die Seite selbst braucht kein Login.
+  const GRUSS = { id: 'capicop', fuer: /kudnick/i, text: '{lila}{blau}{gruen}\nHALLO CAPICOP\n{gruen}{blau}{lila}' };
+  let konto = '';
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (/^sb-.*-auth-token$/.test(k)) konto = JSON.parse(localStorage.getItem(k))?.user?.email || '';
+    }
+  } catch {}
+  const fuerMich = GRUSS.fuer.test(konto);
   const PRESETS = [
-    ['Hallo Capicop', GRUSS.text],
+    ...(fuerMich ? [['Hallo Capicop', GRUSS.text]] : []),
     ['Guten Morgen', '{gelb}{gelb}{gelb}\nGUTEN MORGEN!\nHEUTE WIRD EIN\nGUTER TAG\n{gelb}{gelb}{gelb}'],
     ['Kaffee', 'ERST KAFFEE,\nDANN DIE WELT.\n\n{orange}{rot}{orange}'],
     ['Wochenende', '{blau}{gruen}{gelb}{orange}{rot}{lila}{blau}{gruen}{gelb}{orange}{rot}{lila}\nENDLICH\nWOCHENENDE!\n{blau}{gruen}{gelb}{orange}{rot}{lila}{blau}{gruen}{gelb}{orange}{rot}{lila}'],
@@ -849,13 +858,15 @@ body.saver.moved { cursor: default; }
   function save() { try { localStorage.setItem('vb-state', JSON.stringify({text: msg.value, center: center.checked, mode})); } catch {} }
   let saved = null;
   try { saved = JSON.parse(localStorage.getItem('vb-state') || 'null'); } catch {}
+  // Wer nicht gemeint ist, aber die Nachricht schon bekommen hat: zurück zum normalen Start.
+  if (!fuerMich && saved?.text === GRUSS.text) saved = null;
   msg.value = saved?.text ?? PRESETS[0][1];
   if (saved && typeof saved.center === 'boolean') center.checked = saved.center;
   updateCount();
   if (location.hash === '#bildschirmschoner' || document.documentElement.dataset.saver === '1') { setTimeout(startSaver, 250); return; }
   let gruss = false;
-  try { gruss = localStorage.getItem('vb-gruss') !== GRUSS.id; localStorage.setItem('vb-gruss', GRUSS.id); } catch {}
-  if (gruss || !saved) { msg.value = GRUSS.text; center.checked = true; updateCount(); setTimeout(() => { setMode('msg'); send(); }, 250); return; }
+  if (fuerMich) try { gruss = localStorage.getItem('vb-gruss') !== GRUSS.id; localStorage.setItem('vb-gruss', GRUSS.id); } catch {}
+  if (gruss) { msg.value = GRUSS.text; center.checked = true; updateCount(); setTimeout(() => { setMode('msg'); send(); }, 250); return; }
   setTimeout(() => { const m = saved ? saved.mode : 'rot'; if (m && m !== 'msg') setMode(m); else send(); }, 250);
 })();
 </script>
