@@ -614,7 +614,6 @@ function setStore(state){
 }
 
 const DOC = "huberman/";
-const ADMIN_PAGE = "https://claude.ai/artifact/RftCQuS68gfCheV5VLbpgn";
 const pending = {}, writing = {};
 function persist(date){
   saveLocal();
@@ -662,10 +661,21 @@ function renderDayHead(){
   document.getElementById("daytitle").textContent = asDate(cur).toLocaleDateString("de-DE",{weekday:"long", day:"numeric", month:"long", year:"numeric"});
   document.getElementById("next").disabled = cur >= t;
   document.getElementById("today").hidden = cur === t;
-  const r = reports[cur];
+  const r = reports[cur] || (cur < t && countOf(cur) > 0 ? {text: autoReport(cur)} : null);
   const box = document.getElementById("report");
   box.hidden = !r;
   if (r) box.innerHTML = `<p class="eyebrow">Abendauswertung</p><p>${esc(String(r.text||""))}</p>`;
+}
+
+// Abendauswertung für vergangene Tage ohne gespeicherten Bericht: Stand, Vergleich zum Vortag, was geklappt hat, Fokus aus den letzten 7 Tagen
+function autoReport(d){
+  const n = countOf(d), prev = countOf(addDays(d,-1)), pct = Math.round(n/TOTAL*100);
+  const short = id => TITLE[id].split(/[,:(]/)[0].trim();
+  const done = DAILY.filter(id => doneOf(d)[id]).slice(0,4).map(short);
+  const miss = DAILY.map(id => { let k = 0; for (let i=0;i<7;i++) if (!doneOf(addDays(d,-i))[id]) k++; return [id,k]; })
+    .filter(([id]) => !doneOf(d)[id]).sort((a,b)=>b[1]-a[1]).slice(0,2).map(([id]) => short(id));
+  const cmp = days[addDays(d,-1)] ? (n > prev ? `, ${n-prev} mehr als am Vortag` : n < prev ? `, ${prev-n} weniger als am Vortag` : ", wie am Vortag") : "";
+  return `${n} von ${TOTAL} Punkten (${pct} %)${cmp}.` + (done.length ? ` Geklappt: ${done.join(", ")}.` : "") + (miss.length ? ` Fokus für morgen: ${miss.join(" und ")}.` : "");
 }
 
 function renderPlan(){
@@ -823,6 +833,25 @@ show(startTab);
 
 // Speicherung im Konto der Lebensplattform (Supabase, Tabelle schach_docs, Pfade huberman/tag/JJJJ-MM-TT und huberman/einstellungen).
 // Jede Zeile gehört einem Konto; die Datenbank gibt nur die eigenen Zeilen heraus.
+// Einmaliger Umzug von der früheren Claude-Seite: Link mit #import=<base64 JSON {days:{datum:{done}}, reports:{datum:{text}}}>.
+// Die Daten stehen nur im Link, nicht im Code. Vorhandene Tage im Konto werden nicht überschrieben.
+async function importFromHash(seen){
+  const m = location.hash.match(/^#import=(.+)$/); if (!m) return;
+  history.replaceState(null, "", location.pathname + location.search);
+  let x; try { x = JSON.parse(decodeURIComponent(escape(atob(decodeURIComponent(m[1]))))); } catch(e) { return; }
+  const now = new Date().toISOString();
+  for (const [date, rep] of Object.entries(x.reports || {})) {
+    if (!/^\d{4}-\d\d-\d\d$/.test(date) || reports[date] || !rep || !rep.text) continue;
+    reports[date] = {text: String(rep.text)};
+    try { await sb.from("schach_docs").upsert({user_id: user.id, path: DOC+"bericht/"+date, data: reports[date], updated_at: now}); } catch(e) {}
+  }
+  for (const [date, v] of Object.entries(x.days || {})) {
+    if (!/^\d{4}-\d\d-\d\d$/.test(date) || !v || !v.done) continue;
+    const merged = {...(v.done)}; for (const [k,on] of Object.entries(doneOf(date))) if (on) merged[k] = true;
+    days[date] = {done: merged}; seen.delete(date); persist(date);
+  }
+}
+
 (async () => {
   const cfg = window.SR_CONFIG || {};
   const gate = on => { document.getElementById("gate").hidden = !on; for (const v of VIEWS) document.getElementById("tab-"+v).disabled = on; document.getElementById("view-plan").hidden = on || document.getElementById("view-plan").hidden; if (on) { document.getElementById("view-year").hidden = true; document.getElementById("view-ref").hidden = true; } };
@@ -833,11 +862,6 @@ show(startTab);
     user = s.data.session ? s.data.session.user : null;
   } catch(e) { user = null; }
   if (!user) { gate(true); return; }
-  // Admins (Ralf) führen ihre Checkliste weiter auf der Claude-Seite mit Verlauf und Abendauswertung. Sonst landen Häkchen je nach Einstieg (Lesezeichen, Startbildschirm, Portal vor der Admin-Prüfung) mal hier und mal dort.
-  try {
-    const a = await sb.from("app_admins").select("user_id").eq("user_id", user.id).maybeSingle();
-    if (!a.error && a.data) { location.replace(ADMIN_PAGE); return; }
-  } catch(e) {}
   try { days = JSON.parse(localStorage.getItem(lkey("days")) || "{}") || {}; } catch(e) { days = {}; }
   try { Object.assign(times, JSON.parse(localStorage.getItem(lkey("times")) || "{}")); } catch(e) {}
   for (const k of ["wake","bed"]) document.getElementById(k).value = times[k];
@@ -848,11 +872,13 @@ show(startTab);
     const seen = new Set();
     for (const row of r.data || []) {
       const d = row.data || {};
+      if (row.path.startsWith(DOC+"bericht/")) { reports[row.path.slice((DOC+"bericht/").length)] = d; continue; }
       if (row.path === DOC+"einstellungen") { for (const k of ["wake","bed"]) if (d[k]) { times[k] = d[k]; document.getElementById(k).value = d[k]; } continue; }
       const date = row.path.slice((DOC+"tag/").length);
       if (!/^\d{4}-\d\d-\d\d$/.test(date) || pending[date] || writing[date]) continue;
       seen.add(date); days[date] = {done: {...(d.done||{})}};
     }
+    await importFromHash(seen);
     // Häkchen, die vorher nur in diesem Browser lagen, einmal ins Konto übernehmen
     for (const d of Object.keys(days)) if (!seen.has(d) && countOf(d) > 0) persist(d);
     setStore("db"); saveLocal(); renderPlan(); renderYear();
