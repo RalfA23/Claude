@@ -1,6 +1,6 @@
 # Wortwürfel
 
-Buchstabenwürfel-Wortspiel nach dem Vorbild von Boggle. Läuft auf derselben GitHub-Pages-Seite wie die Trainer, unter `/wortwuerfel/`, und braucht keine Anmeldung. Einstellungen und Bilanz liegen im Browser (localStorage).
+Buchstabenwürfel-Wortspiel nach dem Vorbild von Boggle. Läuft auf derselben GitHub-Pages-Seite wie die Trainer, unter `/wortwuerfel/`, und braucht für das Spiel allein oder zu zweit keine Anmeldung. Einstellungen und Bilanz liegen im Browser (localStorage).
 
 So wird gespielt:
 
@@ -9,6 +9,7 @@ So wird gespielt:
 - Punkte nach Wortlänge wie im Original: 3–4 Buchstaben 1, 5 → 2, 6 → 3, 7 → 5, ab 8 → 11. „Qu“ zählt als zwei Buchstaben.
 - Seltene Wörter aus dem Wörterbuch zählen, die Auswertung zeigt als „was noch drin war“ aber nur gebräuchliche Wörter; ein Tipp auf ein Wort zeigt seinen Weg.
 - Zu zweit: nacheinander auf demselben Brett, gemeinsame Wörter werden gestrichen.
+- Wortduell online: asynchrone Duelle gegen andere angemeldete Nutzer der Plattform. Wer herausfordert, spielt ein Brett drei Minuten lang; wer annimmt, spielt dasselbe Brett. Gemeinsame Wörter zählen nicht. Dazu eigene Duelle und eine Bestenliste. Braucht die Tabelle aus `supabase/migrations/0001_wortwuerfel.sql` (einmal im SQL-Editor ausführen); die Anmeldung kommt aus dem Lernportal.
 - Jedes Brett hat einen fünfstelligen Code. Mit demselben Code bekommt jeder dasselbe Brett, auch auf einem anderen Gerät.
 
 ## Aufbau
@@ -20,6 +21,7 @@ So wird gespielt:
 | `wortliste.mjs` | Erzeugt `src/woerter.txt` neu aus der [deutschen Wortliste für Wortspiele](https://github.com/enz/german-wordlist) von Jan Enz (CC0) und markiert gebräuchliche Wörter (ab 15 Vorkommen) nach der [Häufigkeitsliste](https://github.com/hermitdave/FrequencyWords) von Hermit Dave (OpenSubtitles 2018, CC BY-SA 4.0). Nur nötig, wenn die Liste aufgefrischt werden soll. |
 | `build.mjs` | Baut `dist/` (Seite, Wörterbuch, Manifest, Icons). |
 | `public/` | Manifest und Icons. |
+| `supabase/migrations/` | Tabelle `ww_duels` und Funktion `ww_answer` für das Wortduell online. |
 
 ## Lokal bauen
 
