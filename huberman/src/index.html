@@ -614,6 +614,7 @@ function setStore(state){
 }
 
 const DOC = "huberman/";
+const ADMIN_PAGE = "https://claude.ai/artifact/RftCQuS68gfCheV5VLbpgn";
 const pending = {}, writing = {};
 function persist(date){
   saveLocal();
@@ -832,6 +833,11 @@ show(startTab);
     user = s.data.session ? s.data.session.user : null;
   } catch(e) { user = null; }
   if (!user) { gate(true); return; }
+  // Admins (Ralf) führen ihre Checkliste weiter auf der Claude-Seite mit Verlauf und Abendauswertung. Sonst landen Häkchen je nach Einstieg (Lesezeichen, Startbildschirm, Portal vor der Admin-Prüfung) mal hier und mal dort.
+  try {
+    const a = await sb.from("app_admins").select("user_id").eq("user_id", user.id).maybeSingle();
+    if (!a.error && a.data) { location.replace(ADMIN_PAGE); return; }
+  } catch(e) {}
   try { days = JSON.parse(localStorage.getItem(lkey("days")) || "{}") || {}; } catch(e) { days = {}; }
   try { Object.assign(times, JSON.parse(localStorage.getItem(lkey("times")) || "{}")); } catch(e) {}
   for (const k of ["wake","bed"]) document.getElementById(k).value = times[k];
