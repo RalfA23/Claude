@@ -1,0 +1,857 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<script src="../config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<style>:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}*,*::before,*::after{box-sizing:inherit}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>Huberman-Protokolle</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap">
+<style>
+/* Layout: ein Tagesbogen von Morgen bis Nacht; links die Uhrzeit-Spalte, rechts die Handgriffe. Zweiter Reiter = Nachschlagewerk nach Buchteilen. */
+:root{
+  --bg:#f3f6f7; --surface:#ffffff; --fg:#14232b; --muted:#5a6b73; --line:#d6e0e3;
+  --dawn:#d9822b; --day:#2f7f8c; --dusk:#6b4fa0; --night:#24415c; --ok:#2e7d4f;
+  --chip:#e6eef0; --noon:#b8860b; --stress:#b8423f; --grow:#97466f; --warn-bg:#fff4e5; --warn-fg:#7a4a0c;
+  --display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f171c; --surface:#16222a; --fg:#e4ecef; --muted:#97a9b1; --line:#2a3a43;
+  --dawn:#f0a259; --day:#5fb3bf; --dusk:#a68bd8; --night:#7ea6cc; --ok:#62c08a;
+  --chip:#1f2f38; --noon:#e0b44a; --stress:#e57f7b; --grow:#d58ab0; --warn-bg:#2e2414; --warn-fg:#f2c98a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f171c; --surface:#16222a; --fg:#e4ecef; --muted:#97a9b1; --line:#2a3a43;
+  --dawn:#f0a259; --day:#5fb3bf; --dusk:#a68bd8; --night:#7ea6cc; --ok:#62c08a;
+  --chip:#1f2f38; --noon:#e0b44a; --stress:#e57f7b; --grow:#d58ab0; --warn-bg:#2e2414; --warn-fg:#f2c98a; color-scheme:dark}
+
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.55}
+.wrap{max-width:860px;margin:0 auto;padding-block:28px 64px;padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px))}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;line-height:1.2}
+h1{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700}
+h2{font-size:1.35rem;font-weight:700}
+h3{font-size:1.05rem;font-weight:700}
+p{margin:0}
+.lede{color:var(--muted);max-width:62ch;margin-top:8px}
+.eyebrow{font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.arc{height:6px;border-radius:3px;margin:20px 0 4px;background:linear-gradient(90deg,var(--dawn),var(--day) 40%,var(--dusk) 75%,var(--night))}
+
+.tabs{display:flex;gap:6px;margin:22px 0 18px;flex-wrap:wrap}
+.tabs button{font:700 .95rem var(--body);padding:9px 16px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+button:focus-visible,summary:focus-visible,input:focus-visible{outline:3px solid var(--day);outline-offset:2px}
+
+.note{background:var(--warn-bg);color:var(--warn-fg);border-radius:10px;padding:12px 14px;font-size:.92rem}
+
+/* Tagesplan */
+.planbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.progress{font-variant-numeric:tabular-nums;color:var(--muted);font-size:.95rem}
+.progress b{color:var(--fg)}
+.ghost{font:700 .85rem var(--body);background:none;border:1px solid var(--line);color:var(--muted);border-radius:8px;padding:6px 10px;cursor:pointer}
+.block{display:grid;grid-template-columns:120px 1fr;gap:18px;padding:18px 0;border-top:1px solid var(--line)}
+.block .when{display:flex;flex-direction:column;gap:4px}
+.block .when h2{color:var(--c)}
+.block .when span{font-size:.85rem;color:var(--muted)}
+.items{display:flex;flex-direction:column;gap:10px;min-width:0}
+.item{display:grid;grid-template-columns:22px 1fr;gap:10px;align-items:start}
+.item input{width:20px;height:20px;margin:2px 0 0;accent-color:var(--ok);cursor:pointer}
+.item label{cursor:pointer}
+.clock{display:block;font-size:.8rem;font-weight:700;color:var(--c);font-variant-numeric:tabular-nums;letter-spacing:.02em}
+.times{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:16px}
+.times label{font-weight:700;display:flex;align-items:center;gap:8px}
+.times input{font:1rem var(--body);padding:5px 8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--fg);font-variant-numeric:tabular-nums}
+.times .hint{flex-basis:100%;color:var(--muted);font-size:.88rem}
+.item .t{font-weight:700}
+.item .d{color:var(--muted);font-size:.93rem}
+.item input:checked + label .t{text-decoration:line-through;text-decoration-color:var(--muted);color:var(--muted)}
+.refs{display:inline-flex;gap:4px;flex-wrap:wrap;margin-left:4px;vertical-align:1px}
+.ref{font-size:.72rem;font-weight:700;background:var(--chip);color:var(--muted);border-radius:5px;padding:1px 6px;cursor:pointer;border:0;font-family:var(--body)}
+@media (max-width:560px){.block{grid-template-columns:1fr;gap:10px}.block .when{flex-direction:row;align-items:baseline;gap:10px}}
+
+.chips{display:inline-flex;gap:4px;flex-wrap:wrap;vertical-align:1px}
+.chip{font-size:.7rem;font-weight:700;border-radius:5px;padding:1px 6px;color:var(--tc);background:color-mix(in srgb,var(--tc) 14%,transparent)}
+.t-S{--tc:var(--night)}.t-L{--tc:var(--dawn)}.t-ST{--tc:var(--stress)}.t-E{--tc:var(--ok)}.t-B{--tc:var(--day)}.t-K{--tc:var(--dusk)}.t-W{--tc:var(--grow)}
+.item.plain{grid-template-columns:22px 1fr}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--muted);margin:8px 0 0 6px}
+.week{border-collapse:collapse;font-size:.95rem}
+.week th{text-align:left;padding:4px 14px 4px 0;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.week td{padding:4px 0}
+.deep{grid-column:2;margin-top:4px}
+.deep > summary{display:inline-block;cursor:pointer;font-size:.85rem;font-weight:700;color:var(--day);padding:2px 0;list-style:none}
+.deep > summary::-webkit-details-marker{display:none}
+.deep > summary::before{content:"▸ ";}
+.deep[open] > summary::before{content:"▾ ";}
+.deepbody{display:flex;flex-direction:column;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-top:6px;font-size:.93rem;max-width:68ch;min-width:0}
+.deepbody h4{margin:6px 0 0;font:700 .78rem var(--body);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.deepbody ul{margin:0;padding-left:18px}
+.deepbody li{margin:2px 0}
+.links{list-style:none;padding-left:0 !important;display:flex;flex-direction:column;gap:3px;margin-top:4px}
+.links a{color:var(--day);font-weight:700;text-decoration-thickness:1px;text-underline-offset:2px;overflow-wrap:anywhere}
+.links a::after{content:" ↗";font-weight:400}
+.care{background:var(--warn-bg);color:var(--warn-fg);border-radius:8px;padding:6px 10px}
+.women{border-left:3px solid var(--grow);padding-left:10px}
+.dayhead{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.daytitle{flex:1;min-width:0}
+.daytitle h2{font-size:clamp(1.25rem,4vw,1.6rem)}
+.nav{font:700 1.3rem var(--display);width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer;line-height:1}
+.nav:disabled{opacity:.35;cursor:default}
+.meter{height:8px;border-radius:4px;background:var(--line);overflow:hidden;margin:4px 0 6px}
+.meter div{height:100%;background:var(--ok);width:0;transition:width .3s}
+.store{font-size:.8rem;color:var(--muted);margin-bottom:12px}
+.store[data-state="error"]{color:var(--warn-fg)}
+.report{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--dusk);border-radius:10px;padding:10px 14px;margin-bottom:14px;display:flex;flex-direction:column;gap:4px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:6px 0 14px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}
+.stat span{font-size:.78rem;color:var(--muted)}
+.stat b{font-family:var(--display);font-size:1.35rem;font-variant-numeric:tabular-nums}
+.legend{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:.8rem;color:var(--muted);margin-bottom:12px}
+.legend .cell{width:14px;height:14px;display:inline-block;margin-left:6px}
+.cal{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:18px 20px}
+.month h3{font-size:.95rem;margin-bottom:4px}
+.wd,.grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.wd span{font-size:.65rem;color:var(--muted);text-align:center}
+.cell{aspect-ratio:1;border-radius:4px;border:0;font:.68rem var(--body);font-variant-numeric:tabular-nums;color:var(--fg);padding:0;cursor:pointer;max-width:100%}
+.cell.blank{visibility:hidden}
+.cell.none{background:transparent;color:var(--muted);box-shadow:inset 0 0 0 1px var(--line)}
+.cell:disabled{cursor:default;opacity:.55}
+.cell.l0{background:var(--line)}
+.cell.l1{background:color-mix(in srgb,var(--ok) 25%,var(--surface))}
+.cell.l2{background:color-mix(in srgb,var(--ok) 50%,var(--surface))}
+.cell.l3{background:color-mix(in srgb,var(--ok) 75%,var(--surface));color:#fff}
+.cell.l4{background:var(--ok);color:#fff;font-weight:700}
+.cell.today{outline:2px solid var(--dawn);outline-offset:1px}
+h2.sub{font-size:1.1rem;margin:26px 0 8px}
+.missed{list-style:none;padding:0;margin:0 0 10px;display:flex;flex-direction:column}
+.missed li{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-top:1px solid var(--line);flex-wrap:wrap}
+.missed li b{font-size:.85rem;color:var(--muted);font-weight:700;font-variant-numeric:tabular-nums}
+.missed li.empty{color:var(--muted)}
+.hint{color:var(--muted);font-size:.88rem}
+/* Nachschlagewerk */
+.filter{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.filter button{font:.85rem var(--body);padding:5px 11px;border-radius:999px;border:1px solid var(--line);background:none;color:var(--fg);cursor:pointer}
+.filter button[aria-pressed="true"]{background:var(--chip);font-weight:700;border-color:var(--muted)}
+.part{margin-top:26px}
+.part > header{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:6px}
+.part > header span{color:var(--muted);font-size:.85rem;font-variant-numeric:tabular-nums;white-space:nowrap}
+details{border-top:1px solid var(--line)}
+details:last-child{border-bottom:1px solid var(--line)}
+summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:44px 1fr auto;gap:10px;padding:12px 2px;align-items:baseline}
+summary::-webkit-details-marker{display:none}
+summary .no{font-family:var(--display);font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums}
+summary .ti{font-weight:700;min-width:0}
+summary .pg{font-size:.8rem;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+details[open] summary .ti{color:var(--day)}
+.body{padding:0 2px 16px 56px;display:flex;flex-direction:column;gap:8px;max-width:70ch}
+.body ul{margin:0;padding-left:18px}
+.body li{margin:2px 0}
+.tags{display:flex;gap:6px;flex-wrap:wrap}
+.tag{font-size:.75rem;font-weight:700;border-radius:5px;padding:2px 7px;background:var(--chip);color:var(--muted)}
+.tag.care{background:var(--warn-bg);color:var(--warn-fg)}
+@media (max-width:560px){summary{grid-template-columns:34px 1fr}summary .pg{grid-column:2}.body{padding-left:2px}}
+.back{display:inline-block;color:var(--muted);text-decoration:none;font-size:.9rem;margin-bottom:14px}
+.back:hover{color:var(--fg)}
+.gate{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;margin-top:18px}
+.gate a{color:var(--day);font-weight:700}
+footer{margin-top:40px;color:var(--muted);font-size:.85rem;max-width:70ch}
+@media (prefers-reduced-motion:no-preference){details[open] .body{animation:fade .2s ease-out}@keyframes fade{from{opacity:.4}to{opacity:1}}}
+</style>
+
+<div class="wrap">
+  <a class="back" href="../">← Portal</a>
+  <p class="eyebrow">Andrew Huberman · Protocols · 7 Teile · 47 Routinen</p>
+  <h1>Huberman Protokolle im Alltag</h1>
+  <p class="lede">Jeden Tag eine frische Checkliste mit Datum, von morgens bis nachts. Deine Häkchen werden in deinem Konto gespeichert, nur du siehst sie, und im Jahresüberblick ausgewertet. Alle 47 Protokolle sind enthalten; was sich überschneidet, ist zu einem Handgriff zusammengelegt. Die farbigen Vermerke zeigen, welche Themen ein Punkt abdeckt. Unter jedem Punkt öffnet „Mehr erfahren“ die Details mit Links zu Hubermans Folgen.</p>
+  <div class="arc" aria-hidden="true"></div>
+
+  <div class="tabs" role="tablist">
+    <button role="tab" id="tab-plan" aria-selected="true" aria-controls="view-plan">Tages-Checkliste</button>
+    <button role="tab" id="tab-year" aria-selected="false" aria-controls="view-year">Jahresüberblick</button>
+    <button role="tab" id="tab-ref" aria-selected="false" aria-controls="view-ref">Sind alle 47 drin?</button>
+  </div>
+
+  <div class="gate" id="gate" hidden><p>Melde dich im <a href="../">Portal</a> an, dann bekommst du deine eigene Checkliste. Jedes Konto hat seine eigenen Häkchen.</p></div>
+
+  <section id="view-plan" role="tabpanel" aria-labelledby="tab-plan">
+    <div class="dayhead">
+      <button type="button" class="nav" id="prev" aria-label="Vorheriger Tag">‹</button>
+      <div class="daytitle"><p class="eyebrow" id="dayrel">Heute</p><h2 id="daytitle"></h2></div>
+      <button type="button" class="nav" id="next" aria-label="Nächster Tag">›</button>
+      <button type="button" class="ghost" id="today" hidden>Zu heute</button>
+    </div>
+    <div class="meter" aria-hidden="true"><div id="bar"></div></div>
+    <p class="store" id="store"></p>
+    <div class="report" id="report" hidden></div>
+    <div class="times">
+      <label for="wake">Aufstehen <input type="time" id="wake" step="900"></label>
+      <label for="bed">Ins Bett <input type="time" id="bed" step="900"></label>
+      <p class="hint">Huberman rät zu möglichst festen Zeiten. Trag deine Zeiten ein, die Uhrzeiten in der Liste richten sich danach.</p>
+      <p class="hint" id="sun"></p>
+    </div>
+    <div class="planbar">
+      <p class="progress" id="progress"></p>
+      <button class="ghost" id="reset" type="button">Häkchen dieses Tages löschen</button>
+    </div>
+    <div id="plan"></div>
+  </section>
+
+  <section id="view-year" role="tabpanel" aria-labelledby="tab-year" hidden>
+    <div class="dayhead">
+      <button type="button" class="nav" id="yprev" aria-label="Vorheriges Jahr">‹</button>
+      <div class="daytitle"><p class="eyebrow">Jahresüberblick</p><h2 id="yearlabel"></h2></div>
+      <button type="button" class="nav" id="ynext" aria-label="Nächstes Jahr">›</button>
+    </div>
+    <div class="stats" id="stats"></div>
+    <div class="legend"><span>Erledigt:</span><i class="cell l0"></i>0 %<i class="cell l1"></i>bis 33 %<i class="cell l2"></i>bis 66 %<i class="cell l3"></i>bis 89 %<i class="cell l4"></i>ab 90 %</div>
+    <div class="cal" id="cal"></div>
+    <h2 class="sub">Am häufigsten ausgelassen</h2>
+    <ul class="missed" id="missed"></ul>
+    <p class="hint">Tipp auf einen Tag im Kalender, um seine Checkliste zu öffnen und nachzutragen.</p>
+  </section>
+
+  <section id="view-ref" role="tabpanel" aria-labelledby="tab-ref" hidden>
+    <div class="filter" id="filter"></div>
+    <div id="ref"></div>
+  </section>
+
+  <footer>
+    <p class="note"><b>Wichtig:</b> Die Inhalte folgen Hubermans öffentlich bekannten Empfehlungen (Buch, Podcast, Newsletter). Nahrungsergänzungen, Kälte, Schlafmittel und Rotlicht bitte vorher ärztlich abklären, besonders bei Vorerkrankungen, Schwangerschaft oder Medikamenten.</p>
+  </footer>
+</div>
+
+<script>
+const PARTS = [
+ {key:"S", name:"Schlaf", page:41},
+ {key:"B", name:"Sport und Bewegung", page:177},
+ {key:"ST", name:"Stresskontrolle", page:307},
+ {key:"E", name:"Ernährung", page:391},
+ {key:"L", name:"Umgang mit Licht", page:493},
+ {key:"K", name:"Konzentration, Motivation und Lernen", page:565},
+ {key:"W", name:"Persönliches Wachstum", page:675},
+];
+
+// id, Titel (Buch), Seite, Kernpunkte, wo im Tagesplan, Vorsicht?
+const R = [
+ ["S1","Augen so bald wie möglich nach dem Aufwachen dem Sonnenlicht aussetzen",50,["Innerhalb der ersten 30–60 Minuten nach draußen.","Dauer je nach Wetter: sonnig 5–10 Min, bewölkt 10–20 Min, sehr trüb bis 30 Min.","Nicht direkt in die Sonne schauen, keine Sonnenbrille; durch Fensterglas wirkt es kaum.","Stellt die innere Uhr und macht abends früher müde."],"Morgens"],
+ ["S2","Am späten Nachmittag noch einmal dem Sonnenlicht aussetzen",75,["Wenn die Sonne tief steht, 10–20 Min draußen sein.","Macht die Augen abends weniger empfindlich für Kunstlicht."],"Tagsüber"],
+ ["S3","Helles Licht vor dem Einschlafen vermeiden",81,["Ab 2–3 Std. vor dem Schlafen Licht dimmen.","Lampen tief im Raum statt Deckenlicht, warmes oder rötliches Licht.","Nachts (ca. 22–4 Uhr) möglichst kein helles Licht, auch nicht im Bad."],"Abends"],
+ ["S4","Ideale Einschlaf- und Aufwachzeit finden und einhalten",90,["Ins Bett, wenn die natürliche Müdigkeit kommt, nicht dagegen anarbeiten.","Feste Zeiten, auch am Wochenende höchstens ca. 1 Std. Abweichung.","Ziel für die meisten Erwachsenen: 7–9 Std. Schlaf."],"Morgens"],
+ ["S5","Nachts die Körpertemperatur senken",112,["Schlafzimmer kühl halten (etwa 16–19 °C).","Warmes Bad oder heiße Dusche am Abend: danach kühlt der Körper ab und man wird müde.","Leichte Decke, Füße dürfen rausschauen."],"Abends"],
+ ["S6","Körpertemperatur 1–2 Std. vor dem Aufwachen erhöhen",118,["Heizung oder Thermostat so stellen, dass es vor dem Wecker wärmer wird.","Morgens bringen Bewegung und eine kalte Dusche die Temperatur zusätzlich hoch."],"Abends"],
+ ["S7","Richtig gestaltetes Nickerchen gegen kleine Schlafdefizite",121,["Kurz: ca. 20 Min (oder ein voller Zyklus von ca. 90 Min).","Nicht zu spät am Tag, damit der Nachtschlaf nicht leidet.","Wer danach nachts schlechter schläft, lässt es weg."],"Tagsüber"],
+ ["S8","NSDR gegen Schlafdefizite (und für besseren Nachtschlaf)",129,["NSDR = Non-Sleep Deep Rest, z. B. Yoga Nidra oder eine geführte NSDR-Aufnahme.","10–30 Min liegend: Körper-Scan, lange Ausatmung, wach bleiben.","Auch hilfreich, wenn man nachts aufwacht und nicht mehr einschläft."],"Tagsüber"],
+ ["S9","Gegebenenfalls Nahrungsergänzung für den Schlaf",137,["Huberman nennt v. a. Magnesium (Threonat oder Bisglycinat), Apigenin und L-Theanin, 30–60 Min vor dem Schlafen.","Erst Licht, Temperatur und Zeiten in Ordnung bringen, Supplements nur ergänzend.","Melatonin sieht er für den Dauergebrauch kritisch."],"Abends",true],
+ ["S10","Verschreibungspflichtige Schlafmittel nur mit größter Vorsicht",144,["Nur ärztlich begleitet und möglichst kurz.","Können Abhängigkeit machen und den natürlichen Schlafaufbau verändern.","Bei Dauerproblemen ist kognitive Verhaltenstherapie für Schlaf (KVT-I) die erste Wahl."],"Bei Bedarf",true],
+ ["S11","Koffeinkonsum an den Schlafrhythmus anpassen",148,["Erste Tasse erst 60–90 Min nach dem Aufwachen, das vermeidet bei vielen das Tief am Nachmittag.","Ca. 8–10 Std. vor dem Schlafen kein Koffein mehr (Halbwertszeit rund 5 Std.)."],"Morgens"],
+ ["S12","Keinen Alkohol in den letzten 8 Std. vor dem Schlafen",157,["Alkohol macht schläfrig, verschlechtert aber Tiefschlaf und REM-Schlaf.","Am besten insgesamt selten und wenig."],"Abends"],
+ ["S13","Auf Cannabis verzichten",162,["Unterdrückt den REM-Schlaf; beim Absetzen folgen oft unruhige Nächte.","Gewöhnung tritt schnell ein, die Wirkung auf den Schlaf lässt nach."],"Abends"],
+ ["S14","Mindestens 1 Std. vor dem Zubettgehen alle Bildschirme weglegen",166,["Wegen Licht und wegen Aufregung durch Inhalte.","Stattdessen lesen, Gespräche, Dehnen, NSDR."],"Abends"],
+ ["S15","Tipps gegen den Jetlag",170,["Schon vor der Reise Schlafzeiten in Richtung Zielzeit verschieben.","Am Ziel sofort nach Ortszeit leben: Licht am Morgen, Essen und Bewegung zu Ortszeiten.","Nachmittags kurzer Nap statt langem Schlaf, Koffein gezielt einsetzen."],"Bei Bedarf"],
+
+ ["B1","Jeden Tag so viel wie möglich gehen",213,["Grob 7.000–10.000 Schritte als Orientierung, mehr ist besser.","10–20 Min Gehen nach den Mahlzeiten senkt den Blutzucker.","Langes Sitzen unterbrechen; im Sitzen helfen sogar Wadenheben."],"Tagsüber"],
+ ["B2","Dreimal pro Woche Krafttraining",224,["Große Grundübungen, ca. 45–60 Min pro Einheit.","Pro Muskelgruppe mehrere harte Sätze pro Woche, Gewichte langsam steigern.","Kälte nicht direkt nach dem Krafttraining, sie kann den Muskelaufbau bremsen."],"Wöchentlich"],
+ ["B3","Dreimal pro Woche Herz-Kreislauf-Training",276,["Meist lockeres Ausdauertraining (Zone 2, man kann noch sprechen), 30–45+ Min.","Einmal pro Woche intensive Intervalle, z. B. 4 × 4 Min hart."],"Wöchentlich"],
+ ["B4","Zwei- bis viermal pro Woche kurze Einheiten für Beweglichkeit",294,["Ca. 10 Min reichen.","Dehnungen 30–60 Sek halten, sanft und ohne Schmerz.","Gut abends als Teil des Runterfahrens."],"Wöchentlich"],
+
+ ["ST1","Ein bis drei physiologische Seufzer gegen akuten Stress",326,["Zweimal durch die Nase einatmen (der zweite Atemzug füllt die Lunge ganz), dann lang durch den Mund ausatmen.","1–3 Wiederholungen beruhigen in Echtzeit.","Als tägliche Übung: 5 Min am Stück."],"Jederzeit"],
+ ["ST2","Bewusst Kälte aussetzen, um die Stresstoleranz zu steigern",335,["Kalte Dusche oder Kaltwasserbad, so kalt, dass es unangenehm, aber sicher ist.","Insgesamt ca. 11 Min pro Woche, verteilt auf 2–4 Einheiten.","Am besten morgens; bei Herz-Kreislauf-Problemen vorher ärztlich abklären."],"Morgens",true],
+ ["ST3","NSDR nutzen, um sich gegen Stress zu schützen",355,["Gleiche Technik wie Schlaf-Routine 8.","10–20 Min am Nachmittag senken das Stressniveau und füllen Energie auf."],"Tagsüber"],
+ ["ST4","Gleich nach dem Aufwachen eine Mini-Meditation",360,["3–10 Min ruhig sitzen, auf den Atem achten, abschweifende Gedanken zurückholen.","Regelmäßigkeit zählt mehr als Länge."],"Morgens"],
+ ["ST5","Morgendliche Cortisol- und Katecholamin-Spitzen ankurbeln",364,["Ein hoher Cortisolwert am Morgen ist gesund und sorgt für niedrigere Werte am Abend.","Hebel: Licht am Morgen, Bewegung, Kälte, später Koffein.","Fällt mit Schlaf-Routine 1 und Licht-Routine 1 zusammen."],"Morgens"],
+ ["ST6","Bestimmte Nahrungsergänzungen bei exzessivem Stress erwägen",378,["Genannt werden u. a. Ashwagandha und L-Theanin.","Ashwagandha nur zeitlich begrenzt und mit Pausen; nicht in der Schwangerschaft, bei Schilddrüsenproblemen ärztlich abklären.","Erst Atmung, Schlaf und Bewegung, dann Supplements."],"Bei Bedarf",true],
+
+ ["E1","Mindestens 90 % unverarbeitete oder leicht verarbeitete Lebensmittel",443,["Faustregel: Lebensmittel, die man als Zutat erkennt.","Fertigprodukte und Süßes als Ausnahme, nicht als Basis."],"Tagsüber"],
+ ["E2","Genug trinken",452,["Über den Tag verteilt trinken, Schwerpunkt in den ersten 10 Std. nach dem Aufwachen.","Beim Sport zusätzlich; bei starkem Schwitzen Elektrolyte.","Abends weniger, damit man nachts nicht raus muss."],"Morgens"],
+ ["E3","Bei jeder vollständigen Mahlzeit auf Proteine mit hohem CP:CR-Quotienten achten",461,["Lebensmittel bevorzugen, bei denen ein großer Teil der Kalorien aus Protein stammt (z. B. Fisch, Hähnchen, Eier, Magerquark, Skyr).","Orientierung bei Training oft 1,6–2,2 g Protein pro kg Körpergewicht und Tag.","Die genaue Definition von CP:CR steht im Buch auf S. 461."],"Tagsüber"],
+ ["E4","Ballaststoffreiches Gemüse und etwas Obst als Hauptquelle für Kohlenhydrate",466,["Gemüse, Hülsenfrüchte, Beeren statt Weißmehl und Zucker.","Hält länger satt und stabilisiert den Blutzucker."],"Tagsüber"],
+ ["E5","Bei den meisten Mahlzeiten und Snacks auf gesunde Fette setzen",473,["Olivenöl, Avocado, Nüsse, Samen, fetter Fisch.","Stark verarbeitete Fette meiden."],"Tagsüber"],
+ ["E6","Fermentierte Lebensmittel mit niedrigem Zuckergehalt",480,["Täglich 2–4 kleine Portionen: Naturjoghurt, Kefir, Sauerkraut, Kimchi.","Ungezuckert; Sauerkraut aus dem Kühlregal, da Konserven meist pasteurisiert sind."],"Tagsüber"],
+ ["E7","Fetthaltiger Meeresfisch und/oder Omega-3-Präparate",487,["Zwei- bis dreimal pro Woche Lachs, Hering, Makrele oder Sardinen.","Sonst ein Omega-3-Präparat mit viel EPA erwägen.","Bei blutverdünnenden Medikamenten ärztlich abklären."],"Wöchentlich",true],
+
+ ["L1","In der ersten Stunde helles Licht für den Morgen-Cortisolspiegel",506,["Gleiche Praxis wie Schlaf-Routine 1.","Wenn es noch dunkel ist: alle Lichter an oder eine Tageslichtlampe (ca. 10.000 Lux), danach raus, sobald es hell ist."],"Morgens"],
+ ["L2","Sonnenlicht am späten Nachmittag oder frühen Abend",520,["Gleiche Praxis wie Schlaf-Routine 2.","Puffert die Wirkung von Kunstlicht am Abend ab."],"Tagsüber"],
+ ["L3","Helles Licht in der letzten Stunde vor der Schlafenszeit vermeiden",526,["Gleiche Praxis wie Schlaf-Routine 3 und 14.","Für nächtliche Wege ein schwaches, rötliches Nachtlicht."],"Abends"],
+ ["L4","Den gesamten Körper tagsüber dem Sonnenlicht aussetzen",540,["Haut ans Licht, z. B. 20–30 Min bei Spaziergang oder Sport im Freien.","Wirkt positiv auf Stimmung und Wohlbefinden.","Sonnenbrand unbedingt vermeiden, Hauttyp und UV-Index beachten."],"Tagsüber",true],
+ ["L5","Haut und Augen langwelligem Licht aussetzen (Rot, Nahinfrarot, Infrarot)",551,["Rotlicht wird für Haut und, in Studien bei über 40-Jährigen, für die Netzhaut untersucht (wenige Minuten am Morgen).","Abends ist rötliches Licht die schlaffreundliche Beleuchtung.","Geräte mit Bedacht wählen, Augen nicht starken Lichtquellen aussetzen."],"Bei Bedarf",true],
+
+ ["K1","Konzentration und wache Aufmerksamkeit erreichen",584,["Vor dem Start 30–60 Sek bewusst auf einen Punkt schauen, das schaltet auf Fokus.","Bildschirm auf Augenhöhe oder leicht darüber, Handy in einen anderen Raum.","Arbeitsblöcke von bis zu ca. 90 Min, danach echte Pause."],"Tagsüber"],
+ ["K2","Mentales Kontrastieren für den »Zustand der Dringlichkeit«",641,["Ziel und Gewinn konkret vorstellen, danach das größte Hindernis und was passiert, wenn man nichts tut.","Daraus einen Wenn-dann-Plan machen (Methode nach Gabriele Oettingen, WOOP)."],"Morgens"],
+ ["K3","Fehler als Motor begreifen",656,["Frust beim Lernen ist das Signal, dass das Gehirn umbaut.","Am Rand des Könnens üben, so dass etwa jeder sechste bis siebte Versuch misslingt."],"Tagsüber"],
+ ["K4","Nach einer Lernrunde dem Nachtschlaf Vorrang geben",665,["Das Gelernte wird im Schlaf gefestigt.","Nach intensivem Lernen keine kurze Nacht; NSDR nach dem Lernen hilft zusätzlich."],"Abends"],
+ ["K5","Minipausen in Lernrunden einbinden",667,["Zwischendurch ca. 10 Sek nichts tun.","In diesen Pausen wiederholt das Gehirn das gerade Geübte, und zwar deutlich schneller."],"Tagsüber"],
+ ["K6","Gedächtnis durch mentale Wiederholungen stärken",671,["Nach dem Lernen den Ablauf im Kopf durchgehen oder sich selbst abfragen.","Ergänzt echtes Üben, ersetzt es aber nicht."],"Abends"],
+
+ ["W1","Die Gegenwart wahrnehmen, statt abzuschweifen",685,["Mehrmals am Tag bewusst ankommen: Was sehe, höre, spüre ich gerade?","Abschweifende Gedanken machen messbar unzufriedener; zurückholen ist das Training."],"Tagsüber"],
+ ["W2","James Hollis und seine Anleitung für ein bestmögliches Leben",696,["Hollis ist Jung'scher Psychoanalytiker.","Kernfrage für Entscheidungen: Macht mich das größer oder kleiner?","Wiederkehrende Muster aus der eigenen Geschichte erkennen und Verantwortung übernehmen."],"Wöchentlich"],
+ ["W3","Innere Schmerzpunkte durch expressives Schreiben lösen",717,["An 4 Tagen hintereinander je 15–30 Min über ein belastendes Erlebnis schreiben, mit allen Gedanken und Gefühlen.","Nicht korrigieren, niemandem zeigen müssen; kurzfristig kann es aufwühlen (Methode nach James Pennebaker)."],"Bei Bedarf"],
+ ["W4","Einen Verlust neu betrachten, um Trauer zu bewältigen",724,["Trauer ist Lernen: Das Gehirn muss begreifen, dass jemand nicht mehr erreichbar ist.","Die Beziehung bleibt in neuer Form bestehen, z. B. in Erinnerungen und Werten.","Bei anhaltend schwerer Trauer professionelle Hilfe holen."],"Bei Bedarf"],
+];
+const byId = Object.fromEntries(R.map(r=>[r[0],r]));
+const label = id => { const p = id.match(/^[A-Z]+/)[0]; return {S:"Schlaf",B:"Sport",ST:"Stress",E:"Ernährung",L:"Licht",K:"Lernen",W:"Wachstum"}[p]+" "+id.replace(/^[A-Z]+/,""); };
+
+const PLAN = [
+ {when:"Morgens", sub:"Aufwachen bis ca. 2 Std. danach", c:"var(--dawn)", items:[
+  ["m1","Zur festen Zeit aufstehen","Auch am Wochenende höchstens ca. 1 Std. Abweichung.",["S4"]],
+  ["m2","Mini-Meditation, 3–10 Min","Noch vor dem Handy: ruhig sitzen, Atem beobachten, abschweifende Gedanken zurückholen.",["ST4","W1"]],
+  ["m3","Morgenlicht: raus ans Tageslicht, 5–30 Min","Ohne Sonnenbrille, nicht durchs Fenster. Sonnig 5–10, bewölkt 10–20, trüb bis 30 Min. Am besten als Spaziergang. Vor Sonnenaufgang (Herbst und Winter): gleich nach dem Aufstehen alle Lichter an oder Tageslichtlampe, dann raus, sobald die Sonne aufgegangen ist. Die Uhrzeit oben richtet sich nach dem Sonnenaufgang in Hamburg.",["S1","L1","ST5","B1"]],
+  ["m4","Großes Glas Wasser, gern mit einer Prise Salz","Danach über den Vormittag weiter trinken.",["E2"]],
+  ["m5","Kalt duschen, 1–3 Min","So kalt, dass es unangenehm, aber sicher ist. Weckt und hebt die Körpertemperatur. Nicht direkt nach Krafttraining.",["ST2","S6","ST5"]],
+  ["m6","Kaffee oder Tee erst 60–90 Min nach dem Aufstehen","",["S11"]],
+  ["m7","Tagesziel mental kontrastieren, 2 Min","Ziel und Gewinn vorstellen, dann das größte Hindernis, dann einen Wenn-dann-Plan festlegen.",["K2"]],
+  ["m8","Erste Mahlzeit mit viel Protein","Z. B. Eier, Skyr oder Magerquark mit Beeren und Nüssen.",["E3","E4","E5"]],
+ ]},
+ {when:"Mittags", sub:"Arbeit und Mittagessen", c:"var(--noon)", items:[
+  ["t1","Fokusblock bis 90 Min","Vorher 30–60 Sek auf einen Punkt schauen, Handy in einen anderen Raum, Bildschirm auf Augenhöhe. Fehler und Frust gehören dazu: Am Rand des Könnens lernt man am meisten.",["K1","K3"]],
+  ["t2","Minipausen beim Lernen und Arbeiten","Zwischendurch ca. 10 Sek einfach nichts tun.",["K5"]],
+  ["t3","Mittagessen nach Huberman-Teller","Protein zuerst, Gemüse und Hülsenfrüchte als Kohlenhydrate, Olivenöl, Avocado oder Nüsse, möglichst unverarbeitet.",["E1","E3","E4","E5"]],
+  ["t4","Fermentiertes essen, 2–4 kleine Portionen über den Tag","Naturjoghurt, Kefir, Sauerkraut aus dem Kühlregal, Kimchi.",["E6"]],
+  ["t5","Omega-3: fetter Fisch oder Präparat","Fisch (Lachs, Hering, Makrele, Sardinen) 2–3× pro Woche, an den anderen Tagen ggf. ein EPA-reiches Präparat.",["E7"]],
+  ["t6","Nach dem Essen 10–20 Min gehen","Senkt den Blutzucker. Langes Sitzen unterbrechen.",["B1"]],
+  ["t7","Bei Stress: 1–3 physiologische Seufzer","Zweimal durch die Nase einatmen, lang durch den Mund ausatmen. Abhaken, sobald du es heute genutzt hast.",["ST1"]],
+ ]},
+ {when:"Nachmittags", sub:"Erholen, bewegen, Licht", c:"var(--day)", items:[
+  ["n1","Koffein-Stopp","8–10 Std. vor dem Schlafen.",["S11"]],
+  ["n2","NSDR 10–20 Min oder Nickerchen bis 20 Min","Liegend eine NSDR- oder Yoga-Nidra-Aufnahme. Nickerchen nur, wenn der Nachtschlaf nicht leidet.",["S7","S8","ST3"]],
+  ["n3","Training laut Wochenrhythmus","Kraft, Ausdauer oder Intervalle, siehe Wochenrhythmus unten.",["B2","B3"]],
+  ["n4","Spätnachmittags 10–20 Min in die tiefe Sonne","Arme und Beine frei, Haut darf Licht bekommen, aber kein Sonnenbrand.",["S2","L2","L4"]],
+  ["n5","Schrittziel erreicht (7.000–10.000+)","",["B1"]],
+ ]},
+ {when:"Abends", sub:"Ab ca. 3 Std. vor dem Schlafen", c:"var(--dusk)", items:[
+  ["a1","Kein Alkohol und kein Cannabis","Alkohol in den letzten 8 Std. vor dem Schlafen ganz weglassen.",["S12","S13"]],
+  ["a2","Licht dimmen, nur warmes oder rötliches Licht","Tiefe Lampen statt Deckenlicht; Rotlicht ist abends die schlaffreundlichste Beleuchtung.",["S3","L3","L5"]],
+  ["a3","10 Min Beweglichkeit","Dehnungen 30–60 Sek halten, sanft. 2–4× pro Woche reicht, täglich schadet nicht.",["B4"]],
+  ["a4","Gelerntes im Kopf wiederholen, 2–5 Min","Ablauf durchgehen oder dich selbst abfragen.",["K6"]],
+  ["a5","2 Min Rückblick nach James Hollis","Frage: Hat mich heute etwas größer oder kleiner gemacht? Was davon will ich ändern?",["W2"]],
+  ["a7","Warm duschen oder baden","Danach kühlt der Körper ab und du wirst müde.",["S5"]],
+  ["a6","Spätestens 1 Std. vor dem Bett alle Bildschirme weg","Lesen, Gespräch, Dehnen.",["S14"]],
+  ["a8","Schlafzimmer kühl (16–19 °C), Thermostat für morgens wärmer","",["S5","S6"]],
+  ["a9","Optional: Schlaf-Supplements 30–60 Min vorher","Nur nach ärztlicher Rücksprache: Magnesium, Apigenin oder L-Theanin.",["S9"]],
+ ]},
+ {when:"Nachts", sub:"Schlaf", c:"var(--night)", items:[
+  ["z1","Ins Bett, sobald die Müdigkeit kommt, 7–9 Std. Schlaf","Nach Lerntagen besonders auf eine volle Nacht achten.",["S4","K4"]],
+  ["z2","Dunkel und kühl durchschlafen","Beim Aufwachen kein helles Licht und kein Handy, höchstens ein rotes Nachtlicht. Wer nicht wieder einschläft: NSDR im Bett.",["S3","L3","S8"]],
+ ]},
+];
+const EXTRA = [
+ {when:"Wochenrhythmus", sub:"Damit sich Training und Kälte richtig verteilen", rows:[
+  ["Mo","Krafttraining","B2"],["Di","Ausdauer locker 30–45 Min (Zone 2)","B3"],["Mi","Krafttraining","B2"],
+  ["Do","Intervalle, z. B. 4 × 4 Min hart","B3"],["Fr","Krafttraining","B2"],["Sa","Ausdauer lang und locker","B3"],["So","Ruhetag, Spaziergang, Beweglichkeit","B4"],
+  ["Woche","Kälte gesamt ca. 11 Min, Fisch 2–3×","ST2"]]},
+ {when:"Nur bei Bedarf", sub:"Nicht jeden Tag nötig", items:[
+  ["Belastendes verarbeiten: expressives Schreiben","An 4 Tagen hintereinander je 15–30 Min über das Erlebnis schreiben.",["W3"]],
+  ["Trauer: den Verlust neu betrachten","Die Beziehung bleibt in neuer Form, z. B. in Erinnerungen. Bei schwerer Trauer Hilfe holen.",["W4"]],
+  ["Viel Stress über längere Zeit: Supplements erwägen","Z. B. Ashwagandha (mit Pausen) oder L-Theanin, nur nach ärztlicher Rücksprache.",["ST6"]],
+  ["Hartnäckige Schlafprobleme: Schlafmittel nur ärztlich","Erste Wahl ist eine Verhaltenstherapie für Schlaf (KVT-I).",["S10"]],
+  ["Reise: Jetlag-Plan","Vorher Schlafzeiten verschieben, am Ziel sofort nach Ortszeit leben, morgens Licht.",["S15"]],
+ ]},
+];
+// Uhrzeit je Punkt: w = Minuten nach dem Aufstehen, b = Minuten vor/nach Bettzeit, txt = fester Text
+const TIME = {
+ m1:{w:0}, m2:{w:5}, m3:{w:15}, m4:{w:20}, m5:{w:50}, m6:{w:75}, m7:{w:80}, m8:{w:90},
+ t1:{w:150}, t2:{txt:"in jedem Block"}, t3:{w:330}, t4:{txt:"über den Tag"}, t5:{w:330}, t6:{w:360}, t7:{txt:"bei Bedarf"},
+ n1:{b:-540,txt:"spätestens"}, n2:{w:450}, n3:{txt:"nach Plan"}, n4:{txt:"vor Sonnenuntergang"}, n5:{txt:"bis abends"},
+ a1:{b:-480,txt:"ab"}, a2:{b:-180,txt:"ab"}, a3:{b:-150}, a4:{b:-120}, a5:{b:-105}, a6:{b:-60}, a7:{b:-75}, a8:{b:-60}, a9:{b:-45},
+ z1:{b:0}, z2:{txt:"nachts"},
+};
+const toMin = v => { const [h,m] = (v||"0:0").split(":").map(Number); return h*60+m; };
+const fmt = m => { m = ((m%1440)+1440)%1440; return String(Math.floor(m/60)).padStart(2,"0")+":"+String(m%60).padStart(2,"0"); };
+let times = {wake:"07:00", bed:"22:30"};
+// Sonnenauf- und -untergang in Hamburg (NOAA-Näherung), Minuten nach Mitternacht Ortszeit
+function sunTimes(ds){
+  const d = asDate(ds), r = Math.PI/180;
+  const n = Math.round((d - new Date(d.getFullYear(),0,0))/864e5);
+  const g = 2*Math.PI/365*(n-0.5);
+  const eqt = 229.18*(0.000075+0.001868*Math.cos(g)-0.032077*Math.sin(g)-0.014615*Math.cos(2*g)-0.040849*Math.sin(2*g));
+  const decl = 0.006918-0.399912*Math.cos(g)+0.070257*Math.sin(g)-0.006758*Math.cos(2*g)+0.000907*Math.sin(2*g)-0.002697*Math.cos(3*g)+0.00148*Math.sin(3*g);
+  const lat = 53.55*r, lon = 9.99;
+  const ha = Math.acos(Math.cos(90.833*r)/(Math.cos(lat)*Math.cos(decl)) - Math.tan(lat)*Math.tan(decl))/r;
+  const off = -d.getTimezoneOffset();
+  return {rise: Math.round(720-4*(lon+ha)-eqt+off), set: Math.round(720-4*(lon-ha)-eqt+off)};
+}
+const darkMorning = () => toMin(times.wake)+15 < sunTimes(cur).rise;
+function renderSun(){
+  const s = sunTimes(cur);
+  document.getElementById("sun").textContent = "Hamburg an diesem Tag: Sonnenaufgang "+fmt(s.rise)+", Sonnenuntergang "+fmt(s.set)+"."
+    + (darkMorning() ? " Du stehst im Dunkeln auf: Erst alle Lichter an oder die Tageslichtlampe, raus geht es ab Sonnenaufgang, z. B. auf dem Weg zur Arbeit oder in der ersten Pause." : "");
+}
+function timeOf(id){
+  if (id==="m3") { const s = sunTimes(cur), w = toMin(times.wake)+15; return darkMorning() ? "Lampe "+fmt(w)+" · raus ab "+fmt(s.rise) : fmt(w); }
+  if (id==="n4") { const s = sunTimes(cur); return "ca. "+fmt(s.set-90)+" · Sonnenuntergang "+fmt(s.set); }
+  const t = TIME[id]; if(!t) return "";
+  let clock = "";
+  if (t.w!==undefined) clock = fmt(toMin(times.wake)+t.w);
+  if (t.b!==undefined) clock = fmt(toMin(times.bed)+t.b);
+  if (clock && t.txt && t.txt.length<12) return t.txt+" "+clock;
+  return clock || t.txt;
+}
+// Vertiefung je Checklisten-Punkt: warum, wie genau, typische Fehler, Hinweis für Frauen, Quellen
+const HL = "https://www.hubermanlab.com/";
+const SRC = {
+  sleepTk: ["Sleep Toolkit (Podcast)", HL+"episode/sleep-toolkit-tools-for-optimizing-sleep-and-sleep-wake-timing"],
+  sleepNl: ["Toolkit for Sleep (Newsletter, Text)", HL+"newsletter/toolkit-for-sleep"],
+  masterSleep: ["Master Your Sleep & Be More Alert", HL+"episode/master-your-sleep-and-be-more-alert-when-awake"],
+  light: ["Using Light to Optimize Health", HL+"episode/using-light-sunlight-blue-light-and-red-light-to-optimize-health"],
+  hattar: ["Dr. Samer Hattar: Timing Light, Food & Exercise", HL+"episode/dr-samer-hattar-timing-light-food-exercise-for-better-sleep-energy-mood"],
+  caffeine: ["Using Caffeine to Optimize Performance", HL+"episode/using-caffeine-to-optimize-mental-and-physical-performance"],
+  alcohol: ["What Alcohol Does to Your Body & Brain", HL+"episode/what-alcohol-does-to-your-body-brain-health"],
+  cannabis: ["Dr. Matthew Hill: Cannabis & Health", HL+"episode/dr-matthew-hill-how-cannabis-impacts-health-the-potential-risks"],
+  nsdr: ["NSDR-Seite mit Anleitung", HL+"nsdr"],
+  stress: ["Tools for Managing Stress & Anxiety", HL+"episode/tools-for-managing-stress-and-anxiety"],
+  breath: ["How to Breathe Correctly", HL+"episode/how-to-breathe-correctly-for-optimal-health-mood-learning-and-performance"],
+  cortisol: ["How to Control Your Cortisol & Overcome Burnout", HL+"episode/how-to-control-your-cortisol-overcome-burnout"],
+  meditation: ["How Meditation Works", HL+"episode/how-meditation-works-and-science-based-effective-meditations"],
+  coldEp: ["Using Deliberate Cold Exposure", HL+"episode/using-deliberate-cold-exposure-for-health-and-performance"],
+  coldNl: ["Cold Exposure (Newsletter, Text)", HL+"newsletter/the-science-and-use-of-cold-exposure-for-health-and-performance"],
+  soberg: ["Dr. Susanna Søberg: Kälte & Wärme", HL+"episode/dr-susanna-soberg-how-to-use-cold-and-heat-exposure-to-improve-your-health"],
+  water: ["Optimize Water Quality & Intake (Newsletter)", HL+"newsletter/optimize-your-water-quality-and-intake-for-health"],
+  norton: ["Layne Norton: Eating for Health & Lean Muscle", HL+"episode/essentials-the-science-of-eating-for-health-fat-loss-and-lean-muscle-layne-norton"],
+  gut: ["Justin Sonnenburg: Gut Health", HL+"episode/dr-justin-sonnenburg-how-to-build-maintain-and-repair-gut-health"],
+  sugar: ["Controlling Sugar Cravings & Metabolism", HL+"episode/controlling-sugar-cravings-and-metabolism-with-science-based-tools"],
+  supps: ["A Rational Approach to Supplementation", HL+"episode/developing-a-rational-approach-to-supplementation-for-health-and-performance"],
+  fitTk: ["Fitness Toolkit", HL+"episode/fitness-toolkit-protocol-and-tools-to-optimize-physical-health"],
+  fitNl: ["Foundational Fitness Protocol (Newsletter, Text)", HL+"newsletter/foundational-fitness-protocol"],
+  galpinStr: ["Andy Galpin: Strength & Muscle", HL+"episode/dr-andy-galpin-optimal-protocols-to-build-strength-and-grow-muscles"],
+  galpinEnd: ["Andy Galpin: Endurance & Fat Loss", HL+"episode/dr-andy-galpin-how-to-build-physical-endurance-and-lose-fat"],
+  sims: ["Dr. Stacy Sims: Training & Ernährung für Frauen", HL+"episode/dr-stacy-sims-female-specific-exercise-nutrition-for-health-performance-longevity"],
+  focus: ["Focus Toolkit", HL+"episode/focus-toolkit-tools-to-improve-your-focus-and-concentration"],
+  study: ["Optimal Protocols for Studying & Learning", HL+"episode/optimal-protocols-for-studying-learning"],
+  fail: ["Using Failures to Learn Faster", HL+"episode/using-failures-movement-and-balance-to-learn-faster"],
+  goals: ["Goals Toolkit", HL+"episode/goals-toolkit-how-to-set-achieve-your-goals"],
+  goalsNl: ["Toolkit for Setting & Achieving Goals (Newsletter)", HL+"newsletter/toolkit-for-setting-achieving-goals"],
+  hollis: ["Dr. James Hollis: Find Your True Purpose", HL+"episode/dr-james-hollis-how-to-find-your-true-purpose-create-your-best-life"],
+  grief: ["Dr. Mary-Frances O'Connor: Healing From Grief", HL+"episode/healing-from-grief-loss-dr-mary-frances-oconnor"],
+  griefSci: ["The Science & Process of Healing from Grief", HL+"episode/the-science-and-process-of-healing-from-grief"],
+  journal: ["Journaling-Protokoll (Expressives Schreiben)", "https://ai.hubermanlab.com/d/5dbf5b84-b7e2-11ee-bf16-0b34b06db72f"],
+};
+const yt = q => ["Auf YouTube suchen: "+q, "https://www.youtube.com/results?search_query="+encodeURIComponent("Huberman "+q)];
+
+const DEEP = {
+ m1:{why:"Die innere Uhr lernt durch Wiederholung. Feste Aufstehzeiten machen das Einschlafen abends leichter, weil Müdigkeit und Wachheit dann zuverlässig zur gleichen Zeit kommen.",
+  how:["Lieber eine feste Aufstehzeit wählen als eine feste Bettzeit: Die Bettzeit pendelt sich danach ein.","Wenn du nachts schlecht geschlafen hast, trotzdem zur gewohnten Zeit aufstehen und den Schlaf eher mit NSDR oder einem kurzen Nap am frühen Nachmittag nachholen.","Am Wochenende maximal ca. 1 Std. später, sonst entsteht ein kleiner Jetlag am Montag."],
+  err:["Am Wochenende zwei bis drei Stunden ausschlafen.","Mehrfach Schlummertaste drücken."],
+  src:["sleepTk","masterSleep"], yt:"Schlaf Aufstehzeit"},
+ m2:{why:"Kurze tägliche Meditation verbessert in Studien Stimmung, Aufmerksamkeit und Gedächtnis schon nach wenigen Wochen. Morgens fällt sie leicht, weil der Tag noch ruhig ist.",
+  how:["Aufrecht sitzen, Augen zu, Aufmerksamkeit auf den Atem oder auf einen Punkt hinter der Stirn.","Jedes Mal, wenn Gedanken wandern, freundlich zurückkommen. Genau dieses Zurückholen ist das Training.","Mit 3 Min anfangen, über Wochen auf 10–13 Min steigern."],
+  err:["Erwarten, dass der Kopf leer wird.","Vorher schon E-Mails oder Nachrichten lesen."],
+  src:["meditation"], yt:"meditation"},
+ m3:{why:"Helles Licht in den ersten Stunden setzt den Startpunkt der inneren Uhr. Es löst den natürlichen Cortisol-Anstieg am Morgen aus, macht wach und sorgt dafür, dass ca. 14–16 Std. später Melatonin kommt und du müde wirst.",
+  how:["Draußen, ohne Sonnenbrille (normale Brille oder Kontaktlinsen sind okay). Nicht direkt in die Sonne schauen.","Faustregel: sonnig 5–10 Min, bewölkt 10–20 Min, sehr trüb bis 30 Min.","Durch Fenster oder Autoscheibe kommt viel weniger Licht an, also wirklich raus.","Mit Spaziergang kombinieren: Vorwärtsbewegung durch die Umgebung beruhigt zusätzlich.","Wenn es noch dunkel ist: drinnen alles hell machen und raus, sobald es hell wird. Im Winter hilft eine Tageslichtlampe (ca. 10.000 Lux)."],
+  err:["Nur aufs Handydisplay schauen.","Sonnenbrille aufsetzen.","Bei Wolken auslassen, gerade dann ist es wichtig."],
+  src:["light","hattar","sleepNl"], yt:"morning sunlight"},
+ m4:{why:"Schon leichter Flüssigkeitsmangel verschlechtert Konzentration und Stimmung. Nach der Nacht ist der Körper leicht dehydriert.",
+  how:["Morgens ca. 0,5 l Wasser, gern mit einer Prise Salz oder Elektrolyten.","Als Orientierung in den ersten 10 Std. nach dem Aufstehen etwa 250 ml pro Stunde.","Beim Sport zusätzlich trinken, bei starkem Schwitzen mit Elektrolyten.","Die letzten 1–2 Std. vor dem Schlafen weniger trinken."],
+  err:["Den ganzen Vormittag nur Kaffee.","Abends die Tagesmenge nachholen und nachts raus müssen."],
+  src:["water"], yt:"hydration"},
+ m5:{why:"Kälte setzt Adrenalin und Dopamin frei; der Dopaminspiegel bleibt danach stundenlang erhöht. Das macht wach, hebt die Stimmung und trainiert, in Stress ruhig zu bleiben.",
+  how:["Kalte Dusche oder Kaltwasserbad, so kalt, dass du raus willst, aber sicher bleibst.","Gesamt ca. 11 Min pro Woche, verteilt auf 2–4 Einheiten von 1–5 Min.","Morgens ist der beste Zeitpunkt; abends kann es wach machen.","Am Ende nicht sofort warm duschen, sondern den Körper selbst aufwärmen lassen."],
+  err:["Direkt nach Krafttraining (bremst den Muskelaufbau, Abstand mind. 4–6 Std.).","Mit Herzproblemen ohne ärztliche Rücksprache.","Allein in offenes kaltes Wasser gehen."],
+  women:"Frauen frieren oft schneller. Laut Dr. Susanna Søberg reichen kürzere und etwas weniger kalte Einheiten, um die gleichen Effekte zu bekommen.",
+  src:["coldNl","coldEp","soberg"], yt:"cold exposure"},
+ m6:{why:"Beim Aufwachen ist noch etwas Adenosin (der Müdigkeitsstoff) im System. Wer etwas wartet, lässt den Körper das selbst abbauen; bei vielen fällt dadurch das Tief am Nachmittag schwächer aus.",
+  how:["Erste Tasse 60–90 Min nach dem Aufstehen, also nach Licht und Bewegung.","Wenn du direkt morgens trainierst, darf der Kaffee auch früher kommen.","Menge: Huberman nennt ca. 1–3 mg pro kg Körpergewicht als sinnvollen Bereich."],
+  err:["Koffein als Ersatz für Schlaf nutzen.","Nachmittags nachlegen."],
+  women:"Die Pille und andere hormonelle Verhütung verlangsamen den Koffeinabbau deutlich. Dann den Koffein-Stopp eher noch früher legen.",
+  src:["caffeine","sleepTk"], yt:"caffeine timing"},
+ m7:{why:"Wer sich nur das Ziel ausmalt, fühlt sich schon belohnt und tut weniger. Wer zusätzlich die Hindernisse und die Folgen des Nichtstuns sieht, bekommt den nötigen Druck, ins Handeln zu kommen.",
+  how:["W – Wunsch: Was will ich heute erreichen?","O – Ergebnis: Wie fühlt es sich an, wenn es geschafft ist?","O – Hindernis: Was in mir hält mich am ehesten ab?","P – Plan: Wenn Hindernis X auftaucht, dann mache ich Y.","Huberman ergänzt: auch kurz vorstellen, was passiert, wenn du es nicht tust."],
+  err:["Nur positiv visualisieren.","Zu viele Ziele gleichzeitig."],
+  src:["goals","goalsNl"], yt:"goals toolkit"},
+ m8:{why:"Protein sättigt am stärksten, stabilisiert den Blutzucker und ist die Grundlage für Muskelerhalt, besonders mit zunehmendem Alter.",
+  how:["30–40 g Protein in der ersten Mahlzeit sind ein guter Richtwert.","Beispiele: 3 Eier + Skyr, Magerquark mit Beeren und Nüssen, Räucherlachs auf Vollkornbrot.","Du musst nicht früh essen: Wer morgens keinen Hunger hat, kann die erste Mahlzeit später legen."],
+  err:["Süßes Frühstück aus Weißmehl und Zucker.","Den ganzen Tag zu wenig Protein, aber abends viel."],
+  women:"Laut Dr. Stacy Sims sollten Frauen nicht nüchtern intensiv trainieren und bald nach dem Training Protein essen.",
+  src:["norton","sims"], yt:"protein breakfast"},
+ t1:{why:"Fokus beginnt bei den Augen: Wenn der Blick eng auf einen Punkt gerichtet ist, schaltet das Gehirn auf Konzentration. Die Leistungsfähigkeit läuft in Wellen von ca. 90 Min.",
+  how:["Vor dem Start 30–60 Sek auf einen Punkt schauen (z. B. ein Punkt auf dem Bildschirm).","Bildschirm auf Augenhöhe oder leicht darüber, das hält wacher als nach unten zu schauen.","Handy in einen anderen Raum, Benachrichtigungen aus.","Die ersten 5–10 Min fühlen sich zäh an, das ist normal. Danach kommt der Fokus.","Nach 90 Min eine echte Pause: aufstehen, in die Ferne schauen, kein Handy.","Fehler und Frust beim Lernen sind gut: Sie signalisieren dem Gehirn, dass es umbauen muss."],
+  err:["Mehrere Dinge gleichzeitig.","In der Pause aufs Handy schauen."],
+  src:["focus","fail"], yt:"focus toolkit"},
+ t2:{why:"Studien zeigen: In kurzen Pausen von etwa 10 Sek wiederholt das Gehirn das gerade Geübte, und zwar ca. 20-mal schneller. Das verbessert das Lernen deutlich.",
+  how:["Beim Üben einer Fähigkeit oder beim Lernen ab und zu 10 Sek Pause einlegen, ohne nachzudenken.","Zufällig verteilen, keine feste Taktung nötig.","Funktioniert besonders gut bei motorischem Lernen (Instrument, Sport) und beim Auswendiglernen."],
+  err:["Die Pause mit dem Handy füllen."],
+  src:["study","fail"], yt:"gap effect learning"},
+ t3:{why:"Die Zusammensetzung des Tellers steuert Sättigung, Blutzucker und Energie am Nachmittag. Unverarbeitete Lebensmittel sättigen bei weniger Kalorien.",
+  how:["Etwa ein Viertel Protein (Fisch, Fleisch, Eier, Hülsenfrüchte, Tofu).","Die Hälfte Gemüse, dazu Hülsenfrüchte oder Vollkorn.","Ein guter Schuss Olivenöl, Avocado oder Nüsse.","Protein und Gemüse zuerst essen, Kohlenhydrate zum Schluss: Das dämpft den Blutzucker-Anstieg.","Faustregel: Mind. 90 % sind Zutaten, die man als solche erkennt."],
+  err:["Große Mengen schneller Kohlenhydrate mittags, dann Leistungstief.","Stark verarbeitete Snacks zwischendurch."],
+  src:["norton","sugar"], yt:"nutrition"},
+ t4:{why:"In einer Stanford-Studie (Sonnenburg) verbesserten 4–6 Portionen fermentierte Lebensmittel täglich die Vielfalt der Darmflora und senkten Entzündungsmarker.",
+  how:["Kleine Portionen über den Tag: ein Glas Kefir, ein paar Gabeln Sauerkraut, ein Löffel Kimchi, Naturjoghurt.","Sauerkraut aus dem Kühlregal (nicht pasteurisiert) kaufen.","Ohne Zuckerzusatz."],
+  err:["Gezuckerte Fruchtjoghurts oder Kombucha mit viel Zucker."],
+  src:["gut"], yt:"fermented foods Sonnenburg"},
+ t5:{why:"Omega-3-Fettsäuren (vor allem EPA) unterstützen Stimmung, Herz und Entzündungsregulation.",
+  how:["2–3× pro Woche fetter Seefisch: Lachs, Hering, Makrele, Sardinen.","Alternativ ein Fischöl- oder Algenöl-Präparat; Huberman nennt mind. 1 g EPA pro Tag.","Mit einer Mahlzeit einnehmen."],
+  err:["Billige, ranzige Präparate (riechen stark fischig)."],
+  care:"Bei blutverdünnenden Medikamenten vorher ärztlich abklären.",
+  src:["supps","norton"], yt:"omega 3"},
+ t6:{why:"Muskeln nehmen beim Gehen Zucker aus dem Blut auf. Schon 10–20 Min nach dem Essen senken den Blutzucker-Anstieg deutlich.",
+  how:["Direkt nach der Mahlzeit locker gehen.","Wenn das nicht geht: im Sitzen Wadenheben (Fersen heben und senken).","Über den Tag lange Sitzphasen alle 30–60 Min unterbrechen."],
+  err:["Nach dem Essen sofort hinlegen."],
+  src:["sugar","fitTk"], yt:"walking after meals"},
+ t7:{why:"Der doppelte Einatemzug öffnet die kollabierten Lungenbläschen wieder, die lange Ausatmung entfernt viel CO₂. Das ist der schnellste bekannte Weg, das Stressniveau in Echtzeit zu senken.",
+  how:["Tief durch die Nase einatmen, dann oben noch einen kurzen Zug durch die Nase nachlegen.","Lang und langsam durch den Mund ausatmen, bis die Lunge leer ist.","1–3 Mal wiederholen.","Als tägliche Übung: 5 Min am Stück (zyklisches Seufzen) senkt in einer Stanford-Studie die Grundanspannung."],
+  err:["Hektisch atmen.","Erst üben, wenn es schon eskaliert ist."],
+  src:["stress","breath"], yt:"physiological sigh"},
+ n1:{why:"Koffein hat eine Halbwertszeit von ca. 5–6 Std. Nach 10 Std. ist noch ein Viertel aktiv und stört den Tiefschlaf, auch wenn du trotzdem einschlafen kannst.",
+  how:["Koffein-Stopp ca. 8–10 Std. vor der Bettzeit (siehe Uhrzeit oben).","Danach koffeinfreie Alternativen: Kräutertee, entkoffeinierter Kaffee.","Auch Cola, Mate, grüner und schwarzer Tee, Energydrinks und Schokolade enthalten Koffein."],
+  err:["Der Espresso nach dem Abendessen."],
+  women:"Mit hormoneller Verhütung baut der Körper Koffein deutlich langsamer ab. Dann lieber 1–2 Std. früher stoppen.",
+  src:["caffeine","sleepNl"], yt:"caffeine sleep"},
+ n2:{why:"NSDR (Non-Sleep Deep Rest) versetzt das Nervensystem in einen tiefen Ruhezustand, ohne zu schlafen. Es füllt Energie auf, senkt Stress und kann Schlafmangel teilweise ausgleichen.",
+  how:["Hinlegen, Augen zu, eine 10–20-minütige NSDR- oder Yoga-Nidra-Aufnahme anhören.","Körper-Scan und lange Ausatmungen, dabei wach bleiben.","Alternative: Nickerchen von max. 20 Min oder einem vollen Zyklus von 90 Min.","Nicht später als ca. 8 Std. vor der Bettzeit schlafen.","Auch hilfreich direkt nach dem Lernen."],
+  err:["Nap zu lang und zu spät, dann klappt das Einschlafen nicht."],
+  src:["nsdr","sleepTk"], yt:"NSDR"},
+ n3:{why:"Kraft erhält Muskeln, Knochen und Stoffwechsel; Ausdauer stärkt Herz und Gefäße; Intervalle verbessern die maximale Sauerstoffaufnahme, einen der stärksten Langlebigkeits-Marker.",
+  how:["Kraft 3× pro Woche, 45–60 Min, große Grundübungen (Kniebeuge, Kreuzheben, Drücken, Ziehen).","Pro Satz nah an die Grenze gehen, Gewicht oder Wiederholungen langsam steigern.","Ausdauer 2× locker 30–45 Min (Zone 2: du kannst noch sprechen).","1× pro Woche Intervalle, z. B. 4 × 4 Min hart mit 3–4 Min Pause.","Hubermans eigener Wochenplan steht im Newsletter „Foundational Fitness Protocol“."],
+  err:["Immer nur mittelhart trainieren.","Kein Fortschritt über Wochen."],
+  women:"Laut Dr. Stacy Sims profitieren Frauen besonders von schwerem Krafttraining und kurzen, sehr intensiven Sprints, vor allem ab den Wechseljahren. Intensive Einheiten lassen sich an den Zyklus anpassen.",
+  src:["fitNl","fitTk","galpinStr","galpinEnd","sims"], yt:"fitness toolkit"},
+ n4:{why:"Licht am späten Nachmittag sagt der inneren Uhr, dass der Tag zu Ende geht. Es macht die Augen abends weniger empfindlich für Lampen und Bildschirme. Sonne auf der Haut verbessert zudem Stimmung und Wohlbefinden.",
+  how:["10–20 Min draußen, wenn die Sonne tief steht (im Herbst ca. 1–2 Std. vor Sonnenuntergang).","Arme und Beine frei, ohne Sonnenbrand.","Sehr gut mit dem Training oder einem Spaziergang kombinierbar."],
+  err:["Mittags ohne Sonnenschutz in der prallen Sonne liegen."],
+  care:"Hauttyp und UV-Index beachten.",
+  src:["light","hattar"], yt:"evening sunlight"},
+ n5:{why:"Gehen ist die einfachste Bewegung mit großem Effekt auf Herz, Blutzucker und Stimmung. Viel Alltagsbewegung schützt vor den Folgen von langem Sitzen.",
+  how:["Orientierung 7.000–10.000 Schritte, mehr ist besser.","Telefonate im Gehen, Treppe statt Aufzug, Wege zu Fuß."],
+  err:["Training am Abend als Ausrede für den Rest des Tages im Sitzen."],
+  src:["fitTk"], yt:"walking"},
+ a1:{why:"Alkohol macht schläfrig, zerstört aber Tiefschlaf und REM-Schlaf. Cannabis unterdrückt den REM-Schlaf, nach dem Absetzen folgen oft unruhige Nächte.",
+  how:["Alkohol nicht in den letzten 8 Std. vor dem Schlafen, insgesamt so selten wie möglich.","Huberman sieht bereits 1–2 Getränke pro Woche als Grenze, ab der Nachteile messbar werden.","Kein Cannabis als Einschlafhilfe."],
+  err:["Das Glas Wein zum Runterkommen."],
+  src:["alcohol","cannabis"], yt:"alcohol"},
+ a2:{why:"Die Augen sind abends besonders lichtempfindlich. Helles Licht von oben unterdrückt das Melatonin und verschiebt die innere Uhr nach hinten.",
+  how:["Ab ca. 3 Std. vor dem Schlafen nur Lampen auf Tisch- oder Bodenhöhe.","Warmes Licht (gelb, orange) oder rotes Licht.","Nachts im Bad nur gedimmtes oder rotes Licht.","Rotlicht schadet dem Schlaf kaum. Morgens untersuchen Studien kurzes tiefrotes Licht für die Netzhaut über 40 Jahren."],
+  err:["Deckenfluter mit kaltweißem Licht bis kurz vor dem Bett.","Nachts helles Licht im Bad."],
+  src:["light","sleepTk"], yt:"light sleep"},
+ a3:{why:"Regelmäßiges, sanftes Dehnen verbessert die Beweglichkeit messbar und senkt die Anspannung. Abends hilft es beim Runterfahren.",
+  how:["Ca. 10 Min, z. B. Hüfte, hintere Beinmuskulatur, Brust, Schultern.","Jede Dehnung 30–60 Sek halten, mit niedriger Intensität (eher 30 % als 100 %).","2–4× pro Woche reicht, täglich ist auch okay."],
+  err:["In den Schmerz hineindehnen.","Ruckartig wippen."],
+  src:["fitTk"], yt:"flexibility stretching"},
+ a4:{why:"Das Abrufen von Gelerntem festigt es stärker als erneutes Lesen. Was abends wiederholt wird, verarbeitet das Gehirn im Schlaf.",
+  how:["Ohne Unterlagen durchgehen: Was habe ich heute gelernt?","Bei Bewegungsabläufen den Ablauf vor dem inneren Auge durchspielen.","Sich selbst abfragen, statt nur nachzulesen."],
+  err:["Nur passiv nochmal lesen."],
+  src:["study"], yt:"studying learning"},
+ a5:{why:"Der Psychoanalytiker James Hollis fragt: Macht mich das, was ich tue, größer oder kleiner? Die Frage hilft, alte Muster zu erkennen und bewusstere Entscheidungen zu treffen.",
+  how:["2 Min aufschreiben: Wann habe ich mich heute groß, wann klein gefühlt?","Welches Muster aus meiner Geschichte hat heute gesteuert?","Was will ich morgen anders machen?"],
+  err:["Selbstkritik statt Neugier."],
+  src:["hollis"], yt:"James Hollis"},
+ a7:{why:"Ein warmes Bad oder eine heiße Dusche erweitert die Gefäße in der Haut. Danach gibt der Körper schnell Wärme ab, und genau dieses Absinken der Körpertemperatur macht müde.",
+  how:["Ca. 1–2 Std. vor dem Schlafen warm duschen, baden oder in die Sauna.","Danach in einen kühleren Raum gehen."],
+  err:["Kalt duschen direkt vor dem Bett, das macht wach."],
+  src:["sleepTk"], yt:"temperature sleep"},
+ a6:{why:"Bildschirme liefern helles Licht direkt ins Auge und Inhalte, die aufregen. Beides verzögert das Einschlafen.",
+  how:["Handy zum Laden außerhalb des Schlafzimmers.","Stattdessen lesen, Gespräch, Dehnen oder NSDR.","Wenn ein Bildschirm sein muss: maximal gedimmt und Nachtmodus."],
+  err:["Im Bett durch soziale Medien scrollen."],
+  src:["sleepTk"], yt:"screens before bed"},
+ a8:{why:"Zum Einschlafen muss die Körpertemperatur um ca. 1–3 °C sinken. Gegen Morgen steigt sie wieder, und dieser Anstieg weckt uns auf natürliche Weise.",
+  how:["Schlafzimmer ca. 16–19 °C.","Leichte Decke, Füße dürfen rausschauen.","Heizung oder Thermostat so einstellen, dass es 1–2 Std. vor dem Wecker wärmer wird."],
+  err:["Zu warmes Schlafzimmer oder zu dicke Decke."],
+  women:"In der zweiten Zyklushälfte und in den Wechseljahren liegt die Körpertemperatur höher und der Schlaf ist oft unruhiger. Dann das Schlafzimmer noch kühler halten.",
+  src:["sleepTk","sleepNl"], yt:"temperature sleep"},
+ a9:{why:"Supplements können beim Einschlafen helfen, ersetzen aber nicht die Grundlagen Licht, Temperatur und feste Zeiten.",
+  how:["Huberman nennt: Magnesium-Threonat oder -Bisglycinat, Apigenin (ca. 50 mg), L-Theanin (100–400 mg), 30–60 Min vor dem Schlafen.","Einzeln ausprobieren, nicht alles gleichzeitig.","L-Theanin weglassen, wenn du sehr lebhaft träumst oder schlafwandelst.","Melatonin sieht er für den Dauergebrauch kritisch."],
+  err:["Supplements statt Licht und Routine."],
+  care:"Vorher ärztlich abklären, besonders mit Medikamenten.",
+  women:"In Schwangerschaft und Stillzeit keine dieser Mittel ohne ärztliche Rücksprache.",
+  src:["sleepNl","sleepTk","supps"], yt:"sleep supplements"},
+ z1:{why:"Im Schlaf festigt das Gehirn das Gelernte, räumt Abfallstoffe auf und reguliert Stimmung, Appetit und Hormone.",
+  how:["Ins Bett gehen, wenn die natürliche Müdigkeit kommt, nicht dagegen arbeiten.","Ziel 7–9 Std.","Nach Tagen mit viel Lernen besonders auf eine volle Nacht achten."],
+  err:["Die erste Müdigkeitswelle verpassen und dann lange wach liegen."],
+  src:["masterSleep","study"], yt:"sleep"},
+ z2:{why:"Schon kurzes helles Licht in der Nacht unterdrückt Melatonin und kann die innere Uhr verschieben.",
+  how:["Schlafzimmer abdunkeln, notfalls Schlafmaske.","Für den Weg zur Toilette ein schwaches rotes Nachtlicht.","Wenn du nicht wieder einschläfst: im Bett NSDR statt Handy."],
+  err:["Nachts aufs Handy schauen, wie spät es ist."],
+  src:["sleepTk","nsdr"], yt:"waking up at night"},
+};
+const DEEP_EXTRA = {
+ "Belastendes verarbeiten: expressives Schreiben":["journal"],
+ "Trauer: den Verlust neu betrachten":["grief","griefSci"],
+ "Viel Stress über längere Zeit: Supplements erwägen":["stress","cortisol"],
+ "Hartnäckige Schlafprobleme: Schlafmittel nur ärztlich":["sleepTk"],
+ "Reise: Jetlag-Plan":["masterSleep"],
+};
+
+const TOPIC = {S:"Schlaf",B:"Bewegung",ST:"Stress",E:"Ernährung",L:"Licht",K:"Lernen",W:"Wachstum"};
+const topicsOf = refs => [...new Set(refs.map(r=>r.match(/^[A-Z]+/)[0]))];
+const chips = refs => topicsOf(refs).map(k=>`<span class="chip t-${k}">${TOPIC[k]}</span>`).join("");
+// Wo wird jede Routine abgehakt?
+const WHERE = {};
+PLAN.forEach(b=>b.items.forEach(([id,t,,refs])=>refs.forEach(r=>(WHERE[r]=WHERE[r]||[]).push(b.when+": "+t))));
+EXTRA[0].rows.forEach(([d,t,r])=>(WHERE[r]=WHERE[r]||[]).push("Wochenrhythmus"));
+EXTRA[1].items.forEach(([t,,refs])=>refs.forEach(r=>(WHERE[r]=WHERE[r]||[]).push("Bei Bedarf: "+t)));
+
+const esc = s => s.replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const pad = n => String(n).padStart(2,"0");
+const ymd = d => d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+const todayStr = () => ymd(new Date());
+const asDate = s => new Date(s+"T12:00:00");
+const addDays = (s,n) => { const d = asDate(s); d.setDate(d.getDate()+n); return ymd(d); };
+const DAILY = PLAN.flatMap(b=>b.items.map(i=>i[0]));
+const TOTAL = DAILY.length;
+const TITLE = Object.fromEntries(PLAN.flatMap(b=>b.items.map(i=>[i[0], i[1]])));
+let cur = todayStr();
+let lastToday = cur;
+let sb = null, user = null;
+let days = {};      // "YYYY-MM-DD" -> {done:{id:true}}
+let reports = {};   // "YYYY-MM-DD" -> {text}
+// Pro Konto getrennt, damit sich mehrere Nutzer im selben Browser nicht mischen
+const lkey = k => "huberman-" + k + "-" + (user ? user.id : "gast");
+const saveLocal = () => { if (!user) return; try { localStorage.setItem(lkey("days"), JSON.stringify(days)); } catch(e) {} };
+const doneOf = d => (days[d] && days[d].done) || {};
+const countOf = d => DAILY.filter(id => doneOf(d)[id]).length;
+
+function setStore(state){
+  const el = document.getElementById("store");
+  el.dataset.state = state;
+  el.textContent = state==="db" ? "Wird in deinem Konto gespeichert, auf allen Geräten."
+    : state==="saved" ? "Gespeichert."
+    : state==="error" ? "Speichern hat gerade nicht geklappt. Deine Häkchen bleiben in diesem Browser erhalten."
+    : "Speichert vorerst nur in diesem Browser.";
+}
+
+const DOC = "huberman/";
+const pending = {}, writing = {};
+function persist(date){
+  saveLocal();
+  if (!sb || !user) return;
+  pending[date] = true;
+  if (writing[date]) return;
+  writing[date] = true;
+  (async () => {
+    while (pending[date]) {
+      pending[date] = false;
+      const done = {}; for (const [k,v] of Object.entries(doneOf(date))) if (v) done[k] = true;
+      try {
+        const r = await sb.from("schach_docs").upsert({user_id: user.id, path: DOC+"tag/"+date, data: {date, done, count: countOf(date), total: TOTAL}, updated_at: new Date().toISOString()});
+        if (r.error) throw r.error;
+        setStore("saved");
+      } catch(e) { setStore("error"); }
+    }
+    writing[date] = false;
+  })();
+}
+
+function linksHtml(list){
+  if(!list.length) return "";
+  return `<ul class="links">${list.map(([n,u])=>`<li><a href="${u}" target="_blank" rel="noopener">${esc(n)}</a></li>`).join("")}</ul>`;
+}
+function deepHtml(id){
+  const x = DEEP[id]; if(!x) return "";
+  const open = openDeep[id] ? " open" : "";
+  return `<details class="deep" data-deep="${id}"${open}><summary>Mehr erfahren</summary>
+    <div class="deepbody">
+      <p>${esc(x.why)}</p>
+      <h4>So geht's</h4><ul>${x.how.map(h=>`<li>${esc(h)}</li>`).join("")}</ul>
+      ${x.err?`<h4>Typische Fehler</h4><ul>${x.err.map(h=>`<li>${esc(h)}</li>`).join("")}</ul>`:""}
+      ${x.care?`<p class="care">${esc(x.care)}</p>`:""}
+      ${x.women?`<p class="women"><b>Für Frauen:</b> ${esc(x.women)}</p>`:""}
+      <h4>Tiefer einsteigen (Huberman Lab, Englisch)</h4>${linksHtml([...x.src.map(k=>SRC[k]), yt(x.yt)])}
+    </div></details>`;
+}
+const openDeep = {};
+
+function renderDayHead(){
+  const t = todayStr();
+  const rel = cur===t ? "Heute" : cur===addDays(t,-1) ? "Gestern" : cur < t ? "Vergangener Tag" : "";
+  document.getElementById("dayrel").textContent = rel;
+  document.getElementById("daytitle").textContent = asDate(cur).toLocaleDateString("de-DE",{weekday:"long", day:"numeric", month:"long", year:"numeric"});
+  document.getElementById("next").disabled = cur >= t;
+  document.getElementById("today").hidden = cur === t;
+  const r = reports[cur];
+  const box = document.getElementById("report");
+  box.hidden = !r;
+  if (r) box.innerHTML = `<p class="eyebrow">Abendauswertung</p><p>${esc(String(r.text||""))}</p>`;
+}
+
+function renderPlan(){
+  renderDayHead(); renderSun();
+  const done = doneOf(cur);
+  const el = document.getElementById("plan");
+  el.innerHTML = PLAN.map(b => `
+    <div class="block" style="--c:${b.c}">
+      <div class="when"><h2>${b.when}</h2><span>${b.sub}</span></div>
+      <div class="items">${b.items.map(([id,t,d,refs]) => `
+        <div class="item">
+          <input type="checkbox" id="cb-${id}" data-id="${id}" ${done[id]?"checked":""}>
+          <label for="cb-${id}"><span class="clock">${timeOf(id)}</span><span class="t">${esc(t)}</span> <span class="chips">${chips(refs)}</span>${d?`<br><span class="d">${esc(d)}</span>`:""}</label>
+          ${deepHtml(id)}
+        </div>`).join("")}
+      </div>
+    </div>`).join("") + `
+    <div class="block" style="--c:var(--muted)">
+      <div class="when"><h2>${EXTRA[0].when}</h2><span>${EXTRA[0].sub}</span></div>
+      <div class="items"><table class="week"><tbody>${EXTRA[0].rows.map(([d,t,r])=>`<tr><th>${d}</th><td>${esc(t)}</td></tr>`).join("")}</tbody></table></div>
+    </div>
+    <div class="block" style="--c:var(--muted)">
+      <div class="when"><h2>${EXTRA[1].when}</h2><span>${EXTRA[1].sub}</span></div>
+      <div class="items">${EXTRA[1].items.map(([t,d,refs])=>`<div class="item plain"><span class="dot" aria-hidden="true"></span><div><span class="t">${esc(t)}</span> <span class="chips">${chips(refs)}</span><br><span class="d">${esc(d)}</span>${linksHtml((DEEP_EXTRA[t]||[]).map(k=>SRC[k]))}</div></div>`).join("")}</div>
+    </div>`;
+  updateProgress();
+}
+function updateProgress(){
+  const n = countOf(cur);
+  const pct = Math.round(n/TOTAL*100);
+  document.getElementById("progress").innerHTML = `<b>${n} von ${TOTAL}</b> Punkten erledigt · ${pct} %`;
+  document.getElementById("bar").style.width = pct+"%";
+}
+document.getElementById("plan").addEventListener("change", e => {
+  const id = e.target.dataset.id; if(!id) return;
+  days[cur] = days[cur] || {done:{}};
+  days[cur].done = {...days[cur].done, [id]: e.target.checked};
+  updateProgress(); persist(cur); renderYear();
+});
+document.getElementById("plan").addEventListener("toggle", e => { const id = e.target.dataset && e.target.dataset.deep; if(id) openDeep[id] = e.target.open; }, true);
+document.getElementById("reset").addEventListener("click", () => { days[cur] = {done:{}}; persist(cur); renderPlan(); renderYear(); });
+document.getElementById("prev").onclick = () => { cur = addDays(cur,-1); renderPlan(); };
+document.getElementById("next").onclick = () => { if (cur < todayStr()) { cur = addDays(cur,1); renderPlan(); } };
+document.getElementById("today").onclick = () => { cur = todayStr(); renderPlan(); };
+
+// Jahresüberblick
+let year = new Date().getFullYear();
+const MONTHS = ["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"];
+const GOOD = 0.8;
+const firstUse = () => Object.keys(days).filter(d => countOf(d) > 0).sort()[0] || null;
+function pctOf(d){
+  const t = todayStr(), f = firstUse();
+  if (d > t || !f || d < f) return null;
+  return countOf(d)/TOTAL;
+}
+const lvl = p => p===null ? "none" : p>=0.9 ? "l4" : p>=0.67 ? "l3" : p>=0.34 ? "l2" : p>0 ? "l1" : "l0";
+function renderYear(){
+  const t = todayStr();
+  document.getElementById("yearlabel").textContent = year;
+  document.getElementById("ynext").disabled = year >= new Date().getFullYear();
+  // Tage im Jahr mit Daten
+  const list = [];
+  for (let d = year+"-01-01"; d <= year+"-12-31" && d <= t; d = addDays(d,1)) { const p = pctOf(d); if (p!==null) list.push([d,p]); }
+  const avg = list.length ? list.reduce((a,[,p])=>a+p,0)/list.length : 0;
+  const good = list.filter(([,p])=>p>=GOOD).length;
+  let streak = 0; { let d = (pctOf(t)??0) >= GOOD ? t : addDays(t,-1); while ((pctOf(d)??-1) >= GOOD) { streak++; d = addDays(d,-1); } }
+  let best = 0, run = 0; for (const [,p] of list) { run = p>=GOOD ? run+1 : 0; best = Math.max(best, run); }
+  document.getElementById("stats").innerHTML = [
+    ["Tage erfasst", list.length],
+    ["Ø erledigt", Math.round(avg*100)+" %"],
+    ["Tage ≥ 80 %", good],
+    ["Aktuelle Serie", streak+(streak===1?" Tag":" Tage")],
+    ["Längste Serie", best+(best===1?" Tag":" Tage")],
+  ].map(([k,v])=>`<div class="stat"><span>${k}</span><b>${v}</b></div>`).join("");
+  // Kalender
+  document.getElementById("cal").innerHTML = MONTHS.map((mn, m) => {
+    const first = new Date(year, m, 1), len = new Date(year, m+1, 0).getDate();
+    const off = (first.getDay()+6)%7;
+    let cells = "";
+    for (let i=0;i<off;i++) cells += `<span class="cell blank"></span>`;
+    for (let dd=1; dd<=len; dd++) {
+      const d = year+"-"+pad(m+1)+"-"+pad(dd), p = pctOf(d);
+      const label = asDate(d).toLocaleDateString("de-DE",{day:"numeric",month:"long"}) + (p===null ? "" : `: ${countOf(d)} von ${TOTAL}`);
+      cells += `<button type="button" class="cell ${lvl(p)}${d===t?" today":""}" data-date="${d}" ${d>t?"disabled":""} title="${label}" aria-label="${label}">${dd}</button>`;
+    }
+    return `<div class="month"><h3>${mn}</h3><div class="wd"><span>Mo</span><span>Di</span><span>Mi</span><span>Do</span><span>Fr</span><span>Sa</span><span>So</span></div><div class="grid">${cells}</div></div>`;
+  }).join("");
+  // Häufig ausgelassen
+  const miss = DAILY.map(id => [id, list.filter(([d])=>!doneOf(d)[id]).length]).filter(([,n])=>n>0).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  document.getElementById("missed").innerHTML = list.length && miss.length
+    ? miss.map(([id,n])=>`<li><span>${esc(TITLE[id])}</span><b>${n} von ${list.length} Tagen ausgelassen</b></li>`).join("")
+    : `<li class="empty">Sobald du ein paar Tage abgehakt hast, steht hier, was am häufigsten liegen bleibt.</li>`;
+}
+document.getElementById("cal").addEventListener("click", e => {
+  const d = e.target.dataset && e.target.dataset.date; if(!d) return;
+  cur = d; renderPlan(); show("plan"); window.scrollTo({top:0});
+});
+document.getElementById("yprev").onclick = () => { year--; renderYear(); };
+document.getElementById("ynext").onclick = () => { year++; renderYear(); };
+
+let filterKey = "alle";
+function renderRef(){
+  document.getElementById("filter").innerHTML = [["alle","Alle"],...PARTS.map(p=>[p.key,p.name])]
+    .map(([k,n])=>`<button type="button" data-f="${k}" aria-pressed="${k===filterKey}">${n}</button>`).join("");
+  document.getElementById("ref").innerHTML = PARTS.filter(p=>filterKey==="alle"||p.key===filterKey).map((p,i) => {
+    const list = R.filter(r=>r[0].match(/^[A-Z]+/)[0]===p.key);
+    return `<section class="part">
+      <header><h2>Teil ${PARTS.indexOf(p)+1}: ${p.name}</h2><span>${list.length} Routinen</span></header>
+      ${list.map(([id,t,pg,pts,when,care]) => `
+        <details id="r-${id}">
+          <summary><span class="no">${id.replace(/^[A-Z]+/,"")}</span><span class="ti">${esc(t)}</span><span class="pg">${WHERE[id]?"in der Checkliste":"fehlt"}</span></summary>
+          <div class="body">
+            <ul>${pts.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>
+            <div class="tags">${(WHERE[id]||[]).map(w=>`<span class="tag">✓ ${esc(w)}</span>`).join("")}${care?`<span class="tag care">Vorher ärztlich abklären</span>`:""}</div>
+          </div>
+        </details>`).join("")}
+    </section>`;
+  }).join("");
+}
+document.getElementById("filter").addEventListener("click", e => {
+  const k = e.target.dataset.f; if(!k) return; filterKey = k; renderRef();
+});
+
+const VIEWS = ["plan","year","ref"];
+function show(which){
+  for (const v of VIEWS) {
+    document.getElementById("view-"+v).hidden = v!==which;
+    document.getElementById("tab-"+v).setAttribute("aria-selected", v===which);
+  }
+  try { localStorage.setItem("huberman-tab", which); } catch(e) {}
+}
+for (const v of VIEWS) document.getElementById("tab-"+v).onclick = () => show(v);
+
+for (const k of ["wake","bed"]) {
+  const inp = document.getElementById(k);
+  inp.addEventListener("change", async () => {
+    if(!inp.value || inp.value===times[k]) return;
+    times[k] = inp.value;
+    try { localStorage.setItem(lkey("times"), JSON.stringify(times)); } catch(e) {}
+    renderPlan();
+    if (sb && user) { try { await sb.from("schach_docs").upsert({user_id: user.id, path: DOC+"einstellungen", data: {wake: times.wake, bed: times.bed}, updated_at: new Date().toISOString()}); } catch(e) {} }
+  });
+}
+
+// Tageswechsel, wenn die Seite über Mitternacht offen bleibt
+setInterval(() => {
+  const t = todayStr();
+  if (t !== lastToday) { if (cur === lastToday) cur = t; lastToday = t; renderPlan(); renderYear(); }
+}, 60000);
+
+renderPlan(); renderYear(); renderRef(); setStore("local");
+for (const k of ["wake","bed"]) document.getElementById(k).value = times[k];
+let startTab = location.hash === "#routinen" ? "ref" : location.hash === "#jahr" ? "year" : "plan";
+show(startTab);
+
+// Speicherung im Konto der Lebensplattform (Supabase, Tabelle schach_docs, Pfade huberman/tag/JJJJ-MM-TT und huberman/einstellungen).
+// Jede Zeile gehört einem Konto; die Datenbank gibt nur die eigenen Zeilen heraus.
+(async () => {
+  const cfg = window.SR_CONFIG || {};
+  const gate = on => { document.getElementById("gate").hidden = !on; for (const v of VIEWS) document.getElementById("tab-"+v).disabled = on; document.getElementById("view-plan").hidden = on || document.getElementById("view-plan").hidden; if (on) { document.getElementById("view-year").hidden = true; document.getElementById("view-ref").hidden = true; } };
+  try {
+    if (!cfg.supabaseUrl || !window.supabase) throw new Error("ohne Konfiguration");
+    sb = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+    const s = await sb.auth.getSession();
+    user = s.data.session ? s.data.session.user : null;
+  } catch(e) { user = null; }
+  if (!user) { gate(true); return; }
+  try { days = JSON.parse(localStorage.getItem(lkey("days")) || "{}") || {}; } catch(e) { days = {}; }
+  try { Object.assign(times, JSON.parse(localStorage.getItem(lkey("times")) || "{}")); } catch(e) {}
+  for (const k of ["wake","bed"]) document.getElementById(k).value = times[k];
+  renderPlan(); renderYear();
+  try {
+    const r = await sb.from("schach_docs").select("path,data").eq("user_id", user.id).like("path", DOC+"%");
+    if (r.error) throw r.error;
+    const seen = new Set();
+    for (const row of r.data || []) {
+      const d = row.data || {};
+      if (row.path === DOC+"einstellungen") { for (const k of ["wake","bed"]) if (d[k]) { times[k] = d[k]; document.getElementById(k).value = d[k]; } continue; }
+      const date = row.path.slice((DOC+"tag/").length);
+      if (!/^\d{4}-\d\d-\d\d$/.test(date) || pending[date] || writing[date]) continue;
+      seen.add(date); days[date] = {done: {...(d.done||{})}};
+    }
+    // Häkchen, die vorher nur in diesem Browser lagen, einmal ins Konto übernehmen
+    for (const d of Object.keys(days)) if (!seen.has(d) && countOf(d) > 0) persist(d);
+    setStore("db"); saveLocal(); renderPlan(); renderYear();
+  } catch(e) { setStore("error"); }
+})();
+</script>
+</body>
+</html>
