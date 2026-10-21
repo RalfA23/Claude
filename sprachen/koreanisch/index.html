@@ -1,0 +1,863 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Koreanisch lernen</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231f4e8c'/%3E%3Ctext x='32' y='45' font-size='36' text-anchor='middle' fill='white' font-family='sans-serif'%3E%ED%95%9C%3C/text%3E%3C/svg%3E">
+<script src="../../config.js"></script>
+<script src="../ton.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Atkinson+Hyperlegible:wght@400;700&family=Noto+Sans+KR:wght@400;600&display=swap">
+<style>
+/* Koreanisch-Modul der Sprachen-Seite: Hangul, Silbenbau, Lautregeln, Lesen, Sprechen, Dialoge, Diktat. Eine Datei, keine Abhängigkeiten außer Supabase fürs Konto. */
+:root{
+  --bg:#f5f6f8; --surface:#ffffff; --fg:#191c22; --muted:#5f6670; --line:#dde1e7; --chip:#eceff3;
+  --accent:#1f4e8c; --accent-fg:#ffffff; --ok:#2e7d4f; --bad:#c0392b; --warn:#b8860b;
+  --plain:#1f4e8c; --asp:#c0392b; --tense:#7a4fb0;
+  --display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
+  --body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+  --ko:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  box-sizing:border-box;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#12151a; --surface:#1b2028; --fg:#e8ecf2; --muted:#9aa3ae; --line:#2f3642; --chip:#252b35;
+  --accent:#7fa8e0; --accent-fg:#0d1420; --ok:#62c08a; --bad:#e57f7b; --warn:#e0b44a;
+  --plain:#7fa8e0; --asp:#e57f7b; --tense:#b89be0; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#12151a; --surface:#1b2028; --fg:#e8ecf2; --muted:#9aa3ae; --line:#2f3642; --chip:#252b35;
+  --accent:#7fa8e0; --accent-fg:#0d1420; --ok:#62c08a; --bad:#e57f7b; --warn:#e0b44a;
+  --plain:#7fa8e0; --asp:#e57f7b; --tense:#b89be0; color-scheme:dark}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.55}
+[hidden]{display:none!important}
+.wrap{max-width:900px;margin:0 auto;padding:20px max(16px,env(safe-area-inset-right)) 64px max(16px,env(safe-area-inset-left))}
+h1,h2,h3{font-family:var(--display);margin:0;line-height:1.2;text-wrap:balance}
+h1{font-size:clamp(1.7rem,5vw,2.4rem)}
+h2{font-size:1.3rem;margin:22px 0 10px}
+h3{font-size:1.05rem;margin:14px 0 6px}
+p{margin:6px 0}
+a{color:var(--accent)}
+.ko{font-family:var(--ko);font-weight:400}
+.muted{color:var(--muted)}
+.small{font-size:.88rem}
+.top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:space-between}
+.back{text-decoration:none;font-weight:700}
+.stats{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 6px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:8px 12px;min-width:92px}
+.stat b{display:block;font-family:var(--display);font-size:1.2rem}
+.stat span{font-size:.8rem;color:var(--muted)}
+.goal{height:8px;background:var(--chip);border-radius:6px;overflow:hidden;margin-top:6px}
+.goal i{display:block;height:100%;background:var(--ok);width:0;transition:width .4s}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:var(--surface)}
+.seg button{border:0;background:none;padding:7px 14px;font:inherit;cursor:pointer;color:var(--fg)}
+.seg button.on{background:var(--accent);color:var(--accent-fg);font-weight:700}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding:10px 0;margin:6px 0 4px;scrollbar-width:none;position:sticky;top:0;background:var(--bg);z-index:5}
+.tabs::-webkit-scrollbar{display:none}
+.tabs button{flex:none;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:999px;padding:8px 14px;font:inherit;cursor:pointer;white-space:nowrap}
+.tabs button.on{background:var(--fg);color:var(--bg);border-color:var(--fg);font-weight:700}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:10px 0}
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:10px;padding:8px 12px;font:inherit;cursor:pointer;text-decoration:none}
+.btn:hover{border-color:var(--muted)}
+.btn.pri{background:var(--accent);color:var(--accent-fg);border-color:var(--accent);font-weight:700}
+.btn.sm{padding:4px 9px;font-size:.9rem}
+.btn:disabled{opacity:.45;cursor:default}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.sub{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.sub button{border:1px solid var(--line);background:var(--chip);color:var(--fg);border-radius:8px;padding:6px 11px;font:inherit;cursor:pointer}
+.sub button.on{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:6px}
+.letter{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:6px 2px 4px;text-align:center;cursor:pointer;position:relative;font:inherit;color:var(--fg)}
+.letter .ko{font-size:2rem;line-height:1.3;display:block}
+.letter small{font-size:.72rem;color:var(--muted)}
+.letter.P{border-top:4px solid var(--plain)} .letter.A{border-top:4px solid var(--asp)} .letter.T{border-top:4px solid var(--tense)} .letter.V{border-top:4px solid var(--ok)} .letter.W{border-top:4px solid var(--warn)}
+.letter .dot{position:absolute;top:5px;right:5px;width:8px;height:8px;border-radius:50%;background:var(--chip)}
+.letter .dot.b1{background:var(--warn)} .letter .dot.b2{background:var(--plain)} .letter .dot.b3,.letter .dot.b4{background:var(--ok)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.85rem;color:var(--muted);margin:6px 0}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-1px;margin-right:4px}
+.big{font-size:4.2rem;line-height:1.25;text-align:center}
+.detail{display:grid;grid-template-columns:auto 1fr;gap:4px 16px;align-items:center}
+.quiz-q{text-align:center;margin:8px 0 12px}
+.quiz-q .ko{font-size:3.4rem;line-height:1.35}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.opt{border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:10px;padding:12px;font:inherit;cursor:pointer;text-align:center}
+.opt .ko{font-size:1.8rem}
+.opt.right{background:color-mix(in srgb,var(--ok) 18%,var(--surface));border-color:var(--ok)}
+.opt.wrong{background:color-mix(in srgb,var(--bad) 18%,var(--surface));border-color:var(--bad)}
+.fb{min-height:1.6em;margin-top:10px;font-weight:700}
+.fb.ok{color:var(--ok)} .fb.no{color:var(--bad)}
+.phrase{display:grid;grid-template-columns:1fr auto;gap:4px 10px;align-items:center;border-bottom:1px solid var(--line);padding:10px 0}
+.phrase:last-child{border-bottom:0}
+.phrase .ko{font-size:1.35rem}
+.tr{color:var(--muted);font-style:italic}
+.de{font-size:.95rem}
+.res{grid-column:1/-1;font-size:.9rem}
+.res.ok{color:var(--ok)} .res.mid{color:var(--warn)} .res.no{color:var(--bad)}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+th,td{border-bottom:1px solid var(--line);padding:6px 6px;text-align:left;vertical-align:top}
+.scroll{overflow-x:auto}
+.line{padding:8px 10px;border-radius:12px;margin:8px 0;max-width:88%}
+.line.them{background:var(--chip)}
+.line.me{background:color-mix(in srgb,var(--accent) 14%,var(--surface));margin-left:auto;border:1px solid color-mix(in srgb,var(--accent) 35%,var(--line))}
+.line .who{font-size:.78rem;color:var(--muted)}
+.line .ko{font-size:1.25rem}
+.sent{padding:8px 0;border-bottom:1px dashed var(--line)}
+.sent .ko{font-size:1.45rem;line-height:1.7}
+.sent .ko span{cursor:pointer;border-radius:4px}
+.sent .ko span:hover{background:var(--chip)}
+.tiles{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+.tile{min-width:52px;height:58px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--fg);font-family:var(--ko);font-size:1.8rem;cursor:pointer}
+.tile:disabled{opacity:.25}
+.answer{min-height:70px;border:2px dashed var(--line);border-radius:12px;font-family:var(--ko);font-size:2.4rem;display:flex;align-items:center;justify-content:center;padding:4px 10px}
+.note{background:var(--chip);border-radius:10px;padding:10px 12px;font-size:.92rem}
+.builder{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.builder select{width:100%;font:inherit;font-family:var(--ko);font-size:1.3rem;padding:6px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--fg)}
+.builder label{font-size:.8rem;color:var(--muted);display:block;margin-bottom:2px}
+.block{font-family:var(--ko);font-size:5rem;line-height:1.2;text-align:center;margin:8px 0}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:999px;font-weight:700;opacity:0;transition:opacity .3s;pointer-events:none;z-index:20}
+.toast.on{opacity:1}
+label.chk{display:inline-flex;gap:6px;align-items:center;cursor:pointer;font-size:.92rem}
+input[type=range]{width:120px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <span><a class="back" href="../">← Sprachen</a> <span class="muted">·</span> <a class="back" href="../hilfe/">🔊 Kein Ton?</a></span>
+    <div class="seg" id="levelSeg"><button data-l="a">Anfänger</button><button data-l="f">Fortgeschritten</button></div>
+  </div>
+  <h1 style="margin-top:12px">Koreanisch <span class="ko" style="font-weight:600">한국어</span></h1>
+  <p class="muted" id="store">Fortschritt wird geladen …</p>
+  <div class="stats">
+    <div class="stat"><b id="sStufe">1</b><span id="sStufeName">Neuling</span></div>
+    <div class="stat"><b id="sPunkte">0</b><span>Punkte</span></div>
+    <div class="stat"><b id="sSerie">0 🔥</b><span>Tage in Folge</span></div>
+    <div class="stat" style="flex:1;min-width:160px"><b id="sHeute">0 / 100</b><span>Tagesziel</span><div class="goal"><i id="sGoal"></i></div></div>
+  </div>
+  <nav class="tabs" id="tabs"></nav>
+  <main id="view"></main>
+  <p class="small muted" style="margin-top:28px">Aussprache kommt aus der koreanischen Stimme deines Geräts (<a href="../hilfe/">kein Ton? So richtest du sie ein</a>), Nachsprechen nutzt die Spracherkennung des Browsers (am besten Chrome oder Safari). Umschrift nach der offiziellen Revidierten Romanisierung: eo ist ein offenes o wie in »Sonne«, eu ein u mit breiten Lippen.</p>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+"use strict";
+// ---------- Hangul-Bausteine ----------
+// Anlaut, Vokal und Auslaut in der Reihenfolge der Unicode-Silbenformel (Silbe = 0xAC00 + (L*21 + V)*28 + T)
+const JL = [..."ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ"];
+const JV = [..."ㅏㅐㅑㅒㅓㅔㅕㅖㅗㅘㅙㅚㅛㅜㅝㅞㅟㅠㅡㅢㅣ"];
+const JT = [""].concat([..."ㄱㄲㄳㄴㄵㄶㄷㄹㄺㄻㄼㄽㄾㄿㅀㅁㅂㅄㅅㅆㅇㅈㅊㅋㅌㅍㅎ"]);
+const isSyl = c => c >= "가" && c <= "힣";
+const isVow = c => c >= "ㅏ" && c <= "ㅣ";
+const isCon = c => c >= "ㄱ" && c <= "ㅎ";
+const syl = (l, v, t) => String.fromCharCode(0xAC00 + (JL.indexOf(l)*21 + JV.indexOf(v))*28 + (t ? JT.indexOf(t) : 0));
+// Silben in Einzelzeichen zerlegen: 한국 → ㅎ ㅏ ㄴ ㄱ ㅜ ㄱ
+function jamo(s){
+  const out = [];
+  for (const c of s) {
+    if (isSyl(c)) { const n = c.charCodeAt(0) - 0xAC00; out.push(JL[Math.floor(n/588)], JV[Math.floor(n%588/28)]); if (n%28) out.push(JT[n%28]); }
+    else if (c.trim()) out.push(c);
+  }
+  return out;
+}
+// Einzelzeichen wieder zu Silbenblöcken setzen. Ein Konsonant wird Auslaut, wenn kein Vokal folgt.
+function compose(arr){
+  let out = "", cur = null;
+  const flush = () => { if (cur) { out += cur.v ? syl(cur.l, cur.v, cur.t) : cur.l; cur = null; } };
+  arr.forEach((j, i) => {
+    if (isVow(j)) { if (cur && !cur.v) cur.v = j; else { flush(); out += j; } }
+    else if (cur && cur.v && !cur.t && JT.includes(j) && !isVow(arr[i+1] || "")) cur.t = j;
+    else { flush(); if (JL.includes(j)) cur = {l:j}; else out += j; }
+  });
+  flush();
+  return out;
+}
+
+// Konsonanten: Zeichen, Name, Name in Umschrift, Anlaut, Auslaut, Gruppe (P einfach, A behaucht, T gespannt), Beispielwort, Umschrift, Deutsch
+const CONS = [
+  ["ㄱ","기역","giyeok","g","k","P","가방","gabang","Tasche"],["ㄴ","니은","nieun","n","n","P","나무","namu","Baum"],
+  ["ㄷ","디귿","digeut","d","t","P","다리","dari","Bein, Brücke"],["ㄹ","리을","rieul","r","l","P","라면","ramyeon","Ramen"],
+  ["ㅁ","미음","mieum","m","m","P","머리","meori","Kopf"],["ㅂ","비읍","bieup","b","p","P","바다","bada","Meer"],
+  ["ㅅ","시옷","siot","s","t","P","사과","sagwa","Apfel"],["ㅇ","이응","ieung","stumm","ng","P","아이","ai","Kind"],
+  ["ㅈ","지읒","jieut","j","t","P","자리","jari","Platz"],["ㅎ","히읗","hieut","h","t","P","하나","hana","eins"],
+  ["ㅊ","치읓","chieut","ch","t","A","차","cha","Auto, Tee"],["ㅋ","키읔","kieuk","k","k","A","코","ko","Nase"],
+  ["ㅌ","티읕","tieut","t","t","A","토끼","tokki","Hase"],["ㅍ","피읖","pieup","p","p","A","포도","podo","Weintrauben"],
+  ["ㄲ","쌍기역","ssanggiyeok","kk","k","T","꼬리","kkori","Schwanz"],["ㄸ","쌍디귿","ssangdigeut","tt","–","T","딸기","ttalgi","Erdbeere"],
+  ["ㅃ","쌍비읍","ssangbieup","pp","–","T","빵","ppang","Brot"],["ㅆ","쌍시옷","ssangsiot","ss","t","T","쌀","ssal","Reis (roh)"],
+  ["ㅉ","쌍지읒","ssangjieut","jj","–","T","짜다","jjada","salzig"]
+].map(([c,name,nt,ini,fin,grp,ex,ext,de]) => ({c,name,nt,ini,fin,grp,ex,ext,de}));
+const GRP = {P:"einfach",A:"behaucht",T:"gespannt"};
+
+// Vokale: Zeichen, Umschrift, Art (B Grundvokal, Z zusammengesetzt), Beispielwort, Umschrift, Deutsch
+const VOW = [
+  ["ㅏ","a","B","아기","agi","Baby"],["ㅑ","ya","B","야구","yagu","Baseball"],["ㅓ","eo","B","어머니","eomeoni","Mutter"],["ㅕ","yeo","B","여자","yeoja","Frau"],
+  ["ㅗ","o","B","오이","oi","Gurke"],["ㅛ","yo","B","요리","yori","Kochen"],["ㅜ","u","B","우유","uyu","Milch"],["ㅠ","yu","B","유리","yuri","Glas"],
+  ["ㅡ","eu","B","그림","geurim","Bild"],["ㅣ","i","B","이","i","Zahn, zwei"],
+  ["ㅐ","ae","Z","개","gae","Hund"],["ㅔ","e","Z","게","ge","Krabbe"],["ㅒ","yae","Z","얘기","yaegi","Gespräch"],["ㅖ","ye","Z","시계","sigye","Uhr"],
+  ["ㅘ","wa","Z","사과","sagwa","Apfel"],["ㅙ","wae","Z","왜","wae","warum"],["ㅚ","oe","Z","회사","hoesa","Firma"],["ㅝ","wo","Z","뭐","mwo","was"],
+  ["ㅞ","we","Z","웨이터","weiteo","Kellner"],["ㅟ","wi","Z","귀","gwi","Ohr"],["ㅢ","ui","Z","의사","uisa","Arzt, Ärztin"]
+].map(([v,s,kind,ex,ext,de]) => ({v,s,kind,ex,ext,de}));
+const VOW_HINT = {"eo":"offenes o wie in »Sonne«","eu":"u mit breiten, ungerundeten Lippen","ae":"wie e in »Bett«, heute gleich wie ㅔ","e":"wie e in »Bett«","oe":"heute meist wie »we«","ui":"eu und i schnell hintereinander"};
+const HORIZ = new Set([..."ㅗㅛㅜㅠㅡ"]);
+// Silbenlesen: Umschrift von Anlaut und Vokal
+const L_ROM = {"ㄱ":"g","ㄲ":"kk","ㄴ":"n","ㄷ":"d","ㄸ":"tt","ㄹ":"r","ㅁ":"m","ㅂ":"b","ㅃ":"pp","ㅅ":"s","ㅆ":"ss","ㅇ":"","ㅈ":"j","ㅉ":"jj","ㅊ":"ch","ㅋ":"k","ㅌ":"t","ㅍ":"p","ㅎ":"h"};
+const V_ROM = Object.fromEntries(VOW.map(w => [w.v, w.s]));
+// Auslaute: nur sieben Laute am Silbenende
+const BATCHIM = [["ㄱ","k",["ㄱ","ㅋ","ㄲ"],"국","guk","Suppe"],["ㄴ","n",["ㄴ"],"산","san","Berg"],["ㄷ","t",["ㄷ","ㅌ","ㅅ","ㅆ","ㅈ","ㅊ","ㅎ"],"옷","ot","Kleidung"],
+  ["ㄹ","l",["ㄹ"],"물","mul","Wasser"],["ㅁ","m",["ㅁ"],"밤","bam","Nacht"],["ㅂ","p",["ㅂ","ㅍ"],"앞","ap","vorne"],["ㅇ","ng",["ㅇ"],"강","gang","Fluss"]];
+const BATCHIM_EX = [["부엌","bueok","Küche","ㅋ"],["밖","bak","draußen","ㄲ"],["옷","ot","Kleidung","ㅅ"],["꽃","kkot","Blume","ㅊ"],["낮","nat","Tag (hell)","ㅈ"],["밭","bat","Feld","ㅌ"],["있다","itda","es gibt","ㅆ"],["앞","ap","vorne","ㅍ"],["밥","bap","Reis (gekocht)","ㅂ"],["책","chaek","Buch","ㄱ"],["산","san","Berg","ㄴ"],["길","gil","Weg","ㄹ"],["봄","bom","Frühling","ㅁ"],["방","bang","Zimmer","ㅇ"],["히읗","hieut","der Buchstabe ㅎ","ㅎ"],["숲","sup","Wald","ㅍ"]];
+
+// Lautregeln: Wort, richtige Aussprache, zwei falsche, Regel, Deutsch
+const RULES = {
+  bind:{name:"Bindung",text:"Folgt auf einen Auslaut eine Silbe mit stummem ㅇ, rutscht der Auslaut hinüber: 한국어 klingt wie 한구거."},
+  nasal:{name:"Nasalierung",text:"Die Auslaute k, t, p werden vor ㄴ oder ㅁ zu ng, n, m: 감사합니다 klingt wie 감사함니다."},
+  liquid:{name:"ㄹ-Angleichung",text:"ㄴ und ㄹ nebeneinander werden zu zwei ㄹ: 신라 klingt wie 실라."},
+  asp:{name:"Behauchung",text:"ㅎ verschmilzt mit ㄱ, ㄷ, ㅂ, ㅈ zu ㅋ, ㅌ, ㅍ, ㅊ: 좋다 klingt wie 조타."},
+  tense:{name:"Verhärtung",text:"Nach den Auslauten k, t, p werden ㄱ ㄷ ㅂ ㅅ ㅈ gespannt: 학교 klingt wie 학꾜."},
+  palat:{name:"Palatalisierung",text:"ㄷ und ㅌ vor 이 werden zu ㅈ und ㅊ: 같이 klingt wie 가치."}
+};
+const LAUTQ = [
+  ["한국어","한구거",["한국어","한궁어"],"bind","Koreanisch"],["음악","으막",["음악","음막"],"bind","Musik"],["맛있어요","마시써요",["마시어요","맏있어요"],"bind","Es ist lecker"],
+  ["읽어요","일거요",["익어요","일어요"],"bind","Ich lese"],["감사합니다","감사함니다",["감사합니다","감사하니다"],"nasal","Danke"],["국물","궁물",["국물","구물"],"nasal","Brühe"],
+  ["거짓말","거진말",["거짓말","거지말"],"nasal","Lüge"],["십만","심만",["십만","시만"],"nasal","hunderttausend"],["입니다","임니다",["입니다","이니다"],"nasal","ist (höflich)"],
+  ["신라","실라",["신나","시나"],"liquid","Silla (altes Königreich)"],["연락","열락",["연낙","연락"],"liquid","Kontakt"],["좋다","조타",["좋다","조다"],"asp","gut sein"],
+  ["축하","추카",["축하","추가"],"asp","Glückwunsch"],["학교","학꾜",["하교","학고"],"tense","Schule"],["식당","식땅",["시당","식강"],"tense","Restaurant"],
+  ["같이","가치",["가티","같이"],"palat","zusammen"],["굳이","구지",["구디","굳이"],"palat","unbedingt"]
+].map(([w,right,wrong,rule,de]) => ({w,right,wrong,rule,de}));
+
+// Wörter zum Lesen: Stufe 1 offene Silben, Stufe 2 mit Auslaut und Doppelkonsonant, Stufe 3 lange Wörter
+const WORDS = {
+  1:[["아이","ai","Kind"],["우유","uyu","Milch"],["나라","nara","Land"],["나무","namu","Baum"],["바다","bada","Meer"],["모자","moja","Mütze"],["하나","hana","eins"],["두부","dubu","Tofu"],["오이","oi","Gurke"],["고기","gogi","Fleisch"],["커피","keopi","Kaffee"],["비","bi","Regen"],["머리","meori","Kopf"],["지도","jido","Landkarte"],["기차","gicha","Zug"],["버스","beoseu","Bus"],["아버지","abeoji","Vater"],["어머니","eomeoni","Mutter"]],
+  2:[["한국","hanguk","Korea"],["김치","gimchi","Kimchi"],["사람","saram","Mensch"],["물","mul","Wasser"],["밥","bap","Reis (gekocht)"],["집","jip","Haus"],["책","chaek","Buch"],["빵","ppang","Brot"],["꽃","kkot","Blume"],["친구","chingu","Freund, Freundin"],["시간","sigan","Zeit"],["돈","don","Geld"],["산","san","Berg"],["딸기","ttalgi","Erdbeere"],["문","mun","Tür"],["가방","gabang","Tasche"]],
+  3:[["감사합니다","gamsahamnida","danke"],["안녕하세요","annyeonghaseyo","Hallo"],["서울","seoul","Seoul"],["대한민국","daehanminguk","Republik Korea"],["지하철","jihacheol","U-Bahn"],["병원","byeongwon","Krankenhaus"],["편의점","pyeonuijeom","Minimarkt"],["컴퓨터","keompyuteo","Computer"],["아이스크림","aiseukeurim","Eiscreme"],["한국어","hangugeo","Koreanisch (Sprache)"],["음식","eumsik","Essen"],["독일","dogil","Deutschland"],["화장실","hwajangsil","Toilette"],["비빔밥","bibimbap","Bibimbap"]]
+};
+const SIGNS = [["입구","ipgu","Eingang"],["출구","chulgu","Ausgang"],["비상구","bisanggu","Notausgang"],["화장실","hwajangsil","Toilette"],["남자","namja","Herren"],["여자","yeoja","Damen"],["미세요","miseyo","Drücken"],["당기세요","danggiseyo","Ziehen"],["금연","geumyeon","Rauchen verboten"],["영업 중","yeongeop jung","Geöffnet"],["주의","juui","Vorsicht"],["출입금지","churipgeumji","Zutritt verboten"],["매진","maejin","Ausverkauft"],["지하철","jihacheol","U-Bahn"]];
+
+// Lesetexte: Sätze als [Koreanisch, Umschrift, Deutsch]
+const TEXTS = {
+  a:[
+    {title:"Mein Tag",ko:"나의 하루",s:[
+      ["저는 아침 일곱 시에 일어나요.","jeoneun achim ilgop sie ireonayo.","Ich stehe um sieben Uhr morgens auf."],
+      ["아침에 커피를 마셔요.","achime keopireul masyeoyo.","Morgens trinke ich Kaffee."],
+      ["그리고 회사에 가요.","geurigo hoesae gayo.","Dann gehe ich in die Firma."],
+      ["점심에 친구하고 김밥을 먹어요.","jeomsime chinguhago gimbabeul meogeoyo.","Mittags esse ich mit einem Freund Kimbap."],
+      ["저녁에는 집에서 쉬어요.","jeonyeogeneun jibeseo swieoyo.","Abends ruhe ich mich zu Hause aus."]]},
+    {title:"Im Café",ko:"카페에서",s:[
+      ["이 카페는 아주 작아요.","i kapeneun aju jagayo.","Dieses Café ist sehr klein."],
+      ["하지만 커피가 정말 맛있어요.","hajiman keopiga jeongmal masisseoyo.","Aber der Kaffee ist wirklich lecker."],
+      ["저는 보통 라테를 시켜요.","jeoneun botong rateureul sikyeoyo.","Ich bestelle normalerweise einen Latte."],
+      ["창문 옆 자리가 제일 좋아요.","changmun yeop jariga jeil joayo.","Der Platz am Fenster ist der beste."]]}
+  ],
+  f:[
+    {title:"Wochenende in Busan",ko:"부산 여행",s:[
+      ["지난 주말에 친구들과 부산에 다녀왔어요.","jinan jumare chingudeulgwa busane danyeowasseoyo.","Letztes Wochenende war ich mit Freunden in Busan."],
+      ["기차를 타고 세 시간쯤 걸렸어요.","gichareul tago se siganjjeum geollyeosseoyo.","Mit dem Zug hat es etwa drei Stunden gedauert."],
+      ["해운대 바다는 생각보다 훨씬 넓었어요.","haeundae badaneun saenggakboda hwolssin neolbeosseoyo.","Das Meer in Haeundae war viel weiter als gedacht."],
+      ["자갈치 시장에서 신선한 회를 먹었어요.","jagalchi sijangeseo sinseonhan hoereul meogeosseoyo.","Auf dem Jagalchi-Markt haben wir frischen rohen Fisch gegessen."],
+      ["밤에는 바닷가를 따라 산책했어요.","bameneun badatgareul ttara sanchaekaesseoyo.","Nachts sind wir am Strand entlang spaziert."],
+      ["다음에는 가족과 함께 가고 싶어요.","daeumeneun gajokgwa hamkke gago sipeoyo.","Nächstes Mal möchte ich mit meiner Familie hinfahren."]]},
+    {title:"Koreanisch lernen",ko:"한국어 공부",s:[
+      ["저는 석 달 전부터 한국어를 배우고 있어요.","jeoneun seok dal jeonbuteo hangugeoreul baeugo isseoyo.","Ich lerne seit drei Monaten Koreanisch."],
+      ["한글은 생각보다 쉬웠지만 발음은 아직 어려워요.","hangeureun saenggakboda swiwotjiman bareumeun ajik eoryeowoyo.","Hangul war leichter als gedacht, aber die Aussprache ist noch schwer."],
+      ["매일 드라마를 보면서 듣기 연습을 해요.","maeil deuramareul bomyeonseo deutgi yeonseubeul haeyo.","Jeden Tag übe ich das Hören mit Serien."],
+      ["내년에는 서울에 가서 한국 사람들과 이야기하고 싶어요.","naenyeoneneun seoure gaseo hanguk saramdeulgwa iyagihago sipeoyo.","Nächstes Jahr möchte ich nach Seoul und mit Koreanern sprechen."]]}
+  ]
+};
+
+// Sätze zum Nachsprechen, nach Themen
+const PHRASES = {
+  a:{
+    "Begrüßen":[["안녕하세요","annyeonghaseyo","Hallo / Guten Tag"],["처음 뵙겠습니다","cheoeum boepgetseumnida","Freut mich (beim ersten Treffen)"],["제 이름은 랄프예요","je ireumeun Ralpeuyeyo","Ich heiße Ralf."],["저는 독일 사람이에요","jeoneun dogil saramieyo","Ich komme aus Deutschland."],["만나서 반가워요","mannaseo bangawoyo","Schön, Sie zu treffen."],["안녕히 가세요","annyeonghi gaseyo","Auf Wiedersehen (zu dem, der geht)"],["안녕히 계세요","annyeonghi gyeseyo","Auf Wiedersehen (zu dem, der bleibt)"]],
+    "Höflich":[["감사합니다","gamsahamnida","Danke"],["죄송합니다","joesonghamnida","Entschuldigung"],["괜찮아요","gwaenchanayo","Kein Problem / Alles gut"],["네","ne","Ja"],["아니요","aniyo","Nein"],["잘 모르겠어요","jal moreugesseoyo","Das weiß ich nicht genau."],["천천히 말해 주세요","cheoncheonhi malhae juseyo","Bitte langsamer sprechen."]],
+    "Essen":[["이거 주세요","igeo juseyo","Das hier, bitte."],["물 주세요","mul juseyo","Wasser, bitte."],["맛있어요","masisseoyo","Lecker!"],["안 맵게 해 주세요","an maepge hae juseyo","Bitte nicht scharf."],["계산해 주세요","gyesanhae juseyo","Die Rechnung, bitte."],["잘 먹겠습니다","jal meokgetseumnida","Guten Appetit (vor dem Essen)"]],
+    "Unterwegs":[["얼마예요?","eolmayeyo?","Wie viel kostet das?"],["화장실이 어디예요?","hwajangsiri eodiyeyo?","Wo ist die Toilette?"],["지하철역이 어디예요?","jihacheollyeogi eodiyeyo?","Wo ist die U-Bahn-Station?"],["여기 세워 주세요","yeogi sewo juseyo","Bitte hier halten."]],
+    "Zahlen":[["일","il","1"],["이","i","2"],["삼","sam","3"],["사","sa","4"],["오","o","5"],["육","yuk","6"],["칠","chil","7"],["팔","pal","8"],["구","gu","9"],["십","sip","10"],["백","baek","100"],["천","cheon","1000"]],
+    "Zählen":[["하나","hana","eins (Stück, Alter, Uhrzeit)"],["둘","dul","zwei"],["셋","set","drei"],["넷","net","vier"],["다섯","daseot","fünf"],["여섯","yeoseot","sechs"],["일곱","ilgop","sieben"],["여덟","yeodeol","acht"],["아홉","ahop","neun"],["열","yeol","zehn"]]
+  },
+  f:{
+    "Gespräch":[["다시 한번 말씀해 주시겠어요?","dasi hanbeon malsseumhae jusigesseoyo?","Könnten Sie das bitte noch einmal sagen?"],["한국어를 배운 지 석 달 됐어요","hangugeoreul baeun ji seok dal dwaesseoyo","Ich lerne seit drei Monaten Koreanisch."],["이 단어는 무슨 뜻이에요?","i daneoneun museun tteusieyo?","Was bedeutet dieses Wort?"],["한국에 가 본 적이 있어요?","hanguge ga bon jeogi isseoyo?","Waren Sie schon einmal in Korea?"],["주말에 뭐 할 거예요?","jumare mwo hal geoyeyo?","Was machen Sie am Wochenende?"]],
+    "Unterwegs":[["명동까지 얼마나 걸려요?","myeongdongkkaji eolmana geollyeoyo?","Wie lange dauert es bis Myeongdong?"],["이 버스 시청에 가요?","i beoseu sicheonge gayo?","Fährt dieser Bus zum Rathaus?"],["교통카드 충전해 주세요","gyotongkadeu chungjeonhae juseyo","Bitte die Verkehrskarte aufladen."],["길을 잃어버렸어요","gireul ireobeoryeosseoyo","Ich habe mich verlaufen."]],
+    "Einkaufen & Essen":[["좀 깎아 주세요","jom kkakka juseyo","Geht es etwas billiger?"],["다른 색깔도 있어요?","dareun saekkkaldo isseoyo?","Gibt es auch eine andere Farbe?"],["저는 땅콩 알레르기가 있어요","jeoneun ttangkong allereugiga isseoyo","Ich bin allergisch gegen Erdnüsse."],["포장해 주세요","pojanghae juseyo","Zum Mitnehmen, bitte."]],
+    "Satzbau":[["비가 오면 박물관에 갈 거예요","biga omyeon bangmulgwane gal geoyeyo","Wenn es regnet, gehen wir ins Museum."],["아직 김치찌개를 먹어 본 적이 없어요","ajik gimchijjigaereul meogeo bon jeogi eopseoyo","Ich habe noch nie Kimchi-Eintopf gegessen."],["가격에 따라 달라요","gagyeoge ttara dallayo","Das hängt vom Preis ab."],["시간이 있으면 같이 커피 마실래요?","sigani isseumyeon gachi keopi masillaeyo?","Wollen wir einen Kaffee trinken, wenn du Zeit hast?"]]
+  }
+};
+
+// Dialoge: 1 = deine Rolle
+const DIALOGS = {
+  a:[
+    {title:"Kennenlernen",them:"Minji",lines:[
+      [0,"안녕하세요. 이름이 뭐예요?","annyeonghaseyo. ireumi mwoyeyo?","Hallo, wie heißen Sie?"],
+      [1,"제 이름은 랄프예요. 이름이 뭐예요?","je ireumeun Ralpeuyeyo. ireumi mwoyeyo?","Ich heiße Ralf. Und wie heißen Sie?"],
+      [0,"저는 민지예요. 어느 나라 사람이에요?","jeoneun Minjiyeyo. eoneu nara saramieyo?","Ich bin Minji. Aus welchem Land kommen Sie?"],
+      [1,"독일 사람이에요. 함부르크에서 왔어요.","dogil saramieyo. hambureukeueseo wasseoyo.","Aus Deutschland. Ich komme aus Hamburg."],
+      [0,"만나서 반가워요.","mannaseo bangawoyo.","Schön, Sie kennenzulernen."],
+      [1,"저도 반가워요.","jeodo bangawoyo.","Ganz meinerseits."]]},
+    {title:"Im Restaurant",them:"Bedienung",lines:[
+      [0,"어서 오세요. 몇 분이세요?","eoseo oseyo. myeot buniseyo?","Willkommen! Wie viele Personen?"],
+      [1,"한 명이에요.","han myeongieyo.","Eine Person."],
+      [0,"뭐 드릴까요?","mwo deurilkkayo?","Was darf ich bringen?"],
+      [1,"비빔밥 하나 주세요.","bibimbap hana juseyo.","Ein Bibimbap, bitte."],
+      [0,"음료는요?","eumnyoneunyo?","Und zu trinken?"],
+      [1,"물 주세요.","mul juseyo.","Wasser, bitte."],
+      [0,"네, 잠시만 기다리세요.","ne, jamsiman gidariseyo.","Gern, einen Moment bitte."]]},
+    {title:"Auf dem Markt",them:"Verkäuferin",lines:[
+      [1,"사과 얼마예요?","sagwa eolmayeyo?","Was kosten die Äpfel?"],
+      [0,"다섯 개에 만 원이에요.","daseot gaee man wonieyo.","Fünf Stück für 10.000 Won."],
+      [1,"좀 깎아 주세요.","jom kkakka juseyo.","Geht es etwas billiger?"],
+      [0,"그럼 구천 원에 드릴게요.","geureom gucheon wone deurilgeyo.","Dann gebe ich sie Ihnen für 9.000 Won."],
+      [1,"좋아요. 주세요.","joayo. juseyo.","Gut, die nehme ich."],
+      [0,"감사합니다. 또 오세요.","gamsahamnida. tto oseyo.","Danke, kommen Sie wieder."]]}
+  ],
+  f:[
+    {title:"Im Taxi",them:"Fahrer",lines:[
+      [0,"어디로 가세요?","eodiro gaseyo?","Wohin möchten Sie?"],
+      [1,"명동역으로 가 주세요.","myeongdongyeogeuro ga juseyo.","Zur Station Myeongdong, bitte."],
+      [0,"네. 지금 길이 좀 막혀요.","ne. jigeum giri jom makyeoyo.","Gut. Gerade ist etwas Stau."],
+      [1,"괜찮아요. 얼마나 걸려요?","gwaenchanayo. eolmana geollyeoyo?","Kein Problem. Wie lange dauert es?"],
+      [0,"한 삼십 분쯤 걸릴 거예요.","han samsip bunjjeum geollil geoyeyo.","Ungefähr dreißig Minuten."],
+      [1,"카드로 계산해도 돼요?","kadeuro gyesanhaedo dwaeyo?","Kann ich mit Karte zahlen?"],
+      [0,"그럼요. 다 왔습니다.","geureomyo. da watseumnida.","Natürlich. Wir sind da."]]},
+    {title:"In der Apotheke",them:"Apothekerin",lines:[
+      [1,"머리가 아프고 목도 아파요.","meoriga apeugo mokdo apayo.","Ich habe Kopf- und Halsschmerzen."],
+      [0,"언제부터 아프셨어요?","eonjebuteo apeusyeosseoyo?","Seit wann haben Sie Schmerzen?"],
+      [1,"이틀 전부터요.","iteul jeonbuteoyo.","Seit zwei Tagen."],
+      [0,"열도 있어요?","yeoldo isseoyo?","Haben Sie auch Fieber?"],
+      [1,"조금 있어요.","jogeum isseoyo.","Ein bisschen."],
+      [0,"이 약을 하루에 세 번 식후에 드세요.","i yageul harue se beon sikue deuseyo.","Nehmen Sie das dreimal täglich nach dem Essen."],
+      [1,"감사합니다.","gamsahamnida.","Vielen Dank."]]},
+    {title:"Hotel-Rezeption",them:"Rezeption",lines:[
+      [0,"어서 오세요. 체크인하시겠어요?","eoseo oseyo. chekeuinhasigesseoyo?","Willkommen. Möchten Sie einchecken?"],
+      [1,"네, 랄프 이름으로 삼 박 예약했어요.","ne, Ralpeu ireumeuro sam bak yeyakaesseoyo.","Ja, ich habe auf den Namen Ralf drei Nächte reserviert."],
+      [0,"여권 좀 보여 주시겠어요?","yeogwon jom boyeo jusigesseoyo?","Darf ich bitte Ihren Pass sehen?"],
+      [1,"여기 있어요. 아침은 몇 시부터예요?","yeogi isseoyo. achimeun myeot sibuteoyeyo?","Hier bitte. Ab wann gibt es Frühstück?"],
+      [0,"일곱 시부터 열 시까지예요.","ilgop sibuteo yeol sikkajiyeyo.","Von sieben bis zehn Uhr."],
+      [1,"감사합니다.","gamsahamnida.","Danke."]]}
+  ]
+};
+// Schreiben: Wörter aus Einzelzeichen zusammensetzen
+const WRITE = {a:WORDS[1].concat(WORDS[2]),f:WORDS[2].concat(WORDS[3])};
+
+// ---------- Zustand, Punkte, Serien, Stufen ----------
+const LEVELS = [[0,"Neuling"],[60,"Entdecker"],[180,"Tourist"],[360,"Reisender"],[600,"Marktgänger"],[900,"Gesprächspartner"],[1300,"Kenner"],[1800,"Leser"],[2500,"Erzähler"],[3400,"Meister"]];
+const GOAL = 100;
+const todayStr = () => { const d = new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); };
+const dayDiff = (a,b) => Math.round((new Date(b+"T12:00")-new Date(a+"T12:00"))/864e5);
+const lsGet = k => { try { return localStorage.getItem("ko_"+k); } catch(e) { return null; } };
+const lsSet = (k,v) => { try { localStorage.setItem("ko_"+k, v); } catch(e) {} };
+let S = {punkte:0,serie:0,lastDay:"",heute:{date:"",punkte:0},boxes:{},level:"a",updated:0};
+try { Object.assign(S, JSON.parse(lsGet("state") || "{}")); } catch(e) {}
+const stufeOf = p => { let i = 0; LEVELS.forEach((l,j) => { if (p >= l[0]) i = j; }); return i; };
+
+let sb = null, user = null, saveTimer = null;
+function save(){
+  S.updated = Date.now();
+  lsSet("state", JSON.stringify(S));
+  if (!sb || !user) return;
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(async () => {
+    const i = stufeOf(S.punkte);
+    const data = {punkte:S.punkte, serie:S.serie, stufe:i+1, stufeName:LEVELS[i][1], lastDay:S.lastDay, heute:S.heute, boxes:S.boxes, level:S.level, updated:S.updated};
+    try { const r = await sb.from("schach_docs").upsert({user_id:user.id, path:"sprachen/koreanisch/fortschritt", data, updated_at:new Date().toISOString()}); setStore(r.error ? "error" : "db"); } catch(e) { setStore("error"); }
+  }, 800);
+}
+function setStore(s){
+  const e = document.getElementById("store");
+  e.textContent = s==="db" ? "Fortschritt wird in deinem Konto gespeichert." : s==="error" ? "Speichern im Konto gerade nicht möglich, Fortschritt liegt in diesem Browser." : "";
+  if (s==="local") { e.textContent = "Nicht angemeldet: Fortschritt bleibt in diesem Browser. "; e.appendChild(Object.assign(document.createElement("a"),{href:"../../",textContent:"Im Portal anmelden"})); }
+}
+function award(n, msg){
+  const t = todayStr();
+  if (S.lastDay !== t) { S.serie = S.lastDay && dayDiff(S.lastDay,t) === 1 ? S.serie+1 : 1; S.lastDay = t; }
+  if (S.heute.date !== t) S.heute = {date:t,punkte:0};
+  const before = stufeOf(S.punkte), goalBefore = S.heute.punkte >= GOAL;
+  S.punkte += n; S.heute.punkte += n;
+  save(); renderStats();
+  if (stufeOf(S.punkte) > before) toast("Neue Stufe: "+LEVELS[stufeOf(S.punkte)][1]+" 🎉");
+  else if (!goalBefore && S.heute.punkte >= GOAL) toast("Tagesziel geschafft 🔥");
+  else if (msg) toast(msg);
+}
+function renderStats(){
+  const i = stufeOf(S.punkte), t = todayStr();
+  const heute = S.heute.date === t ? S.heute.punkte : 0;
+  const alive = S.lastDay && dayDiff(S.lastDay,t) <= 1 ? S.serie : 0;
+  $("sStufe").textContent = "Stufe "+(i+1);
+  $("sStufeName").textContent = LEVELS[i][1] + (LEVELS[i+1] ? " · noch "+(LEVELS[i+1][0]-S.punkte) : "");
+  $("sPunkte").textContent = S.punkte;
+  $("sSerie").textContent = alive+" 🔥";
+  $("sHeute").textContent = Math.min(heute,GOAL)+" / "+GOAL;
+  $("sGoal").style.width = Math.min(100, heute/GOAL*100)+"%";
+}
+let toastT;
+function toast(m){ const t = $("toast"); t.textContent = m; t.classList.add("on"); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("on"), 2200); }
+
+// ---------- Hilfen ----------
+function $(id){ return document.getElementById(id); }
+function el(tag, attrs, kids){
+  const e = document.createElement(tag);
+  for (const [k,v] of Object.entries(attrs||{})) {
+    if (k==="text") e.textContent = v; else if (k==="class") e.className = v;
+    else if (k.startsWith("on")) e.addEventListener(k.slice(2), v); else if (v!==false && v!=null) e.setAttribute(k, v===true ? "" : v);
+  }
+  for (const c of [].concat(kids||[])) if (c!=null) e.appendChild(typeof c==="string" ? document.createTextNode(c) : c);
+  return e;
+}
+const ko = (t, extra) => el("span",{class:"ko"+(extra?" "+extra:""),lang:"ko",text:t});
+const shuffle = a => { a = a.slice(); for (let i=a.length-1;i>0;i--){ const j = Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; };
+const pick = a => a[Math.floor(Math.random()*a.length)];
+function sampleOthers(pool, right, n, key){ const k = key || (x => x); const seen = new Set([k(right)]); const out = []; for (const x of shuffle(pool)) { if (out.length>=n) break; if (!seen.has(k(x))) { seen.add(k(x)); out.push(x); } } return out; }
+
+// Sprachausgabe über ../ton.js (Browserfehler umgangen, Hinweis zur Ton-Hilfe bei fehlender Stimme)
+let voices = [], rate = parseFloat(lsGet("rate") || "0.85");
+function loadVoices(){ try { voices = speechSynthesis.getVoices().filter(v => /^ko/i.test(v.lang)); } catch(e) { voices = []; } }
+if ("speechSynthesis" in window) { loadVoices(); speechSynthesis.onvoiceschanged = loadVoices; }
+function speak(text, opts){
+  opts = opts || {};
+  return Ton.speak(text, {lang:"ko-KR", rate: opts.slow ? 0.55 : rate, pitch: opts.pitch || 1});
+}
+const sayBtn = (text, label, opts) => el("button",{class:"btn sm",title:"Anhören",onclick:e => { e.stopPropagation(); speak(text, opts); }, text:label||"🔊"});
+
+// Spracherkennung; verglichen wird Zeichen für Zeichen (ㅎ ㅏ ㄴ …), damit fast richtige Silben Teilpunkte geben
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+const norm = s => jamo(s.replace(/[\s.,!?~]/g,""));
+function lev(a,b){ const d = Array.from({length:a.length+1},(_,i)=>[i]); for (let j=1;j<=b.length;j++) d[0][j]=j; for (let i=1;i<=a.length;i++) for (let j=1;j<=b.length;j++) d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1)); return d[a.length][b.length]; }
+function similarity(heard, target){ const a = norm(heard), b = norm(target); if (!a.length||!b.length) return 0; if (a.join("").includes(b.join(""))) return 1; return Math.max(0, 1 - lev(a,b)/Math.max(a.length,b.length)); }
+function listen(){
+  return new Promise((res, rej) => {
+    if (!SR) { rej(new Error("nosr")); return; }
+    const r = new SR(); r.lang = "ko-KR"; r.interimResults = false; r.maxAlternatives = 5;
+    let done = false;
+    r.onresult = e => { done = true; res([...e.results[0]].map(x => x.transcript)); };
+    r.onerror = e => { if (!done) { done = true; rej(new Error(e.error||"err")); } };
+    r.onend = () => { if (!done) { done = true; res([]); } };
+    try { speechSynthesis.cancel(); r.start(); } catch(e) { rej(e); }
+  });
+}
+// Nachsprechen-Knopf mit Ergebnisfeld
+function speakCheck(target, resEl, pts){
+  return async () => {
+    resEl.className = "res"; resEl.textContent = "🎤 Ich höre zu …";
+    if (!SR) { resEl.replaceChildren("Keine Spracherkennung in diesem Browser. Sprich laut nach und bewerte dich selbst: ",
+      el("button",{class:"btn sm",text:"👍 Klang gut",onclick:() => { resEl.textContent = "👍 +"+Math.round(pts/2); award(Math.round(pts/2)); }}), " ",
+      el("button",{class:"btn sm",text:"🔁 Nochmal",onclick:() => speak(target)})); return; }
+    try {
+      const alts = await listen();
+      if (!alts.length) { resEl.className = "res no"; resEl.textContent = "Nichts gehört. Noch einmal versuchen?"; return; }
+      let best = 0, bestAlt = alts[0];
+      for (const a of alts) { const s = similarity(a, target); if (s > best) { best = s; bestAlt = a; } }
+      const pct = Math.round(best*100);
+      if (best >= 0.8) { resEl.className = "res ok"; resEl.replaceChildren("✓ Sehr gut ("+pct+" %). Gehört: ", ko(bestAlt), " · +"+pts); award(pts); }
+      else if (best >= 0.5) { resEl.className = "res mid"; resEl.replaceChildren("Fast ("+pct+" %). Gehört: ", ko(bestAlt), " · +"+Math.round(pts/3)+". Achte auf eo/o und auf behauchte und gespannte Laute."); award(Math.round(pts/3)); }
+      else { resEl.className = "res no"; resEl.replaceChildren("Noch nicht ("+pct+" %). Gehört: ", ko(bestAlt), ". Hör es dir langsam an und versuche es erneut."); }
+    } catch(e) {
+      resEl.className = "res no";
+      resEl.textContent = e.message==="not-allowed" ? "Mikrofon ist nicht erlaubt. Bitte in den Browser-Einstellungen freigeben." : "Spracherkennung nicht verfügbar ("+e.message+").";
+    }
+  };
+}
+
+// ---------- Ansichten ----------
+const TABS = [["start","Start"],["hangul","Hangul"],["lesen","Lesen"],["sprechen","Sprechen"],["dialoge","Dialoge"],["schreiben","Schreiben"]];
+let tab = "start";
+function show(t){
+  tab = t; lsSet("tab", t);
+  for (const b of $("tabs").children) b.classList.toggle("on", b.dataset.t===t);
+  const v = $("view"); v.replaceChildren();
+  ({start:viewStart,hangul:viewHangul,lesen:viewLesen,sprechen:viewSprechen,dialoge:viewDialoge,schreiben:viewSchreiben})[t](v);
+  speechSynthesis && speechSynthesis.cancel && speechSynthesis.cancel();
+}
+const adv = () => S.level === "f";
+
+function viewStart(v){
+  const known = Object.values(S.boxes).filter(b => b >= 3).length;
+  v.append(
+    el("div",{class:"card"},[
+      el("h3",{text: adv() ? "Fortgeschritten" : "Anfänger"}),
+      el("p",{text: adv()
+        ? "Zusammengesetzte Vokale und Doppelkonsonanten, die sieben Auslaute, Lautregeln wie Bindung und Nasalierung, längere Texte und Schilder, Dialoge im Taxi, in der Apotheke und im Hotel, Diktat ohne Umschrift."
+        : "Die 14 Grundkonsonanten und 10 Grundvokale, Silben selbst bauen, erste Wörter lesen, Begrüßen, Danken, Bestellen und Zählen, kurze Dialoge zum Nachsprechen."}),
+      el("p",{class:"muted small",text:"Zeichen sicher erkannt: "+known+" von "+(CONS.length+VOW.length)+"."})
+    ]),
+    el("h2",{text:"Heute üben"}),
+    el("div",{class:"row"},[
+      el("button",{class:"btn pri",text:"Hangul-Quiz",onclick:() => { hangulSub = "ueben"; show("hangul"); }}),
+      el("button",{class:"btn",text:"Silben bauen",onclick:() => { hangulSub = "bau"; show("hangul"); }}),
+      el("button",{class:"btn",text:"Wörter lesen",onclick:() => show("lesen")}),
+      el("button",{class:"btn",text:"Nachsprechen",onclick:() => show("sprechen")}),
+      el("button",{class:"btn",text:"Dialog",onclick:() => show("dialoge")})
+    ]),
+    el("h2",{text:"So funktioniert Hangul"}),
+    el("div",{class:"card"},[
+      el("p",{},["Hangul ist ein Alphabet: ",el("b",{text:"14 Grundkonsonanten"})," und ",el("b",{text:"10 Grundvokale"}),", dazu Doppelkonsonanten und zusammengesetzte Vokale. Die meisten lernen es an einem Abend."]),
+      el("p",{},["Die Buchstaben werden zu ",el("b",{text:"Silbenblöcken"})," gestapelt: Anlaut + Vokal (+ Auslaut). ",ko("ㅎ")," + ",ko("ㅏ")," + ",ko("ㄴ")," = ",ko("한")," (han), ",ko("ㄱ")," + ",ko("ㅜ")," + ",ko("ㄱ")," = ",ko("국")," (guk), zusammen ",ko("한국"),", Korea."]),
+      el("p",{},["Beginnt eine Silbe mit einem Vokal, steht davor das stumme ",ko("ㅇ"),": ",ko("아")," a, ",ko("오")," o. Am Silbenende klingt ",ko("ㅇ")," wie ng."]),
+      el("p",{},["Koreanisch hat keine Töne. Wichtig sind drei Reihen von Konsonanten: einfach ",ko("ㄱ"),", behaucht ",ko("ㅋ")," und gespannt ",ko("ㄲ"),". Höflich endet ein Satz meist auf ",ko("-요")," oder ",ko("-니다"),"."])
+    ]),
+    el("h2",{text:"Einstellungen"}),
+    el("div",{class:"card row"},[
+      el("span",{text:"Sprechtempo"}),
+      (() => { const r = el("input",{type:"range",min:"0.5",max:"1.1",step:"0.05",value:String(rate)}); r.oninput = () => { rate = parseFloat(r.value); lsSet("rate", r.value); }; return r; })(),
+      sayBtn("안녕하세요. 반가워요.","🔊 Probe"),
+      el("span",{class:"small muted",text: voices.length ? "Koreanische Stimme: "+voices[0].name : "Keine koreanische Stimme gefunden. "}), el("a",{href:"../hilfe/",class:"small",text:"Ton einrichten"})
+    ])
+  );
+}
+
+// Hangul
+let hangulSub = "kons";
+function viewHangul(v){
+  const sub = el("div",{class:"sub"}), box = el("div");
+  const subs = [["kons","Konsonanten"],["vok","Vokale"],["bau","Silben bauen"],["aus","Auslaute"],["regeln","Lautregeln"],["ueben","Üben"]];
+  const go = s => { hangulSub = s; for (const b of sub.children) b.classList.toggle("on", b.dataset.s===s); box.replaceChildren(); ({kons:hangulKons,vok:hangulVok,bau:hangulBau,aus:hangulAus,regeln:hangulRegeln,ueben:hangulUeben})[s](box); };
+  for (const [s,l] of subs) sub.appendChild(el("button",{text:l,"data-s":s,onclick:() => go(s)}));
+  v.append(sub, box); go(hangulSub);
+}
+const dotOf = key => el("i",{class:"dot b"+(S.boxes[key]||0)});
+function hangulKons(box){
+  const detail = el("div",{class:"card"},[el("p",{class:"muted",text:"Tippe auf einen Buchstaben."})]);
+  const showC = k => {
+    const ka = syl(k.c,"ㅏ");
+    detail.replaceChildren(el("div",{class:"row",style:"align-items:flex-start;gap:20px"},[
+      ko(k.c,"big"),
+      el("div",{class:"detail",style:"flex:1;min-width:200px"},[
+        el("span",{class:"muted",text:"Name"}),el("span",{},[ko(k.name)," ",el("i",{class:"tr",text:k.nt})]),
+        el("span",{class:"muted",text:"Laut"}),el("span",{text:"am Anfang "+k.ini+", am Ende "+k.fin}),
+        el("span",{class:"muted",text:"Reihe"}),el("span",{text:GRP[k.grp]}),
+        el("span",{class:"muted",text:"Beispiel"}),el("span",{},[ko(k.ex)," ",el("i",{class:"tr",text:k.ext})," ",k.de])
+      ])
+    ]), el("div",{class:"row",style:"margin-top:8px"},[sayBtn(ka,"🔊 "+ka),sayBtn(k.name,"🔊 Name"),sayBtn(k.ex,"🔊 Beispiel")]));
+    speak(ka);
+  };
+  const grid = el("div",{class:"grid"});
+  for (const k of CONS) grid.appendChild(el("button",{class:"letter "+k.grp,onclick:() => showC(k)},[dotOf(k.c),ko(k.c),el("small",{text:k.ini})]));
+  box.append(
+    el("div",{class:"legend"},[el("span",{},[el("i",{style:"background:var(--plain)"}),"einfach (10)"]),el("span",{},[el("i",{style:"background:var(--asp)"}),"behaucht (4)"]),el("span",{},[el("i",{style:"background:var(--tense)"}),"gespannt (5)"]),el("span",{text:"Punkt = Lernstand"})]),
+    grid, detail,
+    el("div",{class:"note"},["Die Formen zeigen den Mund: ",ko("ㄱ")," die Zunge hinten am Gaumen, ",ko("ㄴ")," die Zungenspitze oben, ",ko("ㅁ")," die geschlossenen Lippen, ",ko("ㅅ")," die Zähne, ",ko("ㅇ")," den offenen Rachen. Ein Strich mehr heißt mehr Luft: ",ko("ㄱ → ㅋ"),", ",ko("ㄷ → ㅌ"),". Doppelt heißt gespannt, ohne Luft: ",ko("ㄲ ㄸ ㅃ ㅆ ㅉ"),"."])
+  );
+}
+function hangulVok(box){
+  const t = el("table");
+  t.appendChild(el("tr",{},[el("th",{text:"Zeichen"}),el("th",{text:"Laut"}),el("th",{text:"Beispiel"}),el("th",{text:""})]));
+  const list = adv() ? VOW : VOW.filter(w => w.kind==="B").concat(VOW.filter(w => ["ㅐ","ㅔ","ㅘ","ㅝ"].includes(w.v)));
+  for (const w of list) {
+    t.appendChild(el("tr",{},[
+      el("td",{},[ko(w.v)," ",ko(syl("ㅇ",w.v))]),
+      el("td",{},[el("b",{text:w.s})," ",el("span",{class:"muted small",text:(w.kind==="Z"?"zusammengesetzt":"Grundvokal")+(VOW_HINT[w.s]?", "+VOW_HINT[w.s]:"")})]),
+      el("td",{},[ko(w.ex)," ",el("i",{class:"tr",text:w.ext})," ",el("span",{class:"small",text:w.de})]),
+      el("td",{},[sayBtn(syl("ㅇ",w.v))," ",sayBtn(w.ex,"📖")])
+    ]));
+  }
+  for (const td of t.querySelectorAll("td:first-child .ko")) td.style.fontSize = "1.7rem";
+  box.append(
+    el("p",{class:"muted",text: adv() ? "Alle 21 Vokale. Daneben steht die Silbe mit stummem ㅇ, so liest man den Vokal allein." : "Die 10 Grundvokale und die vier häufigsten zusammengesetzten. Alle 21 siehst du unter Fortgeschritten."}),
+    el("div",{class:"scroll"},[t]),
+    el("div",{class:"note",style:"margin-top:10px"},["Ein Strich mehr macht ein y davor: ",ko("ㅏ → ㅑ"),", ",ko("ㅓ → ㅕ"),", ",ko("ㅗ → ㅛ"),", ",ko("ㅜ → ㅠ"),". Senkrechte Vokale (",ko("ㅏ ㅓ ㅣ"),") stehen rechts vom Konsonanten, waagerechte (",ko("ㅗ ㅜ ㅡ"),") darunter: ",ko("나")," aber ",ko("노"),"."])
+  );
+}
+function hangulBau(box){
+  const cons = adv() ? JL : JL.filter(c => !"ㄲㄸㅃㅆㅉ".includes(c));
+  const vows = adv() ? JV : JV.filter(v => VOW.some(w => w.v===v && w.kind==="B"));
+  const fins = adv() ? ["","ㄱ","ㄴ","ㄷ","ㄹ","ㅁ","ㅂ","ㅅ","ㅇ","ㅈ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ","ㄲ","ㅆ"] : ["","ㄱ","ㄴ","ㄹ","ㅁ","ㅂ","ㅇ"];
+  const mk = (label, opts, val) => { const s = el("select"); for (const o of opts) s.appendChild(el("option",{value:o,text:o||"–"})); s.value = val; return [el("div",{},[el("label",{text:label}), s]), s]; };
+  const [w1,sL] = mk("Anlaut", cons, "ㅎ"), [w2,sV] = mk("Vokal", vows, "ㅏ"), [w3,sT] = mk("Auslaut", fins, "ㄴ");
+  const out = el("div",{class:"block",lang:"ko"}), info = el("p",{class:"muted",style:"text-align:center"});
+  const upd = () => {
+    const s = syl(sL.value, sV.value, sT.value);
+    const fin = sT.value ? (BATCHIM.find(b => b[2].includes(sT.value)) || [,""])[1] : "";
+    out.textContent = s;
+    info.textContent = (L_ROM[sL.value] || "") + V_ROM[sV.value] + fin + " · " + (HORIZ.has(sV.value) ? "Vokal unter dem Konsonanten" : "Vokal rechts vom Konsonanten") + (sT.value ? ", Auslaut unten" : "");
+  };
+  [sL,sV,sT].forEach(s => s.onchange = () => { upd(); speak(out.textContent); });
+  upd();
+  const q = el("div",{class:"card"});
+  box.append(el("div",{class:"card"},[el("p",{class:"muted",text:"Wähle Anlaut, Vokal und Auslaut und sieh zu, wie der Block entsteht."}),
+    el("div",{class:"builder"},[w1,w2,w3]), out, info,
+    el("div",{class:"row",style:"justify-content:center"},[el("button",{class:"btn pri",text:"🔊 Anhören",onclick:() => speak(out.textContent)}),el("button",{class:"btn",text:"🎲 Zufall",onclick:() => { sL.value = pick(cons); sV.value = pick(vows); sT.value = pick(fins); upd(); speak(out.textContent); }})])]),
+    el("h3",{text:"Silbenbau-Quiz"}), q);
+  // Quiz: Aus welchen Teilen besteht die Silbe?
+  const next = () => {
+    const l = pick(cons), v = pick(vows), t = Math.random() < .5 ? "" : pick(fins.filter(Boolean));
+    const right = [l,v,t].filter(Boolean).join(" + ");
+    const wrongs = new Set();
+    while (wrongs.size < 3) { const w = [pick(cons), Math.random()<.5 ? v : pick(vows), Math.random()<.5 ? t : pick(fins)].filter(Boolean).join(" + "); if (w !== right) wrongs.add(w); }
+    const fb = el("div",{class:"fb"}), opts = el("div",{class:"opts"}); let done = false;
+    const all = shuffle([right, ...wrongs]);
+    for (const o of all) { const b = el("button",{class:"opt"},[ko(o)]); b.onclick = () => { if (done) return; done = true; speak(syl(l,v,t));
+      if (o===right) { b.classList.add("right"); fb.className = "fb ok"; fb.textContent = "✓ Richtig"; award(4); } else { b.classList.add("wrong"); fb.className = "fb no"; fb.textContent = "✗ Richtig ist "+right; [...opts.children][all.indexOf(right)].classList.add("right"); }
+      setTimeout(next, o===right ? 1300 : 2500); }; opts.appendChild(b); }
+    q.replaceChildren(el("p",{class:"muted",text:"Aus welchen Teilen besteht diese Silbe?"}), el("div",{class:"quiz-q"},[ko(syl(l,v,t))]), opts, fb);
+  };
+  next();
+}
+function hangulAus(box){
+  const t = el("table");
+  t.appendChild(el("tr",{},[el("th",{text:"Klingt wie"}),el("th",{text:"Geschrieben mit"}),el("th",{text:"Beispiel"})]));
+  for (const [c,s,list,ex,ext,de] of BATCHIM) t.appendChild(el("tr",{},[el("td",{},[el("b",{text:s})]),el("td",{},[ko(list.join(" "))]),el("td",{},[ko(ex)," ",el("i",{class:"tr",text:ext})," ",el("span",{class:"small",text:de})," ",sayBtn(ex)])]));
+  for (const x of t.querySelectorAll("td:nth-child(2) .ko")) x.style.fontSize = "1.4rem";
+  const q = el("div",{class:"card"});
+  box.append(el("p",{text:"Am Silbenende gibt es nur sieben Laute. Viele Buchstaben fallen dort zusammen, und k, t, p werden nicht ausgehaucht, sondern nur angehalten."}),
+    el("div",{class:"scroll"},[t]), el("h3",{text:"Wie klingt der Auslaut?"}), q);
+  const sounds = BATCHIM.map(b => b[1]);
+  const next = () => {
+    const [w,tr,de,c] = pick(BATCHIM_EX), right = BATCHIM.find(b => b[2].includes(c))[1];
+    const fb = el("div",{class:"fb"}), opts = el("div",{class:"opts"}); let done = false;
+    const all = shuffle([right].concat(sampleOthers(sounds, right, 3)));
+    for (const s of all) { const b = el("button",{class:"opt"},[el("b",{text:s})]); b.onclick = () => { if (done) return; done = true; speak(w);
+      if (s===right) { b.classList.add("right"); fb.className = "fb ok"; fb.textContent = "✓ "+w+" · "+tr+" · "+de; award(5); } else { b.classList.add("wrong"); fb.className = "fb no"; fb.textContent = "✗ "+c+" am Ende klingt wie "+right+": "+w+" · "+tr+" · "+de; [...opts.children][all.indexOf(right)].classList.add("right"); }
+      setTimeout(next, s===right ? 1500 : 2800); }; opts.appendChild(b); }
+    q.replaceChildren(el("p",{class:"muted",text:"Welcher Laut steht am Ende?"}), el("div",{class:"quiz-q"},[ko(w)]), opts, fb);
+  };
+  next();
+}
+function hangulRegeln(box){
+  const cards = el("div");
+  for (const k of Object.keys(RULES)) {
+    const ex = LAUTQ.filter(x => x.rule===k).slice(0,3);
+    cards.appendChild(el("div",{class:"card"},[el("h3",{style:"margin-top:0",text:RULES[k].name}), el("p",{text:RULES[k].text}),
+      el("div",{class:"row"}, ex.map(x => el("button",{class:"btn",onclick:() => speak(x.w)},[ko(x.w)," → ",ko(x.right)," ",el("span",{class:"small muted",text:x.de})])))]));
+  }
+  const q = el("div",{class:"card"});
+  box.append(el("p",{class:"muted",text:"Geschrieben wird nach Wortbestandteilen, gesprochen fließend. Diese Regeln erklären, warum ein Wort anders klingt, als es dasteht."}), cards, el("h3",{text:"Wie spricht man es?"}), q);
+  const next = () => {
+    const it = pick(LAUTQ);
+    const fb = el("div",{class:"fb"}), opts = el("div",{class:"opts"}); let done = false;
+    const all = shuffle([it.right, ...it.wrong]);
+    for (const o of all) { const b = el("button",{class:"opt"},[ko("["+o+"]")]); b.onclick = () => { if (done) return; done = true; speak(it.w);
+      if (o===it.right) { b.classList.add("right"); fb.className = "fb ok"; award(8); } else { b.classList.add("wrong"); fb.className = "fb no"; [...opts.children][all.indexOf(it.right)].classList.add("right"); }
+      fb.replaceChildren((o===it.right?"✓ ":"✗ ")+it.w+" klingt wie ["+it.right+"] · "+it.de+". ", el("span",{class:"small",style:"font-weight:400",text:RULES[it.rule].name+": "+RULES[it.rule].text}));
+      setTimeout(next, o===it.right ? 2600 : 4200); }; opts.appendChild(b); }
+    q.replaceChildren(el("p",{class:"muted",text:"Erst überlegen, dann hören."}), el("div",{class:"quiz-q"},[ko(it.w)]), opts, fb);
+  };
+  next();
+}
+function hangulUeben(box){
+  const modes = adv() ? [["name","Zeichen → Laut"],["hear","Hören → Silbe"],["read","Silben lesen"],["grp","Reihe bestimmen"]] : [["name","Zeichen → Laut"],["hear","Hören → Silbe"],["read","Silben lesen"]];
+  let mode = lsGet("qmode") || "name"; if (!modes.some(m => m[0]===mode)) mode = "name";
+  const sub = el("div",{class:"sub"}), q = el("div",{class:"card"});
+  const cpool = adv() ? CONS : CONS.filter(k => k.grp!=="T");
+  const vpool = adv() ? VOW : VOW.filter(w => w.kind==="B");
+  const items = cpool.map(k => ({key:k.c, c:k, rom:k.ini==="stumm" ? "stumm" : k.ini, say:syl(k.c,"ㅏ")}))
+    .concat(vpool.map(w => ({key:w.v, w, rom:w.s, say:syl("ㅇ",w.v)})));
+  // Leitner: niedrige Kästen kommen öfter dran
+  const weighted = list => { const w = list.map(x => 5 - Math.min(4, S.boxes[x.key]||0)); let r = Math.random()*w.reduce((a,b)=>a+b,0); for (let i=0;i<list.length;i++){ r -= w[i]; if (r<=0) return list[i]; } return list[0]; };
+  let streak = 0;
+  const next = () => {
+    q.replaceChildren();
+    const fb = el("div",{class:"fb"}), opts = el("div",{class:"opts"});
+    let key = null, options, label, prompt, right;
+    if (mode === "read") {
+      const l = pick(cpool).c, v = pick(vpool).v, s = syl(l,v), rom = L_ROM[l]+V_ROM[v];
+      const others = new Set();
+      while (others.size < 3) { const o = Math.random()<.5 ? L_ROM[pick(cpool).c]+V_ROM[v] : L_ROM[l]+V_ROM[pick(vpool).v]; if (o !== rom) others.add(o); }
+      prompt = [ko(s)]; label = "Wie liest man diese Silbe?";
+      options = shuffle([rom, ...others]).map(o => ({ok:o===rom, node:[el("b",{text:o||"(nur Vokal)"})]}));
+      right = () => { speak(s); return [ko(s)," = "+rom]; };
+    } else {
+      const it = weighted(mode==="grp" ? items.filter(x => x.c) : items); key = it.key;
+      const name = it.c ? [ko(it.c.c+" "+it.c.name)," ",it.c.nt," · ",GRP[it.c.grp]] : [ko(it.w.v)," ",it.w.s," · ",ko(it.w.ex)," ",it.w.de];
+      right = () => { speak(it.say); return name; };
+      if (mode === "name") {
+        prompt = [ko(key)]; label = it.c ? "Welcher Laut am Silbenanfang?" : "Wie klingt dieser Vokal?";
+        const same = items.filter(x => !!x.c === !!it.c);
+        options = shuffle([it].concat(sampleOthers(same, it, 3, x => x.rom))).map(x => ({ok:x.rom===it.rom, node:[el("b",{text:x.rom})]}));
+      } else if (mode === "hear") {
+        prompt = [el("button",{class:"btn pri",text:"🔊 Nochmal hören",onclick:() => speak(it.say)})]; label = "Welche Silbe hörst du?";
+        setTimeout(() => speak(it.say), 200);
+        const same = items.filter(x => !!x.c === !!it.c);
+        options = shuffle([it].concat(sampleOthers(same, it, 3, x => x.say))).map(x => ({ok:x===it, node:[ko(x.say)]}));
+      } else {
+        prompt = [ko(key)]; label = "Zu welcher Reihe gehört er?";
+        options = ["P","A","T"].map(g => ({ok:g===it.c.grp, node:[el("b",{text:GRP[g]})]}));
+      }
+    }
+    let answered = false;
+    for (const o of options) {
+      const b = el("button",{class:"opt"}, o.node);
+      b.onclick = () => {
+        if (answered) return; answered = true;
+        const box0 = key ? S.boxes[key]||0 : 0;
+        if (o.ok) { b.classList.add("right"); if (key) S.boxes[key] = Math.min(4, box0+1); streak++; fb.className = "fb ok"; fb.replaceChildren("✓ "+(streak>=5?streak+" richtig in Folge! ":""), ...right()); award(streak>=5?7:5); }
+        else { b.classList.add("wrong"); if (key) S.boxes[key] = Math.max(0, box0-1); streak = 0; fb.className = "fb no"; fb.replaceChildren("✗ Richtig: ", ...right()); save();
+          [...opts.children].forEach((x,i) => { if (options[i].ok) x.classList.add("right"); }); }
+        setTimeout(next, o.ok ? 1400 : 2600);
+      };
+      opts.appendChild(b);
+    }
+    q.append(el("p",{class:"muted",text:label}), el("div",{class:"quiz-q"},prompt), opts, fb);
+  };
+  for (const [m,l] of modes) sub.appendChild(el("button",{text:l,class:m===mode?"on":"",onclick:() => { mode = m; lsSet("qmode",m); for (const b of sub.children) b.classList.toggle("on", b.textContent===l); next(); }}));
+  box.append(sub, q); next();
+}
+
+// Lesen
+function viewLesen(v){
+  const stages = adv() ? [2,3,"s"] : [1,2,3];
+  let stage = lsGet("rstage"); stage = stages.map(String).includes(stage) ? (stage==="s"?"s":+stage) : stages[0];
+  const sub = el("div",{class:"sub"}), q = el("div",{class:"card"});
+  const pool = () => stage==="s" ? SIGNS : WORDS[stage];
+  const next = () => {
+    const p = pool(), w = pick(p);
+    const fb = el("div",{class:"fb"}), opts = el("div",{class:"opts"});
+    const others = sampleOthers(p, w, 3, x => x[1]);
+    let done = false;
+    const all = shuffle([w].concat(others));
+    for (const x of all) {
+      const b = el("button",{class:"opt"},[el("b",{text:x[1]}), el("div",{class:"small muted",text:x[2]})]);
+      b.onclick = () => { if (done) return; done = true; speak(w[0]);
+        if (x===w) { b.classList.add("right"); fb.className = "fb ok"; fb.textContent = "✓ "+w[1]+" · "+w[2]; award(stage===1?5:8); }
+        else { b.classList.add("wrong"); fb.className = "fb no"; fb.textContent = "✗ "+w[0]+" liest man "+w[1]+" · "+w[2]; [...opts.children][all.indexOf(w)].classList.add("right"); }
+        setTimeout(next, x===w ? 1500 : 2800); };
+      opts.appendChild(b);
+    }
+    q.replaceChildren(el("p",{class:"muted",text:"Lies das Wort und wähle die passende Aussprache."}), el("div",{class:"quiz-q"},[ko(w[0])]), opts, fb);
+  };
+  const names = {1:"Stufe 1: offene Silben",2:"Stufe 2: mit Auslaut",3:"Stufe 3: lange Wörter",s:"Schilder"};
+  for (const s of stages) sub.appendChild(el("button",{text:names[s],class:s===stage?"on":"",onclick:e => { stage = s; lsSet("rstage", String(s)); for (const b of sub.children) b.classList.remove("on"); e.target.classList.add("on"); next(); }}));
+  v.append(el("h2",{text:"Wörter lesen",style:"margin-top:6px"}), sub, q, el("h2",{text:"Texte lesen"}));
+  next();
+  const showTr = el("input",{type:"checkbox"}), showDe = el("input",{type:"checkbox"});
+  showTr.checked = lsGet("showTr")!=="0" && !adv(); showDe.checked = lsGet("showDe")==="1";
+  const holder = el("div");
+  const toggles = el("div",{class:"row"},[el("label",{class:"chk"},[showTr,"Umschrift"]),el("label",{class:"chk"},[showDe,"Deutsch"]),el("span",{class:"small muted",text:"Tippe auf ein Wort, um es zu hören."})]);
+  const apply = () => { lsSet("showTr", showTr.checked?"1":"0"); lsSet("showDe", showDe.checked?"1":"0"); for (const e of holder.querySelectorAll(".tr")) e.hidden = !showTr.checked; for (const e of holder.querySelectorAll(".de")) e.hidden = !showDe.checked; };
+  showTr.onchange = apply; showDe.onchange = apply;
+  for (const tx of TEXTS[S.level]) {
+    const c = el("div",{class:"card"},[el("div",{class:"row",style:"justify-content:space-between"},[el("h3",{style:"margin:0"},[tx.title," ",ko(tx.ko)]), el("button",{class:"btn sm",text:"🔊 Ganzer Text",onclick:async () => { for (const s of tx.s) await speak(s[0]); }})])]);
+    let read = 0;
+    for (const [k,tr,de] of tx.s) {
+      const line = el("span",{class:"ko",lang:"ko"});
+      k.split(" ").forEach((w,i) => { if (i) line.append(" "); line.appendChild(el("span",{text:w,onclick:() => speak(w.replace(/[.,?!]/g,""), {slow:true})})); });
+      const deEl = el("div",{class:"de",text:de});
+      const doneBtn = el("button",{class:"btn sm",text:"✓ verstanden",onclick:() => { doneBtn.disabled = true; deEl.hidden = false; read++; award(3); if (read===tx.s.length) toast("Text fertig gelesen 📖"); }});
+      c.appendChild(el("div",{class:"sent"},[el("div",{class:"row",style:"justify-content:space-between;flex-wrap:nowrap;align-items:flex-start"},[line, el("div",{class:"row",style:"flex:none"},[sayBtn(k),doneBtn])]), el("div",{class:"tr",text:tr}), deEl]));
+    }
+    holder.appendChild(c);
+  }
+  v.append(toggles, holder); apply();
+}
+
+// Sprechen
+function viewSprechen(v){
+  const groups = PHRASES[S.level];
+  let g = lsGet("pgroup"); if (!groups[g]) g = Object.keys(groups)[0];
+  const sub = el("div",{class:"sub"}), list = el("div",{class:"card"});
+  const render = () => {
+    list.replaceChildren();
+    for (const [k,tr,de] of groups[g]) {
+      const res = el("div",{class:"res"});
+      list.appendChild(el("div",{class:"phrase"},[
+        el("div",{},[ko(k), el("div",{class:"tr",text:tr}), el("div",{class:"de",text:de})]),
+        el("div",{class:"row",style:"justify-content:flex-end"},[sayBtn(k), sayBtn(k,"🐢",{slow:true}), el("button",{class:"btn sm pri",text:"🎤",title:"Nachsprechen",onclick:speakCheck(k,res,10)})]),
+        res]));
+    }
+  };
+  for (const k of Object.keys(groups)) sub.appendChild(el("button",{text:k,class:k===g?"on":"",onclick:e => { g = k; lsSet("pgroup",k); for (const b of sub.children) b.classList.remove("on"); e.target.classList.add("on"); render(); }}));
+  v.append(el("p",{class:"muted",text:"Erst anhören, dann auf 🎤 tippen und nachsprechen. 🐢 spielt langsam ab."}), sub, list);
+  if (groups === PHRASES.a) v.appendChild(el("p",{class:"note",text:"Koreanisch hat zwei Zahlenreihen: die sinokoreanischen (일, 이, 삼 …) für Geld, Daten, Minuten und Telefonnummern, die koreanischen (하나, 둘, 셋 …) zum Zählen von Dingen, für das Alter und die Stunde."}));
+  if (!SR) v.appendChild(el("p",{class:"note",text:"Dein Browser hat keine Spracherkennung. Du kannst trotzdem nachsprechen und dich selbst bewerten. Chrome auf dem Computer oder Android erkennt Koreanisch am besten."}));
+  render();
+}
+
+// Dialoge
+function viewDialoge(v){
+  const ds = DIALOGS[S.level];
+  let di = Math.min(+(lsGet("dlg")||0), ds.length-1);
+  const sub = el("div",{class:"sub"}), stage = el("div",{class:"card"});
+  const hide = el("input",{type:"checkbox"}); hide.checked = adv();
+  const run = () => {
+    const d = ds[di]; let i = 0;
+    stage.replaceChildren(el("h3",{style:"margin-top:0",text:d.title}));
+    const area = el("div"), ctl = el("div",{class:"row",style:"margin-top:10px"});
+    stage.append(area, ctl);
+    const step = async () => {
+      ctl.replaceChildren();
+      if (i >= d.lines.length) { award(15, "Dialog geschafft 💬"); ctl.append(el("button",{class:"btn pri",text:"Nochmal",onclick:run}), di < ds.length-1 ? el("button",{class:"btn",text:"Nächster Dialog",onclick:() => { di++; lsSet("dlg",di); mark(); run(); }}) : null); return; }
+      const [me,k,tr,de] = d.lines[i];
+      if (!me) {
+        area.appendChild(el("div",{class:"line them"},[el("div",{class:"who",text:d.them}),ko(k),el("div",{class:"tr",text:tr}),el("div",{class:"small",text:de})," ",sayBtn(k,"🔊",{pitch:1.15})]));
+        await speak(k,{pitch:1.15}); i++; step();
+      } else {
+        const res = el("div",{class:"res"});
+        const kEl = ko(k), trEl = el("div",{class:"tr",text:tr});
+        if (hide.checked) { kEl.hidden = true; trEl.hidden = true; }
+        area.appendChild(el("div",{class:"line me"},[el("div",{class:"who",text:"Du"}),kEl,trEl,el("div",{class:"small",text:de}),res]));
+        ctl.append(el("button",{class:"btn pri",text:"🎤 Sprechen",onclick:async () => { await speakCheck(k,res,12)(); kEl.hidden = false; trEl.hidden = false; }}),
+          el("button",{class:"btn",text:"🔊 Vorsagen",onclick:() => { kEl.hidden = false; trEl.hidden = false; speak(k); }}),
+          el("button",{class:"btn",text:"Weiter →",onclick:() => { kEl.hidden = false; trEl.hidden = false; i++; step(); }}));
+      }
+    };
+    step();
+  };
+  const mark = () => { [...sub.children].forEach((b,j) => b.classList.toggle("on", j===di)); };
+  ds.forEach((d,j) => sub.appendChild(el("button",{text:d.title,onclick:() => { di = j; lsSet("dlg",j); mark(); run(); }})));
+  v.append(el("p",{class:"muted",text:"Dein Gegenüber spricht, du antwortest. Sprich deine Zeile, lass sie dir vorsagen oder geh weiter."}), sub,
+    el("label",{class:"chk"},[hide,"Meine Zeilen erst nach dem Sprechen zeigen (nur Deutsch als Vorlage)"]), stage);
+  mark(); run();
+}
+
+// Schreiben: Einzelzeichen antippen, die Seite setzt daraus die Silbenblöcke
+function viewSchreiben(v){
+  const words = WRITE[S.level];
+  const diktat = el("input",{type:"checkbox"}); diktat.checked = adv();
+  const card = el("div",{class:"card"});
+  const extra = [..."ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅎㅏㅓㅗㅜㅡㅣㅐㅔ"];
+  const next = () => {
+    const w = pick(words), parts = jamo(w[0]);
+    const tiles = shuffle(parts.concat(sampleOthers(extra.filter(c => !parts.includes(c)), null, 3)));
+    let built = [];
+    const ans = el("div",{class:"answer",lang:"ko"}), fb = el("div",{class:"fb"}), tl = el("div",{class:"tiles"});
+    const draw = () => { ans.textContent = compose(built.map(b => tiles[b])) || " "; [...tl.children].forEach((t,i) => t.disabled = built.includes(i)); };
+    tiles.forEach((c,i) => tl.appendChild(el("button",{class:"tile",text:c,onclick:() => { built.push(i); draw(); check(); }})));
+    const check = () => {
+      const s = built.map(b => tiles[b]);
+      if (s.join("") === parts.join("")) { fb.className = "fb ok"; fb.textContent = "✓ "+w[0]+" · "+w[1]+" · "+w[2]; award(parts.length>6?10:6); speak(w[0]); [...tl.children].forEach(t => t.disabled = true); setTimeout(next, 1800); }
+      else if (s.length >= parts.length) { fb.className = "fb no"; fb.textContent = "Noch nicht ganz. Tipp: Jede Silbe beginnt mit einem Konsonanten (bei Vokal mit ㅇ), dann kommt der Vokal, dann der Auslaut."; }
+      else { fb.className = "fb"; fb.textContent = ""; }
+    };
+    const hint = el("div",{},[el("b",{text:w[2]}), diktat.checked ? null : el("span",{class:"tr",text:"  "+w[1]})]);
+    card.replaceChildren(
+      el("p",{class:"muted",text: diktat.checked ? "Diktat: Hör das Wort und setze es aus den Zeichen zusammen." : "Setze das Wort aus den Zeichen zusammen."}),
+      el("div",{class:"row"},[sayBtn(w[0],"🔊 Anhören"), sayBtn(w[0],"🐢",{slow:true}), hint]),
+      ans, tl, fb,
+      el("div",{class:"row"},[el("button",{class:"btn",text:"⌫ Zurück",onclick:() => { built.pop(); draw(); check(); }}), el("button",{class:"btn",text:"Lösung zeigen",onclick:() => { fb.className = "fb"; fb.textContent = w[0]+" = "+parts.join(" + "); }}), el("button",{class:"btn",text:"Neues Wort",onclick:next})])
+    );
+    draw(); if (diktat.checked) setTimeout(() => speak(w[0]), 250);
+  };
+  diktat.onchange = next;
+  v.append(el("label",{class:"chk"},[diktat,"Diktat (ohne Umschrift)"]), card,
+    el("p",{class:"small muted",text:"Du tippst die Zeichen in Schreibreihenfolge an: Anlaut, Vokal, Auslaut, Silbe für Silbe. Die Blöcke entstehen von selbst."}));
+  next();
+}
+
+// ---------- Start ----------
+for (const [t,l] of TABS) $("tabs").appendChild(el("button",{text:l,"data-t":t,onclick:() => show(t)}));
+function setLevel(l){ S.level = l; for (const b of $("levelSeg").children) b.classList.toggle("on", b.dataset.l===l); }
+for (const b of $("levelSeg").children) b.onclick = () => { setLevel(b.dataset.l); save(); show(tab); };
+setLevel(S.level === "f" ? "f" : "a");
+renderStats();
+show(TABS.some(t => t[0]===lsGet("tab")) ? lsGet("tab") : "start");
+
+(async () => {
+  const cfg = window.SR_CONFIG || {};
+  try {
+    if (!cfg.supabaseUrl || !window.supabase) throw new Error("ohne Konfiguration");
+    sb = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+    const s = await sb.auth.getSession();
+    user = s.data.session ? s.data.session.user : null;
+  } catch(e) { user = null; }
+  if (!user) { setStore("local"); return; }
+  try {
+    const r = await sb.from("schach_docs").select("data").eq("user_id", user.id).eq("path", "sprachen/koreanisch/fortschritt").maybeSingle();
+    if (r.error) throw r.error;
+    const d = r.data && r.data.data;
+    if (d && (d.updated||0) > (S.updated||0)) {
+      S = Object.assign(S, {punkte:d.punkte||0, serie:d.serie||0, lastDay:d.lastDay||"", heute:d.heute||{date:"",punkte:0}, boxes:d.boxes||{}, level:d.level||S.level, updated:d.updated});
+      lsSet("state", JSON.stringify(S)); setLevel(S.level === "f" ? "f" : "a"); renderStats(); show(tab);
+      setStore("db");
+    } else if (S.punkte > 0) save(); else setStore("db");
+  } catch(e) { setStore("error"); }
+})();
+</script>
+</body>
+</html>

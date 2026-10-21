@@ -169,8 +169,8 @@ var COURSES = [
   {id: "huberman", icon: "🌅", title: "Huberman-Protokolle", text: "Deine Tages-Checkliste nach Hubermans „Protocols“: 31 Punkte von morgens bis nachts, ab 80 % ist der Tag geschafft, mit Jahresübersicht und Nachschlagewerk.", href: "huberman/"},
   // Jedes Konto hat seine eigene Karte (weltkarte/, Orte in schach_docs unter weltkarte/ort.<id>). Die Kachel zeigt, wie viele Orte besucht und geplant sind.
   {id: "weltkarte", icon: "🗺️", title: "Weltkarte", text: "Alle Orte, an denen du warst und wo du noch hin willst, als Pins auf einer großen Weltkarte. Mit Datum, Notizen und Bildern als Andenken.", href: "weltkarte/"},
-  // Sprachen (sprachen/): Niederländisch, Japanisch, Thai. Die Kachel zeigt die Punkte aller Sprachen (schach_docs, Pfade sprachen/<sprache>/fortschritt).
-  {id: "sprachen", icon: "🗣️", title: "Sprachen", text: "Niederländisch, Japanisch und Thai für Anfänger und Fortgeschrittene: nachsprechen mit Spracherkennung, Dialoge, Schreiben und Lesen, mit Punkten, Serien und Stufen.", href: "sprachen/"}
+  // Sprachen (sprachen/): Niederländisch, Japanisch, Thai, Koreanisch. Die Kachel zeigt die Punkte aller Sprachen (schach_docs, Pfade sprachen/<sprache>/fortschritt).
+  {id: "sprachen", icon: "🗣️", title: "Sprachen", text: "Niederländisch, Japanisch, Thai und Koreanisch für Anfänger und Fortgeschrittene: nachsprechen mit Spracherkennung, Dialoge, Schreiben und Lesen, mit Punkten, Serien und Stufen.", href: "sprachen/"}
 ];
 // Nur für einzeln freigeschaltete Konten sichtbar (Zeile in gevt_members). Ohne Freigabe taucht die Kachel nicht auf.
 var GEVT = {id: "gevt", icon: "🥋", title: "Ving Tsun Wissen", text: "Frag deine GEVT-Wissensdatenbank: Göksels Lehre und deine Notizen getrennt, mit Grad und Quellen.", href: "gevt/"};
@@ -743,7 +743,8 @@ var GEVT = {id: "gevt", icon: "🥋", title: "Ving Tsun Wissen", text: "Frag dei
   var SUBMODS = [
     {id: "sprachen:niederlaendisch", icon: "🇳🇱", title: "Nur Niederländisch"},
     {id: "sprachen:japanisch", icon: "🇯🇵", title: "Nur Japanisch"},
-    {id: "sprachen:thai", icon: "🇹🇭", title: "Nur Thai"}
+    {id: "sprachen:thai", icon: "🇹🇭", title: "Nur Thai"},
+    {id: "sprachen:koreanisch", icon: "🇰🇷", title: "Nur Koreanisch"}
   ];
   function modList() { return COURSES.filter(function (c) { return c.id !== "gevt"; }).concat(SUBMODS); }
   function modBoxes(sel, disabled, onchange) {
