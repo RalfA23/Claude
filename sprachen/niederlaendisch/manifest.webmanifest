@@ -1,0 +1,14 @@
+{
+  "name": "Niederländisch",
+  "short_name": "Nederlands",
+  "description": "Niederländisch sprechen lernen: nachsprechen, Dialoge, Schreiben, Lesen.",
+  "lang": "de",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f6f3ee",
+  "theme_color": "#e2711d",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}
