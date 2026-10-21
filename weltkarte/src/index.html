@@ -229,8 +229,9 @@ dialog.light::backdrop{background:rgba(0,0,0,.6)}
 
 <script>
 // Speicherung im Konto der Lebensplattform (Supabase, Tabelle schach_docs):
-//   weltkarte/ort/<id>          {name, kind: "war"|"will", lat, lng, date, note, photos: [bildIds], thumb, created, updated}
-//   weltkarte/bild/<id>/<bild>  {img} als verkleinertes JPEG (data-URL), wird erst beim Öffnen eines Ortes geladen
+// Die Tabelle erlaubt nur einen Schrägstrich im Pfad, deshalb Punkte als Trenner:
+//   weltkarte/ort.<id>          {name, kind: "war"|"will", lat, lng, date, note, photos: [bildIds], thumb, created, updated}
+//   weltkarte/bild.<id>.<bild>  {img} als verkleinertes JPEG (data-URL), wird erst beim Öffnen eines Ortes geladen
 // Jede Zeile gehört einem Konto; die Datenbank gibt nur die eigenen Zeilen heraus. Die Orte ohne Bilder liegen zusätzlich im Browser.
 var DOC = "weltkarte/";
 var sb = null, user = null;
@@ -492,8 +493,8 @@ $("editform").addEventListener("submit", function (e) {
     return savePin(p, d);
   }).then(function () {
     $("edit").close(); openMemo(p.id);
-  }).catch(function () {
-    toast("Speichern hat nicht geklappt. Bitte nochmal versuchen.", 4000);
+  }).catch(function (err) {
+    toast("Speichern hat nicht geklappt" + (err && err.message ? ": " + err.message : ". Bitte nochmal versuchen."), 6000);
   }).then(function () { $("savebtn").disabled = false; $("savebtn").textContent = "Speichern"; });
 });
 
@@ -582,21 +583,21 @@ function savePin(p, d) {
   var now = new Date().toISOString(), chain = Promise.resolve();
   d.photos.filter(function (x) { return x.isNew; }).forEach(function (x) {
     chain = chain.then(function () {
-      return sb.from("schach_docs").upsert({user_id: user.id, path: DOC + "bild/" + p.id + "/" + x.id, data: {img: x.src}, updated_at: now}).then(chk);
+      return sb.from("schach_docs").upsert({user_id: user.id, path: DOC + "bild." + p.id + "." + x.id, data: {img: x.src}, updated_at: now}).then(chk);
     }).then(function () { photoCache[x.id] = x.src; x.isNew = false; });
   });
   return chain.then(function () {
-    return sb.from("schach_docs").upsert({user_id: user.id, path: DOC + "ort/" + p.id, data: p, updated_at: now}).then(chk);
+    return sb.from("schach_docs").upsert({user_id: user.id, path: DOC + "ort." + p.id, data: p, updated_at: now}).then(chk);
   }).then(function () {
     pins[p.id] = p; saveLocal(); drawPin(p); updateStat();
-    if (d.removed.length) sb.from("schach_docs").delete().eq("user_id", user.id).in("path", d.removed.map(function (b) { return DOC + "bild/" + p.id + "/" + b; })).then(function () {});
+    if (d.removed.length) sb.from("schach_docs").delete().eq("user_id", user.id).in("path", d.removed.map(function (b) { return DOC + "bild." + p.id + "." + b; })).then(function () {});
     d.removed.forEach(function (b) { delete photoCache[b]; });
   });
 }
 
 function deletePin(id) {
-  return sb.from("schach_docs").delete().eq("user_id", user.id).like("path", DOC + "bild/" + id + "/%").then(chk)
-    .then(function () { return sb.from("schach_docs").delete().eq("user_id", user.id).eq("path", DOC + "ort/" + id).then(chk); })
+  return sb.from("schach_docs").delete().eq("user_id", user.id).like("path", DOC + "bild." + id + ".%").then(chk)
+    .then(function () { return sb.from("schach_docs").delete().eq("user_id", user.id).eq("path", DOC + "ort." + id).then(chk); })
     .then(function () { if (markers[id]) map.removeLayer(markers[id]); delete markers[id]; delete pins[id]; saveLocal(); updateStat(); });
 }
 
@@ -606,8 +607,8 @@ function loadPhotos(p, cb) {
   if (!need.length) { cb(); return; }
   if (loadingPhotos[p.id]) { loadingPhotos[p.id].push(cb); return; }
   loadingPhotos[p.id] = [cb];
-  sb.from("schach_docs").select("path,data").eq("user_id", user.id).like("path", DOC + "bild/" + p.id + "/%").then(function (r) {
-    (r.data || []).forEach(function (row) { var b = row.path.split("/").pop(); if (row.data && row.data.img) photoCache[b] = row.data.img; });
+  sb.from("schach_docs").select("path,data").eq("user_id", user.id).like("path", DOC + "bild." + p.id + ".%").then(function (r) {
+    (r.data || []).forEach(function (row) { var b = row.path.split(".").pop(); if (row.data && row.data.img) photoCache[b] = row.data.img; });
     var cbs = loadingPhotos[p.id]; delete loadingPhotos[p.id];
     if (r.error) toast("Bilder gerade nicht abrufbar.");
     cbs.forEach(function (f) { f(); });
@@ -629,7 +630,7 @@ function loadPhotos(p, cb) {
     drawAll(); fitAll();
     var hadLocal = Object.keys(pins).length;
     try {
-      var r = await sb.from("schach_docs").select("path,data").eq("user_id", user.id).like("path", DOC + "ort/%");
+      var r = await sb.from("schach_docs").select("path,data").eq("user_id", user.id).like("path", DOC + "ort.%");
       if (r.error) throw r.error;
       pins = {};
       (r.data || []).forEach(function (row) { var d = row.data || {}; if (d.id && typeof d.lat === "number") pins[d.id] = d; });
