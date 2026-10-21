@@ -169,7 +169,7 @@ var COURSES = [
   {id: "huberman", icon: "🌅", title: "Huberman-Protokolle", text: "Deine Tages-Checkliste nach Hubermans „Protocols“: 31 Punkte von morgens bis nachts, ab 80 % ist der Tag geschafft, mit Jahresübersicht und Nachschlagewerk.", href: "huberman/"},
   // Jedes Konto hat seine eigene Karte (weltkarte/, Orte in schach_docs unter weltkarte/ort.<id>). Die Kachel zeigt, wie viele Orte besucht und geplant sind.
   {id: "weltkarte", icon: "🗺️", title: "Weltkarte", text: "Alle Orte, an denen du warst und wo du noch hin willst, als Pins auf einer großen Weltkarte. Mit Datum, Notizen und Bildern als Andenken.", href: "weltkarte/"},
-  // Sprachen (sprachen/): Niederländisch, Japanisch, Thai, Koreanisch, Englisch. Die Kachel zeigt die Punkte aller Sprachen (schach_docs, Pfade sprachen/<sprache>/fortschritt).
+  // Sprachen (sprachen/): Niederländisch, Japanisch, Thai, Koreanisch, Englisch. Die Kachel zeigt die Punkte aller Sprachen (schach_docs, Pfade sprachen/<sprache>.fortschritt).
   {id: "sprachen", icon: "🗣️", title: "Sprachen", text: "Niederländisch, Japanisch, Thai, Koreanisch und Englisch für Anfänger und Fortgeschrittene: nachsprechen mit Spracherkennung, Dialoge, Schreiben und Lesen, mit Punkten, Serien und Stufen.", href: "sprachen/"}
 ];
 // Nur für einzeln freigeschaltete Konten sichtbar (Zeile in gevt_members). Ohne Freigabe taucht die Kachel nicht auf.
@@ -489,10 +489,10 @@ var GEVT = {id: "gevt", icon: "🥋", title: "Ving Tsun Wissen", text: "Frag dei
     });
   }
 
-  // Punkte und längste Serie über alle Sprachen (schach_docs, Pfade sprachen/<sprache>/fortschritt)
+  // Punkte und längste Serie über alle Sprachen (schach_docs, Pfade sprachen/<sprache>.fortschritt)
   function sprachenStand(b, row) {
     var txt = el("p", {text: ""}); b.insertBefore(txt, row);
-    sb.from("schach_docs").select("data").eq("user_id", user.id).like("path", "sprachen/%/fortschritt").then(function (r) {
+    sb.from("schach_docs").select("data").eq("user_id", user.id).like("path", "sprachen/%.fortschritt").then(function (r) {
       if (r.error || !r.data || !r.data.length) return;
       var sum = 0, best = 0;
       r.data.forEach(function (x) { var d = x.data || {}; sum += +d.punkte || 0; best = Math.max(best, +d.serie || 0); });

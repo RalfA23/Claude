@@ -358,7 +358,7 @@ function save(){
   saveTimer = setTimeout(async () => {
     const i = stufeOf(S.punkte);
     const data = {punkte:S.punkte, serie:S.serie, stufe:i+1, stufeName:LEVELS[i][1], lastDay:S.lastDay, heute:S.heute, boxes:S.boxes, level:S.level, updated:S.updated};
-    try { const r = await sb.from("schach_docs").upsert({user_id:user.id, path:"sprachen/koreanisch/fortschritt", data, updated_at:new Date().toISOString()}); setStore(r.error ? "error" : "db"); } catch(e) { setStore("error"); }
+    try { const r = await sb.from("schach_docs").upsert({user_id:user.id, path:"sprachen/koreanisch.fortschritt", data, updated_at:new Date().toISOString()}); setStore(r.error ? "error" : "db"); } catch(e) { setStore("error"); }
   }, 800);
 }
 function setStore(s){
@@ -848,7 +848,7 @@ show(TABS.some(t => t[0]===lsGet("tab")) ? lsGet("tab") : "start");
   } catch(e) { user = null; }
   if (!user) { setStore("local"); return; }
   try {
-    const r = await sb.from("schach_docs").select("data").eq("user_id", user.id).eq("path", "sprachen/koreanisch/fortschritt").maybeSingle();
+    const r = await sb.from("schach_docs").select("data").eq("user_id", user.id).eq("path", "sprachen/koreanisch.fortschritt").maybeSingle();
     if (r.error) throw r.error;
     const d = r.data && r.data.data;
     if (d && (d.updated||0) > (S.updated||0)) {

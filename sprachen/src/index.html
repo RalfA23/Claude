@@ -12,7 +12,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
 <style>
-/* Sprachen: Startseite mit einer Karte pro Sprache. Jede Sprache ist ein eigener Ordner (niederlaendisch/, japanisch/, thai/, koreanisch/, englisch/) und speichert ihren Stand in schach_docs unter sprachen/<ordner>/fortschritt als {punkte, serie, stufe, …}. */
+/* Sprachen: Startseite mit einer Karte pro Sprache. Jede Sprache ist ein eigener Ordner (niederlaendisch/, japanisch/, thai/, koreanisch/, englisch/) und speichert ihren Stand in schach_docs unter sprachen/<ordner>.fortschritt als {punkte, serie, stufe, …}. */
 :root{
   --bg:#f4f2ee; --surface:#fff; --fg:#1b2430; --muted:#5d6876; --line:#dfdad2; --accent:#1f4e79; --warm:#d9731f; --ok:#2e7d4f; --chip:#ebe6de;
   --display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif; --body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
@@ -96,11 +96,11 @@ function stats(dir, d) {
     var ma = await sb.from("module_access").select("modules").eq("user_id", user.id).maybeSingle();
     var mods = !ma.error && ma.data && Array.isArray(ma.data.modules) && !(ad.data && !ad.error) ? ma.data.modules : null;
     if (mods && mods.indexOf("sprachen") < 0) LANGS.forEach(function (l) { if (mods.indexOf("sprachen:" + l.dir) < 0) { cards[l.dir].remove(); delete cards[l.dir]; } });
-    var r = await sb.from("schach_docs").select("path,data").eq("user_id", user.id).like("path", "sprachen/%/fortschritt");
+    var r = await sb.from("schach_docs").select("path,data").eq("user_id", user.id).like("path", "sprachen/%.fortschritt");
     if (r.error) throw r.error;
     var sum = 0, best = 0;
     (r.data || []).forEach(function (row) {
-      var dir = row.path.split("/")[1], d = row.data || {};
+      var dir = row.path.slice(9, -12), d = row.data || {};
       if (cards[dir]) stats(dir, d);
       sum += +d.punkte || 0; best = Math.max(best, +d.serie || 0);
     });
