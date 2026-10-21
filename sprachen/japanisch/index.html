@@ -588,7 +588,9 @@ function save() {
 async function pushCloud() {
   const now = new Date().toISOString();
   try {
-    const r = await sb.from("schach_docs").upsert([{user_id: user.id, path: DOC + "fortschritt", data: S, updated_at: now}, {user_id: user.id, path: DOC + "stand", data: hubStand(), updated_at: now}]);
+    // Die Sprachen-Startseite liest punkte, serie, stufe (ab 1) und stufeName aus diesem Objekt.
+    const h = hubStand(), data = {...S, punkte: h.punkte, serie: h.serie, stufe: h.stufeNr, stufeName: h.stufe};
+    const r = await sb.from("schach_docs").upsert({user_id: user.id, path: DOC + "fortschritt", data, updated_at: now});
     setStore(r.error ? "error" : "db");
   } catch (e) { setStore("error"); }
 }
