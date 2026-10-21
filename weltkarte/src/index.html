@@ -166,7 +166,7 @@ dialog.light::backdrop{background:rgba(0,0,0,.6)}
 
 <!-- Ort anlegen oder bearbeiten -->
 <dialog class="sheet" id="edit" aria-labelledby="edittitle">
-  <form class="dlg" method="dialog" id="editform">
+  <form class="dlg" method="dialog" id="editform" novalidate>
     <header><h2 id="edittitle">Neuer Ort</h2><button type="button" class="x" data-close aria-label="Schließen">✕</button></header>
     <div class="body">
       <div id="searchbox">
@@ -182,8 +182,8 @@ dialog.light::backdrop{background:rgba(0,0,0,.6)}
         <button type="button" class="war" data-k="war" aria-pressed="true"><i class="dot war"></i>War ich</button>
         <button type="button" class="will" data-k="will" aria-pressed="false"><i class="dot will"></i>Will ich hin</button>
       </div>
-      <label class="f">Name <input type="text" id="name" maxlength="120" required></label>
-      <label class="f"><span id="datelabel">Wann warst du dort?</span> <input type="date" id="date"></label>
+      <label class="f">Name des Ortes <small>(optional, sonst nehme ich den Ortsnamen von der Karte)</small><input type="text" id="name" maxlength="120" placeholder="z. B. Lissabon oder Strandbar in Sagres"></label>
+      <label class="f"><span id="datelabel">Wann warst du dort? (optional)</span> <input type="date" id="date"></label>
       <label class="f">Notiz <small>Erinnerungen, mit wem, was du dort erlebt hast oder erleben willst</small><textarea id="note" maxlength="5000"></textarea></label>
       <div>
         <p class="f" style="font-weight:700;font-size:.88rem;margin-bottom:5px">Bilder <small class="hint">werden vor dem Speichern verkleinert</small></p>
@@ -392,7 +392,7 @@ function setPos(lat, lng) {
 function setKind(k) {
   draft.kind = k;
   document.querySelectorAll(".seg button").forEach(function (b) { b.setAttribute("aria-pressed", b.dataset.k === k ? "true" : "false"); });
-  $("datelabel").textContent = k === "will" ? "Wann willst du hin? (optional)" : "Wann warst du dort?";
+  $("datelabel").textContent = k === "will" ? "Wann willst du hin? (optional)" : "Wann warst du dort? (optional)";
 }
 document.querySelectorAll(".seg button").forEach(function (b) { b.addEventListener("click", function () { setKind(b.dataset.k); }); });
 
@@ -479,8 +479,22 @@ function thumbFromSrc(src) {
 $("editform").addEventListener("submit", function (e) {
   e.preventDefault();
   var name = $("name").value.trim();
-  if (draft.lat == null) { toast("Bitte zuerst einen Ort suchen oder auf die Karte tippen."); return; }
-  if (!name) { $("name").focus(); toast("Bitte einen Namen eingeben."); return; }
+  if (draft.lat == null) {
+    // Noch keine Position: den eingegebenen Namen oder Suchbegriff nachschlagen und den ersten Treffer nehmen
+    var q = name || $("q").value.trim();
+    if (!q) { toast("Tippe auf die Karte oder such den Ort, damit ich weiß, wo der Pin hin soll.", 4000); return; }
+    $("savebtn").disabled = true; $("savebtn").textContent = "Suche Ort …";
+    fetch("https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=1&accept-language=de&q=" + encodeURIComponent(q))
+      .then(function (r) { return r.json(); })
+      .then(function (list) {
+        $("savebtn").disabled = false; $("savebtn").textContent = "Speichern";
+        if (!list.length) { toast("„" + q + "“ habe ich nicht gefunden. Tippe auf die Karte, um den Pin zu setzen.", 4500); return; }
+        setPos(+list[0].lat, +list[0].lon); if (!name) $("name").value = shortName(list[0]);
+        $("editform").requestSubmit();
+      })
+      .catch(function () { $("savebtn").disabled = false; $("savebtn").textContent = "Speichern"; toast("Ortssuche nicht erreichbar. Tippe auf die Karte, um den Pin zu setzen.", 4500); });
+    return;
+  }
   var old = pins[draft.id] || {};
   var first = draft.photos[0];
   var p = {id: draft.id, name: name, kind: draft.kind, lat: draft.lat, lng: draft.lng, date: $("date").value, note: $("note").value.trim(),
@@ -488,7 +502,8 @@ $("editform").addEventListener("submit", function (e) {
   var d = draft;
   $("savebtn").disabled = true; $("savebtn").textContent = "Speichere …";
   var thumbP = !first ? Promise.resolve("") : first.thumb ? Promise.resolve(first.thumb) : first.id === (old.photos || [])[0] && old.thumb ? Promise.resolve(old.thumb) : thumbFromSrc(first.src);
-  thumbP.then(function (t) {
+  var nameP = name ? Promise.resolve(name) : new Promise(function (res) { reverseName(p.lat, p.lng, res); setTimeout(function () { res(""); }, 4000); });
+  nameP.then(function (n) { p.name = n || "Ort bei " + p.lat.toFixed(2) + ", " + p.lng.toFixed(2); return thumbP; }).then(function (t) {
     p.thumb = t;
     return savePin(p, d);
   }).then(function () {
