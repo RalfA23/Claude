@@ -1,0 +1,1141 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Japanisch lernen</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23fffdf8'/%3E%3Ccircle cx='32' cy='32' r='16' fill='%23c8402f'/%3E%3C/svg%3E">
+<script src="../../config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;700&family=Klee+One:wght@600&family=Bricolage+Grotesque:opsz,wght@12..96,700&display=swap">
+<style>
+/* Aufbau: Kopf mit Punkten, Serie und Stufe; darunter Reiter Start, Schrift, Lesen, Sprechen, Dialoge, Schreiben. Farben: Washi-Papier, Indigo und Zinnoberrot. */
+:root{
+  --bg:#f6f1e7; --surface:#fffdf8; --fg:#1d2433; --muted:#6b6559; --line:#e3dbcb; --chip:#efe7d6;
+  --ai:#27408b; --shu:#c8402f; --matcha:#4f7a2e; --gold:#a8760b; --bad:#b3261e;
+  --display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
+  --body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+  --jp:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic","Noto Sans JP",sans-serif;
+  --brush:"Klee One","Zen Kaku Gothic New","Hiragino Mincho ProN",serif;
+  box-sizing:border-box;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#14161c; --surface:#1c1f27; --fg:#ece6da; --muted:#a39d90; --line:#2e323c; --chip:#252934;
+  --ai:#8ea6ec; --shu:#ef7a68; --matcha:#9cc275; --gold:#e0b44a; --bad:#f2867d; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#14161c; --surface:#1c1f27; --fg:#ece6da; --muted:#a39d90; --line:#2e323c; --chip:#252934;
+  --ai:#8ea6ec; --shu:#ef7a68; --matcha:#9cc275; --gold:#e0b44a; --bad:#f2867d; color-scheme:dark}
+*,*::before,*::after{box-sizing:inherit}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.55}
+.wrap{max-width:900px;margin:0 auto;padding:20px max(16px,env(safe-area-inset-right,0px)) 80px max(16px,env(safe-area-inset-left,0px))}
+h1,h2,h3{font-family:var(--display);margin:0;line-height:1.2;text-wrap:balance}
+h1{font-size:clamp(1.7rem,5vw,2.4rem)}
+h2{font-size:1.3rem}
+h3{font-size:1.05rem}
+p{margin:0}
+.jp{font-family:var(--jp)}
+a{color:var(--ai)}
+button{font:inherit;color:inherit}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--ai);outline-offset:2px}
+.muted{color:var(--muted)}
+.small{font-size:.88rem}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.back{font-size:.9rem;text-decoration:none;color:var(--muted)}
+.title{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-top:6px}
+.title .jp{font-size:clamp(1.5rem,4vw,2rem);color:var(--shu);font-weight:700}
+.stats{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:8px 12px;min-width:92px}
+.stat b{display:block;font-size:1.2rem;font-variant-numeric:tabular-nums}
+.stat span{font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;background:var(--surface);padding:3px;gap:2px}
+.seg button{border:0;background:none;padding:6px 14px;border-radius:999px;cursor:pointer;font-weight:700;font-size:.9rem;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:20px 0 18px;border-bottom:1px solid var(--line);padding-bottom:12px}
+.tabs button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 15px;font-weight:700;cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--ai);border-color:var(--ai);color:#fff}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.stack{display:flex;flex-direction:column;gap:14px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:9px 14px;cursor:pointer;font-weight:700}
+.btn.primary{background:var(--shu);border-color:var(--shu);color:#fff}
+.btn.ai{background:var(--ai);border-color:var(--ai);color:#fff}
+.btn:disabled{opacity:.5;cursor:default}
+.ghost{background:none;border:1px solid var(--line);border-radius:8px;padding:5px 10px;cursor:pointer;color:var(--muted);font-weight:700;font-size:.85rem}
+.icon{background:var(--chip);border:0;border-radius:999px;width:38px;height:38px;cursor:pointer;font-size:1.05rem;display:inline-grid;place-items:center;flex:none}
+.note{background:var(--chip);border-radius:10px;padding:10px 14px;font-size:.9rem;color:var(--muted)}
+.bar{height:8px;border-radius:4px;background:var(--chip);overflow:hidden}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--shu),var(--gold));border-radius:4px;transition:width .4s}
+.pill{display:inline-block;font-size:.75rem;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--chip);color:var(--muted)}
+.pill.ok{background:color-mix(in srgb,var(--matcha) 18%,transparent);color:var(--matcha)}
+label.chk{display:inline-flex;gap:6px;align-items:center;font-size:.92rem;cursor:pointer}
+select,input[type=text]{font:inherit;color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:9px 12px}
+input[type=text]{width:100%}
+ruby rt{font-size:.5em;color:var(--muted);font-family:var(--jp)}
+.nofuri rt{visibility:hidden}
+
+/* Start */
+.hero{display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:center}
+.ring{width:110px;height:110px}
+.week{display:flex;gap:6px;align-items:flex-end;height:70px;margin-top:10px}
+.week div{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end}
+.week i{display:block;width:100%;max-width:26px;background:var(--ai);border-radius:4px 4px 0 0;min-height:2px}
+.week span{font-size:.7rem;color:var(--muted)}
+.go{display:flex;justify-content:space-between;align-items:center;gap:10px;text-align:left;width:100%;cursor:pointer}
+.go .jp{font-size:1.6rem;color:var(--shu)}
+.badges{display:flex;flex-wrap:wrap;gap:6px}
+.badge{font-size:.82rem;padding:5px 10px;border-radius:999px;border:1px dashed var(--line);color:var(--muted)}
+.badge.on{border-style:solid;border-color:var(--gold);color:var(--fg);background:color-mix(in srgb,var(--gold) 14%,transparent)}
+
+/* Schrift */
+.kgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.kgrid.y{grid-template-columns:repeat(3,1fr)}
+.kcell{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:6px 0 4px;text-align:center;cursor:pointer;position:relative}
+.kcell .c{font-family:var(--jp);font-size:1.7rem;line-height:1.2;display:block}
+.kcell .r{font-size:.75rem;color:var(--muted)}
+.kcell.l1{background:color-mix(in srgb,var(--gold) 12%,var(--surface))}
+.kcell.l2{background:color-mix(in srgb,var(--matcha) 20%,var(--surface));border-color:color-mix(in srgb,var(--matcha) 45%,var(--line))}
+.kcell.empty{visibility:hidden}
+.kcell.pop{animation:pop .35s}
+@keyframes pop{50%{transform:scale(1.12)}}
+.kanjis{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px}
+.kj{border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:8px 4px;text-align:center;cursor:pointer}
+.kj .c{font-family:var(--brush);font-size:2.1rem;display:block;line-height:1.2}
+.kj .m{font-size:.75rem;color:var(--muted);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kj.l2{border-color:var(--matcha)}
+.kdetail{display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:center}
+.kdetail .big{font-family:var(--brush);font-size:5rem;line-height:1;color:var(--shu)}
+
+/* Quiz */
+.q-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.q-prompt{text-align:center;padding:14px 0 18px}
+.q-prompt .big{font-family:var(--jp);font-size:clamp(3rem,14vw,4.6rem);line-height:1.15;display:block}
+.q-prompt .mid{font-size:1.6rem;font-weight:700;display:block}
+.q-opts{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.opt{border:2px solid var(--line);background:var(--surface);border-radius:12px;padding:14px 8px;font-size:1.15rem;font-weight:700;cursor:pointer;min-height:56px}
+.opt.jpopt{font-family:var(--jp);font-size:1.7rem;font-weight:400}
+.opt.ok{border-color:var(--matcha);background:color-mix(in srgb,var(--matcha) 16%,var(--surface))}
+.opt.bad{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 12%,var(--surface))}
+.q-fb{min-height:1.6em;text-align:center;margin-top:10px;font-weight:700}
+.good{color:var(--matcha)} .badtxt{color:var(--bad)}
+
+/* Lesen */
+.drill{text-align:center}
+.drill .word{font-family:var(--jp);font-size:clamp(2.4rem,10vw,3.6rem);line-height:1.3}
+.drill .preview{font-family:var(--jp);font-size:1.3rem;min-height:1.6em;color:var(--ai)}
+.texts{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.tcard{text-align:left;cursor:pointer}
+.tcard .jp{font-size:1.2rem;display:block}
+.reader{font-family:var(--jp);font-size:1.35rem;line-height:2.3}
+.reader .s{cursor:pointer;border-radius:6px;padding:0 2px}
+.reader .s:hover,.reader .s.on{background:color-mix(in srgb,var(--gold) 22%,transparent)}
+.trans{font-size:.95rem;color:var(--muted);border-left:3px solid var(--line);padding-left:12px}
+.question{display:flex;flex-direction:column;gap:6px}
+.question .row button{flex:1 1 160px;text-align:left}
+
+/* Sprechen */
+.phrase{text-align:center;padding:10px 0}
+.phrase .jp{font-size:clamp(1.6rem,6vw,2.3rem);line-height:2.1;display:block}
+.phrase .de{color:var(--muted);font-size:1.05rem}
+.mic{width:76px;height:76px;border-radius:50%;border:0;background:var(--shu);color:#fff;font-size:1.9rem;cursor:pointer;box-shadow:0 4px 14px color-mix(in srgb,var(--shu) 35%,transparent)}
+.mic.rec{animation:pulse 1s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--shu) 55%,transparent)}100%{box-shadow:0 0 0 18px transparent}}
+.result{min-height:3.2em;text-align:center}
+.result .heard{font-family:var(--jp);font-size:1.15rem}
+.dots{display:flex;flex-wrap:wrap;gap:5px;justify-content:center}
+.dots button{width:14px;height:14px;border-radius:50%;border:1px solid var(--line);background:var(--chip);padding:0;cursor:pointer}
+.dots button.s1{background:var(--gold);border-color:var(--gold)}
+.dots button.s2{background:var(--matcha);border-color:var(--matcha)}
+.dots button.cur{outline:2px solid var(--fg);outline-offset:1px}
+
+/* Dialoge */
+.dlist{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}
+.lines{display:flex;flex-direction:column;gap:10px;margin-top:14px}
+.line{max-width:86%;border-radius:16px;padding:10px 14px;border:1px solid var(--line);background:var(--surface)}
+.line.A{align-self:flex-start;border-bottom-left-radius:4px}
+.line.B{align-self:flex-end;border-bottom-right-radius:4px;background:color-mix(in srgb,var(--ai) 10%,var(--surface))}
+.line .who{font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.line .jp{font-size:1.25rem;line-height:2.1;display:block}
+.line .de{font-size:.9rem;color:var(--muted)}
+.line.speaking{border-color:var(--shu);box-shadow:0 0 0 2px color-mix(in srgb,var(--shu) 25%,transparent)}
+.line .task{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px}
+
+/* Schreiben */
+.tiles{display:flex;flex-wrap:wrap;gap:8px;min-height:54px;padding:8px;border-radius:12px;border:1px dashed var(--line)}
+.tiles.answer{background:var(--chip);border-style:solid}
+.tile{font-family:var(--jp);font-size:1.25rem;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:4px 12px;cursor:pointer;line-height:1.9}
+.tile:disabled{opacity:.25;cursor:default}
+.trace{display:flex;gap:18px;flex-wrap:wrap;align-items:center;justify-content:center}
+.trace canvas{border-radius:16px;background:var(--surface);border:1px solid var(--line);touch-action:none;width:260px;height:260px}
+
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(30px);background:var(--fg);color:var(--bg);padding:10px 18px;border-radius:999px;font-weight:700;opacity:0;transition:.3s;pointer-events:none;z-index:9}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+@media (max-width:560px){
+  .hero{grid-template-columns:1fr;justify-items:center;text-align:center}
+  .q-opts{grid-template-columns:1fr 1fr}
+  .kdetail{grid-template-columns:1fr;text-align:center}
+  .line{max-width:96%}
+}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <a class="back" href="../">← Sprachen</a>
+    <div class="row">
+      <span class="small muted">Stufe:</span>
+      <div class="seg" id="levelSeg" role="group" aria-label="Niveau">
+        <button data-level="anf">Anfänger</button>
+        <button data-level="fort">Fortgeschritten</button>
+      </div>
+    </div>
+  </div>
+  <div class="title"><h1>Japanisch</h1><span class="jp">日本語</span></div>
+  <div class="stats" id="stats"></div>
+
+  <nav class="tabs" role="tablist">
+    <button data-tab="start">Start</button>
+    <button data-tab="schrift">Schrift</button>
+    <button data-tab="lesen">Lesen</button>
+    <button data-tab="sprechen">Sprechen</button>
+    <button data-tab="dialoge">Dialoge</button>
+    <button data-tab="schreiben">Schreiben</button>
+  </nav>
+
+  <section id="v-start" class="stack"></section>
+
+  <section id="v-schrift" class="stack" hidden>
+    <div class="row" style="justify-content:space-between">
+      <div class="seg" id="scriptSeg" role="group" aria-label="Schrift">
+        <button data-s="h">Hiragana</button><button data-s="k">Katakana</button><button data-s="kanji">Kanji</button>
+      </div>
+      <button class="btn primary" id="startScriptQuiz">Quiz starten</button>
+    </div>
+    <div id="scriptQuiz" class="card" hidden></div>
+    <div id="scriptBody" class="stack"></div>
+  </section>
+
+  <section id="v-lesen" class="stack" hidden></section>
+  <section id="v-sprechen" class="stack" hidden></section>
+  <section id="v-dialoge" class="stack" hidden></section>
+  <section id="v-schreiben" class="stack" hidden></section>
+
+  <p class="small muted" id="store" style="margin-top:28px"></p>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+// ---------- Daten ----------
+// Kanji mit Lesung stehen als 漢字{かんじ}; daraus entstehen Schriftbild, Lesung und Furigana.
+const KANA_SRC = {
+  basic: "あa いi うu えe おo かka きki くku けke こko さsa しshi すsu せse そso たta ちchi つtsu てte とto なna にni ぬnu ねne のno はha ひhi ふfu へhe ほho まma みmi むmu めme もmo やya ゆyu よyo らra りri るru れre ろro わwa をwo んn",
+  daku: "がga ぎgi ぐgu げge ごgo ざza じji ずzu ぜze ぞzo だda ぢji づzu でde どdo ばba びbi ぶbu べbe ぼbo ぱpa ぴpi ぷpu ぺpe ぽpo",
+  yoon: "きゃkya きゅkyu きょkyo しゃsha しゅshu しょsho ちゃcha ちゅchu ちょcho にゃnya にゅnyu にょnyo ひゃhya ひゅhyu ひょhyo みゃmya みゅmyu みょmyo りゃrya りゅryu りょryo ぎゃgya ぎゅgyu ぎょgyo じゃja じゅju じょjo びゃbya びゅbyu びょbyo ぴゃpya ぴゅpyu ぴょpyo"
+};
+const KANA = [];
+for (const [g, s] of Object.entries(KANA_SRC)) for (const tok of s.split(" ")) { const m = tok.match(/^([^a-z]+)([a-z]+)$/); KANA.push({k: m[1], r: m[2], g}); }
+const AMBIG = new Set(["ぢ", "づ"]);
+const GROUP_NAMES = {basic: "Grundzeichen", daku: "Mit Strichen (゛゜)", yoon: "Kombinationen (ゃゅょ)"};
+
+const KANJI = {
+  anf: [
+    ["一","eins","イチ","ひと(つ)","一{ひと}つ","eins (Stück)"],["二","zwei","ニ","ふた(つ)","二人{ふたり}","zwei Personen"],["三","drei","サン","みっ(つ)","三月{さんがつ}","März"],
+    ["四","vier","シ","よん, よ(つ)","四時{よじ}","vier Uhr"],["五","fünf","ゴ","いつ(つ)","五分{ごふん}","fünf Minuten"],["六","sechs","ロク","むっ(つ)","六時{ろくじ}","sechs Uhr"],
+    ["七","sieben","シチ","なな","七月{しちがつ}","Juli"],["八","acht","ハチ","やっ(つ)","八百屋{やおや}","Gemüseladen"],["九","neun","キュウ, ク","ここの(つ)","九月{くがつ}","September"],
+    ["十","zehn","ジュウ","とお","十月{じゅうがつ}","Oktober"],["百","hundert","ヒャク","","百円{ひゃくえん}","100 Yen"],["千","tausend","セン","ち","千円{せんえん}","1000 Yen"],
+    ["円","Yen, Kreis","エン","まる(い)","円高{えんだか}","starker Yen"],["日","Tag, Sonne","ニチ, ジツ","ひ, か","日本{にほん}","Japan"],["月","Monat, Mond","ゲツ, ガツ","つき","月曜日{げつようび}","Montag"],
+    ["火","Feuer","カ","ひ","火曜日{かようび}","Dienstag"],["水","Wasser","スイ","みず","水曜日{すいようび}","Mittwoch"],["木","Baum","モク","き","木曜日{もくようび}","Donnerstag"],
+    ["金","Gold, Geld","キン","かね","金曜日{きんようび}","Freitag"],["土","Erde","ド","つち","土曜日{どようび}","Samstag"],["人","Mensch","ジン, ニン","ひと","日本人{にほんじん}","Japaner"],
+    ["口","Mund","コウ","くち","入口{いりぐち}","Eingang"],["目","Auge","モク","め","目薬{めぐすり}","Augentropfen"],["山","Berg","サン","やま","富士山{ふじさん}","Berg Fuji"],
+    ["川","Fluss","セン","かわ","川口{かわぐち}","Flussmündung"],["大","groß","ダイ, タイ","おお(きい)","大学{だいがく}","Universität"],["小","klein","ショウ","ちい(さい)","小学校{しょうがっこう}","Grundschule"],
+    ["中","Mitte, innen","チュウ","なか","中国{ちゅうごく}","China"],["上","oben","ジョウ","うえ","上手{じょうず}","geschickt"],["下","unten","カ, ゲ","した","地下鉄{ちかてつ}","U-Bahn"],
+    ["右","rechts","ウ","みぎ","右手{みぎて}","rechte Hand"],["左","links","サ","ひだり","左手{ひだりて}","linke Hand"],["本","Buch, Ursprung","ホン","もと","本屋{ほんや}","Buchladen"],
+    ["学","lernen","ガク","まな(ぶ)","学生{がくせい}","Student"],["生","Leben","セイ","い(きる), う(まれる)","先生{せんせい}","Lehrer"],["年","Jahr","ネン","とし","今年{ことし}","dieses Jahr"],
+    ["時","Zeit, Stunde","ジ","とき","時間{じかん}","Zeit"],["食","essen","ショク","た(べる)","食堂{しょくどう}","Kantine"],["行","gehen","コウ","い(く)","銀行{ぎんこう}","Bank"],
+    ["見","sehen","ケン","み(る)","花見{はなみ}","Kirschblütenschau"],["話","sprechen","ワ","はな(す)","電話{でんわ}","Telefon"],["語","Sprache","ゴ","かた(る)","日本語{にほんご}","Japanisch"]
+  ],
+  fort: [
+    ["会","treffen","カイ","あ(う)","会社{かいしゃ}","Firma"],["社","Firma, Schrein","シャ","やしろ","神社{じんじゃ}","Shintō-Schrein"],["電","Elektrizität","デン","","電車{でんしゃ}","Zug"],
+    ["車","Wagen, Auto","シャ","くるま","自転車{じてんしゃ}","Fahrrad"],["駅","Bahnhof","エキ","","駅員{えきいん}","Bahnpersonal"],["道","Weg","ドウ","みち","北海道{ほっかいどう}","Hokkaidō"],
+    ["店","Laden","テン","みせ","店員{てんいん}","Verkäufer"],["買","kaufen","バイ","か(う)","買{か}い物{もの}","Einkauf"],["売","verkaufen","バイ","う(る)","売{う}り場{ば}","Verkaufsstand"],
+    ["新","neu","シン","あたら(しい)","新聞{しんぶん}","Zeitung"],["古","alt","コ","ふる(い)","古本{ふるほん}","antiquarisches Buch"],["高","hoch, teuer","コウ","たか(い)","高校{こうこう}","Oberschule"],
+    ["安","billig, ruhig","アン","やす(い)","安心{あんしん}","Beruhigung"],["長","lang, Chef","チョウ","なが(い)","社長{しゃちょう}","Firmenchef"],["早","früh","ソウ","はや(い)","早朝{そうちょう}","früher Morgen"],
+    ["朝","Morgen","チョウ","あさ","朝食{ちょうしょく}","Frühstück"],["昼","Mittag","チュウ","ひる","昼休{ひるやす}み","Mittagspause"],["夜","Nacht","ヤ","よる","今夜{こんや}","heute Nacht"],
+    ["週","Woche","シュウ","","週末{しゅうまつ}","Wochenende"],["何","was","カ","なに, なん","何時{なんじ}","wie spät"],["天","Himmel","テン","あめ","天気{てんき}","Wetter"],
+    ["気","Geist, Stimmung","キ, ケ","","元気{げんき}","gesund, munter"],["雨","Regen","ウ","あめ","大雨{おおあめ}","Starkregen"],["花","Blume","カ","はな","花火{はなび}","Feuerwerk"],
+    ["休","ruhen","キュウ","やす(む)","休日{きゅうじつ}","Feiertag"],["読","lesen","ドク","よ(む)","読書{どくしょ}","Lesen"],["書","schreiben","ショ","か(く)","辞書{じしょ}","Wörterbuch"],
+    ["聞","hören, fragen","ブン","き(く)","新聞記者{しんぶんきしゃ}","Journalist"],["言","sagen","ゲン","い(う)","言葉{ことば}","Wort"],["思","denken","シ","おも(う)","思{おも}い出{で}","Erinnerung"],
+    ["知","wissen","チ","し(る)","知人{ちじん}","Bekannter"],["来","kommen","ライ","く(る)","来週{らいしゅう}","nächste Woche"],["帰","heimkehren","キ","かえ(る)","帰国{きこく}","Heimkehr"],
+    ["待","warten","タイ","ま(つ)","待合室{まちあいしつ}","Wartezimmer"],["持","halten","ジ","も(つ)","気持{きも}ち","Gefühl"],["作","machen","サク","つく(る)","作家{さっか}","Schriftsteller"],
+    ["使","benutzen","シ","つか(う)","大使館{たいしかん}","Botschaft"],["楽","Freude, Musik","ガク, ラク","たの(しい)","音楽{おんがく}","Musik"],["国","Land","コク","くに","外国{がいこく}","Ausland"],
+    ["名","Name","メイ","な","名前{なまえ}","Name"],["病","krank","ビョウ","やまい","病院{びょういん}","Krankenhaus"],["医","Medizin","イ","","医者{いしゃ}","Arzt"]
+  ]
+};
+
+const VOCAB = [
+  ["ねこ","Katze"],["いぬ","Hund"],["さかな","Fisch"],["すし","Sushi"],["みず","Wasser"],["おちゃ","Tee"],["ごはん","Reis, Mahlzeit"],["くるま","Auto"],
+  ["えき","Bahnhof"],["やま","Berg"],["かわ","Fluss"],["はな","Blume"],["あめ","Regen"],["そら","Himmel"],["ともだち","Freund"],["せんせい","Lehrer"],
+  ["がっこう","Schule"],["でんしゃ","Zug"],["きって","Briefmarke"],["しんぶん","Zeitung"],["ありがとう","danke"],["おいしい","lecker"],["たかい","teuer, hoch"],["やすい","billig"],
+  ["あたらしい","neu"],["ちいさい","klein"],["おおきい","groß"],["きのう","gestern"],["あした","morgen"],["きょう","heute"],["りんご","Apfel"],["たまご","Ei"],
+  ["ひこうき","Flugzeug"],["じてんしゃ","Fahrrad"],["びょういん","Krankenhaus"],["としょかん","Bibliothek"],["しゃしん","Foto"],["きっぷ","Fahrkarte"],
+  ["コーヒー","Kaffee"],["パン","Brot"],["テレビ","Fernseher"],["ホテル","Hotel"],["タクシー","Taxi"],["カメラ","Kamera"],["ドイツ","Deutschland"],["ハンブルク","Hamburg"],
+  ["ビール","Bier"],["レストラン","Restaurant"],["アイスクリーム","Speiseeis"],["パソコン","Computer"],["スマホ","Smartphone"],["コンビニ","Minimarkt"],["ラーメン","Ramen"],
+  ["チョコレート","Schokolade"],["ケーキ","Kuchen"],["トイレ","Toilette"],["エレベーター","Aufzug"],["メニュー","Speisekarte"]
+];
+
+const PHRASES = {
+  anf: [
+    ["おはようございます","Guten Morgen."],["こんにちは","Guten Tag."],["こんばんは","Guten Abend."],["ありがとうございます","Vielen Dank."],
+    ["すみません","Entschuldigung."],["はじめまして","Freut mich (beim ersten Treffen)."],["私{わたし}はラルフです","Ich bin Ralf."],["ドイツから来{き}ました","Ich komme aus Deutschland."],
+    ["よろしくお願{ねが}いします","Auf gute Bekanntschaft."],["これはいくらですか","Was kostet das?"],["トイレはどこですか","Wo ist die Toilette?"],["水{みず}をください","Wasser, bitte."],
+    ["日本語{にほんご}を勉強{べんきょう}しています","Ich lerne Japanisch."],["わかりません","Ich verstehe nicht."],["もう一度{いちど}お願{ねが}いします","Noch einmal, bitte."],["ゆっくり話{はな}してください","Bitte sprechen Sie langsam."],
+    ["おいしいです","Es ist lecker."],["いただきます","Guten Appetit (vor dem Essen)."],["ごちそうさまでした","Danke für das Essen (danach)."],["駅{えき}はどこですか","Wo ist der Bahnhof?"],
+    ["英語{えいご}を話{はな}せますか","Sprechen Sie Englisch?"],["お会計{かいけい}お願{ねが}いします","Die Rechnung, bitte."],["さようなら","Auf Wiedersehen."],["おやすみなさい","Gute Nacht."],["今{いま}何時{なんじ}ですか","Wie spät ist es?"]
+  ],
+  fort: [
+    ["週末{しゅうまつ}は何{なに}をしましたか","Was hast du am Wochenende gemacht?"],["日本{にほん}に行{い}ったことがあります","Ich war schon einmal in Japan."],["京都{きょうと}に行{い}ってみたいです","Ich möchte gern einmal nach Kyōto."],
+    ["予約{よやく}を変更{へんこう}したいんですが","Ich würde gern meine Reservierung ändern."],["窓側{まどがわ}の席{せき}をお願{ねが}いできますか","Könnte ich einen Fensterplatz bekommen?"],["道{みち}に迷{まよ}ってしまいました","Ich habe mich verlaufen."],
+    ["この近{ちか}くにおすすめのレストランはありますか","Gibt es hier in der Nähe ein empfehlenswertes Restaurant?"],["少{すこ}し考{かんが}えさせてください","Lassen Sie mich kurz nachdenken."],["遅{おく}れてすみません","Entschuldigen Sie die Verspätung."],
+    ["お仕事{しごと}は何{なに}をしていますか","Was machen Sie beruflich?"],["ハンブルクに住{す}んでいます","Ich wohne in Hamburg."],["雨{あめ}が降{ふ}りそうですね","Sieht nach Regen aus, oder?"],
+    ["写真{しゃしん}を撮{と}ってもいいですか","Darf ich ein Foto machen?"],["気{き}にしないでください","Machen Sie sich keine Gedanken."],["頭{あたま}が痛{いた}いです","Ich habe Kopfschmerzen."],
+    ["薬局{やっきょく}はどこにありますか","Wo gibt es eine Apotheke?"],["時間{じかん}があれば、一緒{いっしょ}に行{い}きませんか","Wenn du Zeit hast, gehen wir zusammen hin?"],["日本語{にほんご}がまだ下手{へた}なので、ゆっくりお願{ねが}いします","Mein Japanisch ist noch schwach, bitte langsam."],
+    ["それはいい考{かんが}えですね","Das ist eine gute Idee."],["明日{あした}の会議{かいぎ}は何時{なんじ}からですか","Ab wann ist das Meeting morgen?"],["電車{でんしゃ}が遅{おく}れているそうです","Der Zug soll Verspätung haben."],
+    ["前{まえ}より上手{じょうず}になりました","Ich bin besser geworden als früher."],["お先{さき}に失礼{しつれい}します","Ich gehe dann schon (Feierabend)."],["お疲{つか}れ様{さま}でした","Danke für die gute Arbeit."],["今度{こんど}一緒{いっしょ}に飲{の}みに行{い}きましょう","Lass uns nächstes Mal zusammen etwas trinken gehen."]
+  ]
+};
+
+// Dialoge: A ist das Gegenüber (Sprachausgabe), B bist du.
+const DIALOGS = {
+  anf: [
+    {id: "kennen", title: "Kennenlernen", jp: "自己紹介", lines: [
+      ["A","はじめまして。田中{たなか}です。","Freut mich. Ich bin Tanaka."],
+      ["B","はじめまして。ラルフです。","Freut mich. Ich bin Ralf."],
+      ["A","ラルフさんはどこから来{き}ましたか。","Woher kommen Sie, Ralf?"],
+      ["B","ドイツのハンブルクから来{き}ました。","Ich komme aus Hamburg in Deutschland."],
+      ["A","そうですか。日本語{にほんご}が上手{じょうず}ですね。","Ach so. Ihr Japanisch ist gut!"],
+      ["B","いいえ、まだまだです。よろしくお願{ねが}いします。","Ach nein, noch lange nicht. Auf gute Bekanntschaft."],
+      ["A","こちらこそ、よろしくお願{ねが}いします。","Ganz meinerseits."]]},
+    {id: "cafe", title: "Im Café", jp: "カフェで", lines: [
+      ["A","いらっしゃいませ。ご注文{ちゅうもん}はお決{き}まりですか。","Willkommen. Haben Sie schon gewählt?"],
+      ["B","コーヒーを一{ひと}つください。","Einen Kaffee, bitte."],
+      ["A","ホットとアイス、どちらにしますか。","Heiß oder mit Eis?"],
+      ["B","ホットでお願{ねが}いします。","Heiß, bitte."],
+      ["A","四百五十円{よんひゃくごじゅうえん}です。","Das macht 450 Yen."],
+      ["B","カードで払{はら}えますか。","Kann ich mit Karte zahlen?"],
+      ["A","はい、大丈夫{だいじょうぶ}です。","Ja, kein Problem."]]},
+    {id: "bahnhof", title: "Am Bahnhof", jp: "駅で", lines: [
+      ["B","すみません、東京駅{とうきょうえき}までいくらですか。","Entschuldigung, was kostet es bis Tōkyō-Bahnhof?"],
+      ["A","二百円{にひゃくえん}です。","200 Yen."],
+      ["B","何番線{なんばんせん}ですか。","Welches Gleis?"],
+      ["A","三番線{さんばんせん}です。","Gleis 3."],
+      ["B","次{つぎ}の電車{でんしゃ}は何時{なんじ}ですか。","Wann fährt der nächste Zug?"],
+      ["A","十時十五分{じゅうじじゅうごふん}です。","Um 10:15 Uhr."],
+      ["B","ありがとうございます。","Vielen Dank."]]},
+    {id: "konbini", title: "Im Konbini", jp: "コンビニで", lines: [
+      ["A","いらっしゃいませ。","Willkommen."],
+      ["B","すみません、お弁当{べんとう}はありますか。","Entschuldigung, gibt es Bentō?"],
+      ["A","はい、あちらにあります。","Ja, dort drüben."],
+      ["A","お弁当{べんとう}、温{あたた}めますか。","Soll ich das Bentō aufwärmen?"],
+      ["B","はい、お願{ねが}いします。","Ja, bitte."],
+      ["A","袋{ふくろ}はご利用{りよう}ですか。","Brauchen Sie eine Tüte?"],
+      ["B","いいえ、大丈夫{だいじょうぶ}です。","Nein, nicht nötig."],
+      ["A","ありがとうございました。","Vielen Dank."]]},
+    {id: "weg", title: "Nach dem Weg fragen", jp: "道を聞く", lines: [
+      ["B","すみません、駅{えき}はどこですか。","Entschuldigung, wo ist der Bahnhof?"],
+      ["A","まっすぐ行{い}って、二{ふた}つ目{め}の信号{しんごう}を右{みぎ}に曲{ま}がってください。","Gehen Sie geradeaus und biegen Sie an der zweiten Ampel rechts ab."],
+      ["B","二{ふた}つ目{め}の信号{しんごう}を右{みぎ}ですね。","An der zweiten Ampel rechts, ja?"],
+      ["A","はい、そうです。歩{ある}いて五分{ごふん}ぐらいです。","Ja, genau. Etwa fünf Minuten zu Fuß."],
+      ["B","どうもありがとうございます。","Vielen Dank."],
+      ["A","どういたしまして。","Gern geschehen."]]}
+  ],
+  fort: [
+    {id: "hotel", title: "Im Hotel", jp: "ホテルで", lines: [
+      ["A","いらっしゃいませ。チェックインでしょうか。","Willkommen. Möchten Sie einchecken?"],
+      ["B","はい、ラルフの名前{なまえ}で予約{よやく}しています。","Ja, ich habe auf den Namen Ralf reserviert."],
+      ["A","ラルフ様{さま}ですね。三泊{さんぱく}のご予約{よやく}でございます。","Herr Ralf, eine Reservierung für drei Nächte."],
+      ["B","はい。朝食{ちょうしょく}は何時{なんじ}からですか。","Ja. Ab wann gibt es Frühstück?"],
+      ["A","朝{あさ}七時{しちじ}から十時{じゅうじ}まで、二階{にかい}のレストランでございます。","Von 7 bis 10 Uhr im Restaurant im ersten Stock."],
+      ["B","荷物{にもつ}を預{あず}かってもらえますか。","Könnten Sie mein Gepäck aufbewahren?"],
+      ["A","かしこまりました。お部屋{へや}は五階{ごかい}です。ごゆっくりどうぞ。","Sehr gern. Ihr Zimmer ist im vierten Stock. Erholen Sie sich gut."],
+      ["B","ありがとうございます。","Vielen Dank."]]},
+    {id: "arzt", title: "Beim Arzt", jp: "病院で", lines: [
+      ["A","今日{きょう}はどうされましたか。","Was führt Sie heute zu mir?"],
+      ["B","昨日{きのう}から熱{ねつ}があって、のどが痛{いた}いんです。","Seit gestern habe ich Fieber und Halsschmerzen."],
+      ["A","咳{せき}は出{で}ますか。","Haben Sie Husten?"],
+      ["B","少{すこ}し出{で}ます。夜{よる}はあまり眠{ねむ}れません。","Ein wenig. Nachts kann ich kaum schlafen."],
+      ["A","風邪{かぜ}ですね。薬{くすり}を出{だ}しておきます。","Eine Erkältung. Ich verschreibe Ihnen etwas."],
+      ["B","一日{いちにち}に何回{なんかい}飲{の}めばいいですか。","Wie oft am Tag soll ich es nehmen?"],
+      ["A","一日{いちにち}三回{さんかい}、食後{しょくご}に飲{の}んでください。","Dreimal täglich nach dem Essen."],
+      ["B","わかりました。ありがとうございます。","Verstanden. Vielen Dank."]]},
+    {id: "kollege", title: "Small Talk mit Kollegen", jp: "同僚と雑談", lines: [
+      ["A","週末{しゅうまつ}はどうでしたか。","Wie war Ihr Wochenende?"],
+      ["B","友達{ともだち}と箱根{はこね}に行{い}って、温泉{おんせん}に入{はい}りました。","Ich war mit Freunden in Hakone und im heißen Bad."],
+      ["A","いいですね。紅葉{こうよう}はもうきれいでしたか。","Schön! War das Herbstlaub schon schön?"],
+      ["B","まだ少{すこ}し早{はや}かったですが、景色{けしき}は最高{さいこう}でした。","Es war noch etwas früh, aber die Aussicht war großartig."],
+      ["A","今度{こんど}おすすめの宿{やど}を教{おし}えてください。","Verraten Sie mir mal eine gute Unterkunft."],
+      ["B","もちろんです。後{あと}でメールで送{おく}りますね。","Natürlich. Ich schicke sie Ihnen später per Mail."]]},
+    {id: "telefon", title: "Tisch reservieren", jp: "電話で予約", lines: [
+      ["A","お電話{でんわ}ありがとうございます。さくら亭{てい}でございます。","Danke für Ihren Anruf, hier ist das Sakura-tei."],
+      ["B","もしもし、今晩{こんばん}二人{ふたり}で予約{よやく}したいんですが。","Hallo, ich möchte für heute Abend einen Tisch für zwei reservieren."],
+      ["A","何時{なんじ}ごろがよろしいでしょうか。","Um welche Uhrzeit ungefähr?"],
+      ["B","七時{しちじ}は空{あ}いていますか。","Ist um sieben etwas frei?"],
+      ["A","申{もう}し訳{わけ}ございません、七時{しちじ}は満席{まんせき}です。八時{はちじ}でしたらご用意{ようい}できます。","Es tut mir leid, um sieben sind wir ausgebucht. Um acht wäre möglich."],
+      ["B","では、八時{はちじ}でお願{ねが}いします。","Dann bitte um acht."],
+      ["A","かしこまりました。お名前{なまえ}をお願{ねが}いします。","Sehr gern. Ihr Name, bitte?"],
+      ["B","ラルフと申{もう}します。よろしくお願{ねが}いします。","Mein Name ist Ralf. Vielen Dank."]]}
+  ]
+};
+
+const TEXTS = {
+  anf: [
+    {id: "tag", title: "Mein Tag", jp: "わたしの いちにち", text: "わたしは まいあさ 六時{ろくじ}に おきます。コーヒーを のみます。それから しごとに いきます。ひるごはんは おにぎりです。よるは 日本語{にほんご}を べんきょうします。",
+      de: "Ich stehe jeden Morgen um sechs Uhr auf. Ich trinke Kaffee. Dann gehe ich zur Arbeit. Zu Mittag gibt es Onigiri. Abends lerne ich Japanisch.",
+      q: [["Wann steht die Person auf?", ["Um 6 Uhr","Um 7 Uhr","Um 8 Uhr"]], ["Was gibt es mittags?", ["Onigiri","Sushi","Ramen"]]]},
+    {id: "hamburg", title: "Wetter in Hamburg", jp: "ハンブルクの てんき", text: "ハンブルクは ドイツの きたに あります。あめが おおいです。でも、なつは すずしくて きもちが いいです。わたしは ハンブルクが すきです。",
+      de: "Hamburg liegt im Norden Deutschlands. Es regnet viel. Aber der Sommer ist kühl und angenehm. Ich mag Hamburg.",
+      q: [["Wie ist das Wetter oft?", ["Es regnet viel","Es schneit viel","Es ist sehr heiß"]], ["Wie ist der Sommer?", ["Kühl und angenehm","Heiß und schwül","Kalt und dunkel"]]]},
+    {id: "konbini", title: "Der Konbini", jp: "コンビニ", text: "日本{にほん}の コンビニは とても べんりです。二十四時間{にじゅうよじかん} あいて います。おにぎりや パンや のみものが あります。おかねも おろせます。",
+      de: "Japanische Minimärkte sind sehr praktisch. Sie haben rund um die Uhr geöffnet. Es gibt Onigiri, Brot und Getränke. Man kann dort auch Geld abheben.",
+      q: [["Wie lange haben sie geöffnet?", ["24 Stunden","Bis 22 Uhr","Nur morgens"]], ["Was kann man dort außerdem?", ["Geld abheben","Zug fahren","Übernachten"]]]},
+    {id: "geburtstag", title: "Ein Geburtstag", jp: "たんじょうび", text: "きのうは ゆきさんの たんじょうびでした。みんなで レストランに いきました。ケーキを たべて、うたを うたいました。とても たのしかったです。",
+      de: "Gestern hatte Yuki Geburtstag. Wir sind alle zusammen ins Restaurant gegangen. Wir haben Kuchen gegessen und gesungen. Es hat viel Spaß gemacht.",
+      q: [["Wer hatte Geburtstag?", ["Yuki","Tanaka","Ich selbst"]], ["Was haben alle gemacht?", ["Kuchen gegessen und gesungen","Karaoke und Bowling","Einen Film geschaut"]]]}
+  ],
+  fort: [
+    {id: "kyoto", title: "Reise nach Kyōto", jp: "京都の旅", text: "先月{せんげつ}、初{はじ}めて京都{きょうと}へ行{い}きました。古{ふる}いお寺{てら}や神社{じんじゃ}がたくさんあって、どこを歩{ある}いても絵{え}のようでした。特{とく}に金閣寺{きんかくじ}は、池{いけ}に映{うつ}る姿{すがた}が本当{ほんとう}に美{うつく}しかったです。ただ、観光客{かんこうきゃく}が多{おお}かったので、次{つぎ}は朝早{あさはや}く行{い}こうと思{おも}います。",
+      de: "Letzten Monat war ich zum ersten Mal in Kyōto. Es gab viele alte Tempel und Schreine, überall sah es aus wie auf einem Gemälde. Besonders der Kinkaku-ji mit seinem Spiegelbild im Teich war wirklich schön. Allerdings waren viele Touristen dort, deshalb will ich nächstes Mal früh morgens hingehen.",
+      q: [["Was war besonders schön?", ["Der Kinkaku-ji im Teich gespiegelt","Das Essen im Hotel","Die Zugfahrt"]], ["Was will die Person nächstes Mal anders machen?", ["Früh morgens hingehen","Im Winter reisen","Mit Reiseführer gehen"]]]},
+    {id: "zug", title: "Japans Züge", jp: "日本の電車", text: "日本{にほん}の電車{でんしゃ}は時間{じかん}に正確{せいかく}なことで有名{ゆうめい}です。数分{すうふん}遅{おく}れただけで、駅員{えきいん}がアナウンスで謝{あやま}ります。また、車内{しゃない}で電話{でんわ}をするのはマナー違反{いはん}だと考{かんが}えられています。そのため、朝{あさ}の満員{まんいん}電車{でんしゃ}でも、驚{おどろ}くほど静{しず}かです。",
+      de: "Japanische Züge sind für ihre Pünktlichkeit berühmt. Schon bei wenigen Minuten Verspätung entschuldigt sich das Bahnpersonal per Durchsage. Außerdem gilt Telefonieren im Zug als unhöflich. Deshalb ist es selbst im vollen Morgenzug erstaunlich ruhig.",
+      q: [["Wofür sind die Züge berühmt?", ["Pünktlichkeit","Niedrige Preise","Große Sitze"]], ["Was gilt im Zug als unhöflich?", ["Telefonieren","Lesen","Schlafen"]]]},
+    {id: "hanami", title: "Kirschblütenschau", jp: "お花見", text: "毎年{まいとし}三月{さんがつ}の終{お}わりから四月{しがつ}にかけて、日本{にほん}各地{かくち}で桜{さくら}が咲{さ}きます。人々{ひとびと}は公園{こうえん}に集{あつ}まり、桜{さくら}の木{き}の下{した}でお弁当{べんとう}を食{た}べたり、お酒{さけ}を飲{の}んだりします。これを「お花見{はなみ}」と言{い}います。桜{さくら}はすぐに散{ち}ってしまうので、人生{じんせい}のはかなさの象徴{しょうちょう}とも言{い}われています。",
+      de: "Jedes Jahr von Ende März bis in den April blühen überall in Japan die Kirschbäume. Die Menschen treffen sich in Parks, essen unter den Bäumen Bentō und trinken Sake. Das nennt man Hanami. Weil die Blüten schnell fallen, gelten sie auch als Symbol für die Vergänglichkeit des Lebens.",
+      q: [["Wann blühen die Kirschbäume?", ["Ende März bis April","Im Juni","Im Herbst"]], ["Wofür stehen die Kirschblüten?", ["Vergänglichkeit","Reichtum","Stärke"]]]},
+    {id: "remote", title: "Arbeit von zu Hause", jp: "在宅勤務", text: "最近{さいきん}、日本{にほん}でも在宅{ざいたく}勤務{きんむ}をする会社{かいしゃ}が増{ふ}えてきました。通勤{つうきん}の時間{じかん}がなくなって助{たす}かるという人{ひと}が多{おお}い一方{いっぽう}で、同僚{どうりょう}と話{はな}す機会{きかい}が減{へ}って寂{さび}しいという声{こえ}もあります。働{はたら}き方{かた}は、これからも変{か}わっていくでしょう。",
+      de: "In letzter Zeit lassen auch in Japan immer mehr Firmen von zu Hause arbeiten. Viele sind froh, dass der Arbeitsweg wegfällt, andere vermissen die Gespräche mit Kollegen. Die Art zu arbeiten wird sich wohl weiter verändern.",
+      q: [["Was finden viele gut?", ["Kein Arbeitsweg mehr","Mehr Gehalt","Längere Pausen"]], ["Welcher Nachteil wird genannt?", ["Weniger Gespräche mit Kollegen","Schlechtes Internet","Mehr Arbeit"]]]}
+  ]
+};
+
+// Satzbau: Bausteine mit |, die erste Reihenfolge ist die Musterlösung, alt enthält weitere richtige.
+const SENTENCES = {
+  anf: [
+    ["わたし|は|コーヒー|を|のみます","Ich trinke Kaffee."],["えき|は|どこ|です|か","Wo ist der Bahnhof?"],["これ|は|わたし|の|ほん|です","Das ist mein Buch."],
+    ["ねこ|が|すき|です","Ich mag Katzen."],["にほんご|を|べんきょう|して|います","Ich lerne Japanisch."],["トイレ|は|あそこ|です","Die Toilette ist dort drüben."],
+    ["みず|を|ください","Wasser, bitte."],["ドイツ|から|きました","Ich komme aus Deutschland."],["ともだち|と|レストラン|に|いきました","Ich bin mit einem Freund ins Restaurant gegangen.",["レストラン|に|ともだち|と|いきました"]],
+    ["この|ラーメン|は|おいしい|です","Diese Ramen sind lecker."]
+  ],
+  fort: [
+    ["日本{にほん}|に|行{い}った|こと|が|あります","Ich war schon einmal in Japan."],["雨{あめ}|が|降{ふ}り|そう|です","Es sieht nach Regen aus."],["写真{しゃしん}|を|撮{と}って|も|いい|ですか","Darf ich ein Foto machen?"],
+    ["少{すこ}し|考{かんが}えさせて|ください","Lassen Sie mich kurz nachdenken."],["窓側{まどがわ}|の|席{せき}|を|お願{ねが}いします","Einen Fensterplatz, bitte."],["電車{でんしゃ}|が|遅{おく}れて|いる|そう|です","Der Zug soll Verspätung haben."],
+    ["京都{きょうと}|に|行{い}って|みたい|です","Ich möchte gern einmal nach Kyōto."],["薬{くすり}|を|飲{の}んだ|ほう|が|いい|です","Du solltest besser Medizin nehmen."],["日本語{にほんご}|が|上手{じょうず}に|なりました","Mein Japanisch ist besser geworden."],
+    ["ここ|で|たばこ|を|吸{す}って|は|いけません","Hier darf man nicht rauchen."]
+  ]
+};
+
+const STAGES = [[0,"初心者","Neuling"],[300,"ひらがな","Hiragana-Lehrling"],[800,"カタカナ","Katakana-Kenner"],[1800,"漢字","Kanji-Schüler"],[3500,"会話","Gesprächspartner"],[6000,"上級","Fortgeschritten"],[10000,"先生","Sensei-Niveau"]];
+const GOAL = 100, STREAK_MIN = 30;
+
+// ---------- Schrift-Werkzeuge ----------
+const RUBY_RE = /([一-鿿々〆ヶ]+)\{([^}]+)\}/g;
+const plain = t => t.replace(RUBY_RE, "$1");
+const reading = t => t.replace(RUBY_RE, "$2");
+const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[c]);
+const ruby = t => esc(t).replace(RUBY_RE, "<ruby>$1<rt>$2</rt></ruby>");
+const toKata = s => s.replace(/[ぁ-ゖ]/g, c => String.fromCharCode(c.charCodeAt(0) + 0x60));
+const toHira = s => s.replace(/[ァ-ヶ]/g, c => String.fromCharCode(c.charCodeAt(0) - 0x60));
+
+const K2R = {};
+for (const x of KANA) if (!K2R[x.k]) K2R[x.k] = x.r;
+Object.assign(K2R, {"ぁ":"a","ぃ":"i","ぅ":"u","ぇ":"e","ぉ":"o","ゃ":"ya","ゅ":"yu","ょ":"yo","ゔ":"vu","ふぁ":"fa","ふぃ":"fi","ふぇ":"fe","ふぉ":"fo","てぃ":"ti","でぃ":"di","でゅ":"dyu","うぃ":"wi","うぇ":"we","うぉ":"wo","しぇ":"she","じぇ":"je","ちぇ":"che","ゔぁ":"va","ゔぃ":"vi","ゔぇ":"ve","ゔぉ":"vo"});
+function kanaToRomaji(s) {
+  s = toHira(s); let out = "", i = 0, dbl = false;
+  while (i < s.length) {
+    const c = s[i];
+    if (c === "っ") { dbl = true; i++; continue; }
+    if (c === "ー") { const v = out.match(/[aeiou]$/); if (v) out += v[0]; i++; continue; }
+    let r, len;
+    if (K2R[s.substr(i, 2)]) { r = K2R[s.substr(i, 2)]; len = 2; }
+    else if (K2R[c]) { r = K2R[c]; len = 1; }
+    else { r = c; len = 1; }
+    if (dbl) { out += r.startsWith("ch") ? "t" : (/^[b-df-hj-np-tv-z]/.test(r) ? r[0] : ""); dbl = false; }
+    out += r; i += len;
+  }
+  return out;
+}
+const R2K = {};
+for (const x of KANA) if (!AMBIG.has(x.k) && !(x.r in R2K)) R2K[x.r] = x.k;
+Object.assign(R2K, {si:"し",ti:"ち",tu:"つ",hu:"ふ",zi:"じ",di:"ぢ",du:"づ",sya:"しゃ",syu:"しゅ",syo:"しょ",tya:"ちゃ",tyu:"ちゅ",tyo:"ちょ",cya:"ちゃ",cyu:"ちゅ",cyo:"ちょ",zya:"じゃ",zyu:"じゅ",zyo:"じょ",jya:"じゃ",jyu:"じゅ",jyo:"じょ",fa:"ふぁ",fi:"ふぃ",fe:"ふぇ",fo:"ふぉ",she:"しぇ",je:"じぇ",che:"ちぇ",thi:"てぃ",dhi:"でぃ",wi:"うぃ",we:"うぇ",vu:"ゔ",va:"ゔぁ",vi:"ゔぃ",ve:"ゔぇ",vo:"ゔぉ","-":"ー",xa:"ぁ",xi:"ぃ",xu:"ぅ",xe:"ぇ",xo:"ぉ",xtu:"っ",xya:"ゃ",xyu:"ゅ",xyo:"ょ"});
+// Romaji wie bei einer japanischen Tastatur: nn oder n vor Konsonant wird ん, Doppelkonsonant wird っ.
+function romajiToKana(s) {
+  s = s.toLowerCase().replace(/[āâ]/g, "aa").replace(/[ōô]/g, "ou").replace(/[ūû]/g, "uu").replace(/[ēê]/g, "ee").replace(/[īî]/g, "ii");
+  const V = "aeiouy"; let out = "", i = 0;
+  while (i < s.length) {
+    const c = s[i], n1 = s[i + 1] || "", n2 = s[i + 2] || "";
+    if (c === "n" && !(n1 && V.includes(n1))) {
+      if (n1 === "'" || (n1 === "n" && !(n2 && V.includes(n2)))) i += 2; else i += 1;
+      out += "ん"; continue;
+    }
+    if (c === n1 && /[bcdfghjkmpqrstvwxz]/.test(c)) { out += "っ"; i++; continue; }
+    if (c === "t" && n1 === "c" && n2 === "h") { out += "っ"; i++; continue; }
+    let hit = false;
+    for (const L of [3, 2, 1]) { const p = s.substr(i, L); if (p.length === L && R2K[p]) { out += R2K[p]; i += L; hit = true; break; } }
+    if (!hit) { out += c; i++; }
+  }
+  return out;
+}
+// Vergleichsform: Hiragana, ohne Satzzeichen, Langvokalstrich ausgeschrieben, Partikel wie gesprochen.
+function normJa(s) {
+  s = toHira(String(s).toLowerCase()).replace(/[０-９]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xfee0)).replace(/[\s、。！？!?,.「」『』・〜~…'-]/g, m => m === "-" ? "ー" : "");
+  let out = "";
+  for (const c of s) {
+    if (c === "ー") { const v = kanaToRomaji(out.slice(-1)).slice(-1); out += ({a:"あ",i:"い",u:"う",e:"え",o:"お"})[v] || ""; }
+    else out += c;
+  }
+  return out.replace(/は/g, "わ").replace(/へ/g, "え").replace(/を/g, "お").replace(/ぢ/g, "じ").replace(/づ/g, "ず");
+}
+function lev(a, b) {
+  a = [...a]; b = [...b]; const d = Array.from({length: b.length + 1}, (_, i) => i);
+  for (let i = 1; i <= a.length; i++) { let prev = d[0]; d[0] = i;
+    for (let j = 1; j <= b.length; j++) { const t = d[j]; d[j] = Math.min(d[j] + 1, d[j - 1] + 1, prev + (a[i - 1] === b[j - 1] ? 0 : 1)); prev = t; } }
+  return d[b.length];
+}
+const sim = (a, b) => { const m = Math.max([...a].length, [...b].length); return m ? 1 - lev(a, b) / m : 1; };
+// Erkannter Text kommt mit Kanji oder nur in Kana zurück, darum gegen beide Formen messen.
+function speechScore(alts, t) {
+  const p = normJa(plain(t)), r = normJa(reading(t)); let best = 0, heard = alts[0] || "";
+  for (const a of alts) { const n = normJa(a), s = Math.max(sim(n, p), sim(n, r)); if (s > best) { best = s; heard = a; } }
+  return {score: best, heard};
+}
+
+// ---------- Hilfen ----------
+const $ = s => document.querySelector(s);
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const pick = a => a[Math.floor(Math.random() * a.length)];
+const wait = ms => new Promise(r => setTimeout(r, ms));
+const dkey = d => d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+const today = () => dkey(new Date());
+function wpick(arr, w, avoid) {
+  for (let tries = 0; tries < 4; tries++) {
+    const ws = arr.map(w); let r = Math.random() * ws.reduce((a, b) => a + b, 0), it = arr[arr.length - 1];
+    for (let i = 0; i < arr.length; i++) { r -= ws[i]; if (r <= 0) { it = arr[i]; break; } }
+    if (it !== avoid || arr.length < 2) return it;
+  }
+  return arr.find(x => x !== avoid);
+}
+const statW = st => !st ? 1.4 : Math.max(0.25, 1 + 1.5 * st.m - 0.35 * st.h);
+const mastered = st => !!st && st.h >= 3 && st.h >= 2 * st.m;
+function toast(msg) { const t = $("#toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove("show"), 1500); }
+
+// ---------- Sprachausgabe und Spracherkennung ----------
+let jaVoice = null;
+function pickVoice() { if (!window.speechSynthesis) return; const vs = speechSynthesis.getVoices(); jaVoice = vs.find(v => /^ja[-_]JP/i.test(v.lang) && /google|kyoko|otoya|natural|online/i.test(v.name)) || vs.find(v => /^ja/i.test(v.lang)) || null; }
+if (window.speechSynthesis) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+function speak(text, rate) {
+  return new Promise(res => {
+    if (!window.speechSynthesis) return res();
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text); u.lang = "ja-JP"; if (jaVoice) u.voice = jaVoice; u.rate = rate || S.rate;
+    let done = false; const fin = () => { if (!done) { done = true; res(); } };
+    u.onend = fin; u.onerror = fin; setTimeout(fin, 1500 + text.length * 450 / (rate || S.rate));
+    speechSynthesis.speak(u);
+  });
+}
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+function listen() {
+  return new Promise((res, rej) => {
+    const r = new SR(); r.lang = "ja-JP"; r.interimResults = false; r.maxAlternatives = 5;
+    let got = null;
+    r.onresult = e => { got = [...e.results[0]].map(a => a.transcript); };
+    r.onerror = e => rej(e.error);
+    r.onend = () => res(got || []);
+    try { speechSynthesis && speechSynthesis.cancel(); r.start(); } catch (e) { rej(e.message); }
+  });
+}
+document.addEventListener("click", e => { const b = e.target.closest("[data-say]"); if (b) speak(b.dataset.say, b.dataset.rate ? +b.dataset.rate : undefined); });
+
+// ---------- Fortschritt ----------
+const LKEY = "jp_state_v1", HUB_KEY = "sprachen.japanisch.stand", DOC = "sprachen/japanisch/";
+const fresh = () => ({pts: 0, days: {}, kana: {}, kanji: {}, said: {}, texts: {}, dialogs: {}, level: "anf", rate: 0.9, kq: {script: "h", groups: ["basic"], mode: "k2r"}, updated: 0});
+let S = fresh();
+try { S = Object.assign(fresh(), JSON.parse(localStorage.getItem(LKEY) || "{}")); } catch (e) {}
+let sb = null, user = null, syncTimer = null;
+
+function mergeState(a, b) {
+  const o = Object.assign(fresh(), (a.updated || 0) >= (b.updated || 0) ? a : b);
+  o.pts = Math.max(a.pts || 0, b.pts || 0);
+  for (const k of ["days", "said", "dialogs"]) { o[k] = {...(a[k] || {})}; for (const [x, v] of Object.entries(b[k] || {})) o[k][x] = Math.max(o[k][x] || 0, v); }
+  o.texts = {...(a.texts || {}), ...(b.texts || {})};
+  for (const k of ["kana", "kanji"]) { o[k] = {}; for (const src of [a[k] || {}, b[k] || {}]) for (const [x, v] of Object.entries(src)) { const c = o[k][x] || {h: 0, m: 0}; o[k][x] = {h: Math.max(c.h, v.h || 0), m: Math.max(c.m, v.m || 0)}; } }
+  o.updated = Math.max(a.updated || 0, b.updated || 0);
+  return o;
+}
+function stageOf(p) { let i = 0; for (let j = 0; j < STAGES.length; j++) if (p >= STAGES[j][0]) i = j; return i; }
+function streak() {
+  const d = new Date(); if ((S.days[today()] || 0) < STREAK_MIN) d.setDate(d.getDate() - 1);
+  let n = 0; while ((S.days[dkey(d)] || 0) >= STREAK_MIN) { n++; d.setDate(d.getDate() - 1); }
+  return n;
+}
+function hubStand() { const i = stageOf(S.pts); return {punkte: S.pts, serie: streak(), stufe: STAGES[i][2], stufeNr: i + 1, heute: S.days[today()] || 0, ziel: GOAL, aktualisiert: new Date().toISOString()}; }
+function save() {
+  S.updated = Date.now();
+  try { localStorage.setItem(LKEY, JSON.stringify(S)); localStorage.setItem(HUB_KEY, JSON.stringify(hubStand())); } catch (e) {}
+  if (sb && user) { clearTimeout(syncTimer); syncTimer = setTimeout(pushCloud, 1500); }
+}
+async function pushCloud() {
+  const now = new Date().toISOString();
+  try {
+    const r = await sb.from("schach_docs").upsert([{user_id: user.id, path: DOC + "fortschritt", data: S, updated_at: now}, {user_id: user.id, path: DOC + "stand", data: hubStand(), updated_at: now}]);
+    setStore(r.error ? "error" : "db");
+  } catch (e) { setStore("error"); }
+}
+function setStore(m) {
+  $("#store").innerHTML = m === "db" ? "Fortschritt wird in deinem Konto gespeichert und ist auf allen Geräten gleich."
+    : m === "error" ? "Speichern im Konto gerade nicht möglich, der Fortschritt liegt vorerst in diesem Browser."
+    : 'Nicht angemeldet: Fortschritt liegt nur in diesem Browser. <a href="../../">Im Portal anmelden</a>, dann ist er überall gleich.';
+}
+function addPoints(n) {
+  const before = stageOf(S.pts), hadGoal = (S.days[today()] || 0) >= GOAL;
+  S.pts += n; S.days[today()] = (S.days[today()] || 0) + n;
+  const after = stageOf(S.pts);
+  save(); renderStats();
+  if (after > before) toast("Neue Stufe: " + STAGES[after][2] + " " + STAGES[after][1]);
+  else if (!hadGoal && S.days[today()] >= GOAL) toast("Tagesziel geschafft! がんばったね");
+  else toast("+" + n);
+}
+function mark(store, key, ok) { const st = S[store][key] || (S[store][key] = {h: 0, m: 0}); if (ok) st.h++; else st.m++; }
+
+// ---------- Kopf ----------
+function renderStats() {
+  const i = stageOf(S.pts), next = STAGES[i + 1], base = STAGES[i][0];
+  const prog = next ? Math.round(100 * (S.pts - base) / (next[0] - base)) : 100;
+  $("#stats").innerHTML = `
+    <div class="stat"><b>${S.pts}</b><span>Punkte</span></div>
+    <div class="stat"><b>${streak()} 🔥</b><span>Tage Serie</span></div>
+    <div class="stat"><b>${Math.min(S.days[today()] || 0, 999)} / ${GOAL}</b><span>Heute</span></div>
+    <div class="stat" style="flex:1;min-width:180px"><b><span class="jp" style="font-size:1rem;text-transform:none;letter-spacing:0;color:var(--shu)">${STAGES[i][1]}</span> ${STAGES[i][2]}</b>
+      <div class="bar" style="margin-top:6px"><i style="width:${prog}%"></i></div>
+      <span>${next ? (next[0] - S.pts) + " bis " + next[2] : "Höchste Stufe"}</span></div>`;
+  for (const b of document.querySelectorAll("#levelSeg button")) b.setAttribute("aria-pressed", b.dataset.level === S.level);
+}
+
+// ---------- Reiter ----------
+const VIEWS = ["start", "schrift", "lesen", "sprechen", "dialoge", "schreiben"];
+const RENDER = {};
+let current = "start";
+function show(v) {
+  if (!VIEWS.includes(v)) v = "start";
+  current = v; dlgGen++;
+  if (window.speechSynthesis) speechSynthesis.cancel();
+  for (const x of VIEWS) $("#v-" + x).hidden = x !== v;
+  for (const b of document.querySelectorAll(".tabs button")) b.setAttribute("aria-selected", b.dataset.tab === v);
+  if (location.hash !== "#" + v) history.replaceState(null, "", "#" + v);
+  RENDER[v]();
+}
+document.querySelector(".tabs").addEventListener("click", e => { const b = e.target.closest("button[data-tab]"); if (b) show(b.dataset.tab); });
+$("#levelSeg").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; S.level = b.dataset.level; save(); renderStats(); RENDER[current](); });
+
+// ---------- Start ----------
+RENDER.start = () => {
+  const todayPts = S.days[today()] || 0, frac = Math.min(1, todayPts / GOAL), C = 2 * Math.PI * 46;
+  const days = []; for (let k = 6; k >= 0; k--) { const d = new Date(); d.setDate(d.getDate() - k); days.push([d, S.days[dkey(d)] || 0]); }
+  const maxD = Math.max(GOAL, ...days.map(x => x[1]));
+  const cnt = (set, fn) => set.filter(fn).length;
+  const hira = cnt(KANA.filter(x => x.g === "basic"), x => mastered(S.kana[x.k]));
+  const kata = cnt(KANA.filter(x => x.g === "basic"), x => mastered(S.kana[toKata(x.k)]));
+  const allKanji = [...KANJI.anf, ...KANJI.fort], kj = cnt(allKanji, x => mastered(S.kanji[x[0]]));
+  const dlgs = Object.keys(S.dialogs).length, txts = Object.keys(S.texts).length;
+  const badges = [["Erste 100 Punkte", S.pts >= 100], ["Alle Hiragana", hira >= 46], ["Alle Katakana", kata >= 46], ["20 Kanji", kj >= 20], ["3 Dialoge gespielt", dlgs >= 3], ["3 Texte gelesen", txts >= 3], ["7 Tage Serie", streak() >= 7], ["1000 Punkte", S.pts >= 1000]];
+  const tips = S.level === "anf"
+    ? [["schrift", "ひらがな", "Hiragana üben", "Die 46 Grundzeichen, mit Ton"], ["sprechen", "話す", "Nachsprechen", "Alltagssätze laut sagen"], ["dialoge", "会話", "Dialog spielen", "Café, Bahnhof, Konbini"], ["lesen", "読む", "Lesen", "Wörter und kurze Texte"]]
+    : [["schrift", "漢字", "Kanji üben", "Lesungen und Bedeutungen"], ["dialoge", "会話", "Dialog spielen", "Hotel, Arzt, Telefon"], ["lesen", "読む", "Texte lesen", "Mit Furigana zum Ausblenden"], ["schreiben", "書く", "Satzbau", "Partikel an die richtige Stelle"]];
+  $("#v-start").innerHTML = `
+    <div class="card hero">
+      <svg class="ring" viewBox="0 0 110 110" role="img" aria-label="Tagesziel ${todayPts} von ${GOAL} Punkten">
+        <circle cx="55" cy="55" r="46" fill="none" stroke="var(--chip)" stroke-width="10"/>
+        <circle cx="55" cy="55" r="46" fill="none" stroke="var(--shu)" stroke-width="10" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C * (1 - frac)}" transform="rotate(-90 55 55)"/>
+        <text x="55" y="52" text-anchor="middle" font-size="22" font-weight="700" fill="var(--fg)">${todayPts}</text>
+        <text x="55" y="72" text-anchor="middle" font-size="11" fill="var(--muted)">von ${GOAL}</text>
+      </svg>
+      <div class="stack" style="gap:6px">
+        <h2>${frac >= 1 ? "Tagesziel geschafft. すごい！" : todayPts ? "Weiter so, noch " + (GOAL - todayPts) + " Punkte bis zum Tagesziel." : "Heute schon geübt? Zehn Minuten reichen."}</h2>
+        <p class="muted small">Eine Serie zählt jeden Tag mit mindestens ${STREAK_MIN} Punkten. Richtige Antworten bringen 5 bis 15 Punkte, gut gesprochene Sätze am meisten.</p>
+        <div class="week">${days.map(([d, p]) => `<div title="${p} Punkte"><i style="height:${Math.round(100 * p / maxD)}%"></i><span>${"SoMoDiMiDoFrSa".substr(d.getDay() * 2, 2)}</span></div>`).join("")}</div>
+      </div>
+    </div>
+    <div class="grid2">${tips.map(t => `<button class="card go" data-goto="${t[0]}"><span><b>${t[2]}</b><br><span class="muted small">${t[3]}</span></span><span class="jp">${t[1]}</span></button>`).join("")}</div>
+    <div class="card stack" style="gap:10px">
+      <h3>Dein Stand</h3>
+      <div class="grid2" style="gap:14px">
+        ${[["Hiragana", hira, 46], ["Katakana", kata, 46], ["Kanji", kj, allKanji.length]].map(([n, a, b]) => `<div><div class="row" style="justify-content:space-between"><span>${n}</span><span class="muted small">${a} / ${b} sicher</span></div><div class="bar"><i style="width:${Math.round(100 * a / b)}%"></i></div></div>`).join("")}
+      </div>
+      <h3 style="margin-top:6px">Meilensteine</h3>
+      <div class="badges">${badges.map(([n, on]) => `<span class="badge ${on ? "on" : ""}">${on ? "★ " : ""}${n}</span>`).join("")}</div>
+    </div>
+    <div class="card stack" style="gap:8px">
+      <h3>Aussprache</h3>
+      <div class="row"><span class="small">Sprechtempo</span><input type="range" id="rate" min="0.5" max="1.2" step="0.05" value="${S.rate}" style="flex:1;max-width:240px"><button class="btn" data-say="こんにちは。日本語を一緒に勉強しましょう。">Probe 🔊</button></div>
+      <p class="small muted">${!window.speechSynthesis ? "Dieser Browser kann nicht vorlesen." : jaVoice ? "Japanische Stimme: " + esc(jaVoice.name) + "." : "Keine japanische Stimme gefunden. Auf dem iPhone unter Einstellungen, Bedienungshilfen, Gesprochene Inhalte, Stimmen eine japanische Stimme laden."}
+      ${SR ? " Spracherkennung ist verfügbar." : " Spracherkennung fehlt in diesem Browser (am besten Chrome oder Safari). Beim Nachsprechen bewertest du dich dann selbst."}</p>
+    </div>`;
+  $("#rate").oninput = e => { S.rate = +e.target.value; save(); };
+  for (const b of document.querySelectorAll("[data-goto]")) b.onclick = () => show(b.dataset.goto);
+};
+
+// ---------- Multiple-Choice ----------
+function mcQuiz(box, gen, onStop) {
+  const g = box._gen = (box._gen || 0) + 1; let right = 0, total = 0, last = null;
+  function next() {
+    if (box._gen !== g) return;
+    const q = gen(last); last = q.key;
+    box.innerHTML = `<div class="q-head"><span class="muted small">${right} von ${total} richtig</span><button class="ghost" data-stop>Beenden</button></div>
+      <div class="q-prompt">${q.prompt}</div>
+      <div class="q-opts">${q.options.map((o, i) => `<button class="opt ${q.jpOpts ? "jpopt" : ""}" data-i="${i}">${o.html}</button>`).join("")}</div>
+      <div class="q-fb" aria-live="polite"></div>`;
+    if (q.audio) speak(q.audio);
+    box.querySelector("[data-stop]").onclick = () => { box._gen++; onStop(); };
+    for (const b of box.querySelectorAll(".opt")) b.onclick = () => {
+      const o = q.options[+b.dataset.i]; total++; if (o.correct) right++;
+      box.querySelectorAll(".opt").forEach((x, i) => { x.disabled = true; if (q.options[i].correct) x.classList.add("ok"); });
+      if (!o.correct) b.classList.add("bad");
+      q.onAnswer(o.correct);
+      box.querySelector(".q-fb").innerHTML = o.correct ? `<span class="good">Richtig</span>` : `<span class="badtxt">Richtig wäre: ${q.solution}</span>`;
+      if (o.correct) addPoints(q.pts || 5); else save();
+      if (q.after) speak(q.after);
+      setTimeout(next, o.correct ? 900 : 2000);
+    };
+  }
+  next();
+}
+function optionsFrom(correct, pool, label, n = 4) {
+  const seen = new Set([label(correct)]), out = [{html: label(correct), correct: true}];
+  for (const x of shuffle(pool)) { if (out.length >= n) break; const l = label(x); if (!seen.has(l)) { seen.add(l); out.push({html: l, correct: false}); } }
+  return shuffle(out);
+}
+
+// ---------- Schrift ----------
+let scriptTab = "h";
+RENDER.schrift = () => {
+  for (const b of document.querySelectorAll("#scriptSeg button")) b.setAttribute("aria-pressed", b.dataset.s === scriptTab);
+  $("#scriptQuiz").hidden = true; $("#scriptQuiz")._gen = ($("#scriptQuiz")._gen || 0) + 1;
+  $("#scriptBody").hidden = false;
+  if (scriptTab === "kanji") renderKanji(); else renderKana(scriptTab);
+};
+$("#scriptSeg").addEventListener("click", e => { const b = e.target.closest("button"); if (b) { scriptTab = b.dataset.s; RENDER.schrift(); } });
+const ROWS = ["あいうえお", "かきくけこ", "さしすせそ", "たちつてと", "なにぬねの", "はひふへほ", "まみむめも", "や ゆ よ", "らりるれろ", "わ   を", "ん    "];
+const DROWS = ["がぎぐげご", "ざじずぜぞ", "だぢづでど", "ばびぶべぼ", "ぱぴぷぺぽ"];
+function kcell(h, script) {
+  if (!h || h === " ") return `<div class="kcell empty"></div>`;
+  const c = script === "k" ? toKata(h) : h, st = S.kana[c], lv = mastered(st) ? "l2" : st && st.h ? "l1" : "";
+  return `<button class="kcell ${lv}" data-say="${c}" data-k="${c}"><span class="c">${c}</span><span class="r">${K2R[h]}</span></button>`;
+}
+function renderKana(script) {
+  const q = S.kq;
+  $("#scriptBody").innerHTML = `
+    <div class="card stack" style="gap:10px">
+      <h3>Quiz einstellen</h3>
+      <div class="row">${Object.entries(GROUP_NAMES).map(([g, n]) => `<label class="chk"><input type="checkbox" data-g="${g}" ${q.groups.includes(g) ? "checked" : ""}> ${n}</label>`).join("")}</div>
+      <div class="row">
+        <select id="kqMode" aria-label="Abfrageart">
+          <option value="k2r">Zeichen sehen, Laut wählen</option><option value="r2k">Laut sehen, Zeichen wählen</option><option value="listen">Hören, Zeichen wählen</option>
+        </select>
+        <label class="chk"><input type="checkbox" id="kqMix" ${q.script === "mix" ? "checked" : ""}> Hiragana und Katakana gemischt</label>
+      </div>
+    </div>
+    <div class="card stack">
+      <div class="row" style="justify-content:space-between"><h3>${script === "k" ? "Katakana カタカナ" : "Hiragana ひらがな"}</h3><span class="small muted">Antippen zum Anhören. Grün heißt sicher.</span></div>
+      <p class="small muted">${script === "k" ? "Katakana schreibt Fremdwörter und Namen, zum Beispiel コーヒー (Kaffee) und ドイツ (Deutschland). Der Strich ー verlängert den Vokal." : "Hiragana ist die Grundschrift. Damit schreibt man Endungen, Partikel und Wörter ohne Kanji. Jedes Zeichen ist eine Silbe."}</p>
+      <div class="kgrid">${ROWS.map(r => [...r.padEnd(5, " ")].map(h => kcell(h, script)).join("")).join("")}</div>
+      <h3 style="margin-top:8px">Mit Strichen ゛ und Kreis ゜</h3>
+      <p class="small muted">Zwei Striche machen den Laut stimmhaft (か ka → が ga), der Kreis macht aus h ein p (は ha → ぱ pa).</p>
+      <div class="kgrid">${DROWS.map(r => [...r].map(h => kcell(h, script)).join("")).join("")}</div>
+      <h3 style="margin-top:8px">Kombinationen</h3>
+      <p class="small muted">Ein kleines ゃ, ゅ oder ょ verschmilzt mit dem Zeichen davor: き + ゃ = きゃ kya. Ein kleines っ verdoppelt den nächsten Konsonanten: きって kitte.</p>
+      <div class="kgrid y">${KANA.filter(x => x.g === "yoon").map(x => kcell(x.k, script)).join("")}</div>
+    </div>`;
+  $("#kqMode").value = q.mode;
+  $("#kqMode").onchange = e => { q.mode = e.target.value; save(); };
+  $("#kqMix").onchange = e => { q.script = e.target.checked ? "mix" : scriptTab; save(); };
+  for (const c of document.querySelectorAll("[data-g]")) c.onchange = () => { q.groups = [...document.querySelectorAll("[data-g]:checked")].map(x => x.dataset.g); if (!q.groups.length) { q.groups = ["basic"]; c.checked = true; } save(); };
+  for (const b of document.querySelectorAll(".kcell[data-k]")) b.addEventListener("click", () => { b.classList.remove("pop"); void b.offsetWidth; b.classList.add("pop"); });
+}
+function kanaGen(last) {
+  const q = S.kq, script = q.script === "mix" ? pick(["h", "k"]) : scriptTab;
+  let pool = KANA.filter(x => q.groups.includes(x.g)); if (q.mode !== "k2r") pool = pool.filter(x => !AMBIG.has(x.k));
+  const conv = h => script === "k" ? toKata(h) : h;
+  const it = wpick(pool, x => statW(S.kana[conv(x.k)]), pool.find(x => conv(x.k) === last));
+  const ch = conv(it.k), key = ch;
+  const base = {key, pts: 5, onAnswer: ok => mark("kana", ch, ok), after: q.mode === "k2r" ? ch : null};
+  if (q.mode === "k2r") return {...base, prompt: `<span class="big">${ch}</span>`, options: optionsFrom(it, pool, x => x.r), solution: it.r};
+  const opts = optionsFrom(it, pool, x => conv(x.k)).map(o => ({...o}));
+  if (q.mode === "r2k") return {...base, jpOpts: true, prompt: `<span class="mid">${it.r}</span><span class="muted small">Welches Zeichen ist das?</span>`, options: opts, solution: ch};
+  return {...base, jpOpts: true, audio: ch, prompt: `<button class="mic" style="width:64px;height:64px;font-size:1.5rem" data-say="${ch}" aria-label="Nochmal hören">🔊</button><div class="muted small" style="margin-top:8px">Welches Zeichen hörst du?</div>`, options: opts, solution: ch + " (" + it.r + ")"};
+}
+function renderKanji() {
+  const list = KANJI[S.level];
+  $("#scriptBody").innerHTML = `
+    <div class="card stack" style="gap:10px">
+      <div class="row" style="justify-content:space-between"><h3>Kanji 漢字, ${S.level === "anf" ? "Grundstufe" : "Aufbaustufe"}</h3>
+        <select id="kjMode" aria-label="Abfrageart"><option value="mean">Kanji sehen, Bedeutung wählen</option><option value="read">Wort sehen, Lesung wählen</option></select></div>
+      <p class="small muted">Kanji tragen Bedeutung. Fast jedes hat eine chinesische Lesung (in Katakana notiert) und eine japanische (in Hiragana). Antippen für Details.</p>
+      <div id="kjDetail"></div>
+      <div class="kanjis">${list.map(k => `<button class="kj ${mastered(S.kanji[k[0]]) ? "l2" : ""}" data-kj="${k[0]}"><span class="c">${k[0]}</span><span class="m">${esc(k[1])}</span></button>`).join("")}</div>
+    </div>`;
+  $("#kjMode").value = S.kjMode || "mean";
+  $("#kjMode").onchange = e => { S.kjMode = e.target.value; save(); };
+  for (const b of document.querySelectorAll("[data-kj]")) b.onclick = () => {
+    const k = list.find(x => x[0] === b.dataset.kj);
+    $("#kjDetail").innerHTML = `<div class="kdetail card" style="background:var(--bg)"><div class="big">${k[0]}</div><div class="stack" style="gap:6px">
+      <div><b>${esc(k[1])}</b></div>
+      <div class="small"><span class="muted">On-Lesung</span> <span class="jp">${k[2] || "–"}</span> &nbsp; <span class="muted">Kun-Lesung</span> <span class="jp">${k[3] || "–"}</span></div>
+      <div class="row"><span class="jp" style="font-size:1.4rem">${ruby(k[4])}</span><span class="muted">${esc(k[5])}</span><button class="icon" data-say="${reading(k[4])}" aria-label="Anhören">🔊</button></div></div></div>`;
+    speak(reading(k[4]));
+  };
+}
+function kanjiGen(last) {
+  const list = KANJI[S.level], mode = S.kjMode || "mean";
+  const it = wpick(list, x => statW(S.kanji[x[0]]), list.find(x => x[0] === last));
+  const base = {key: it[0], pts: mode === "read" ? 8 : 6, onAnswer: ok => mark("kanji", it[0], ok), after: reading(it[4])};
+  if (mode === "mean") return {...base, prompt: `<span class="big" style="font-family:var(--brush)">${it[0]}</span>`, options: optionsFrom(it, list, x => esc(x[1])), solution: esc(it[1])};
+  return {...base, jpOpts: true, prompt: `<span class="big" style="font-family:var(--brush)">${plain(it[4])}</span><span class="muted small">${esc(it[5])}. Wie liest man das?</span>`, options: optionsFrom(it, list, x => reading(x[4])), solution: reading(it[4])};
+}
+$("#startScriptQuiz").onclick = () => {
+  const box = $("#scriptQuiz"); box.hidden = false; $("#scriptBody").hidden = true;
+  mcQuiz(box, scriptTab === "kanji" ? kanjiGen : kanaGen, () => RENDER.schrift());
+  box.scrollIntoView({block: "nearest"});
+};
+
+// ---------- Lesen ----------
+RENDER.lesen = () => {
+  const texts = TEXTS[S.level];
+  $("#v-lesen").innerHTML = `
+    <div class="card stack drill" id="drill"></div>
+    <div class="card stack">
+      <h3>Lesetexte</h3>
+      <p class="small muted">${S.level === "anf" ? "Kurze Texte, fast nur in Kana und mit Leerzeichen zwischen den Wörtern, wie in japanischen Kinderbüchern." : "Texte mit Kanji. Die kleine Lesehilfe (Furigana) lässt sich ausblenden, wenn du dich traust."} Satz antippen zum Anhören.</p>
+      <div class="texts">${texts.map(t => `<button class="card tcard" data-text="${t.id}"><span class="jp">${esc(t.jp)}</span><span class="small muted">${esc(t.title)}</span> ${S.texts[t.id] ? '<span class="pill ok">gelesen</span>' : ""}</button>`).join("")}</div>
+      <div id="reader"></div>
+    </div>`;
+  for (const b of document.querySelectorAll("[data-text]")) b.onclick = () => openText(texts.find(t => t.id === b.dataset.text));
+  drillNext();
+};
+function drillPool() {
+  if (S.level === "anf") return VOCAB.map(([w, de]) => ({show: w, kana: w, de}));
+  return [...KANJI.anf, ...KANJI.fort].map(k => ({show: plain(k[4]), kana: reading(k[4]), de: k[5]})).concat(VOCAB.filter(v => /[゠-ヿ]/.test(v[0])).map(([w, de]) => ({show: w, kana: w, de})));
+}
+let drillItem = null;
+function drillNext() {
+  const pool = drillPool(); drillItem = wpick(pool, () => 1, drillItem);
+  const it = drillItem;
+  $("#drill").innerHTML = `
+    <div class="row" style="justify-content:space-between"><h3>Wörter lesen</h3><span class="small muted">Lies das Wort und tippe es in Romaji</span></div>
+    <div class="word">${esc(it.show)}</div>
+    <div class="preview" id="drillPrev" aria-live="polite"></div>
+    <div class="row" style="justify-content:center;max-width:420px;margin:0 auto;width:100%">
+      <input type="text" id="drillIn" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${S.level === "anf" ? "z. B. neko" : "z. B. kaisha"}" style="flex:1;min-width:0">
+      <button class="btn ai" id="drillOk">Prüfen</button>
+    </div>
+    <div class="row" style="justify-content:center"><button class="ghost" id="drillSkip">Weiß nicht</button><button class="ghost" data-say="${esc(it.kana)}">🔊 Anhören</button></div>
+    <div class="q-fb" id="drillFb" aria-live="polite"></div>`;
+  const inp = $("#drillIn"); inp.focus({preventScroll: true});
+  inp.oninput = () => { $("#drillPrev").textContent = romajiToKana(inp.value); };
+  const check = () => {
+    if (!inp.value.trim()) return;
+    const ok = normJa(romajiToKana(inp.value)) === normJa(it.kana);
+    $("#drillFb").innerHTML = ok ? `<span class="good">Richtig: ${esc(it.kana)} (${kanaToRomaji(it.kana)}) heißt „${esc(it.de)}“</span>` : `<span class="badtxt">Noch nicht. Richtig: ${esc(it.kana)} (${kanaToRomaji(it.kana)}), „${esc(it.de)}“</span>`;
+    speak(it.kana);
+    if (ok) addPoints(S.level === "anf" ? 5 : 8);
+    inp.disabled = true; $("#drillOk").textContent = "Weiter"; $("#drillOk").onclick = drillNext; inp.onkeydown = null;
+    setTimeout(() => $("#drillOk") && $("#drillOk").focus({preventScroll: true}), 50);
+  };
+  $("#drillOk").onclick = check;
+  inp.onkeydown = e => { if (e.key === "Enter") check(); };
+  $("#drillSkip").onclick = () => { inp.value = ""; $("#drillFb").innerHTML = `${esc(it.kana)} (${kanaToRomaji(it.kana)}), „${esc(it.de)}“`; speak(it.kana); inp.disabled = true; $("#drillOk").textContent = "Weiter"; $("#drillOk").onclick = drillNext; inp.onkeydown = null; };
+}
+function openText(t) {
+  const sentences = t.text.split(/(?<=[。])/).filter(s => s.trim());
+  const answered = {};
+  $("#reader").innerHTML = `
+    <div class="stack" style="margin-top:16px;border-top:1px solid var(--line);padding-top:16px">
+      <div class="row" style="justify-content:space-between"><h3><span class="jp">${esc(t.jp)}</span> · ${esc(t.title)}</h3>
+      <div class="row"><button class="btn" id="readAll">▶ Vorlesen</button>${S.level === "fort" ? '<label class="chk"><input type="checkbox" id="furi" checked> Furigana</label>' : ""}<label class="chk"><input type="checkbox" id="showDe"> Übersetzung</label></div></div>
+      <div class="reader" id="readerText">${sentences.map((s, i) => `<span class="s" data-i="${i}">${ruby(s)}</span>`).join("")}</div>
+      <p class="trans" id="trans" hidden>${esc(t.de)}</p>
+      <h3>Verstanden?</h3>
+      ${t.q.map((q, qi) => `<div class="question" data-q="${qi}"><span>${esc(q[0])}</span><div class="row">${shuffle(q[1].map((a, ai) => [a, ai])).map(([a, ai]) => `<button class="btn" data-a="${ai}">${esc(a)}</button>`).join("")}</div></div>`).join("")}
+      <div class="q-fb" id="textFb"></div>
+    </div>`;
+  const rt = $("#readerText");
+  rt.onclick = e => { const s = e.target.closest(".s"); if (!s) return; rt.querySelectorAll(".s").forEach(x => x.classList.toggle("on", x === s)); speak(plain(sentences[+s.dataset.i])); };
+  $("#readAll").onclick = async () => { const g = ++dlgGen; for (const [i, s] of sentences.entries()) { if (g !== dlgGen) break; rt.querySelectorAll(".s").forEach(x => x.classList.toggle("on", +x.dataset.i === i)); await speak(plain(s)); await wait(250); } rt.querySelectorAll(".s").forEach(x => x.classList.remove("on")); };
+  if ($("#furi")) $("#furi").onchange = e => rt.classList.toggle("nofuri", !e.target.checked);
+  $("#showDe").onchange = e => { $("#trans").hidden = !e.target.checked; };
+  for (const qd of document.querySelectorAll("[data-q]")) for (const b of qd.querySelectorAll("[data-a]")) b.onclick = () => {
+    const qi = +qd.dataset.q; if (answered[qi] !== undefined) return;
+    const ok = b.dataset.a === "0"; answered[qi] = ok;
+    qd.querySelectorAll("[data-a]").forEach(x => { x.disabled = true; if (x.dataset.a === "0") x.classList.add("primary"); });
+    if (ok) addPoints(10); else b.style.borderColor = "var(--bad)";
+    if (Object.keys(answered).length === t.q.length) {
+      const first = !S.texts[t.id]; S.texts[t.id] = true;
+      if (first) addPoints(10); else save();
+      $("#textFb").innerHTML = `<span class="good">Text abgeschlossen${first ? ", +10 Bonus" : ""}.</span>`;
+    }
+  };
+  $("#reader").scrollIntoView({behavior: "smooth", block: "start"});
+}
+
+// ---------- Sprechen ----------
+let phraseIdx = 0;
+RENDER.sprechen = () => {
+  const list = PHRASES[S.level]; if (phraseIdx >= list.length) phraseIdx = 0;
+  const id = S.level + ":" + phraseIdx, t = list[phraseIdx][0];
+  $("#v-sprechen").innerHTML = `
+    <div class="card stack">
+      <div class="row" style="justify-content:space-between"><h3>Nachsprechen</h3><span class="small muted">Satz ${phraseIdx + 1} von ${list.length}</span></div>
+      <div class="phrase"><span class="jp">${ruby(t)}</span><div class="small muted">${kanaToRomaji(reading(t))}</div><div class="de">${esc(list[phraseIdx][1])}</div></div>
+      <div class="row" style="justify-content:center;gap:14px">
+        <button class="icon" data-say="${esc(plain(t))}" aria-label="Anhören">🔊</button>
+        <button class="mic" id="micBtn" aria-label="Nachsprechen">🎤</button>
+        <button class="icon" data-say="${esc(plain(t))}" data-rate="0.6" aria-label="Langsam anhören">🐢</button>
+      </div>
+      <div class="result" id="speakRes" aria-live="polite"><span class="muted small">${SR ? "Erst anhören, dann aufs Mikrofon tippen und den Satz sagen." : "Anhören, laut nachsprechen und dich dann selbst bewerten."}</span></div>
+      <div class="row" style="justify-content:space-between"><button class="btn" id="prevP">← Zurück</button><button class="btn" id="nextP">Weiter →</button></div>
+      <div class="dots">${list.map((_, i) => { const s = S.said[S.level + ":" + i] || 0; return `<button class="${s >= 0.9 ? "s2" : s >= 0.75 ? "s1" : ""} ${i === phraseIdx ? "cur" : ""}" data-p="${i}" aria-label="Satz ${i + 1}"></button>`; }).join("")}</div>
+    </div>
+    <p class="small muted">Gelb heißt gut gesprochen, grün sehr gut. Die Erkennung vergleicht, was der Browser verstanden hat, mit dem Satz. Kanji oder Kana spielen dabei keine Rolle.</p>`;
+  $("#prevP").onclick = () => { phraseIdx = (phraseIdx - 1 + list.length) % list.length; RENDER.sprechen(); };
+  $("#nextP").onclick = () => { phraseIdx = (phraseIdx + 1) % list.length; RENDER.sprechen(); };
+  for (const b of document.querySelectorAll("[data-p]")) b.onclick = () => { phraseIdx = +b.dataset.p; RENDER.sprechen(); };
+  $("#micBtn").onclick = () => attempt($("#micBtn"), $("#speakRes"), t, id, () => RENDER.sprechen());
+};
+// Ein Sprechversuch: erkennt, bewertet, vergibt Punkte. Ohne Spracherkennung bewertet man sich selbst.
+async function attempt(btn, out, t, id, done) {
+  const award = (score, heard) => {
+    const prev = S.said[id] || 0; S.said[id] = Math.max(prev, score);
+    const pts = score >= 0.9 ? 15 : score >= 0.75 ? 10 : 2;
+    const verdict = score >= 0.9 ? "Sehr gut! すばらしい" : score >= 0.75 ? "Gut verstanden. いいね" : "Noch nicht ganz. Hör noch einmal hin und versuch es nochmal.";
+    out.innerHTML = `${heard ? `<div class="heard">„${esc(heard)}“</div>` : ""}<div class="bar" style="max-width:260px;margin:6px auto"><i style="width:${Math.round(score * 100)}%"></i></div><b class="${score >= 0.75 ? "good" : "badtxt"}">${verdict}</b>`;
+    addPoints(pts);
+    if (done && score >= 0.75) setTimeout(() => { const d = out.closest(".card").querySelector(".dots"); if (d) { const c = d.querySelector(".cur"); if (c) c.className = "cur " + (score >= 0.9 ? "s2" : "s1"); } }, 0);
+    return score;
+  };
+  if (!SR) {
+    return new Promise(res => {
+      out.innerHTML = `<div class="row" style="justify-content:center"><span class="small">Wie lief es?</span><button class="btn" data-self="0.95">Sehr gut</button><button class="btn" data-self="0.8">Gut</button><button class="btn" data-self="0.4">Nochmal</button></div>`;
+      for (const b of out.querySelectorAll("[data-self]")) b.onclick = () => res(award(+b.dataset.self, ""));
+    });
+  }
+  btn.classList.add("rec"); btn.disabled = true; out.innerHTML = `<span class="muted">Ich höre zu …</span>`;
+  try {
+    const alts = await listen();
+    if (!alts.length) { out.innerHTML = `<span class="badtxt">Nichts verstanden. Tipp aufs Mikrofon und sprich etwas lauter.</span>`; return null; }
+    const {score, heard} = speechScore(alts, t);
+    return award(score, heard);
+  } catch (e) {
+    out.innerHTML = `<span class="badtxt">${e === "not-allowed" || e === "service-not-allowed" ? "Mikrofon ist gesperrt. Bitte im Browser für diese Seite erlauben." : "Spracherkennung hat nicht geklappt (" + esc(e) + ")."}</span>`;
+    return null;
+  } finally { btn.classList.remove("rec"); btn.disabled = false; }
+}
+
+// ---------- Dialoge ----------
+let dlgGen = 0, dlgOpen = null;
+RENDER.dialoge = () => {
+  const list = DIALOGS[S.level];
+  $("#v-dialoge").innerHTML = `
+    <div class="card stack">
+      <h3>Dialoge</h3>
+      <p class="small muted">Erst anhören, dann mitspielen: Du bist B und sprichst deine Zeilen, das Gegenüber antwortet mit Sprachausgabe.</p>
+      <div class="dlist">${list.map(d => `<button class="card tcard" data-d="${d.id}"><span class="jp">${esc(d.jp)}</span><span class="small muted">${esc(d.title)}</span> ${S.dialogs[d.id] ? `<span class="pill ok">${Math.round(S.dialogs[d.id] * 100)} %</span>` : ""}</button>`).join("")}</div>
+    </div>
+    <div class="card" id="dlgBox" hidden></div>`;
+  for (const b of document.querySelectorAll("[data-d]")) b.onclick = () => openDialog(list.find(d => d.id === b.dataset.d));
+  if (dlgOpen && list.find(d => d.id === dlgOpen)) openDialog(list.find(d => d.id === dlgOpen));
+};
+function lineHtml(l, hide) {
+  return `<div class="line ${l[0]}"><div class="who">${l[0] === "A" ? "Gegenüber" : "Du"}</div>
+    <span class="jp" ${hide ? "hidden" : ""}>${ruby(l[1])}</span><div class="de">${esc(l[2])}</div></div>`;
+}
+function openDialog(d) {
+  dlgOpen = d.id; dlgGen++;
+  const box = $("#dlgBox"); box.hidden = false;
+  box.innerHTML = `<div class="row" style="justify-content:space-between"><h3><span class="jp">${esc(d.jp)}</span> · ${esc(d.title)}</h3>
+      <div class="row"><button class="btn" id="dlgListen">▶ Anhören</button><button class="btn primary" id="dlgPlay">🎤 Mitspielen</button></div></div>
+    <div class="lines" id="dlgLines">${d.lines.map(l => lineHtml(l, false)).join("")}</div><div class="q-fb" id="dlgFb"></div>`;
+  $("#dlgListen").onclick = () => runDialog(d, "listen");
+  $("#dlgPlay").onclick = () => runDialog(d, "play");
+  for (const [i, el] of [...box.querySelectorAll(".line")].entries()) el.onclick = () => speak(plain(d.lines[i][1]));
+  box.scrollIntoView({behavior: "smooth", block: "start"});
+}
+async function runDialog(d, mode) {
+  const g = ++dlgGen, box = $("#dlgLines"); box.innerHTML = ""; $("#dlgFb").innerHTML = "";
+  let sum = 0, n = 0;
+  for (const l of d.lines) {
+    if (g !== dlgGen) return;
+    const wrap = document.createElement("div"); wrap.innerHTML = lineHtml(l, mode === "play" && l[0] === "B"); const row = wrap.firstElementChild; box.append(row);
+    row.scrollIntoView({behavior: "smooth", block: "nearest"});
+    if (mode === "listen" || l[0] === "A") { row.classList.add("speaking"); await speak(plain(l[1])); row.classList.remove("speaking"); await wait(350); continue; }
+    const s = await userTurn(row, l, g); if (s === null) return;
+    sum += s; n++;
+  }
+  if (mode === "play" && g === dlgGen) {
+    const avg = n ? sum / n : 0; S.dialogs[d.id] = Math.max(S.dialogs[d.id] || 0, avg);
+    const bonus = Math.round(10 + 20 * avg); addPoints(bonus);
+    $("#dlgFb").innerHTML = `<span class="good">Dialog geschafft, im Schnitt ${Math.round(avg * 100)} %. Bonus +${bonus}.</span>`;
+  }
+}
+function userTurn(row, l, g) {
+  return new Promise(res => {
+    const task = document.createElement("div"); task.className = "task";
+    task.innerHTML = `<button class="mic" style="width:52px;height:52px;font-size:1.3rem" aria-label="Sprechen">🎤</button><button class="ghost" data-hint>Japanisch zeigen</button><button class="ghost" data-say="${esc(plain(l[1]))}">🔊 Vorsagen</button><button class="ghost" data-next>Weiter →</button><div class="result small" style="flex-basis:100%;text-align:left;min-height:0"></div>`;
+    row.append(task);
+    let best = 0;
+    const out = task.querySelector(".result"), mic = task.querySelector(".mic");
+    task.querySelector("[data-hint]").onclick = () => { row.querySelector(".jp").hidden = false; };
+    mic.onclick = async () => {
+      const s = await attemptLine(mic, out, l[1]); if (s !== null) { best = Math.max(best, s); row.querySelector(".jp").hidden = false; }
+    };
+    task.querySelector("[data-next]").onclick = () => { task.remove(); row.querySelector(".jp").hidden = false; res(g === dlgGen ? best : null); };
+  });
+}
+async function attemptLine(btn, out, t) {
+  if (!SR) {
+    return new Promise(r => {
+      out.innerHTML = `<span>Selbst bewerten:</span> <button class="ghost" data-s="0.95">Sehr gut</button> <button class="ghost" data-s="0.8">Gut</button> <button class="ghost" data-s="0.4">Nochmal</button>`;
+      for (const b of out.querySelectorAll("[data-s]")) b.onclick = () => { out.innerHTML = ""; r(+b.dataset.s); };
+    });
+  }
+  btn.classList.add("rec"); btn.disabled = true; out.textContent = "Ich höre zu …";
+  try {
+    const alts = await listen(); if (!alts.length) { out.textContent = "Nichts verstanden, nochmal versuchen."; return null; }
+    const {score, heard} = speechScore(alts, t);
+    out.innerHTML = `<span class="jp">„${esc(heard)}“</span> · <b class="${score >= 0.75 ? "good" : "badtxt"}">${Math.round(score * 100)} %</b>${score < 0.75 ? " · nochmal oder weiter" : ""}`;
+    return score;
+  } catch (e) { out.textContent = e === "not-allowed" ? "Mikrofon ist gesperrt." : "Erkennung fehlgeschlagen (" + e + ")."; return null; }
+  finally { btn.classList.remove("rec"); btn.disabled = false; }
+}
+
+// ---------- Schreiben ----------
+let writeMode = "type";
+RENDER.schreiben = () => {
+  $("#v-schreiben").innerHTML = `
+    <div class="seg" id="writeSeg" role="group" aria-label="Übung"><button data-w="type">Übersetzen</button><button data-w="build">Satzbau</button><button data-w="trace">Nachzeichnen</button></div>
+    <div class="card stack" id="writeBox"></div>`;
+  for (const b of document.querySelectorAll("#writeSeg button")) { b.setAttribute("aria-pressed", b.dataset.w === writeMode); b.onclick = () => { writeMode = b.dataset.w; RENDER.schreiben(); }; }
+  ({type: typeNext, build: buildNext, trace: traceInit})[writeMode]();
+};
+let typeItem = null;
+function typePool() {
+  if (S.level === "anf") return VOCAB.map(([w, de]) => ({de, kana: w, show: w}));
+  return PHRASES.anf.map(([t, de]) => ({de, kana: reading(t), show: t}));
+}
+function typeNext() {
+  typeItem = wpick(typePool(), () => 1, typeItem); const it = typeItem; let hint = 0;
+  $("#writeBox").innerHTML = `
+    <div class="row" style="justify-content:space-between"><h3>Auf Japanisch schreiben</h3><span class="small muted">Tippe in Romaji, es wird zu Kana</span></div>
+    <div style="text-align:center"><div class="mid" style="font-size:1.5rem;font-weight:700">„${esc(it.de)}“</div></div>
+    <div class="drill"><div class="preview" id="tPrev" style="font-size:1.8rem;min-height:2.2rem"></div></div>
+    <div class="row"><input type="text" id="tIn" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${S.level === "anf" ? "z. B. neko" : "z. B. arigatougozaimasu"}" style="flex:1;min-width:0"><button class="btn ai" id="tOk">Prüfen</button></div>
+    <div class="row"><button class="ghost" id="tHint">Tipp</button><button class="ghost" id="tSkip">Lösung zeigen</button><span class="small muted">Lange Vokale mit Bindestrich: ko-hi- ergibt こーひー. Für ん bei Bedarf nn tippen.</span></div>
+    <div class="q-fb" id="tFb"></div>`;
+  const inp = $("#tIn"); inp.focus({preventScroll: true});
+  inp.oninput = () => { $("#tPrev").textContent = romajiToKana(inp.value); };
+  const finish = (ok, shown) => {
+    $("#tFb").innerHTML = `${ok ? '<span class="good">Richtig!</span>' : shown ? "" : '<span class="badtxt">Nicht ganz.</span>'} <span class="jp" style="font-size:1.3rem">${ruby(it.show)}</span> <span class="muted">(${kanaToRomaji(it.kana)})</span>`;
+    speak(plain(it.show)); if (ok) addPoints(Math.max(2, (S.level === "anf" ? 8 : 12) - hint * 2));
+    inp.disabled = true; $("#tOk").textContent = "Weiter"; $("#tOk").onclick = typeNext; inp.onkeydown = null;
+  };
+  const check = () => { if (inp.value.trim()) finish(normJa(romajiToKana(inp.value)) === normJa(it.kana), false); };
+  $("#tOk").onclick = check; inp.onkeydown = e => { if (e.key === "Enter") check(); };
+  $("#tHint").onclick = () => { hint++; const k = [...it.kana.replace(/\s/g, "")]; $("#tFb").innerHTML = `<span class="muted">Fängt an mit <span class="jp">${k.slice(0, hint * 2).join("")}</span>…, ${k.length} Zeichen</span>`; };
+  $("#tSkip").onclick = () => finish(false, true);
+}
+let buildItem = null;
+function buildNext() {
+  const list = SENTENCES[S.level]; buildItem = wpick(list, () => 1, buildItem); const it = buildItem;
+  const parts = it[0].split("|"), answers = [it[0], ...(it[2] || [])].map(a => a.split("|").map(plain).join(""));
+  let order = shuffle(parts.map((p, i) => i)); while (parts.length > 2 && order.every((v, i) => v === i)) order = shuffle(order);
+  const chosen = [];
+  $("#writeBox").innerHTML = `
+    <div class="row" style="justify-content:space-between"><h3>Satzbau</h3><span class="small muted">Bausteine in die richtige Reihenfolge tippen</span></div>
+    <div style="text-align:center;font-size:1.3rem;font-weight:700">„${esc(it[1])}“</div>
+    <div class="tiles answer" id="bAns" aria-label="Dein Satz"></div>
+    <div class="tiles" id="bPool">${order.map(i => `<button class="tile" data-t="${i}">${ruby(parts[i])}</button>`).join("")}</div>
+    <div class="row"><button class="btn ai" id="bOk">Prüfen</button><button class="ghost" id="bReset">Zurücksetzen</button></div>
+    <p class="small muted">Im Japanischen steht das Verb am Ende. Partikel wie は (Thema), を (Objekt), に (Ziel) stehen hinter dem Wort, auf das sie sich beziehen.</p>
+    <div class="q-fb" id="bFb"></div>`;
+  const draw = () => {
+    $("#bAns").innerHTML = chosen.map((i, k) => `<button class="tile" data-c="${k}">${ruby(parts[i])}</button>`).join("");
+    document.querySelectorAll("#bPool .tile").forEach(b => b.disabled = chosen.includes(+b.dataset.t));
+    document.querySelectorAll("#bAns .tile").forEach(b => b.onclick = () => { chosen.splice(+b.dataset.c, 1); draw(); });
+  };
+  document.querySelectorAll("#bPool .tile").forEach(b => b.onclick = () => { chosen.push(+b.dataset.t); draw(); });
+  $("#bReset").onclick = () => { chosen.length = 0; draw(); };
+  $("#bOk").onclick = () => {
+    if (chosen.length < parts.length) { $("#bFb").innerHTML = `<span class="muted">Es fehlen noch Bausteine.</span>`; return; }
+    const ok = answers.includes(chosen.map(i => plain(parts[i])).join(""));
+    $("#bFb").innerHTML = ok ? `<span class="good">Richtig!</span>` : `<span class="badtxt">Richtig wäre:</span> <span class="jp" style="font-size:1.2rem">${parts.map(ruby).join(" ")}</span>`;
+    speak(plain(parts.join(""))); if (ok) addPoints(S.level === "anf" ? 8 : 12);
+    $("#bOk").textContent = "Weiter"; $("#bOk").onclick = buildNext;
+  };
+}
+let traceChar = "あ";
+function traceInit() {
+  const q = S.kq, script = q.script === "mix" ? pick(["h", "k"]) : (scriptTab === "k" ? "k" : "h");
+  $("#writeBox").innerHTML = `
+    <div class="row" style="justify-content:space-between"><h3>Nachzeichnen</h3><span class="small muted">Mit Finger oder Maus über die Vorlage schreiben</span></div>
+    <div class="trace"><canvas id="cv" width="520" height="520" aria-label="Zeichenfläche"></canvas>
+      <div class="stack" style="align-items:center;gap:10px">
+        <div class="seg" id="trSeg"><button data-tr="h">ひらがな</button><button data-tr="k">カタカナ</button></div>
+        <div id="trInfo" style="text-align:center"></div>
+        <div class="row" style="justify-content:center"><button class="btn" id="trClear">Löschen</button><button class="btn primary" id="trDone">Geschafft</button><button class="btn" id="trNext">Anderes Zeichen</button></div>
+        <p class="small muted" style="max-width:260px;text-align:center">Faustregel für die Strichfolge: von oben nach unten, von links nach rechts, waagerecht vor senkrecht.</p>
+      </div></div>`;
+  let trScript = script;
+  const cv = $("#cv"), ctx = cv.getContext("2d");
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const pickChar = () => { const it = pick(KANA.filter(x => x.g === "basic")); traceChar = trScript === "k" ? toKata(it.k) : it.k; };
+  const bg = () => {
+    ctx.clearRect(0, 0, 520, 520);
+    ctx.strokeStyle = css("--line"); ctx.lineWidth = 2; ctx.setLineDash([10, 10]);
+    ctx.beginPath(); ctx.moveTo(260, 20); ctx.lineTo(260, 500); ctx.moveTo(20, 260); ctx.lineTo(500, 260); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle = css("--chip"); ctx.font = `600 380px ${css("--brush")}`; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(traceChar, 260, 280);
+    $("#trInfo").innerHTML = `<span class="jp" style="font-size:2.4rem">${traceChar}</span><br><span class="muted">${kanaToRomaji(traceChar)}</span> <button class="icon" data-say="${traceChar}" aria-label="Anhören">🔊</button>`;
+    for (const b of document.querySelectorAll("#trSeg button")) b.setAttribute("aria-pressed", b.dataset.tr === trScript);
+  };
+  const fontReady = document.fonts ? document.fonts.load(`600 40px "Klee One"`, traceChar) : Promise.resolve();
+  let drawing = false, lastPt = null, strokes = 0;
+  const pt = e => { const r = cv.getBoundingClientRect(); return [(e.clientX - r.left) * 520 / r.width, (e.clientY - r.top) * 520 / r.height]; };
+  cv.onpointerdown = e => { drawing = true; lastPt = pt(e); cv.setPointerCapture(e.pointerId); strokes++; };
+  cv.onpointermove = e => { if (!drawing) return; const p = pt(e); ctx.strokeStyle = css("--ai"); ctx.lineWidth = 18; ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.beginPath(); ctx.moveTo(...lastPt); ctx.lineTo(...p); ctx.stroke(); lastPt = p; };
+  cv.onpointerup = cv.onpointercancel = () => { drawing = false; };
+  $("#trClear").onclick = () => { strokes = 0; bg(); };
+  $("#trNext").onclick = () => { strokes = 0; pickChar(); bg(); };
+  $("#trDone").onclick = () => { if (!strokes) { toast("Erst nachzeichnen"); return; } addPoints(3); strokes = 0; pickChar(); bg(); };
+  $("#trSeg").onclick = e => { const b = e.target.closest("button"); if (!b) return; trScript = b.dataset.tr; strokes = 0; pickChar(); bg(); };
+  pickChar(); bg(); fontReady.then(() => bg()).catch(() => {});
+}
+
+// ---------- Start der Seite ----------
+renderStats(); setStore("local"); save();
+show(location.hash.slice(1) || "start");
+window.addEventListener("hashchange", () => { const v = location.hash.slice(1); if (v !== current && VIEWS.includes(v)) show(v); });
+
+(async () => {
+  const cfg = window.SR_CONFIG || {};
+  try {
+    if (!cfg.supabaseUrl || !window.supabase) return;
+    sb = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+    const s = await sb.auth.getSession(); user = s.data.session ? s.data.session.user : null;
+    if (!user) return;
+    const r = await sb.from("schach_docs").select("data").eq("user_id", user.id).eq("path", DOC + "fortschritt").maybeSingle();
+    if (r.error) throw r.error;
+    if (r.data && r.data.data) S = mergeState(S, r.data.data);
+    save(); await pushCloud(); renderStats(); RENDER[current]();
+  } catch (e) { if (user) setStore("error"); }
+})();
+</script>
+</body>
+</html>
