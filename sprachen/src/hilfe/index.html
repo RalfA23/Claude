@@ -78,7 +78,7 @@ li{margin:.25rem 0}
       <ol>
         <li><b>Stummmodus aus</b>: Schalter oder Aktionstaste an der Seite, im Kontrollzentrum darf die Glocke nicht durchgestrichen sein. Sonst bleibt die Vorlesestimme oft still.</li>
         <li>Lautstärke-Taste drücken, während die Seite offen ist.</li>
-        <li>Stimme laden: <span class="path">Einstellungen › Bedienungshilfen › Gesprochene Inhalte › Stimmen</span>, dann die Sprache wählen und eine Stimme laden, z. B. Japanisch <b>Kyoko</b>, Thai <b>Kanya</b>, Koreanisch <b>Yuna</b>, Niederländisch <b>Xander</b> oder <b>Claire</b>.</li>
+        <li>Stimme laden: <span class="path">Einstellungen › Bedienungshilfen › Gesprochene Inhalte › Stimmen</span>, dann die Sprache wählen und eine Stimme laden, z. B. Japanisch <b>Kyoko</b>, Thai <b>Kanya</b>, Koreanisch <b>Yuna</b>, Englisch <b>Daniel</b> (britisch) oder <b>Samantha</b> (amerikanisch), Niederländisch <b>Xander</b> oder <b>Claire</b>.</li>
         <li>Safari ganz schließen (von unten wischen, Safari nach oben wegschieben) und die Seite neu öffnen.</li>
         <li>Einmal auf 🔊 tippen. Das iPhone spielt erst nach einer Berührung Ton ab.</li>
       </ol>
@@ -145,7 +145,9 @@ var LANGS = [
   {lang: "nl-NL", name: "Niederländisch", text: "Hallo, het geluid werkt."},
   {lang: "ja-JP", name: "Japanisch", text: "こんにちは。音が聞こえますか。"},
   {lang: "th-TH", name: "Thai", text: "สวัสดีครับ ได้ยินเสียงไหมครับ"},
-  {lang: "ko-KR", name: "Koreanisch", text: "안녕하세요. 소리가 들려요?"}
+  {lang: "ko-KR", name: "Koreanisch", text: "안녕하세요. 소리가 들려요?"},
+  {lang: "en-GB", name: "Englisch (britisch)", text: "Hello, can you hear me?"},
+  {lang: "en-US", name: "Englisch (amerikanisch)", text: "Hi there, the sound is working."}
 ];
 var box = document.getElementById("tests"), info = document.getElementById("info"), rows = [], waited = false;
 LANGS.forEach(function (l) {

@@ -12,7 +12,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
 <style>
-/* Sprachen: Startseite mit einer Karte pro Sprache. Jede Sprache ist ein eigener Ordner (niederlaendisch/, japanisch/, thai/, koreanisch/) und speichert ihren Stand in schach_docs unter sprachen/<ordner>/fortschritt als {punkte, serie, stufe, …}. */
+/* Sprachen: Startseite mit einer Karte pro Sprache. Jede Sprache ist ein eigener Ordner (niederlaendisch/, japanisch/, thai/, koreanisch/, englisch/) und speichert ihren Stand in schach_docs unter sprachen/<ordner>/fortschritt als {punkte, serie, stufe, …}. */
 :root{
   --bg:#f4f2ee; --surface:#fff; --fg:#1b2430; --muted:#5d6876; --line:#dfdad2; --accent:#1f4e79; --warm:#d9731f; --ok:#2e7d4f; --chip:#ebe6de;
   --display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif; --body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
@@ -60,7 +60,8 @@ var LANGS = [
   {dir: "niederlaendisch", flag: "🇳🇱", title: "Niederländisch", native: "Nederlands", text: "Alltag in den Niederlanden: Café, Markt, Weg, Bahn, Arzt, Arbeit, Meinungen. Sprechen mit Spracherkennung, Diktat, Lückentexte und Lesetexte."},
   {dir: "japanisch", flag: "🇯🇵", title: "Japanisch", native: "日本語", text: "Hiragana, Katakana und erste Kanji mit Schreib- und Leseübungen, dazu Sprechen und Dialoge."},
   {dir: "thai", flag: "🇹🇭", title: "Thailändisch", native: "ภาษาไทย", text: "Thai-Schrift und Töne mit Leseübungen, dazu Sprechen und Alltagsdialoge."},
-  {dir: "koreanisch", flag: "🇰🇷", title: "Koreanisch", native: "한국어", text: "Hangul in einem Abend, Silben bauen und lesen, Lautregeln, dazu Nachsprechen, Dialoge und Diktat."}
+  {dir: "koreanisch", flag: "🇰🇷", title: "Koreanisch", native: "한국어", text: "Hangul in einem Abend, Silben bauen und lesen, Lautregeln, dazu Nachsprechen, Dialoge und Diktat."},
+  {dir: "englisch", flag: "🇬🇧", title: "Englisch", native: "English", text: "Vom Small Talk bis zum Meeting: britische oder amerikanische Aussprache, Stolperfallen für Deutsche, Dialoge, Diktat und Lesetexte."}
 ];
 var grid = document.getElementById("grid");
 var cards = {};
