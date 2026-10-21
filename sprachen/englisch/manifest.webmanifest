@@ -1,0 +1,14 @@
+{
+  "name": "Englisch",
+  "short_name": "English",
+  "description": "Englisch sprechen lernen: nachsprechen, Dialoge, Diktat, Lesen.",
+  "lang": "de",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f6f3ee",
+  "theme_color": "#c8102e",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}

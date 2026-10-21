@@ -1,0 +1,864 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Englisch</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<script src="../../config.js"></script>
+<script src="../ton.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="inhalte.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap">
+<style>
+/* Englisch: Startseite mit Lektionen je Stufe, darunter ein Übungsablauf (eine Karte nach der anderen). Rot = Akzent, Blau = Aktion. */
+:root{
+  --bg:#f6f3ee; --surface:#fff; --fg:#1b2430; --muted:#5d6876; --line:#e1dbd1; --chip:#eee8df;
+  --accent:#1f4e79; --accent-fg:#fff; --orange:#c8102e; --ok:#2e7d4f; --ok-bg:#e3f2e8; --bad:#b8423f; --bad-bg:#fbe7e6; --mid:#a8740c; --mid-bg:#fbf0d9;
+  --display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif; --body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#11161d;--surface:#18202a;--fg:#e6ebf1;--muted:#98a4b3;--line:#2a3542;--chip:#222c38;--accent:#7fb2e5;--accent-fg:#0d1620;--orange:#ef6b7d;--ok:#62c08a;--ok-bg:#183326;--bad:#e57f7b;--bad-bg:#3a1f1e;--mid:#e0b44a;--mid-bg:#33290f;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#11161d;--surface:#18202a;--fg:#e6ebf1;--muted:#98a4b3;--line:#2a3542;--chip:#222c38;--accent:#7fb2e5;--accent-fg:#0d1620;--orange:#ef6b7d;--ok:#62c08a;--ok-bg:#183326;--bad:#e57f7b;--bad-bg:#3a1f1e;--mid:#e0b44a;--mid-bg:#33290f;color-scheme:dark}
+*,*::before,*::after{box-sizing:inherit}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--body);font-size:17px;line-height:1.55}
+.wrap{max-width:760px;margin:0 auto;padding-block:22px 80px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.top{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px}
+.back{color:var(--muted);text-decoration:none;font-size:.9rem}
+.iconbtn{background:none;border:0;color:var(--muted);font-size:1.3rem;cursor:pointer;padding:6px}
+h1,h2,h3{font-family:var(--display);margin:0;line-height:1.2;text-wrap:balance}
+h1{font-size:clamp(1.8rem,5vw,2.4rem)}
+h2{font-size:1.3rem}
+.muted{color:var(--muted)}
+.small{font-size:.88rem}
+button{font:inherit}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--fg);padding:10px 16px;font-weight:700;cursor:pointer;text-decoration:none;min-height:44px}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-fg)}
+.btn.ghost{background:transparent}
+.btn:disabled{opacity:.5;cursor:default}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px}
+
+/* Kopf mit Stand */
+.status{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;margin:14px 0 18px}
+.lvl b{font-family:var(--display);font-size:1.1rem}
+.bar{height:10px;border-radius:99px;background:var(--chip);overflow:hidden;margin-top:6px}
+.bar i{display:block;height:100%;background:var(--orange);border-radius:99px;transition:width .4s ease}
+.badges{display:flex;gap:8px}
+.badge{background:var(--chip);border-radius:12px;padding:6px 10px;font-weight:700;text-align:center;min-width:64px;font-size:.95rem}
+.badge small{display:block;font-weight:400;color:var(--muted);font-size:.72rem}
+.goal{margin-bottom:18px}
+.goal .bar i{background:var(--ok)}
+
+.tabs{display:flex;gap:6px;background:var(--chip);border-radius:12px;padding:4px;margin-bottom:14px}
+.tabs button{flex:1;border:0;background:transparent;border-radius:9px;padding:9px 8px;font-weight:700;color:var(--muted);cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--surface);color:var(--fg);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+
+.units{display:grid;gap:10px}
+.unit{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;text-align:left;width:100%;cursor:pointer;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px;color:inherit}
+.unit:hover{border-color:var(--accent)}
+.unit .ic{font-size:1.8rem;width:42px;text-align:center}
+.unit .t b{display:block}
+.unit .t span{color:var(--muted);font-size:.88rem}
+.dots{display:flex;gap:4px}
+.dots i{width:10px;height:10px;border-radius:50%;background:var(--chip);display:block}
+.dots i.on{background:var(--ok)}
+.dots i.gold{background:var(--orange)}
+.extra{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-bottom:14px}
+
+/* Lektion */
+.acts{display:grid;gap:10px;margin-top:14px}
+.act{display:flex;gap:12px;align-items:center;text-align:left;width:100%;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;cursor:pointer;color:inherit}
+.act:hover{border-color:var(--accent)}
+.act .ic{font-size:1.5rem}
+.act .t{flex:1}
+.act .t span{display:block;color:var(--muted);font-size:.88rem}
+.act .ok{color:var(--ok);font-weight:700}
+.plist{margin:14px 0 0;padding:0;list-style:none;display:grid;gap:6px}
+.plist li{display:flex;gap:10px;align-items:baseline;padding:8px 10px;border-radius:10px;background:var(--surface);border:1px solid var(--line)}
+.plist li span{color:var(--muted);font-size:.9rem}
+.say{border:0;background:var(--chip);border-radius:8px;cursor:pointer;padding:2px 8px;font-size:1rem}
+
+/* Übungsablauf */
+.prog{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.prog .bar{flex:1;margin:0}
+.prog .bar i{background:var(--accent)}
+.combo{font-weight:700;color:var(--orange);min-width:3.5em;text-align:right}
+.task{font-size:.85rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700;margin-bottom:6px}
+.big{font-family:var(--display);font-size:clamp(1.4rem,4.6vw,1.9rem);line-height:1.3;margin:6px 0}
+.de{color:var(--muted)}
+.mic{width:84px;height:84px;border-radius:50%;border:0;background:var(--orange);color:#fff;font-size:2.1rem;cursor:pointer;display:grid;place-items:center;margin:18px auto 8px;box-shadow:0 4px 14px rgba(200,16,46,.3)}
+.mic.on{animation:pulse 1.1s ease-in-out infinite;background:var(--bad)}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+@media (prefers-reduced-motion: reduce){.mic.on{animation:none}.bar i{transition:none}}
+.hint{text-align:center;color:var(--muted);font-size:.9rem;min-height:1.5em}
+.words{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+.words span{padding:3px 9px;border-radius:8px;font-weight:700}
+.words .y{background:var(--ok-bg);color:var(--ok)}
+.words .n{background:var(--bad-bg);color:var(--bad)}
+.fb{border-radius:12px;padding:10px 14px;margin:12px 0;font-weight:700}
+.fb.good{background:var(--ok-bg);color:var(--ok)}
+.fb.mid{background:var(--mid-bg);color:var(--mid)}
+.fb.bad{background:var(--bad-bg);color:var(--bad)}
+.choices{display:grid;gap:8px;margin-top:12px}
+.choice{text-align:left;background:var(--surface);border:2px solid var(--line);border-radius:12px;padding:12px 14px;cursor:pointer;font-weight:700;color:inherit}
+.choice:hover:not(:disabled){border-color:var(--accent)}
+.choice.right{border-color:var(--ok);background:var(--ok-bg)}
+.choice.wrong{border-color:var(--bad);background:var(--bad-bg)}
+input.answer{width:100%;font:inherit;font-size:1.15rem;padding:12px 14px;border-radius:12px;border:2px solid var(--line);background:var(--surface);color:var(--fg);margin-top:12px}
+input.answer:focus{outline:none;border-color:var(--accent)}
+.gapline{font-family:var(--display);font-size:1.4rem;margin:8px 0}
+.gapline u{text-decoration:none;border-bottom:3px solid var(--orange);padding:0 1.5em}
+.foot{display:flex;gap:10px;justify-content:space-between;flex-wrap:wrap;margin-top:16px}
+
+/* Dialog */
+.chat{display:flex;flex-direction:column;gap:8px;margin:12px 0}
+.msg{max-width:85%;padding:10px 14px;border-radius:16px;background:var(--surface);border:1px solid var(--line)}
+.msg.me{align-self:flex-end;background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.msg .who{font-size:.75rem;opacity:.75;font-weight:700}
+.msg .tr{font-size:.85rem;opacity:.8}
+.msg.cur{outline:3px solid var(--orange)}
+
+/* Lesen */
+.reader{font-size:1.15rem;line-height:1.8}
+.reader span{cursor:pointer;border-radius:4px}
+.reader span:hover{background:var(--chip)}
+.reader span.hit{background:var(--ok-bg)}
+.trans{margin-top:10px;color:var(--muted);font-style:italic}
+
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:10px 18px;border-radius:12px;font-weight:700;z-index:9;max-width:calc(100% - 32px);text-align:center}
+.done{text-align:center}
+.done .xp{font-family:var(--display);font-size:2.6rem;color:var(--orange)}
+dialog{border:0;border-radius:16px;padding:20px;max-width:440px;width:calc(100% - 32px);background:var(--surface);color:var(--fg)}
+dialog::backdrop{background:rgba(0,0,0,.4)}
+dialog label{display:block;margin:12px 0 4px;font-weight:700}
+dialog select{width:100%;font:inherit;padding:8px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--fg)}
+.warn{background:var(--mid-bg);color:var(--mid);border-radius:12px;padding:10px 14px;margin-bottom:14px;font-size:.92rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <span><a class="back" href="../">← Sprachen</a> <span class="muted">·</span> <a class="back" href="../hilfe/">🔊 Kein Ton?</a></span>
+    <button class="iconbtn" id="openSettings" type="button" aria-label="Einstellungen">⚙️</button>
+  </div>
+  <div id="app"></div>
+</div>
+
+<dialog id="settings">
+  <h2>Einstellungen</h2>
+  <label for="setAccent">Aussprache</label>
+  <select id="setAccent"><option value="en-GB">Britisch (en-GB)</option><option value="en-US">Amerikanisch (en-US)</option></select>
+  <label for="setRate">Sprechtempo der Stimme</label>
+  <select id="setRate"><option value="0.95">Normal</option><option value="0.8">Etwas langsamer</option><option value="0.65">Langsam</option></select>
+  <label for="setVoice">Stimme</label>
+  <select id="setVoice"></select>
+  <label for="setGoal">Tagesziel</label>
+  <select id="setGoal"><option value="20">Locker: 20 Punkte</option><option value="40">Normal: 40 Punkte</option><option value="80">Ehrgeizig: 80 Punkte</option></select>
+  <label for="setText">Eigene Sätze im Dialog</label>
+  <select id="setText"><option value="auto">Bei Anfängern zeigen, bei Fortgeschrittenen verdecken</option><option value="show">Immer zeigen</option><option value="hide">Immer verdecken</option></select>
+  <p class="small muted" id="setStore"></p>
+  <div class="row" style="justify-content:flex-end;margin-top:14px"><button class="btn primary" type="button" id="closeSettings">Fertig</button></div>
+</dialog>
+
+<script>
+// Englisch lernen: Sprechen mit Spracherkennung (Web Speech API, en-GB oder en-US), Sprachausgabe, Dialoge, Schreiben, Lesen.
+// Stand im Konto der Lebensplattform (Supabase, Tabelle schach_docs, Pfad sprachen/englisch/fortschritt), dazu im Browser als Rückfall.
+"use strict";
+var UNITS = window.EN_UNITS || [];
+var DOC = "sprachen/englisch/fortschritt";
+var LEVELS = [
+  [0, "Tourist"], [100, "Tea Drinker"], [250, "Small Talker"], [450, "Commuter"], [700, "Pub Regular"],
+  [1000, "Storyteller"], [1400, "Negotiator"], [1900, "Wordsmith"], [2500, "Near Native"], [3200, "Master of English"]
+];
+var STREAK_MIN = 10; // Punkte an einem Tag, damit er für die Serie zählt
+var app = document.getElementById("app");
+var sb = null, user = null;
+
+/* ---------- Stand ---------- */
+var S = fresh();
+function fresh() { return {xp: 0, days: {}, units: {}, weak: {}, track: "a1", settings: {accent: "en-GB", rate: "0.95", voice: "", goal: "40", text: "auto"}}; }
+function today() { var d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
+function dayBefore(s) { var d = new Date(s + "T12:00:00"); d.setDate(d.getDate() - 1); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
+function dayWord(n) { return n + (n === 1 ? " Tag" : " Tage"); }
+function level() { var i = 0; while (i + 1 < LEVELS.length && S.xp >= LEVELS[i + 1][0]) i++; return i; }
+function streak() {
+  var d = today(), n = 0;
+  if ((S.days[d] || 0) < STREAK_MIN) d = dayBefore(d); // heute noch offen: Serie bis gestern zählt weiter
+  while ((S.days[d] || 0) >= STREAK_MIN) { n++; d = dayBefore(d); }
+  return n;
+}
+function lkey() { return "en_state_" + (user ? user.id : "gast"); }
+function saveLocal() { try { localStorage.setItem(lkey(), JSON.stringify(S)); } catch (e) {} }
+function loadLocal() { try { var x = JSON.parse(localStorage.getItem(lkey()) || "null"); if (x) S = merge(fresh(), x); } catch (e) {} }
+function merge(a, b) { for (var k in b) a[k] = (k === "settings") ? Object.assign(a.settings, b.settings) : b[k]; return a; }
+var saveTimer = null, storeState = "lokal";
+function save() {
+  saveLocal();
+  if (!sb || !user) return;
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(function () {
+    var lv = level();
+    var data = Object.assign({}, S, {punkte: S.xp, serie: streak(), stufe: lv + 1, stufeName: LEVELS[lv][1]});
+    sb.from("schach_docs").upsert({user_id: user.id, path: DOC, data: data, updated_at: new Date().toISOString()}).then(function (r) { storeState = r.error ? "fehler" : "konto"; });
+  }, 1200);
+}
+function gain(n) {
+  if (!n) return;
+  var before = level();
+  S.xp += n; var t = today(); S.days[t] = (S.days[t] || 0) + n;
+  save();
+  if (level() > before) toast("🎉 Neue Stufe: " + LEVELS[level()][1] + "!");
+}
+function unitState(id) { return S.units[id] || (S.units[id] = {}); }
+function weakKey(u, i) { return u.id + ":" + i; }
+function markWeak(u, i, bad) {
+  var k = weakKey(u, i);
+  if (bad) S.weak[k] = (S.weak[k] || 0) + 1;
+  else if (S.weak[k]) { S.weak[k]--; if (S.weak[k] <= 0) delete S.weak[k]; }
+}
+
+/* ---------- Helfer ---------- */
+function h(tag, attrs, kids) {
+  var e = document.createElement(tag);
+  for (var k in attrs || {}) {
+    var v = attrs[k]; if (v == null || v === false) continue;
+    if (k === "text") e.textContent = v; else if (k === "class") e.className = v;
+    else if (k.slice(0, 2) === "on") e.addEventListener(k.slice(2), v); else e.setAttribute(k, v === true ? "" : v);
+  }
+  (kids || []).forEach(function (c) { if (c != null) e.appendChild(typeof c === "string" ? document.createTextNode(c) : c); });
+  return e;
+}
+function shuffle(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+function pick(a, n) { return shuffle(a).slice(0, n); }
+var toastTimer;
+function toast(t) {
+  var old = document.querySelector(".toast"); if (old) old.remove();
+  var e = h("div", {class: "toast", role: "status", text: t}); document.body.appendChild(e);
+  clearTimeout(toastTimer); toastTimer = setTimeout(function () { e.remove(); }, 2600);
+}
+
+/* ---------- Text vergleichen ---------- */
+var ONES = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen"];
+var TENS = ["", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"];
+function numEn(n) {
+  if (n < 20) return ONES[n];
+  if (n < 100) { var t = Math.floor(n / 10), o = n % 10; return TENS[t] + (o ? " " + ONES[o] : ""); }
+  if (n < 1000) { var hu = Math.floor(n / 100), r = n % 100; return ONES[hu] + " hundred" + (r ? " " + numEn(r) : ""); }
+  if (n < 10000) { var th = Math.floor(n / 1000), r2 = n % 1000; return ONES[th] + " thousand" + (r2 ? " " + numEn(r2) : ""); }
+  return String(n);
+}
+// Kurzformen ausschreiben und britische/amerikanische Schreibweisen angleichen, damit „I'm“ = „I am“ und „colour“ = „color“ zählt
+var CONTR = [[/\b(can)(?:no|')t\b/g, "$1 not"], [/\bwon't\b/g, "will not"], [/\bshan't\b/g, "shall not"], [/n't\b/g, " not"], [/'re\b/g, " are"], [/'ve\b/g, " have"], [/'ll\b/g, " will"], [/'m\b/g, " am"], [/'d\b/g, " would"],
+  [/\blet's\b/g, "let us"], [/\b(it|that|what|he|she|there|here|who|where|how|everything|nothing)'s\b/g, "$1 is"], [/\bok\b/g, "okay"]];
+var SPELL = {colour: "color", favourite: "favorite", centre: "center", theatre: "theater", travelling: "traveling", travelled: "traveled", realise: "realize", organise: "organize", organised: "organized", programme: "program", neighbour: "neighbor", neighbours: "neighbors", flavour: "flavor", honour: "honor", apologise: "apologize", cheque: "check", grey: "gray", mum: "mom", metre: "meter", metres: "meters", whilst: "while", okay: "okay", alright: "all right"};
+function norm(s) {
+  s = String(s).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[’`]/g, "'")
+    .replace(/[£$€]\s?(\d+)/g, function (m, d) { return d + (m[0] === "£" ? " pounds" : m[0] === "$" ? " dollars" : " euros"); })
+    .replace(/(\d+)\s?(am|pm)\b/g, "$1 $2").replace(/\b(\d+):00\b/g, "$1").replace(/(\d+):(\d\d)/g, "$1 $2");
+  CONTR.forEach(function (c) { s = s.replace(c[0], c[1]); });
+  return s.replace(/'/g, "").replace(/[^a-z0-9]+/g, " ")
+    .replace(/\d+/g, function (d) { return " " + numEn(parseInt(d, 10)) + " "; })
+    .trim().split(/\s+/).filter(Boolean).map(function (w) { return SPELL[w] || w; });
+}
+function lev(a, b) {
+  if (a === b) return 0;
+  var m = a.length, n = b.length, p = [], i, j;
+  for (j = 0; j <= n; j++) p[j] = j;
+  for (i = 1; i <= m; i++) {
+    var prev = p[0]; p[0] = i;
+    for (j = 1; j <= n; j++) { var tmp = p[j]; p[j] = Math.min(p[j] + 1, p[j - 1] + 1, prev + (a[i - 1] === b[j - 1] ? 0 : 1)); prev = tmp; }
+  }
+  return p[n];
+}
+function near(a, b) { var L = Math.max(a.length, b.length); var allow = L <= 3 ? 0 : L <= 6 ? 1 : 2; return lev(a, b) <= allow; }
+// Gesprochenes gegen Zielsatz: welche Wörter des Ziels kamen vor? Beste von mehreren Erkennungsvarianten.
+function compareSpoken(target, alts) {
+  var tw = norm(target), best = null;
+  (alts.length ? alts : [""]).forEach(function (alt) {
+    var hw = norm(alt).join(""), hws = norm(alt), used = {};
+    var marks = tw.map(function (w) {
+      for (var i = 0; i < hws.length; i++) if (!used[i] && near(w, hws[i])) { used[i] = 1; return {w: w, ok: true}; }
+      // zusammengezogene Wörter („weekend“ vs. „week end“)
+      return {w: w, ok: w.length > 3 && hw.indexOf(w) >= 0};
+    });
+    var score = tw.length ? marks.filter(function (m) { return m.ok; }).length / tw.length : 0;
+    if (!best || score > best.score) best = {score: score, marks: marks, heard: alt};
+  });
+  return best;
+}
+// Getippte Antwort: Abstand über den ganzen Satz
+function compareTyped(target, typed) {
+  var a = norm(target).join(" "), b = norm(typed).join(" ");
+  var L = Math.max(a.length, 1); return Math.max(0, 1 - lev(a, b) / L);
+}
+
+/* ---------- Sprachausgabe ---------- */
+var voices = [];
+function loadVoices() {
+  if (!window.speechSynthesis) return;
+  var want = new RegExp(accent().replace("-", "."), "i");
+  voices = speechSynthesis.getVoices().filter(function (v) { return /^en/i.test(v.lang); })
+    .sort(function (a, b) { return (want.test(b.lang) - want.test(a.lang)) || (b.localService - a.localService); });
+  fillVoiceSelect();
+}
+if (window.speechSynthesis) { loadVoices(); speechSynthesis.onvoiceschanged = loadVoices; }
+function accent() { return S.settings.accent === "en-US" ? "en-US" : "en-GB"; }
+function voice() { return voices.find(function (v) { return v.name === S.settings.voice; }) || voices[0] || null; }
+// Sprachausgabe über ../ton.js (Browserfehler umgangen, Hinweis zur Ton-Hilfe bei fehlender Stimme); wartet bis zum Satzende
+function speak(text, rate) {
+  return Ton.speak(text, {lang: accent(), voice: voice(), rate: rate || parseFloat(S.settings.rate) || 0.95});
+}
+function sayBtn(text, label) { return h("button", {class: "btn", type: "button", onclick: function () { speak(text); }, text: label || "🔊 Anhören"}); }
+function slowBtn(text) { return h("button", {class: "btn ghost", type: "button", onclick: function () { speak(text, 0.6); }, text: "🐢 Langsam"}); }
+
+/* ---------- Spracherkennung ---------- */
+var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+var activeRec = null;
+// Ein Mikrofon-Knopf: tippen startet, nochmal tippen stoppt. Liefert Varianten des Gehörten an onResult.
+function micButton(opts) {
+  var btn = h("button", {class: "mic", type: "button", "aria-label": "Sprechen", text: "🎤"});
+  var hint = h("p", {class: "hint", text: opts.hint || "Tippen und sprechen"});
+  var rec = null, finals = [], alts = [], live = "";
+  function stop() { if (rec) try { rec.stop(); } catch (e) {} }
+  btn.addEventListener("click", function () {
+    if (rec) { stop(); return; }
+    if (window.speechSynthesis) speechSynthesis.cancel();
+    if (activeRec) try { activeRec.abort(); } catch (e) {}
+    rec = new SR(); activeRec = rec;
+    rec.lang = accent(); rec.interimResults = true; rec.maxAlternatives = 4; rec.continuous = !!opts.long;
+    finals = []; alts = []; live = "";
+    rec.onresult = function (ev) {
+      var interim = "";
+      for (var i = ev.resultIndex; i < ev.results.length; i++) {
+        var r = ev.results[i];
+        if (r.isFinal) { finals.push(r[0].transcript); if (!opts.long) for (var j = 0; j < r.length; j++) alts.push(r[j].transcript); }
+        else interim += r[0].transcript;
+      }
+      live = (finals.join(" ") + " " + interim).trim();
+      hint.textContent = live ? "„" + live + "“" : "Ich höre zu …";
+    };
+    rec.onerror = function (ev) {
+      hint.textContent = ev.error === "not-allowed" || ev.error === "service-not-allowed" ? "Mikrofon ist nicht erlaubt. Bitte im Browser freigeben."
+        : ev.error === "no-speech" ? "Nichts gehört. Tippe und sprich nochmal." : ev.error === "aborted" ? hint.textContent : "Spracherkennung gerade gestört (" + ev.error + ").";
+    };
+    rec.onend = function () {
+      btn.classList.remove("on"); btn.textContent = "🎤"; rec = null;
+      var all = opts.long ? [finals.join(" ")] : (alts.length ? alts : finals);
+      if (!all.length && live) all = [live];
+      if (all.length && all[0].trim()) opts.onResult(all);
+      else if (/Ich höre zu/.test(hint.textContent)) hint.textContent = "Nichts verstanden. Tippe und sprich nochmal.";
+    };
+    try { rec.start(); btn.classList.add("on"); btn.textContent = "⏹"; hint.textContent = opts.long ? "Ich höre zu … tippe zum Beenden." : "Ich höre zu …"; }
+    catch (e) { rec = null; hint.textContent = "Mikrofon ließ sich nicht starten."; }
+  });
+  return h("div", {}, [btn, hint]);
+}
+// Ohne Spracherkennung (z. B. Firefox): selbst einschätzen
+function selfCheck(onPick) {
+  return h("div", {}, [
+    h("p", {class: "hint", text: "Dein Browser hat keine Spracherkennung. Sprich laut nach und schätze dich selbst ein."}),
+    h("div", {class: "row", style: "justify-content:center"}, [
+      h("button", {class: "btn", type: "button", text: "😕 Noch unsicher", onclick: function () { onPick(0.4); }}),
+      h("button", {class: "btn primary", type: "button", text: "😀 Hat geklappt", onclick: function () { onPick(0.9); }})
+    ])
+  ]);
+}
+function wordMarks(marks) { return h("div", {class: "words"}, marks.map(function (m) { return h("span", {class: m.ok ? "y" : "n", text: m.w}); })); }
+function verdict(score) { return score >= 0.85 ? ["good", "Sehr gut! 🎯"] : score >= 0.6 ? ["mid", "Fast! Die roten Wörter nochmal üben."] : ["bad", "Das war noch nicht verständlich. Hör nochmal hin."]; }
+
+/* ---------- Startseite ---------- */
+function statusBlock() {
+  var lv = level(), cur = LEVELS[lv][0], next = LEVELS[lv + 1] ? LEVELS[lv + 1][0] : null;
+  var pct = next ? Math.round((S.xp - cur) / (next - cur) * 100) : 100;
+  var goal = parseInt(S.settings.goal, 10) || 40, t = S.days[today()] || 0;
+  return h("div", {}, [
+    h("div", {class: "status"}, [
+      h("div", {class: "lvl"}, [
+        h("b", {text: "Stufe " + (lv + 1) + " · " + LEVELS[lv][1]}),
+        h("div", {class: "bar", role: "progressbar", "aria-valuenow": pct, "aria-valuemin": 0, "aria-valuemax": 100}, [h("i", {style: "width:" + pct + "%"})]),
+        h("div", {class: "small muted", text: next ? (next - S.xp) + " Punkte bis „" + LEVELS[lv + 1][1] + "“" : "Höchste Stufe erreicht"})
+      ]),
+      h("div", {class: "badges"}, [
+        h("div", {class: "badge"}, ["⭐ " + S.xp, h("small", {text: "Punkte"})]),
+        h("div", {class: "badge"}, ["🔥 " + streak(), h("small", {text: streak() === 1 ? "Tag Serie" : "Tage Serie"})])
+      ])
+    ]),
+    h("div", {class: "goal"}, [
+      h("div", {class: "small", text: t >= goal ? "✅ Tagesziel geschafft: " + t + " von " + goal + " Punkten" : "Tagesziel: " + t + " von " + goal + " Punkten"}),
+      h("div", {class: "bar"}, [h("i", {style: "width:" + Math.min(100, Math.round(t / goal * 100)) + "%"})])
+    ])
+  ]);
+}
+function unitDots(u) {
+  var st = unitState(u.id), parts = [st.practice != null, !!st.dialog, !!st.read]; if (u.speak) parts.push(!!st.speak);
+  return h("div", {class: "dots", "aria-label": parts.filter(Boolean).length + " von " + parts.length + " erledigt"}, parts.map(function (on, i) {
+    return h("i", {class: on ? (i === 0 && st.practice >= 0.9 ? "gold" : "on") : ""});
+  }));
+}
+function home() {
+  stopAll(); window.scrollTo(0, 0);
+  app.textContent = "";
+  app.appendChild(h("h1", {text: "🇬🇧 Englisch"}));
+  if (!SR) app.appendChild(h("p", {class: "warn", text: "Dieser Browser hat keine Spracherkennung. Am besten Chrome, Edge oder Safari nehmen; hier kannst du nachsprechen und dich selbst einschätzen."}));
+  app.appendChild(statusBlock());
+
+  var weakN = Object.keys(S.weak).length;
+  var nextU = UNITS.filter(function (u) { return u.track === S.track; }).find(function (u) { return unitState(u.id).practice == null; });
+  app.appendChild(h("div", {class: "extra"}, [
+    h("button", {class: "act", type: "button", onclick: function () { if (nextU) openUnit(nextU); else runPractice(null, mixPool(S.track), "Tagesmix"); }}, [
+      h("span", {class: "ic", text: "▶️"}), h("span", {class: "t"}, [h("b", {text: nextU ? "Weiter lernen" : "Tagesmix"}), h("span", {text: nextU ? nextU.title : "10 Aufgaben aus allen Lektionen"})])
+    ]),
+    h("button", {class: "act", type: "button", disabled: weakN ? null : true, onclick: function () { runPractice(null, weakPool(), "Fehler wiederholen"); }}, [
+      h("span", {class: "ic", text: "🔁"}), h("span", {class: "t"}, [h("b", {text: "Fehler wiederholen"}), h("span", {text: weakN ? weakN + " Sätze zum Üben" : "Gerade nichts offen"})])
+    ])
+  ]));
+
+  var tabs = h("div", {class: "tabs", role: "tablist"});
+  [["a1", "Anfänger · A1–A2"], ["b1", "Fortgeschritten · B1–B2"]].forEach(function (t) {
+    tabs.appendChild(h("button", {type: "button", role: "tab", "aria-selected": S.track === t[0] ? "true" : "false", text: t[1], onclick: function () { S.track = t[0]; save(); home(); }}));
+  });
+  app.appendChild(tabs);
+  var list = h("div", {class: "units"});
+  UNITS.filter(function (u) { return u.track === S.track; }).forEach(function (u, i) {
+    list.appendChild(h("button", {class: "unit", type: "button", onclick: function () { openUnit(u); }}, [
+      h("span", {class: "ic", text: u.icon}),
+      h("span", {class: "t"}, [h("b", {text: (i + 1) + ". " + u.title}), h("span", {text: u.en})]),
+      unitDots(u)
+    ]));
+  });
+  app.appendChild(list);
+  app.appendChild(h("p", {class: "small muted", style: "margin-top:14px", text: "Punkte: grün = erledigt (Übungsrunde, Dialog, Lesetext" + (S.track === "b1" ? ", freies Sprechen" : "") + "), orange = Übungsrunde mit mindestens 90 %."}));
+}
+function mixPool(track) {
+  var pool = [];
+  UNITS.forEach(function (u) { if (u.track === track && (unitState(u.id).practice != null || track === "a1" && u === UNITS[0])) u.phrases.forEach(function (p, i) { pool.push({u: u, i: i}); }); });
+  if (!pool.length) UNITS.filter(function (u) { return u.track === track; })[0].phrases.forEach(function (p, i) { pool.push({u: UNITS.filter(function (x) { return x.track === track; })[0], i: i}); });
+  return pool;
+}
+function weakPool() {
+  var pool = [];
+  Object.keys(S.weak).forEach(function (k) { var p = k.split(":"), u = UNITS.find(function (x) { return x.id === p[0]; }); if (u && u.phrases[+p[1]]) pool.push({u: u, i: +p[1]}); });
+  return pool;
+}
+
+/* ---------- Lektion ---------- */
+function openUnit(u) {
+  stopAll(); window.scrollTo(0, 0);
+  var st = unitState(u.id);
+  app.textContent = "";
+  app.appendChild(h("button", {class: "btn ghost", type: "button", text: "← Übersicht", onclick: home}));
+  app.appendChild(h("h1", {style: "margin-top:12px", text: u.icon + " " + u.title}));
+  app.appendChild(h("p", {class: "muted", text: u.en}));
+  if (u.tip) app.appendChild(h("p", {class: "warn", text: "💡 " + u.tip}));
+  var acts = h("div", {class: "acts"});
+  function act(ic, title, sub, done, fn) {
+    acts.appendChild(h("button", {class: "act", type: "button", onclick: fn}, [
+      h("span", {class: "ic", text: ic}), h("span", {class: "t"}, [h("b", {text: title}), h("span", {text: sub})]),
+      done ? h("span", {class: "ok", text: done}) : null
+    ]));
+  }
+  act("🎯", "Übungsrunde", "10 Aufgaben: hören, nachsprechen, übersetzen, Diktat, Lücken", st.practice != null ? "✓ " + Math.round(st.practice * 100) + " %" : "", function () {
+    runPractice(u, u.phrases.map(function (p, i) { return {u: u, i: i}; }), u.title);
+  });
+  act("🗣️", "Dialog: " + u.dialog.title, "Du sprichst eine Rolle, die Stimme die andere", st.dialog ? "✓" : "", function () { runDialog(u); });
+  act("📖", "Lesetext: " + u.text.title, "Lesen, vorlesen lassen, laut lesen, Fragen", st.read ? "✓" : "", function () { runRead(u); });
+  if (u.speak) act("🎙️", "Freies Sprechen", u.speak.length + " Aufgaben, frei antworten", st.speak ? "✓" : "", function () { runSpeak(u, 0); });
+  app.appendChild(acts);
+  app.appendChild(h("h2", {style: "margin-top:22px", text: "Alle Sätze"}));
+  app.appendChild(h("ul", {class: "plist"}, u.phrases.map(function (p) {
+    return h("li", {}, [h("button", {class: "say", type: "button", "aria-label": "Anhören", text: "🔊", onclick: function () { speak(p[0]); }}), h("div", {}, [h("b", {text: p[0]}), h("br"), h("span", {text: p[1]})])]);
+  })));
+}
+
+/* ---------- Übungsrunde ---------- */
+var run = null;
+function stopAll() {
+  if (window.speechSynthesis) speechSynthesis.cancel();
+  if (activeRec) try { activeRec.abort(); } catch (e) {}
+  run = null;
+}
+// Pool = [{u, i}] Sätze. Aufgaben: 3× nachsprechen, 2× hören und wählen, 2× auf Englisch sagen, Diktat, Lücke, Übersetzen schreiben.
+function runPractice(unit, pool, title) {
+  stopAll();
+  var weakFirst = shuffle(pool).sort(function (a, b) { return (S.weak[weakKey(b.u, b.i)] || 0) - (S.weak[weakKey(a.u, a.i)] || 0); });
+  var kinds = shuffle(["repeat", "repeat", "repeat", "choice", "choice", "say", "say", "dictation", "gap", "write"]);
+  var steps = kinds.map(function (k, n) { return {kind: k, item: weakFirst[n % weakFirst.length]}; });
+  // Nachsprechen zuerst, damit man den Satz gehört hat, bevor man ihn selbst bilden muss
+  steps.sort(function (a, b) { return (a.kind === "repeat" ? 0 : 1) - (b.kind === "repeat" ? 0 : 1); });
+  run = {unit: unit, title: title, steps: steps, pos: 0, xp: 0, score: 0, combo: 0, pool: pool};
+  showStep();
+}
+function showStep() {
+  if (!run) return;
+  window.scrollTo(0, 0);
+  if (run.pos >= run.steps.length) return finishPractice();
+  var st = run.steps[run.pos], u = st.item.u, p = u.phrases[st.item.i];
+  app.textContent = "";
+  var pct = Math.round(run.pos / run.steps.length * 100);
+  app.appendChild(h("div", {class: "prog"}, [
+    h("button", {class: "iconbtn", type: "button", "aria-label": "Abbrechen", text: "✕", onclick: function () { if (run.unit) openUnit(run.unit); else home(); }}),
+    h("div", {class: "bar"}, [h("i", {style: "width:" + pct + "%"})]),
+    h("span", {class: "combo", text: run.combo >= 3 ? "🔥 " + run.combo : ""})
+  ]));
+  var card = h("div", {class: "card"}); app.appendChild(card);
+  ({repeat: exRepeat, choice: exChoice, say: exSay, dictation: exDictation, gap: exGap, write: exWrite})[st.kind](card, u, p, st.item.i);
+}
+// Ergebnis einer Aufgabe: Punkte, Serie in der Runde, Fehlerliste. Danach erscheint „Weiter“.
+function settle(card, u, i, score) {
+  var good = score >= 0.85, ok = score >= 0.6;
+  var pts = good ? 10 : ok ? 5 : 1;
+  if (good) { run.combo++; if (run.combo >= 3) pts += 2; } else run.combo = 0;
+  run.xp += pts; run.score += Math.min(1, score); gain(pts);
+  markWeak(u, i, !ok);
+  var foot = h("div", {class: "foot"}, [h("span", {class: "muted", text: "+" + pts + " Punkte" + (good && run.combo >= 3 ? " (Serie!)" : "")}), h("button", {class: "btn primary", type: "button", text: "Weiter →", onclick: function () { run.pos++; showStep(); }})]);
+  card.appendChild(foot);
+  foot.querySelector(".btn.primary").focus();
+}
+function exRepeat(card, u, p, i) {
+  card.appendChild(h("div", {class: "task", text: "Hören und nachsprechen"}));
+  card.appendChild(h("p", {class: "big", text: p[0]}));
+  card.appendChild(h("p", {class: "de", text: p[1]}));
+  card.appendChild(h("div", {class: "row"}, [sayBtn(p[0]), slowBtn(p[0])]));
+  var res = h("div"), settled = false, tries = 0;
+  function onScore(score, marks) {
+    res.textContent = "";
+    if (marks) res.appendChild(wordMarks(marks));
+    var v = verdict(score); res.appendChild(h("div", {class: "fb " + v[0], text: v[1] + (marks ? " " + Math.round(score * 100) + " %" : "")}));
+    if (!settled && (score >= 0.6 || tries >= 2)) { settled = true; settle(card, u, i, score); }
+    else if (!settled) { tries++; res.appendChild(h("button", {class: "btn ghost", type: "button", text: "Überspringen", onclick: function () { settled = true; this.remove(); settle(card, u, i, score); }})); }
+  }
+  card.appendChild(SR ? micButton({onResult: function (alts) { var c = compareSpoken(p[0], alts); onScore(c.score, c.marks); }}) : selfCheck(function (s) { onScore(s); }));
+  card.appendChild(res);
+  speak(p[0]);
+}
+function exSay(card, u, p, i) {
+  card.appendChild(h("div", {class: "task", text: "Sag es auf Englisch"}));
+  card.appendChild(h("p", {class: "big", text: p[1]}));
+  var res = h("div"), settled = false;
+  var reveal = h("button", {class: "btn ghost", type: "button", text: "Lösung zeigen", onclick: function () { show(0, null); }});
+  function show(score, marks) {
+    res.textContent = "";
+    if (marks) res.appendChild(wordMarks(marks));
+    var v = verdict(score); res.appendChild(h("div", {class: "fb " + v[0], text: v[1]}));
+    res.appendChild(h("p", {class: "big", text: p[0]}));
+    res.appendChild(h("div", {class: "row"}, [sayBtn(p[0]), slowBtn(p[0])]));
+    reveal.remove();
+    if (!settled) { settled = true; settle(card, u, i, score); }
+    speak(p[0]);
+  }
+  card.appendChild(SR ? micButton({onResult: function (alts) { var c = compareSpoken(p[0], alts); show(c.score, c.marks); }}) : selfCheck(function (s) { show(s, null); }));
+  card.appendChild(h("div", {class: "row", style: "justify-content:center"}, [reveal]));
+  card.appendChild(res);
+}
+function optionsFrom(field, correct, u) {
+  var pool = [];
+  UNITS.forEach(function (x) { if (x.track === u.track) x.phrases.forEach(function (q) { if (q[field] !== correct) pool.push(q[field]); }); });
+  return shuffle(pick(pool, 3).concat([correct]));
+}
+function choiceList(card, opts, correct, onDone) {
+  var box = h("div", {class: "choices"});
+  opts.forEach(function (o) {
+    box.appendChild(h("button", {class: "choice", type: "button", text: o, onclick: function () {
+      var right = o === correct;
+      box.querySelectorAll("button").forEach(function (b) { b.disabled = true; if (b.textContent === correct) b.classList.add("right"); });
+      if (!right) this.classList.add("wrong");
+      onDone(right);
+    }}));
+  });
+  card.appendChild(box);
+}
+function exChoice(card, u, p, i) {
+  card.appendChild(h("div", {class: "task", text: "Hören und verstehen"}));
+  card.appendChild(h("p", {class: "muted", text: "Was hörst du? Wähle die Übersetzung."}));
+  card.appendChild(h("div", {class: "row"}, [sayBtn(p[0], "🔊 Nochmal hören"), slowBtn(p[0])]));
+  choiceList(card, optionsFrom(1, p[1], u), p[1], function (right) {
+    card.appendChild(h("p", {class: "big", text: p[0]}));
+    settle(card, u, i, right ? 1 : 0);
+  });
+  speak(p[0]);
+}
+function typedTask(card, u, p, i, target) {
+  var inp = h("input", {class: "answer", type: "text", autocomplete: "off", autocapitalize: "off", spellcheck: "false", lang: "en", placeholder: "Auf Englisch tippen …"});
+  var res = h("div");
+  var check = h("button", {class: "btn primary", type: "button", text: "Prüfen", onclick: go});
+  inp.addEventListener("keydown", function (e) { if (e.key === "Enter") go(); });
+  function go() {
+    if (check.disabled) return;
+    check.disabled = true; inp.disabled = true;
+    var s = compareTyped(target, inp.value), score = s >= 0.95 ? 1 : s >= 0.85 ? 0.85 : s >= 0.7 ? 0.6 : 0.2;
+    var c = compareSpoken(target, [inp.value]);
+    res.appendChild(wordMarks(c.marks));
+    var v = score >= 1 ? ["good", "Richtig! ✍️"] : score >= 0.85 ? ["good", "Richtig, kleine Tippfehler."] : score >= 0.6 ? ["mid", "Fast. So heißt es:"] : ["bad", "Noch nicht. So heißt es:"];
+    res.appendChild(h("div", {class: "fb " + v[0], text: v[1]}));
+    res.appendChild(h("p", {class: "big", text: target}));
+    check.remove();
+    settle(card, u, i, score);
+  }
+  card.appendChild(inp);
+  card.appendChild(h("div", {class: "row", style: "margin-top:12px"}, [check]));
+  card.appendChild(res);
+  setTimeout(function () { inp.focus(); }, 50);
+}
+function exDictation(card, u, p, i) {
+  card.appendChild(h("div", {class: "task", text: "Diktat"}));
+  card.appendChild(h("p", {class: "muted", text: "Hör zu und schreib den Satz auf. Satzzeichen und Großschreibung zählen nicht."}));
+  card.appendChild(h("div", {class: "row"}, [sayBtn(p[0], "🔊 Nochmal hören"), slowBtn(p[0])]));
+  typedTask(card, u, p, i, p[0]);
+  speak(p[0]);
+}
+function exWrite(card, u, p, i) {
+  card.appendChild(h("div", {class: "task", text: "Übersetzen und schreiben"}));
+  card.appendChild(h("p", {class: "big", text: p[1]}));
+  typedTask(card, u, p, i, p[0]);
+}
+function exGap(card, u, p, i) {
+  var words = p[0].split(" "), cand = [];
+  words.forEach(function (w, k) { if (norm(w)[0] && norm(w)[0].length >= 3) cand.push(k); });
+  if (!cand.length) cand = [0];
+  var k = cand[Math.floor(Math.random() * cand.length)], answer = words[k].replace(/[.,!?¿:;]+$/, ""), tail = words[k].slice(answer.length);
+  card.appendChild(h("div", {class: "task", text: "Lückentext"}));
+  card.appendChild(h("p", {class: "de", text: p[1]}));
+  var line = h("p", {class: "gapline"});
+  words.forEach(function (w, n) { if (n) line.appendChild(document.createTextNode(" ")); if (n === k) { line.appendChild(h("u", {text: " "})); if (tail) line.appendChild(document.createTextNode(tail)); } else line.appendChild(document.createTextNode(w)); });
+  card.appendChild(line);
+  var others = [];
+  UNITS.forEach(function (x) { if (x.track === u.track) x.phrases.forEach(function (q) { q[0].split(" ").forEach(function (w) { w = w.replace(/[.,!?:;]+$/, ""); if (w.length >= 3 && norm(w).join() !== norm(answer).join() && others.indexOf(w) < 0) others.push(w); }); }); });
+  others.sort(function (a, b) { return Math.abs(a.length - answer.length) - Math.abs(b.length - answer.length); });
+  var opts = shuffle(pick(others.slice(0, 12), 3).concat([answer]));
+  choiceList(card, opts, answer, function (right) {
+    line.querySelector("u").textContent = answer; line.querySelector("u").style.padding = "0 .2em";
+    speak(p[0]); settle(card, u, i, right ? 1 : 0);
+  });
+}
+function finishPractice() {
+  var r = run, pct = r.score / r.steps.length;
+  var bonus = pct >= 0.9 ? 20 : pct >= 0.7 ? 10 : 5; gain(bonus);
+  if (r.unit) { var st = unitState(r.unit.id); st.practice = Math.max(st.practice || 0, pct); save(); }
+  doneScreen("Runde geschafft!", r.xp + bonus, Math.round(pct * 100) + " % richtig, Abschlussbonus +" + bonus, function () { runPractice(r.unit, r.pool, r.title); }, r.unit);
+}
+function doneScreen(title, xp, line, again, unit) {
+  run = null; window.scrollTo(0, 0);
+  app.textContent = "";
+  var goal = parseInt(S.settings.goal, 10) || 40, t = S.days[today()] || 0;
+  app.appendChild(h("div", {class: "card done"}, [
+    h("h2", {text: title}),
+    h("p", {class: "xp", text: "+" + xp}),
+    h("p", {class: "muted", text: line}),
+    h("p", {text: (t >= goal ? "✅ Tagesziel geschafft · " : "Heute " + t + " von " + goal + " Punkten · ") + "🔥 " + dayWord(streak()) + " Serie"}),
+    h("div", {class: "row", style: "justify-content:center;margin-top:10px"}, [
+      again ? h("button", {class: "btn", type: "button", text: "Nochmal", onclick: again}) : null,
+      h("button", {class: "btn primary", type: "button", text: unit ? "Zur Lektion" : "Zur Übersicht", onclick: function () { if (unit) openUnit(unit); else home(); }})
+    ])
+  ]));
+}
+
+/* ---------- Dialog ---------- */
+function runDialog(u, swap) {
+  stopAll(); window.scrollTo(0, 0);
+  var me = swap ? "A" : "B", d = u.dialog, my = 0, sum = 0;
+  var showText = S.settings.text === "show" || (S.settings.text === "auto" && u.track === "a1");
+  var token = run = {dialog: true};
+  app.textContent = "";
+  app.appendChild(h("button", {class: "btn ghost", type: "button", text: "← Lektion", onclick: function () { openUnit(u); }}));
+  app.appendChild(h("h2", {style: "margin-top:12px", text: "🗣️ " + d.title}));
+  var mine = d.roles[me === "A" ? 0 : 1], other = d.roles[me === "A" ? 1 : 0];
+  app.appendChild(h("p", {class: "muted", text: mine === "Du" ? "Die Stimme spricht " + other + ", du antwortest." : "Du sprichst die Rolle „" + mine + "“, die Stimme übernimmt „" + other + "“."}));
+  var chat = h("div", {class: "chat"}); app.appendChild(chat);
+  var panel = h("div"); app.appendChild(panel);
+  function bubble(l, mine) {
+    var m = h("div", {class: "msg" + (mine ? " me" : "")}, [h("div", {class: "who", text: d.roles[l[0] === "A" ? 0 : 1]}), h("div", {class: "en", text: l[1]}), h("div", {class: "tr", text: l[2]})]);
+    chat.appendChild(m); m.scrollIntoView({block: "nearest", behavior: "smooth"}); return m;
+  }
+  function step(n) {
+    if (run !== token) return;
+    panel.textContent = "";
+    if (n >= d.lines.length) return finish();
+    var l = d.lines[n];
+    if (l[0] !== me) {
+      var b = bubble(l, false); b.classList.add("cur");
+      speak(l[1]).then(function () { b.classList.remove("cur"); setTimeout(function () { step(n + 1); }, 350); });
+      panel.appendChild(h("div", {class: "row"}, [h("button", {class: "btn ghost", type: "button", text: "⏭ Weiter", onclick: function () { if (window.speechSynthesis) speechSynthesis.cancel(); }})]));
+      return;
+    }
+    var card = h("div", {class: "card"});
+    card.appendChild(h("div", {class: "task", text: "Du bist dran"}));
+    card.appendChild(h("p", {class: "de", text: l[2]}));
+    var en = h("p", {class: "big", text: l[1], hidden: !showText});
+    card.appendChild(en);
+    card.appendChild(h("div", {class: "row"}, [
+      h("button", {class: "btn ghost", type: "button", text: showText ? "Satz verdecken" : "Satz zeigen", onclick: function () { en.hidden = !en.hidden; this.textContent = en.hidden ? "Satz zeigen" : "Satz verdecken"; }}),
+      sayBtn(l[1], "🔊 Vorsagen")
+    ]));
+    var res = h("div");
+    function done(score, marks) {
+      res.textContent = "";
+      if (marks) res.appendChild(wordMarks(marks));
+      var v = verdict(score); res.appendChild(h("div", {class: "fb " + v[0], text: v[1]}));
+      var pts = score >= 0.85 ? 6 : score >= 0.6 ? 3 : 1;
+      res.appendChild(h("div", {class: "foot"}, [
+        h("button", {class: "btn ghost", type: "button", text: "Nochmal sprechen", onclick: function () { res.textContent = ""; }}),
+        h("button", {class: "btn primary", type: "button", text: "Weiter →", onclick: function () { my++; sum += score; gain(pts); bubble(l, true); step(n + 1); }})
+      ]));
+    }
+    card.appendChild(SR ? micButton({onResult: function (alts) { var c = compareSpoken(l[1], alts); done(c.score, c.marks); }}) : selfCheck(function (s) { done(s); }));
+    card.appendChild(res);
+    panel.appendChild(card);
+    card.scrollIntoView({block: "nearest", behavior: "smooth"});
+  }
+  function finish() {
+    var pct = my ? sum / my : 0, bonus = pct >= 0.85 ? 15 : 8; gain(bonus);
+    unitState(u.id).dialog = true; save();
+    panel.appendChild(h("div", {class: "card done"}, [
+      h("h2", {text: "Dialog geschafft!"}),
+      h("p", {class: "muted", text: Math.round(pct * 100) + " % verstanden · Bonus +" + bonus}),
+      h("div", {class: "row", style: "justify-content:center"}, [
+        h("button", {class: "btn", type: "button", text: "🔄 Rollen tauschen", onclick: function () { runDialog(u, !swap); }}),
+        h("button", {class: "btn", type: "button", text: "🔊 Ganzen Dialog hören", onclick: function () { playAll(d.lines.map(function (x) { return x[1]; })); }}),
+        h("button", {class: "btn primary", type: "button", text: "Zur Lektion", onclick: function () { openUnit(u); }})
+      ])
+    ]));
+  }
+  step(0);
+}
+function playAll(lines) { var i = 0; (function next() { if (i < lines.length) speak(lines[i++]).then(function () { setTimeout(next, 250); }); })(); }
+
+/* ---------- Lesetext ---------- */
+function runRead(u) {
+  stopAll(); window.scrollTo(0, 0);
+  var t = u.text, sentences = t.en.match(/[^.!?]+[.!?]+/g) || [t.en];
+  app.textContent = "";
+  app.appendChild(h("button", {class: "btn ghost", type: "button", text: "← Lektion", onclick: function () { openUnit(u); }}));
+  app.appendChild(h("h2", {style: "margin-top:12px", text: "📖 " + t.title}));
+  app.appendChild(h("p", {class: "small muted", text: "Tippe auf einen Satz, um ihn zu hören."}));
+  var reader = h("div", {class: "card reader", lang: "en"});
+  var spans = sentences.map(function (s) { var e = h("span", {text: s.trim() + " ", onclick: function () { speak(s.trim()); }}); reader.appendChild(e); return e; });
+  app.appendChild(reader);
+  var tr = h("p", {class: "trans", text: t.de, hidden: true});
+  app.appendChild(h("div", {class: "row", style: "margin-top:12px"}, [
+    h("button", {class: "btn", type: "button", text: "🔊 Ganzen Text hören", onclick: function () { playAll(sentences.map(function (s) { return s.trim(); })); }}),
+    h("button", {class: "btn ghost", type: "button", text: "Übersetzung zeigen", onclick: function () { tr.hidden = !tr.hidden; this.textContent = tr.hidden ? "Übersetzung zeigen" : "Übersetzung verbergen"; }})
+  ]));
+  app.appendChild(tr);
+
+  // Laut vorlesen: Abdeckung der Wörter des ganzen Textes
+  var aloud = h("div", {class: "card", style: "margin-top:16px"}, [h("div", {class: "task", text: "Laut vorlesen"}), h("p", {class: "muted", text: "Lies den ganzen Text laut. Tippe zum Beenden auf den Knopf."})]);
+  var aRes = h("div"), aDone = false;
+  if (SR) aloud.appendChild(micButton({long: true, hint: "Tippen und vorlesen", onResult: function (alts) {
+    var c = compareSpoken(t.en, alts); aRes.textContent = "";
+    // Sätze markieren, die gut gelesen wurden
+    var pos = 0; spans.forEach(function (sp, k) { var n = norm(sentences[k]).length, seg = c.marks.slice(pos, pos + n); pos += n; sp.classList.toggle("hit", seg.filter(function (m) { return m.ok; }).length / Math.max(1, n) >= 0.7); });
+    var v = verdict(c.score); aRes.appendChild(h("div", {class: "fb " + v[0], text: Math.round(c.score * 100) + " % der Wörter erkannt"}));
+    if (!aDone) { aDone = true; var pts = Math.round(c.score * 15); gain(pts); aRes.appendChild(h("p", {class: "muted", text: "+" + pts + " Punkte"})); }
+  }}));
+  else aloud.appendChild(h("p", {class: "hint", text: "Ohne Spracherkennung: Lies laut mit und vergleiche mit der Stimme."}));
+  aloud.appendChild(aRes);
+  app.appendChild(aloud);
+
+  var qbox = h("div", {class: "card", style: "margin-top:16px"}, [h("div", {class: "task", text: "Fragen zum Text"})]);
+  var answered = 0, right = 0;
+  t.questions.forEach(function (q) {
+    qbox.appendChild(h("p", {style: "font-weight:700;margin:14px 0 0", lang: "en", text: q[0]}));
+    choiceList(qbox, shuffle(q[1]), q[1][0], function (ok) {
+      answered++; if (ok) { right++; gain(5); }
+      if (answered === t.questions.length) {
+        unitState(u.id).read = true; save();
+        qbox.appendChild(h("div", {class: "fb " + (right === answered ? "good" : "mid"), text: right + " von " + answered + " richtig" + (right === answered ? " 🎉" : "")}));
+        qbox.appendChild(h("div", {class: "row"}, [h("button", {class: "btn primary", type: "button", text: "Zur Lektion", onclick: function () { openUnit(u); }})]));
+      }
+    });
+  });
+  app.appendChild(qbox);
+}
+
+/* ---------- Freies Sprechen ---------- */
+function runSpeak(u, k) {
+  stopAll(); window.scrollTo(0, 0);
+  var s = u.speak[k];
+  app.textContent = "";
+  app.appendChild(h("button", {class: "btn ghost", type: "button", text: "← Lektion", onclick: function () { openUnit(u); }}));
+  var card = h("div", {class: "card", style: "margin-top:12px"});
+  card.appendChild(h("div", {class: "task", text: "Freies Sprechen · " + (k + 1) + " von " + u.speak.length}));
+  card.appendChild(h("p", {class: "big", lang: "en", text: s[0]}));
+  card.appendChild(h("p", {class: "de", text: s[1]}));
+  card.appendChild(h("div", {class: "row"}, [sayBtn(s[0], "🔊 Aufgabe hören")]));
+  card.appendChild(h("p", {class: "small muted", text: "Antworte in drei bis fünf Sätzen. Fehler sind erlaubt, Hauptsache du sprichst."}));
+  var res = h("div"), got = false;
+  var model = h("div", {hidden: true}, [h("div", {class: "task", style: "margin-top:14px", text: "Beispielantwort"}), h("p", {lang: "en", text: s[2]}), h("div", {class: "row"}, [sayBtn(s[2], "🔊 Beispiel hören")])]);
+  if (SR) card.appendChild(micButton({long: true, hint: "Tippen, antworten, zum Beenden nochmal tippen", onResult: function (alts) {
+    var text = alts[0].trim(), n = norm(text).length;
+    res.textContent = "";
+    res.appendChild(h("p", {}, [h("b", {text: "Erkannt: "}), document.createTextNode("„" + text + "“")]));
+    var cls = n >= 25 ? "good" : n >= 12 ? "mid" : "bad";
+    res.appendChild(h("div", {class: "fb " + cls, text: n + " Wörter" + (n >= 25 ? " · stark! 💪" : n >= 12 ? " · gut, versuch noch einen Satz mehr" : " · versuch es etwas ausführlicher")}));
+    if (!got) { got = true; var pts = n >= 25 ? 25 : n >= 12 ? 15 : 5; gain(pts); res.appendChild(h("p", {class: "muted", text: "+" + pts + " Punkte"})); }
+    model.hidden = false;
+  }}));
+  else card.appendChild(h("p", {class: "hint", text: "Ohne Spracherkennung: Sprich deine Antwort laut und vergleiche mit der Beispielantwort."}));
+  card.appendChild(res);
+  card.appendChild(h("div", {class: "row"}, [h("button", {class: "btn ghost", type: "button", text: "Beispielantwort zeigen", onclick: function () { model.hidden = false; this.remove(); }})]));
+  card.appendChild(model);
+  var last = k + 1 >= u.speak.length;
+  card.appendChild(h("div", {class: "foot"}, [h("span"), h("button", {class: "btn primary", type: "button", text: last ? "Fertig" : "Nächste Aufgabe →", onclick: function () {
+    if (last) { unitState(u.id).speak = true; save(); openUnit(u); } else runSpeak(u, k + 1);
+  }})]));
+  app.appendChild(card);
+}
+
+/* ---------- Einstellungen ---------- */
+var dlg = document.getElementById("settings");
+function fillVoiceSelect() {
+  var sel = document.getElementById("setVoice"); sel.textContent = "";
+  if (!voices.length) { sel.appendChild(h("option", {value: "", text: "Keine englische Stimme gefunden"})); return; }
+  voices.forEach(function (v) { sel.appendChild(h("option", {value: v.name, text: v.name + " (" + v.lang + ")"})); });
+  sel.value = voice() ? voice().name : "";
+}
+document.getElementById("openSettings").addEventListener("click", function () {
+  ["accent", "rate", "goal", "text"].forEach(function (k) { document.getElementById("set" + k[0].toUpperCase() + k.slice(1)).value = S.settings[k]; });
+  fillVoiceSelect();
+  document.getElementById("setStore").textContent = user ? (storeState === "fehler" ? "Speichern im Konto klappt gerade nicht; der Stand liegt im Browser." : "Dein Stand wird in deinem Konto gespeichert, auf Handy und Rechner gleich.") : "Nicht angemeldet: Der Stand liegt nur in diesem Browser. Melde dich im Portal an, um ihn zu sichern.";
+  if (dlg.showModal) dlg.showModal(); else dlg.setAttribute("open", "");
+});
+// Akzent gewechselt: Stimmenliste gleich passend neu füllen
+document.getElementById("setAccent").addEventListener("change", function () { var keep = S.settings.accent; S.settings.accent = this.value; loadVoices(); document.getElementById("setVoice").value = voices[0] ? voices[0].name : ""; S.settings.accent = keep; });
+document.getElementById("closeSettings").addEventListener("click", function () {
+  var acc = document.getElementById("setAccent").value, changed = acc !== S.settings.accent;
+  S.settings.accent = acc;
+  S.settings.rate = document.getElementById("setRate").value;
+  S.settings.goal = document.getElementById("setGoal").value;
+  S.settings.text = document.getElementById("setText").value;
+  S.settings.voice = document.getElementById("setVoice").value;
+  if (changed) loadVoices();
+  save(); if (dlg.close) dlg.close(); else dlg.removeAttribute("open");
+  if (!run) home();
+  speak(accent() === "en-US" ? "Hi there! This is how I sound now." : "Hello! This is how I sound now.");
+});
+
+/* ---------- Start ---------- */
+(async function () {
+  var cfg = window.SR_CONFIG || {};
+  try {
+    if (!cfg.supabaseUrl || !window.supabase) throw new Error("ohne Konfiguration");
+    sb = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+    var s = await sb.auth.getSession();
+    user = s.data.session ? s.data.session.user : null;
+  } catch (e) { user = null; }
+  loadLocal(); home();
+  if (!user) return;
+  try {
+    var r = await sb.from("schach_docs").select("data").eq("user_id", user.id).eq("path", DOC).maybeSingle();
+    if (r.error) throw r.error;
+    var d = r.data && r.data.data;
+    // Mehr Punkte gewinnt: so geht weder Handy- noch Rechnerstand verloren
+    if (d && (d.xp || 0) > S.xp) { var keep = S.settings; S = merge(fresh(), d); S.settings = Object.assign(keep, d.settings || {}); ["punkte", "serie", "stufe", "stufeName"].forEach(function (k) { delete S[k]; }); saveLocal(); if (!run) home(); }
+    else if (S.xp > ((d && d.xp) || 0)) save();
+    storeState = "konto";
+  } catch (e) { storeState = "fehler"; }
+})();
+</script>
+</body>
+</html>
