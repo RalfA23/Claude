@@ -4,8 +4,8 @@
 // Fehlt eine Stimme oder kommt kein Ton, blendet Ton.speak einmal einen Hinweis mit Link zur Hilfe ein.
 (function () {
   var syn = window.speechSynthesis || null, keep = [], unlocked = false, hinted = false;
-  var NAMES = {de: "deutsche", nl: "niederländische", ja: "japanische", th: "thailändische", en: "englische"};
-  var GOOD = /google|natural|online|premium|enhanced|siri|kyoko|otoya|kanya|xander|claire/i;
+  var NAMES = {de: "deutsche", nl: "niederländische", ja: "japanische", th: "thailändische", ko: "koreanische", en: "englische"};
+  var GOOD = /google|natural|online|premium|enhanced|siri|kyoko|otoya|kanya|yuna|xander|claire/i;
   var base = (document.currentScript && document.currentScript.src || "").replace(/ton\.js(\?.*)?$/, "");
 
   function all() { try { return syn ? syn.getVoices() : []; } catch (e) { return []; } }
