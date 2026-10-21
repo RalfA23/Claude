@@ -409,19 +409,33 @@ body.saver.moved { cursor: default; }
   const $ = id => document.getElementById(id);
   const msg = $('msg'), center = $('center'), status = $('status'), count = $('count');
 
-  // Hinterlegte Nachricht nur für ein bestimmtes Konto: erscheint dort einmal beim nächsten Öffnen und bleibt als Beispiel.
+  // Gruß je Nutzer: beim ersten Öffnen des Tages erscheint ein Gruß nach Tageszeit, mit eigener Anrede, wenn es eine gibt.
   // Das Konto kommt aus der Portal-Anmeldung (Supabase-Sitzung im Browser), die Seite selbst braucht kein Login.
-  const GRUSS = { id: 'capicop', fuer: /kudnick/i, text: '{lila}{blau}{gruen}\nHALLO CAPICOP\n{gruen}{blau}{lila}' };
-  let konto = '';
+  // Anrede: zuerst user_metadata.anrede des Kontos, sonst diese Tabelle (Muster auf die E-Mail), sonst keine.
+  const ANREDEN = [
+    { fuer: /kudnick/i, anrede: 'CAPICOP', farben: ['lila','blau','gruen'] },
+  ];
+  let konto = '', meta = {};
   try {
     for (let i = 0; i < localStorage.length; i++) {
       const k = localStorage.key(i);
-      if (/^sb-.*-auth-token$/.test(k)) konto = JSON.parse(localStorage.getItem(k))?.user?.email || '';
+      if (/^sb-.*-auth-token$/.test(k)) { const u = JSON.parse(localStorage.getItem(k))?.user; konto = u?.email || ''; meta = u?.user_metadata || {}; }
     }
   } catch {}
-  const fuerMich = GRUSS.fuer.test(konto);
+  const eintrag = konto ? ANREDEN.find(a => a.fuer.test(konto)) : null;
+  const anrede = String(meta.anrede || eintrag?.anrede || '').toUpperCase().trim().slice(0, 22);
+  function grussText(d = new Date()) {
+    const h = d.getHours();
+    const [gruss, f] = h >= 5 && h < 11 ? ['GUTEN MORGEN', 'gelb'] : h < 17 && h >= 11 ? ['GUTEN TAG', 'orange'] : h < 22 && h >= 17 ? ['GUTEN ABEND', 'blau'] : ['GUTE NACHT', 'lila'];
+    const farben = eintrag?.farben || [f, f, f];
+    const rand = farben.map(c => `{${c}}`).join(''), rueck = [...farben].reverse().map(c => `{${c}}`).join('');
+    if (anrede) return `${rand}\n${gruss}\n${anrede}\n${rueck}`;
+    // Ohne Anrede bleibt der gewohnte Morgengruß.
+    if (gruss === 'GUTEN MORGEN') return '{gelb}{gelb}{gelb}\nGUTEN MORGEN!\nHEUTE WIRD EIN\nGUTER TAG\n{gelb}{gelb}{gelb}';
+    return `${rand}\n${gruss}!\n${rueck}`;
+  }
   const PRESETS = [
-    ...(fuerMich ? [['Hallo Capicop', GRUSS.text]] : []),
+    ...(anrede ? [['Gruß', grussText()]] : []),
     ['Guten Morgen', '{gelb}{gelb}{gelb}\nGUTEN MORGEN!\nHEUTE WIRD EIN\nGUTER TAG\n{gelb}{gelb}{gelb}'],
     ['Kaffee', 'ERST KAFFEE,\nDANN DIE WELT.\n\n{orange}{rot}{orange}'],
     ['Wochenende', '{blau}{gruen}{gelb}{orange}{rot}{lila}{blau}{gruen}{gelb}{orange}{rot}{lila}\nENDLICH\nWOCHENENDE!\n{blau}{gruen}{gelb}{orange}{rot}{lila}{blau}{gruen}{gelb}{orange}{rot}{lila}'],
@@ -858,16 +872,28 @@ body.saver.moved { cursor: default; }
   function save() { try { localStorage.setItem('vb-state', JSON.stringify({text: msg.value, center: center.checked, mode})); } catch {} }
   let saved = null;
   try { saved = JSON.parse(localStorage.getItem('vb-state') || 'null'); } catch {}
-  // Wer nicht gemeint ist, aber die Nachricht schon bekommen hat: zurück zum normalen Start.
-  if (!fuerMich && saved?.text === GRUSS.text) saved = null;
+  // Alter Sondergruß aus der ersten Fassung: nicht mehr als Starttext übernehmen.
+  if (/HALLO CAPICOP/.test(saved?.text || '')) saved = null;
   msg.value = saved?.text ?? PRESETS[0][1];
   if (saved && typeof saved.center === 'boolean') center.checked = saved.center;
   updateCount();
   if (location.hash === '#bildschirmschoner' || document.documentElement.dataset.saver === '1') { setTimeout(startSaver, 250); return; }
+  const start = () => { const m = saved ? saved.mode : 'rot'; if (m && m !== 'msg') setMode(m); else send(); };
+  // Erster Besuch des Tages: Gruß zeigen, nach 20 Sekunden geht es normal weiter.
+  const heute = new Date().toDateString();
   let gruss = false;
-  if (fuerMich) try { gruss = localStorage.getItem('vb-gruss') !== GRUSS.id; localStorage.setItem('vb-gruss', GRUSS.id); } catch {}
-  if (gruss) { msg.value = GRUSS.text; center.checked = true; updateCount(); setTimeout(() => { setMode('msg'); send(); }, 250); return; }
-  setTimeout(() => { const m = saved ? saved.mode : 'rot'; if (m && m !== 'msg') setMode(m); else send(); }, 250);
+  try { gruss = localStorage.getItem('vb-gruss-tag') !== heute; localStorage.setItem('vb-gruss-tag', heute); } catch {}
+  if (gruss) {
+    // Nur anzeigen, Text und Modus im Browser bleiben unverändert. Wer selbst etwas bedient, beendet den Gruß.
+    setTimeout(() => {
+      show(textToGrid(grussText(), true).grid);
+      const weiter = setTimeout(start, 20000);
+      const abbruch = e => { if (e.type === 'click' && !e.target.closest('button, textarea, input, select, label')) return; clearTimeout(weiter); document.removeEventListener('click', abbruch, true); document.removeEventListener('keydown', abbruch, true); };
+      document.addEventListener('click', abbruch, true); document.addEventListener('keydown', abbruch, true);
+    }, 250);
+    return;
+  }
+  setTimeout(start, 250);
 })();
 </script>
 
