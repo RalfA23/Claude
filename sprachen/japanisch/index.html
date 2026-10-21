@@ -552,7 +552,7 @@ function listen() {
 document.addEventListener("click", e => { const b = e.target.closest("[data-say]"); if (b) speak(b.dataset.say, b.dataset.rate ? +b.dataset.rate : undefined); });
 
 // ---------- Fortschritt ----------
-const LKEY = "jp_state_v1", HUB_KEY = "sprachen.japanisch.stand", DOC = "sprachen/japanisch/";
+const LKEY = "jp_state_v1", HUB_KEY = "sprachen.japanisch.stand", DOC = "sprachen/japanisch.";
 const fresh = () => ({pts: 0, days: {}, kana: {}, kanji: {}, said: {}, texts: {}, dialogs: {}, level: "anf", rate: 0.9, kq: {script: "h", groups: ["basic"], mode: "k2r"}, updated: 0});
 let S = fresh();
 try { S = Object.assign(fresh(), JSON.parse(localStorage.getItem(LKEY) || "{}")); } catch (e) {}

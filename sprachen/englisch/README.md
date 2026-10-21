@@ -7,4 +7,4 @@ Sprachkurs unter `/sprachen/englisch/` für Deutschsprachige, Schwerpunkt Sprech
 - Aussprache wählbar in den Einstellungen: britisch (`en-GB`, Standard) oder amerikanisch (`en-US`), gilt für Stimme und Spracherkennung. Sprachausgabe über `../ton.js`.
 - Vergleich: Kurzformen werden ausgeschrieben (I'm = I am), britische und amerikanische Schreibweisen gleichgesetzt (colour = color), Zahlen und Preise in Wörter umgesetzt.
 - Punkte, Tagesziel, Serie und zehn Stufen von „Tourist“ bis „Master of English“.
-- Stand im Konto: `schach_docs`, Pfad `sprachen/englisch/fortschritt` (mit `punkte`, `serie`, `stufe`, `stufeName`), dazu im Browser (`en_state_…`). Freigabe einzeln über `sprachen:englisch`.
+- Stand im Konto: `schach_docs`, Pfad `sprachen/englisch.fortschritt` (mit `punkte`, `serie`, `stufe`, `stufeName`), dazu im Browser (`en_state_…`). Freigabe einzeln über `sprachen:englisch`.
