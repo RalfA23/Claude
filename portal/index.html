@@ -105,6 +105,11 @@ dialog::backdrop{background:rgba(0,0,0,.45)}
 .orb.in{transform:scale(1.25)}
 .links a{display:block;padding:6px 8px;border-radius:6px;background:var(--soft);color:var(--ink);text-decoration:none;font-size:.92rem;margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .mini{display:grid;grid-template-columns:1fr 1fr;gap:6px}.mini.date{grid-template-columns:minmax(0,1fr) auto auto;align-items:center}.mini input,.mini select{padding:6px 8px;font-size:.9rem}
+.acc{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:10px}
+.acc .who{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline;margin-bottom:6px}
+.acc .who small{color:var(--muted)}
+.acc .mods{display:flex;flex-wrap:wrap;gap:6px 14px}
+.acc label.chk{font-size:.88rem}
 .out{white-space:pre-wrap;font-size:.85rem;background:var(--soft);border-radius:8px;padding:8px}
 </style>
 </head>
@@ -119,6 +124,7 @@ dialog::backdrop{background:rgba(0,0,0,.45)}
     <button type="button" id="edit">✎ Anpassen</button>
     <button type="button" id="addTile" class="primary">＋ Kachel</button>
     <button type="button" id="reset" class="sm" hidden>Zurücksetzen</button>
+    <button type="button" id="admin" class="sm" hidden>👥 Freigaben</button>
     <span class="grow"></span>
     <span class="st" id="saveSt"></span>
   </div>
@@ -130,6 +136,10 @@ dialog::backdrop{background:rgba(0,0,0,.45)}
 <dialog id="gallery">
   <div class="gal-head"><h2>Kachel-Galerie</h2><button type="button" class="sm" id="galClose">Schließen</button></div>
   <div class="gal-body" id="galBody"></div>
+</dialog>
+<dialog id="adminDlg">
+  <div class="gal-head"><h2>Freigaben</h2><button type="button" class="sm" id="admClose">Schließen</button></div>
+  <div class="gal-body" id="admBody"></div>
 </dialog>
 <div id="login" hidden>
   <form id="lf">
@@ -182,20 +192,37 @@ var GEVT = {id: "gevt", icon: "🥋", title: "Ving Tsun Wissen", text: "Frag dei
   function unlocked(c) { return !c.needs || isAdmin || (lessonsDone !== null && lessonsDone >= 48); }
   async function checkUnlock() {
     try {
-      var a = await sb.from("app_admins").select("user_id").eq("user_id", user.id).maybeSingle();
-      isAdmin = !a.error && !!a.data;
       var r = await sb.from("progress").select("lessons:state->lessons").eq("user_id", user.id).maybeSingle();
       lessonKeys = !r.error && r.data && r.data.lessons ? Object.keys(r.data.lessons) : (r.error ? null : []);
       lessonsDone = lessonKeys ? lessonKeys.length : null;
     } catch (e) {}
+    $("admin").hidden = !isAdmin;
     if (isAdmin && layout) renderDash(); else { refreshType(/^kurs:/); refreshType(/^lektion$/); }
+  }
+
+  // Freigaben (Tabelle module_access, siehe portal/supabase/0001_module_access.sql): ohne Zeile sieht ein Konto alles,
+  // neue Konten bekommen beim Registrieren die Standardmodule. Admins sehen immer alles. GEVT hat seine eigene Freigabe.
+  var access = null;
+  function allowed(id) { return isAdmin || access === null || id === "gevt" || access.indexOf(id) >= 0; }
+  async function loadAccess() {
+    var ak = "portal-access-" + user.id;
+    try { var ad = await sb.from("app_admins").select("user_id").eq("user_id", user.id).maybeSingle(); isAdmin = !ad.error && !!ad.data; } catch (e) {}
+    try {
+      var r = await sb.from("module_access").select("modules").eq("user_id", user.id).maybeSingle();
+      if (r.error) throw r.error;
+      access = r.data && Array.isArray(r.data.modules) ? r.data.modules : null;
+      try { localStorage.setItem(ak, JSON.stringify(access)); } catch (e) {}
+    } catch (e) {
+      // Ohne Antwort die letzte bekannte Freigabe nehmen. Fehlt die Tabelle noch, sieht jeder alles wie bisher.
+      try { var c = JSON.parse(localStorage.getItem(ak) || "null"); access = Array.isArray(c) ? c : null; } catch (e2) { access = null; }
+    }
   }
 
   // Kurse, die der Nutzer schon kennt. Ein Kurs, der hier fehlt, zeigt „Neu“. Erster Besuch eines neuen Kontos: alles gilt als bekannt.
   function seen() { var x = user && user.user_metadata && user.user_metadata.seen; return Array.isArray(x) ? x : null; }
   function isNew(c) { var x = seen(); return !!x && x.indexOf(c.id) < 0; }
   async function setSeen(list) { var r = await sb.auth.updateUser({data: {seen: list}}); if (!r.error) { user = r.data.user; renderNews(); refreshType(/^(kurs:|hinweis$)/); } }
-  function allIds() { return COURSES.map(function (k) { return k.id; }); }
+  function allIds() { return courseList().map(function (k) { return k.id; }); }
   function mine() { var c = (user && user.user_metadata && user.user_metadata.courses) || []; return Array.isArray(c) ? c.filter(function (x) { return COURSES.some(function (k) { return k.id === x; }); }) : []; }
 
   /* ---------- Kachel-Typen ---------- */
@@ -203,8 +230,9 @@ var GEVT = {id: "gevt", icon: "🥋", title: "Ving Tsun Wissen", text: "Frag dei
   var TYPES = {
     uhr: {group: "Info", icon: "🕰️", title: "Uhr und Datum", desc: "Uhrzeit, Wochentag, Datum und Kalenderwoche.", w: 2, h: 1, render: renderClock},
     hinweis: {group: "Info", icon: "📣", title: "Hinweisleiste", desc: "Neue Kurse und wichtige Hinweise der Plattform an einer Stelle.", w: 2, h: 1, render: renderHint},
-    lektion: {group: "Info", icon: "📈", title: "Aktuelle Lektion", desc: "Wo du im Lesetraining stehst, mit direktem Sprung zur nächsten Lektion.", w: 2, h: 1, render: renderLesson},
-    elo: {group: "Info", icon: "♟️", title: "Schach-Wertung", desc: "Deine aktuelle Elo von Lichess oder chess.com und der Abstand zum Ziel.", w: 2, h: 1, render: renderElo},
+    // module: nur sichtbar, wenn dieser Kurs für das Konto freigegeben ist.
+    lektion: {group: "Info", icon: "📈", title: "Aktuelle Lektion", desc: "Wo du im Lesetraining stehst, mit direktem Sprung zur nächsten Lektion.", w: 2, h: 1, module: "lesen", render: renderLesson},
+    elo: {group: "Info", icon: "♟️", title: "Schach-Wertung", desc: "Deine aktuelle Elo von Lichess oder chess.com und der Abstand zum Ziel.", w: 2, h: 1, module: "schach", render: renderElo},
     wetter: {group: "Info", icon: "🌤️", title: "Wetter", desc: "Wetter heute für deinen Ort, Standard Hamburg.", w: 1, h: 2, render: renderWeather},
     todo: {group: "Werkzeuge", icon: "🗂️", title: "To-Dos und Kanban", desc: "Aufgaben in Offen, In Arbeit und Erledigt. Antippen schiebt weiter.", w: 2, h: 3, multi: true, render: renderTodo},
     notiz: {group: "Werkzeuge", icon: "📝", title: "Notizzettel", desc: "Freier Text, wird automatisch gespeichert.", w: 1, h: 2, multi: true, render: renderNote},
@@ -215,11 +243,12 @@ var GEVT = {id: "gevt", icon: "🥋", title: "Ving Tsun Wissen", text: "Frag dei
     // admin: nur für Konten in app_admins (Ralf), für alle anderen weder in der Galerie noch auf dem Dashboard.
     istr: {group: "Projekte", icon: "⚖️", title: "IStR-Vortrag", desc: "Vortragstermin mit Countdown und Checkliste der Punkte und BFH-Entscheidungen.", w: 2, h: 2, admin: true, render: renderIstr}
   };
-  function courseList() { return COURSES; }
+  function courseList() { return COURSES.filter(function (c) { return allowed(c.id); }); }
   function courseOf(type) { var id = type.slice(5); return courseList().filter(function (c) { return c.id === id; })[0] || null; }
   function typeOf(type) {
     if (type.slice(0, 5) === "kurs:") { var c = courseOf(type); return c ? {group: "Kurse", icon: c.icon, title: c.title, desc: c.text, w: 1, h: 2, course: c, render: renderCourse} : null; }
     var ty = TYPES[type] || null;
+    if (ty && ty.module && !allowed(ty.module)) return null;
     return ty && ty.admin && !isAdmin ? null : ty;
   }
 
@@ -228,7 +257,7 @@ var GEVT = {id: "gevt", icon: "🥋", title: "Ving Tsun Wissen", text: "Frag dei
   var DOC = "portal/dashboard";
   function lkey() { return "portal-dash-" + user.id; }
   function defaultLayout() {
-    var m = mine(); if (!m.length) m = COURSES.filter(function (c) { return !c.needs; }).map(function (c) { return c.id; });
+    var m = mine(); if (!m.length) m = courseList().filter(function (c) { return !c.needs; }).map(function (c) { return c.id; });
     var t = [{type: "uhr"}, {type: "hinweis"}, {type: "lektion"}, {type: "elo"}]
       .concat(m.map(function (id) { return {type: "kurs:" + id}; }))
       .concat([{type: "todo"}, {type: "entspannung"}, {type: "notiz"}]);
@@ -695,12 +724,67 @@ var GEVT = {id: "gevt", icon: "🥋", title: "Ving Tsun Wissen", text: "Frag dei
     upd();
   }
 
+  /* ---------- Freigaben (nur Admins): welche Module jedes Konto sieht, und der Standard für neue Konten ---------- */
+  function modList() { return COURSES.filter(function (c) { return c.id !== "gevt"; }); }
+  function modBoxes(sel, disabled, onchange) {
+    var box = el("div", {class: "mods"});
+    modList().forEach(function (c) {
+      var cb = el("input", {type: "checkbox"}); cb.checked = sel.indexOf(c.id) >= 0; cb.disabled = disabled;
+      cb.addEventListener("change", function () { onchange(c.id, cb.checked); });
+      box.appendChild(el("label", {class: "chk"}, [cb, el("span", {text: c.icon + " " + c.title})]));
+    });
+    return box;
+  }
+  async function renderAdmin() {
+    var body = $("admBody"); body.replaceChildren(el("p", {class: "empty", text: "Lade die Konten …"}));
+    var d = await sb.rpc("admin_module_defaults"), u = await sb.rpc("admin_module_users");
+    body.replaceChildren();
+    if (d.error || u.error) {
+      body.appendChild(el("p", {text: "Die Freigaben sind noch nicht eingerichtet. Einmal das SQL aus portal/supabase/0001_module_access.sql im Supabase-SQL-Editor ausführen, dann geht es hier weiter."}));
+      return;
+    }
+    var st = el("p", {class: "empty", "aria-live": "polite", text: ""});
+    function call(fn, args) { st.textContent = "Speichere …"; sb.rpc(fn, args).then(function (r) { st.textContent = r.error ? "Nicht gespeichert: " + r.error.message : "Gespeichert"; }); }
+    body.appendChild(el("p", {text: "Konten ohne Häkchen bei „Alles“ sehen nur die angehakten Kurse auf dem Dashboard. Neue Konten bekommen beim Registrieren den Standard. Ving Tsun bleibt eine eigene Freigabe."}));
+    body.appendChild(st);
+    body.appendChild(el("h2", {text: "Standard für neue Konten"}));
+    var defs = (d.data || []).slice();
+    body.appendChild(el("div", {class: "acc"}, [modBoxes(defs, false, function (id, on) {
+      defs = defs.filter(function (x) { return x !== id; }).concat(on ? [id] : []);
+      call("admin_set_module_defaults", {mods: defs});
+    })]));
+    body.appendChild(el("h2", {text: "Konten"}));
+    (u.data || []).forEach(function (a) {
+      var card = el("div", {class: "acc"});
+      var since = a.created_at ? "seit " + new Date(a.created_at).toLocaleDateString("de-DE") : "";
+      card.appendChild(el("div", {class: "who"}, [el("b", {text: a.email || a.user_id}), el("small", {text: since + (a.is_admin ? " · Admin, sieht immer alles" : "")})]));
+      if (a.is_admin) { body.appendChild(card); return; }
+      var mods = Array.isArray(a.modules) ? a.modules.slice() : null, boxes;
+      var all = el("input", {type: "checkbox"}); all.checked = mods === null;
+      function draw() { var n = modBoxes(mods || modList().map(function (c) { return c.id; }), mods === null, function (id, on) {
+        mods = mods.filter(function (x) { return x !== id; }).concat(on ? [id] : []);
+        call("admin_set_modules", {target: a.user_id, mods: mods});
+      }); if (boxes) boxes.replaceWith(n); else card.appendChild(n); boxes = n; }
+      all.addEventListener("change", function () {
+        // „Alles“ aus: mit allen Kursen angehakt starten, dann einzeln abwählen.
+        mods = all.checked ? null : modList().map(function (c) { return c.id; });
+        call("admin_set_modules", {target: a.user_id, mods: mods}); draw();
+      });
+      card.appendChild(el("label", {class: "chk"}, [all, el("span", {text: "Alles (auch alle künftigen Kurse)"})]));
+      draw();
+      body.appendChild(card);
+    });
+  }
+  $("admin").addEventListener("click", function () { renderAdmin(); $("adminDlg").showModal(); });
+  $("admClose").addEventListener("click", function () { $("adminDlg").close(); });
+  $("adminDlg").addEventListener("click", function (e) { if (e.target === $("adminDlg")) $("adminDlg").close(); });
+
   /* ---------- Start ---------- */
   window.addEventListener("resize", measure);
-  function enter(u) {
+  async function enter(u) {
     user = u; $("login").hidden = true; $("app").hidden = false;
     $("who").textContent = user.email || "";
-    measure(); loadLayout(); checkUnlock();
+    measure(); await loadAccess(); loadLayout(); checkUnlock();
     // Konten von vor dieser Funktion: was sie schon gewählt hatten, gilt als bekannt, der Rest ist neu. Neue Konten kennen alles.
     if (!seen()) setSeen(mine().length ? mine() : allIds());
     // Merken, ob das Konto freigeschaltet ist, damit die Kachel beim nächsten Öffnen gleich mit den anderen erscheint. Die Abfrage bestätigt oder entfernt sie danach.
