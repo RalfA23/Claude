@@ -72,12 +72,22 @@ begin
     on conflict (id) do update set modules = excluded.modules;
 end $$;
 
--- Neue Konten: Standardmodule eintragen. Ein Fehler hier darf die Registrierung nie verhindern.
+-- Voreinstellung für eine bestimmte E-Mail: wer sich mit dieser Adresse registriert, bekommt genau diese Module statt des Standards.
+-- Beispiel: insert into public.module_presets (email, modules) values ('name@example.com', array['sprachen:niederlaendisch']);
+create table if not exists public.module_presets (
+  email text primary key check (email = lower(email)),
+  modules text[] not null default '{}'
+);
+alter table public.module_presets enable row level security;
+
+-- Neue Konten: Voreinstellung zur E-Mail oder sonst die Standardmodule eintragen. Ein Fehler hier darf die Registrierung nie verhindern.
 create or replace function public.grant_default_modules() returns trigger
 language plpgsql security definer set search_path = '' as $$
 begin
   insert into public.module_access (user_id, modules)
-    values (new.id, coalesce((select d.modules from public.module_defaults d where d.id = 1), '{}'))
+    values (new.id, coalesce(
+      (select p.modules from public.module_presets p where p.email = lower(new.email)),
+      (select d.modules from public.module_defaults d where d.id = 1), '{}'))
     on conflict (user_id) do nothing;
   return new;
 exception when others then
