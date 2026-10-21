@@ -213,6 +213,10 @@ footer{margin-top:40px;color:var(--muted);font-size:.85rem;max-width:70ch}
     <h2 class="sub">Am häufigsten ausgelassen</h2>
     <ul class="missed" id="missed"></ul>
     <p class="hint">Tipp auf einen Tag im Kalender, um seine Checkliste zu öffnen und nachzutragen.</p>
+    <details class="deep" id="importbox"><summary>Verlauf von der früheren Claude-Seite übernehmen</summary>
+      <div class="deepbody"><p>Füge hier den Umzugscode oder den ganzen Umzugslink aus dem Chat ein.</p>
+        <textarea id="importcode" rows="3" style="width:100%;font:.85rem var(--body)"></textarea>
+        <p><button type="button" class="ghost" id="importbtn">Übernehmen</button> <span class="hint" id="importmsg"></span></p></div></details>
   </section>
 
   <section id="view-ref" role="tabpanel" aria-labelledby="tab-ref" hidden>
@@ -833,13 +837,22 @@ show(startTab);
 
 // Speicherung im Konto der Lebensplattform (Supabase, Tabelle schach_docs, Pfade huberman/tag/JJJJ-MM-TT und huberman/einstellungen).
 // Jede Zeile gehört einem Konto; die Datenbank gibt nur die eigenen Zeilen heraus.
-// Einmaliger Umzug von der früheren Claude-Seite: Link mit #import=<base64 JSON {days:{datum:{done}}, reports:{datum:{text}}}>.
-// Die Daten stehen nur im Link, nicht im Code. Vorhandene Tage im Konto werden nicht überschrieben.
+// Einmaliger Umzug von der früheren Claude-Seite: Link mit #import=<base64 JSON {days:{datum:{done}}, reports:{datum:{text}}}>
+// oder derselbe Code ins Feld im Jahresüberblick eingefügt. Die Daten stehen nur im Link, nicht im Code.
+// Ohne Anmeldung bleibt der Code im Browser liegen und wird nach dem Anmelden übernommen. Vorhandene Häkchen bleiben erhalten.
+const IMPORT_KEY = "huberman-import";
+{ const m = location.hash.match(/^#import=(.+)$/);
+  if (m) { try { localStorage.setItem(IMPORT_KEY, m[1]); } catch(e) {} history.replaceState(null, "", location.pathname + location.search); } }
 async function importFromHash(seen){
-  const m = location.hash.match(/^#import=(.+)$/); if (!m) return;
-  history.replaceState(null, "", location.pathname + location.search);
-  let x; try { x = JSON.parse(decodeURIComponent(escape(atob(decodeURIComponent(m[1]))))); } catch(e) { return; }
+  let code = null; try { code = localStorage.getItem(IMPORT_KEY); } catch(e) {}
+  if (!code) return;
+  if (await importCode(code, seen)) { try { localStorage.removeItem(IMPORT_KEY); } catch(e) {} }
+}
+async function importCode(code, seen){
+  code = String(code).trim().replace(/^.*#import=/, "");
+  let x; try { x = JSON.parse(decodeURIComponent(escape(atob(decodeURIComponent(code))))); } catch(e) { return 0; }
   const now = new Date().toISOString();
+  let n = 0;
   for (const [date, rep] of Object.entries(x.reports || {})) {
     if (!/^\d{4}-\d\d-\d\d$/.test(date) || reports[date] || !rep || !rep.text) continue;
     reports[date] = {text: String(rep.text)};
@@ -848,9 +861,18 @@ async function importFromHash(seen){
   for (const [date, v] of Object.entries(x.days || {})) {
     if (!/^\d{4}-\d\d-\d\d$/.test(date) || !v || !v.done) continue;
     const merged = {...(v.done)}; for (const [k,on] of Object.entries(doneOf(date))) if (on) merged[k] = true;
-    days[date] = {done: merged}; seen.delete(date); persist(date);
+    days[date] = {done: merged}; seen.delete(date); persist(date); n++;
   }
+  return n;
 }
+
+document.getElementById("importbtn").addEventListener("click", async () => {
+  const msg = document.getElementById("importmsg");
+  if (!sb || !user) { msg.textContent = "Bitte zuerst im Portal anmelden."; return; }
+  const n = await importCode(document.getElementById("importcode").value, new Set());
+  msg.textContent = n ? n + (n===1 ? " Tag übernommen." : " Tage übernommen.") : "Der Code ließ sich nicht lesen. Bitte komplett einfügen.";
+  if (n) { document.getElementById("importcode").value = ""; renderPlan(); renderYear(); }
+});
 
 (async () => {
   const cfg = window.SR_CONFIG || {};
