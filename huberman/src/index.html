@@ -617,7 +617,8 @@ function setStore(state){
     : "Speichert vorerst nur in diesem Browser.";
 }
 
-const DOC = "huberman/";
+// schach_docs erlaubt nur einen Schrägstrich im Pfad (path ~ '^[a-z]+/[A-Za-z0-9_.:-]+$'), deshalb Punkte als Trenner
+const DOC = "huberman/", TAG = DOC+"tag.", BERICHT = DOC+"bericht.";
 const pending = {}, writing = {};
 function persist(date){
   saveLocal();
@@ -630,7 +631,7 @@ function persist(date){
       pending[date] = false;
       const done = {}; for (const [k,v] of Object.entries(doneOf(date))) if (v) done[k] = true;
       try {
-        const r = await sb.from("schach_docs").upsert({user_id: user.id, path: DOC+"tag/"+date, data: {date, done, count: countOf(date), total: TOTAL}, updated_at: new Date().toISOString()});
+        const r = await sb.from("schach_docs").upsert({user_id: user.id, path: TAG+date, data: {date, done, count: countOf(date), total: TOTAL}, updated_at: new Date().toISOString()});
         if (r.error) throw r.error;
         setStore("saved");
       } catch(e) { setStore("error"); }
@@ -835,7 +836,7 @@ for (const k of ["wake","bed"]) document.getElementById(k).value = times[k];
 let startTab = location.hash === "#routinen" ? "ref" : location.hash === "#jahr" ? "year" : "plan";
 show(startTab);
 
-// Speicherung im Konto der Lebensplattform (Supabase, Tabelle schach_docs, Pfade huberman/tag/JJJJ-MM-TT und huberman/einstellungen).
+// Speicherung im Konto der Lebensplattform (Supabase, Tabelle schach_docs, Pfade huberman/tag.JJJJ-MM-TT, huberman/bericht.JJJJ-MM-TT und huberman/einstellungen).
 // Jede Zeile gehört einem Konto; die Datenbank gibt nur die eigenen Zeilen heraus.
 // Einmaliger Umzug von der früheren Claude-Seite: Link mit #import=<base64 JSON {days:{datum:{done}}, reports:{datum:{text}}}>
 // oder derselbe Code ins Feld im Jahresüberblick eingefügt. Die Daten stehen nur im Link, nicht im Code.
@@ -856,7 +857,7 @@ async function importCode(code, seen){
   for (const [date, rep] of Object.entries(x.reports || {})) {
     if (!/^\d{4}-\d\d-\d\d$/.test(date) || reports[date] || !rep || !rep.text) continue;
     reports[date] = {text: String(rep.text)};
-    try { await sb.from("schach_docs").upsert({user_id: user.id, path: DOC+"bericht/"+date, data: reports[date], updated_at: now}); } catch(e) {}
+    try { const r = await sb.from("schach_docs").upsert({user_id: user.id, path: BERICHT+date, data: reports[date], updated_at: now}); if (r.error) throw r.error; } catch(e) { setStore("error"); }
   }
   for (const [date, v] of Object.entries(x.days || {})) {
     if (!/^\d{4}-\d\d-\d\d$/.test(date) || !v || !v.done) continue;
@@ -894,9 +895,10 @@ document.getElementById("importbtn").addEventListener("click", async () => {
     const seen = new Set();
     for (const row of r.data || []) {
       const d = row.data || {};
-      if (row.path.startsWith(DOC+"bericht/")) { reports[row.path.slice((DOC+"bericht/").length)] = d; continue; }
+      if (row.path.startsWith(BERICHT)) { reports[row.path.slice(BERICHT.length)] = d; continue; }
       if (row.path === DOC+"einstellungen") { for (const k of ["wake","bed"]) if (d[k]) { times[k] = d[k]; document.getElementById(k).value = d[k]; } continue; }
-      const date = row.path.slice((DOC+"tag/").length);
+      if (!row.path.startsWith(TAG)) continue;
+      const date = row.path.slice(TAG.length);
       if (!/^\d{4}-\d\d-\d\d$/.test(date) || pending[date] || writing[date]) continue;
       seen.add(date); days[date] = {done: {...(d.done||{})}};
     }

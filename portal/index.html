@@ -476,12 +476,12 @@ var GEVT = {id: "gevt", icon: "🥋", title: "Ving Tsun Wissen", text: "Frag dei
     if (c.id === "weltkarte") weltkarteStand(b, row);
     row.appendChild(el("a", {class: "btn primary", href: c.href, text: "Öffnen", onclick: function () { if (isNew(c)) setSeen((seen() || []).concat([c.id])); }}));
   }
-  // Heutiger Stand der Huberman-Checkliste (schach_docs, Pfad huberman/tag/JJJJ-MM-TT)
+  // Heutiger Stand der Huberman-Checkliste (schach_docs, Pfad huberman/tag.JJJJ-MM-TT)
   function hubermanToday(b, row) {
     var n = new Date(), day = n.getFullYear() + "-" + String(n.getMonth() + 1).padStart(2, "0") + "-" + String(n.getDate()).padStart(2, "0");
     var bar = el("i", {style: "width:0%"}), txt = el("p", {text: "Lade deinen Stand …"});
     b.insertBefore(el("div", {class: "meter"}, [bar]), row); b.insertBefore(txt, row);
-    sb.from("schach_docs").select("data").eq("user_id", user.id).eq("path", "huberman/tag/" + day).maybeSingle().then(function (r) {
+    sb.from("schach_docs").select("data").eq("user_id", user.id).eq("path", "huberman/tag." + day).maybeSingle().then(function (r) {
       if (r.error) { txt.textContent = "Stand gerade nicht abrufbar."; return; }
       var d = (r.data && r.data.data) || {}, k = d.done ? Object.keys(d.done).filter(function (x) { return d.done[x]; }).length : 0, tot = d.total || 31;
       bar.style.width = Math.round(k / tot * 100) + "%";
