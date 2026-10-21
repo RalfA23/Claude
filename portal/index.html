@@ -156,7 +156,9 @@ var COURSES = [
   {id: "murmelbahn", icon: "🔮", title: "Murmelbahn", text: "Zum Abschalten: Bei jedem Start eine neue, zufällig gebaute Bahn mit Rampen, Stiften, Schaufelrädern und Pilzen. Murmeln setzen und zuschauen.", href: "murmelbahn/"},
   {id: "vestaboard", icon: "🪧", title: "Vestaboard", text: "Fallblatt-Anzeige wie dein Bildschirmschoner: Uhr, Wetter für Hamburg, Tagesschau, Zitat der Stunde und Sprüche im Wechsel, dazu eigene Texte und Vollbild.", href: "vestaboard/"},
   // Jedes Konto hat seine eigene Checkliste (huberman/, gespeichert im eigenen Konto). Die Kachel zeigt den heutigen Stand.
-  {id: "huberman", icon: "🌅", title: "Huberman-Protokolle", text: "Deine Tages-Checkliste nach Hubermans „Protocols“: 31 Punkte von morgens bis nachts, ab 80 % ist der Tag geschafft, mit Jahresübersicht und Nachschlagewerk.", href: "huberman/"}
+  {id: "huberman", icon: "🌅", title: "Huberman-Protokolle", text: "Deine Tages-Checkliste nach Hubermans „Protocols“: 31 Punkte von morgens bis nachts, ab 80 % ist der Tag geschafft, mit Jahresübersicht und Nachschlagewerk.", href: "huberman/"},
+  // Sprachen (sprachen/): Niederländisch, Japanisch, Thai. Die Kachel zeigt die Punkte aller Sprachen (schach_docs, Pfade sprachen/<sprache>/fortschritt).
+  {id: "sprachen", icon: "🗣️", title: "Sprachen", text: "Niederländisch, Japanisch und Thai für Anfänger und Fortgeschrittene: nachsprechen mit Spracherkennung, Dialoge, Schreiben und Lesen, mit Punkten, Serien und Stufen.", href: "sprachen/"}
 ];
 // Nur für einzeln freigeschaltete Konten sichtbar (Zeile in gevt_members). Ohne Freigabe taucht die Kachel nicht auf.
 var GEVT = {id: "gevt", icon: "🥋", title: "Ving Tsun Wissen", text: "Frag deine GEVT-Wissensdatenbank: Göksels Lehre und deine Notizen getrennt, mit Grad und Quellen.", href: "gevt/"};
@@ -438,6 +440,7 @@ var GEVT = {id: "gevt", icon: "🥋", title: "Ving Tsun Wissen", text: "Frag dei
       return;
     }
     if (c.id === "huberman") hubermanToday(b, row);
+    if (c.id === "sprachen") sprachenStand(b, row);
     row.appendChild(el("a", {class: "btn primary", href: c.href, text: "Öffnen", onclick: function () { if (isNew(c)) setSeen((seen() || []).concat([c.id])); }}));
   }
   // Heutiger Stand der Huberman-Checkliste (schach_docs, Pfad huberman/tag/JJJJ-MM-TT)
@@ -450,6 +453,17 @@ var GEVT = {id: "gevt", icon: "🥋", title: "Ving Tsun Wissen", text: "Frag dei
       var d = (r.data && r.data.data) || {}, k = d.done ? Object.keys(d.done).filter(function (x) { return d.done[x]; }).length : 0, tot = d.total || 31;
       bar.style.width = Math.round(k / tot * 100) + "%";
       txt.textContent = "Heute " + k + " von " + tot + " erledigt";
+    });
+  }
+
+  // Punkte und längste Serie über alle Sprachen (schach_docs, Pfade sprachen/<sprache>/fortschritt)
+  function sprachenStand(b, row) {
+    var txt = el("p", {text: ""}); b.insertBefore(txt, row);
+    sb.from("schach_docs").select("data").eq("user_id", user.id).like("path", "sprachen/%/fortschritt").then(function (r) {
+      if (r.error || !r.data || !r.data.length) return;
+      var sum = 0, best = 0;
+      r.data.forEach(function (x) { var d = x.data || {}; sum += +d.punkte || 0; best = Math.max(best, +d.serie || 0); });
+      txt.textContent = sum + " Punkte" + (best ? " · Serie " + best + (best === 1 ? " Tag" : " Tage") : "");
     });
   }
 

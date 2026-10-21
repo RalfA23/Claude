@@ -7,3 +7,4 @@
 - [goetterquiz](goetterquiz/) – Wissensspiel nach dem Vorbild von „Powerplay: The Game of the Gods“: vier Götter, Duelle, Mutationen, Fragen aus allen Bereichen und aus dem Lesetraining. Läuft unter `/quiz/`.
 - [wortwuerfel](wortwuerfel/) – Buchstabenwürfel-Wortspiel nach dem Vorbild von Boggle: 4×4-Würfelfeld, drei Minuten, deutsches Wörterbuch mit rund 617.000 Wortformen, allein oder zu zweit. Läuft unter `/wortwuerfel/`.
 - [huberman](huberman/) – Huberman-Protokolle als Tages-Checkliste mit Jahresüberblick, jedes Konto mit eigenen Häkchen. Läuft unter `/huberman/`.
+- [sprachen](sprachen/) – Sprachen lernen mit Schwerpunkt Sprechen: Startseite unter `/sprachen/`, jede Sprache als eigener Ordner (`niederlaendisch/`, `japanisch/`, `thai/`), Stand je Sprache in `schach_docs` unter `sprachen/<ordner>/fortschritt`.
