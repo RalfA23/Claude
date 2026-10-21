@@ -2,7 +2,7 @@
 
 Die Fallblatt-Anzeige aus Ralfs Mac-Bildschirmschoner als Kachel im Lernportal, unter `/vestaboard/`, ohne Anmeldung. Grundlage ist die Browser-Version „Mein Vestaboard“ (6×22 Kacheln, Split-Flap-Animation, Zeichensatz und acht Farbkacheln wie das Original).
 
-- Hinterlegte Nachricht für ein Konto: Wer im Portal mit Kudnicks Konto angemeldet ist (E-Mail enthält „kudnick“), sieht beim nächsten Öffnen einmal „HALLO CAPICOP“, danach steht sie als Beispiel bereit. Alle anderen sehen sie nicht.
+- Gruß je Nutzer: Beim ersten Öffnen des Tages steht 20 Sekunden lang ein Gruß nach Tageszeit (Guten Morgen, Guten Tag, Guten Abend, Gute Nacht), danach geht es normal weiter. Die Anrede kommt aus der Portal-Anmeldung: zuerst `user_metadata.anrede` des Supabase-Kontos, sonst die Tabelle `ANREDEN` in `src/index.html` (Muster auf die E-Mail, z. B. Kudnick → „CAPICOP“). Ohne Anrede bleibt der gewohnte Morgengruß „Guten Morgen! Heute wird ein guter Tag“.
 - Sonst startet es in der Rotation: Uhr, Wetter für Hamburg, Zitat der Stunde, Tagesschau-Schlagzeilen und Sprüche im Wechsel (alle 20 Sekunden). Countdowns sind vorerst aus.
 - Wetter (Open-Meteo) und Tagesschau holt die Seite selbst. Termine gibt es hier nicht, die kennt nur der Bildschirmschoner auf dem Mac über sein Hintergrundskript.
 - Eigener Text mit Farbkacheln, Uhr-Modus, Vollbild, Bildschirmschoner-Modus und Ton (Klackern erst nach „Ton an“). Einstellungen liegen im Browser.
