@@ -7,6 +7,7 @@
 <title>Thai lernen</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23a3342f'/%3E%3Ctext x='32' y='46' font-size='40' text-anchor='middle' fill='white' font-family='sans-serif'%3E%E0%B8%81%3C/text%3E%3C/svg%3E">
 <script src="../../config.js"></script>
+<script src="../ton.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Atkinson+Hyperlegible:wght@400;700&family=Noto+Sans+Thai+Looped:wght@400;600&display=swap">
@@ -129,7 +130,7 @@ input[type=range]{width:120px}
 <body>
 <div class="wrap">
   <div class="top">
-    <a class="back" href="../">← Sprachen</a>
+    <span><a class="back" href="../">← Sprachen</a> <span class="muted">·</span> <a class="back" href="../hilfe/">🔊 Kein Ton?</a></span>
     <div class="seg" id="levelSeg"><button data-l="a">Anfänger</button><button data-l="f">Fortgeschritten</button></div>
   </div>
   <h1 style="margin-top:12px">Thai <span class="th" style="font-weight:600">ภาษาไทย</span></h1>
@@ -142,7 +143,7 @@ input[type=range]{width:120px}
   </div>
   <nav class="tabs" id="tabs"></nav>
   <main id="view"></main>
-  <p class="small muted" style="margin-top:28px">Aussprache kommt aus der Thai-Stimme deines Geräts, Nachsprechen nutzt die Spracherkennung des Browsers (am besten Chrome oder Safari). Umschrift: ohne Akzent = Mittelton, à tief, â fallend, á hoch, ǎ steigend.</p>
+  <p class="small muted" style="margin-top:28px">Aussprache kommt aus der Thai-Stimme deines Geräts (<a href="../hilfe/">kein Ton? So richtest du sie ein</a>), Nachsprechen nutzt die Spracherkennung des Browsers (am besten Chrome oder Safari). Umschrift: ohne Akzent = Mittelton, à tief, â fallend, á hoch, ǎ steigend.</p>
 </div>
 <div class="toast" id="toast"></div>
 <script>
@@ -417,18 +418,10 @@ function sampleOthers(pool, right, n, key){ const k = key || (x => x); const see
 let voices = [], rate = parseFloat(lsGet("rate") || "0.85");
 function loadVoices(){ try { voices = speechSynthesis.getVoices().filter(v => /^th/i.test(v.lang)); } catch(e) { voices = []; } }
 if ("speechSynthesis" in window) { loadVoices(); speechSynthesis.onvoiceschanged = loadVoices; }
+// Sprachausgabe über ../ton.js (Browserfehler umgangen, Hinweis zur Ton-Hilfe bei fehlender Stimme)
 function speak(text, opts){
   opts = opts || {};
-  if (!("speechSynthesis" in window)) { toast("Keine Sprachausgabe in diesem Browser"); return Promise.resolve(); }
-  return new Promise(res => {
-    speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text.replace(/\s+/g," "));
-    u.lang = "th-TH"; if (voices[0]) u.voice = voices[opts.voice||0] || voices[0];
-    u.rate = (opts.slow ? 0.55 : rate); u.pitch = opts.pitch || 1;
-    u.onend = res; u.onerror = res;
-    speechSynthesis.speak(u);
-    setTimeout(res, 15000);
-  });
+  return Ton.speak(text, {lang:"th-TH", voice: opts.voice || 0, rate: opts.slow ? 0.55 : rate, pitch: opts.pitch || 1});
 }
 const sayBtn = (text, label, opts) => el("button",{class:"btn sm",title:"Anhören",onclick:e => { e.stopPropagation(); speak(text, opts); }, text:label||"🔊"});
 
@@ -513,7 +506,7 @@ function viewStart(v){
       el("span",{text:"Sprechtempo"}),
       (() => { const r = el("input",{type:"range",min:"0.5",max:"1.1",step:"0.05",value:String(rate)}); r.oninput = () => { rate = parseFloat(r.value); lsSet("rate", r.value); }; return r; })(),
       sayBtn("สวัสดีครับ ยินดีต้อนรับ","🔊 Probe"),
-      el("span",{class:"small muted",text: voices.length ? "Thai-Stimme: "+voices[0].name : "Keine Thai-Stimme gefunden. Auf iPhone/Mac unter Bedienungshilfen › Gesprochene Inhalte › Stimmen › Thai laden."})
+      el("span",{class:"small muted",text: voices.length ? "Thai-Stimme: "+voices[0].name : "Keine Thai-Stimme gefunden. "}), el("a",{href:"../hilfe/",class:"small",text:"Ton einrichten"})
     ])
   );
 }

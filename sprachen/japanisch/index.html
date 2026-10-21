@@ -7,6 +7,7 @@
 <title>Japanisch lernen</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23fffdf8'/%3E%3Ccircle cx='32' cy='32' r='16' fill='%23c8402f'/%3E%3C/svg%3E">
 <script src="../../config.js"></script>
+<script src="../ton.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;700&family=Klee+One:wght@600&family=Bricolage+Grotesque:opsz,wght@12..96,700&display=swap">
@@ -185,7 +186,7 @@ ruby rt{font-size:.5em;color:var(--muted);font-family:var(--jp)}
 <body>
 <div class="wrap">
   <div class="top">
-    <a class="back" href="../">← Sprachen</a>
+    <span><a class="back" href="../">← Sprachen</a> <span class="muted">·</span> <a class="back" href="../hilfe/">🔊 Kein Ton?</a></span>
     <div class="row">
       <span class="small muted">Stufe:</span>
       <div class="seg" id="levelSeg" role="group" aria-label="Niveau">
@@ -532,18 +533,11 @@ function toast(msg) { const t = $("#toast"); t.textContent = msg; t.classList.ad
 
 // ---------- Sprachausgabe und Spracherkennung ----------
 let jaVoice = null;
-function pickVoice() { if (!window.speechSynthesis) return; const vs = speechSynthesis.getVoices(); jaVoice = vs.find(v => /^ja[-_]JP/i.test(v.lang) && /google|kyoko|otoya|natural|online/i.test(v.name)) || vs.find(v => /^ja/i.test(v.lang)) || null; }
+const JA_GOOD = /google|kyoko|otoya|natural|online/i;
+function pickVoice() { jaVoice = Ton.voice("ja-JP", JA_GOOD); }
 if (window.speechSynthesis) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
-function speak(text, rate) {
-  return new Promise(res => {
-    if (!window.speechSynthesis) return res();
-    speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text); u.lang = "ja-JP"; if (jaVoice) u.voice = jaVoice; u.rate = rate || S.rate;
-    let done = false; const fin = () => { if (!done) { done = true; res(); } };
-    u.onend = fin; u.onerror = fin; setTimeout(fin, 1500 + text.length * 450 / (rate || S.rate));
-    speechSynthesis.speak(u);
-  });
-}
+// Sprachausgabe über ../ton.js (Browserfehler umgangen, Hinweis zur Ton-Hilfe bei fehlender Stimme)
+function speak(text, rate) { return Ton.speak(text, {lang: "ja-JP", rate: rate || S.rate, prefer: JA_GOOD}); }
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 function listen() {
   return new Promise((res, rej) => {
@@ -680,7 +674,7 @@ RENDER.start = () => {
     <div class="card stack" style="gap:8px">
       <h3>Aussprache</h3>
       <div class="row"><span class="small">Sprechtempo</span><input type="range" id="rate" min="0.5" max="1.2" step="0.05" value="${S.rate}" style="flex:1;max-width:240px"><button class="btn" data-say="こんにちは。日本語を一緒に勉強しましょう。">Probe 🔊</button></div>
-      <p class="small muted">${!window.speechSynthesis ? "Dieser Browser kann nicht vorlesen." : jaVoice ? "Japanische Stimme: " + esc(jaVoice.name) + "." : "Keine japanische Stimme gefunden. Auf dem iPhone unter Einstellungen, Bedienungshilfen, Gesprochene Inhalte, Stimmen eine japanische Stimme laden."}
+      <p class="small muted">${!window.speechSynthesis ? "Dieser Browser kann nicht vorlesen." : jaVoice ? "Japanische Stimme: " + esc(jaVoice.name) + "." : "Keine japanische Stimme gefunden."} <a href="../hilfe/">Ton einrichten</a>.
       ${SR ? " Spracherkennung ist verfügbar." : " Spracherkennung fehlt in diesem Browser (am besten Chrome oder Safari). Beim Nachsprechen bewertest du dich dann selbst."}</p>
     </div>`;
   $("#rate").oninput = e => { S.rate = +e.target.value; save(); };
