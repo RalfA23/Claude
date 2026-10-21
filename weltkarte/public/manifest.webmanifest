@@ -1,0 +1,14 @@
+{
+  "name": "Weltkarte",
+  "short_name": "Weltkarte",
+  "description": "Orte, an denen du warst und wo du hin willst, mit Notizen und Bildern.",
+  "lang": "de",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#eef3f4",
+  "theme_color": "#17323d",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}

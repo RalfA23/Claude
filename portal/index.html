@@ -167,6 +167,8 @@ var COURSES = [
   {id: "vestaboard", icon: "🪧", title: "Vestaboard", text: "Fallblatt-Anzeige wie dein Bildschirmschoner: Uhr, Wetter für Hamburg, Tagesschau, Zitat der Stunde und Sprüche im Wechsel, dazu eigene Texte und Vollbild.", href: "vestaboard/"},
   // Jedes Konto hat seine eigene Checkliste (huberman/, gespeichert im eigenen Konto). Die Kachel zeigt den heutigen Stand.
   {id: "huberman", icon: "🌅", title: "Huberman-Protokolle", text: "Deine Tages-Checkliste nach Hubermans „Protocols“: 31 Punkte von morgens bis nachts, ab 80 % ist der Tag geschafft, mit Jahresübersicht und Nachschlagewerk.", href: "huberman/"},
+  // Jedes Konto hat seine eigene Karte (weltkarte/, Orte in schach_docs unter weltkarte/ort/<id>). Die Kachel zeigt, wie viele Orte besucht und geplant sind.
+  {id: "weltkarte", icon: "🗺️", title: "Weltkarte", text: "Alle Orte, an denen du warst und wo du noch hin willst, als Pins auf einer großen Weltkarte. Mit Datum, Notizen und Bildern als Andenken.", href: "weltkarte/"},
   // Sprachen (sprachen/): Niederländisch, Japanisch, Thai. Die Kachel zeigt die Punkte aller Sprachen (schach_docs, Pfade sprachen/<sprache>/fortschritt).
   {id: "sprachen", icon: "🗣️", title: "Sprachen", text: "Niederländisch, Japanisch und Thai für Anfänger und Fortgeschrittene: nachsprechen mit Spracherkennung, Dialoge, Schreiben und Lesen, mit Punkten, Serien und Stufen.", href: "sprachen/"}
 ];
@@ -470,6 +472,7 @@ var GEVT = {id: "gevt", icon: "🥋", title: "Ving Tsun Wissen", text: "Frag dei
     }
     if (c.id === "huberman") hubermanToday(b, row);
     if (c.id === "sprachen") sprachenStand(b, row);
+    if (c.id === "weltkarte") weltkarteStand(b, row);
     row.appendChild(el("a", {class: "btn primary", href: c.href, text: "Öffnen", onclick: function () { if (isNew(c)) setSeen((seen() || []).concat([c.id])); }}));
   }
   // Heutiger Stand der Huberman-Checkliste (schach_docs, Pfad huberman/tag/JJJJ-MM-TT)
@@ -493,6 +496,16 @@ var GEVT = {id: "gevt", icon: "🥋", title: "Ving Tsun Wissen", text: "Frag dei
       var sum = 0, best = 0;
       r.data.forEach(function (x) { var d = x.data || {}; sum += +d.punkte || 0; best = Math.max(best, +d.serie || 0); });
       txt.textContent = sum + " Punkte" + (best ? " · Serie " + best + (best === 1 ? " Tag" : " Tage") : "");
+    });
+  }
+
+  // Besuchte und geplante Orte der Weltkarte (schach_docs, Pfade weltkarte/ort/<id>)
+  function weltkarteStand(b, row) {
+    var txt = el("p", {text: ""}); b.insertBefore(txt, row);
+    sb.from("schach_docs").select("kind:data->>kind").eq("user_id", user.id).like("path", "weltkarte/ort/%").then(function (r) {
+      if (r.error || !r.data || !r.data.length) return;
+      var war = r.data.filter(function (x) { return x.kind !== "will"; }).length, will = r.data.length - war;
+      txt.textContent = war + (war === 1 ? " Ort besucht" : " Orte besucht") + " · " + will + (will === 1 ? " Ziel" : " Ziele");
     });
   }
 
