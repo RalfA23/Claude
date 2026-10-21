@@ -1,0 +1,8 @@
+{
+  "name": "weltkarte",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs"
+  }
+}

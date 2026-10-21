@@ -1,0 +1,642 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Weltkarte</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
+<script src="../config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap">
+<style>
+/* Layout: die Karte füllt den ganzen Bildschirm. Oben schwebt die Leiste mit Filter und Zählern, unten rechts der Knopf für neue Orte.
+   Liste, Bearbeiten und die Andenken-Ansicht eines Ortes sind Dialoge über der Karte. */
+:root{
+  --bg:#eef3f4; --surface:#ffffff; --fg:#17323d; --muted:#5b6f77; --line:#d3dfe2; --chip:#e4edef;
+  --war:#d9480f; --will:#1c6fc2; --accent:#2f7f8c; --danger:#b8423f; --shadow:0 6px 24px rgba(10,30,40,.18);
+  --display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f181d; --surface:#17232a; --fg:#e3ecef; --muted:#97a9b1; --line:#2b3b44; --chip:#21313a;
+  --war:#ff7a3d; --will:#5aa7f0; --accent:#5fb3bf; --danger:#e57f7b; --shadow:0 6px 24px rgba(0,0,0,.5); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f181d; --surface:#17232a; --fg:#e3ecef; --muted:#97a9b1; --line:#2b3b44; --chip:#21313a;
+  --war:#ff7a3d; --will:#5aa7f0; --accent:#5fb3bf; --danger:#e57f7b; --shadow:0 6px 24px rgba(0,0,0,.5); color-scheme:dark}
+
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.5;overflow:hidden}
+h1,h2,h3{font-family:var(--display);margin:0;line-height:1.2;text-wrap:balance}
+p{margin:0}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer}
+button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+
+#map{position:fixed;inset:0;background:#aad3df}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) #map .leaflet-tile-pane{filter:brightness(.78) contrast(1.05) saturate(.85)}}
+:root[data-theme="dark"] #map .leaflet-tile-pane{filter:brightness(.78) contrast(1.05) saturate(.85)}
+
+/* Obere Leiste */
+.top{position:fixed;z-index:1000;top:max(10px, env(safe-area-inset-top));left:max(10px, env(safe-area-inset-left));right:max(10px, env(safe-area-inset-right));display:flex;gap:8px;align-items:flex-start;flex-wrap:wrap;pointer-events:none}
+.top > *{pointer-events:auto}
+.card{background:var(--surface);border-radius:14px;box-shadow:var(--shadow)}
+.brand{display:flex;align-items:center;gap:10px;padding:8px 12px 8px 8px}
+.brand a{display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:var(--chip);text-decoration:none;color:var(--fg);font-weight:700}
+.brand h1{font-size:1.15rem}
+.brand .stat{font-size:.82rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.filters{display:flex;padding:4px;gap:2px}
+.filters button{border:0;background:none;border-radius:10px;padding:7px 11px;font-weight:700;font-size:.9rem;color:var(--muted);display:flex;align-items:center;gap:6px}
+.filters button[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block;flex:none}
+.dot.war{background:var(--war)} .dot.will{background:var(--will)}
+.iconbtn{border:0;background:var(--surface);box-shadow:var(--shadow);border-radius:14px;padding:9px 13px;font-weight:700;font-size:.9rem}
+.spacer{flex:1}
+
+.fab{position:fixed;z-index:1000;right:max(16px, env(safe-area-inset-right));bottom:calc(22px + env(safe-area-inset-bottom));border:0;border-radius:999px;background:var(--war);color:#fff;font-weight:700;font-size:1rem;padding:14px 20px;box-shadow:var(--shadow)}
+.banner{position:fixed;z-index:1001;left:50%;transform:translateX(-50%);bottom:calc(86px + env(safe-area-inset-bottom));background:var(--fg);color:var(--bg);border-radius:12px;padding:10px 14px;font-weight:700;font-size:.92rem;box-shadow:var(--shadow);display:flex;gap:12px;align-items:center;max-width:calc(100vw - 32px)}
+.banner button{border:0;background:rgba(255,255,255,.18);color:inherit;border-radius:8px;padding:4px 10px;font-weight:700}
+.toast{position:fixed;z-index:3000;left:50%;transform:translateX(-50%);top:calc(70px + env(safe-area-inset-top));background:var(--surface);color:var(--fg);border-radius:10px;padding:9px 14px;font-size:.9rem;box-shadow:var(--shadow);max-width:calc(100vw - 32px)}
+.gate{position:fixed;z-index:1002;left:50%;transform:translateX(-50%);bottom:calc(24px + env(safe-area-inset-bottom));width:min(440px, calc(100vw - 32px));padding:16px 18px}
+.gate a{color:var(--accent);font-weight:700}
+
+/* Pins */
+.pin{background:none;border:0}
+.pin svg{display:block;filter:drop-shadow(0 2px 2px rgba(0,0,0,.35))}
+.leaflet-popup-content-wrapper{border-radius:12px;background:var(--surface);color:var(--fg)}
+.leaflet-popup-tip{background:var(--surface)}
+.leaflet-popup-content{margin:12px 14px;font-family:var(--body);font-size:.92rem;line-height:1.4;min-width:180px}
+.leaflet-container a.leaflet-popup-close-button{color:var(--muted)}
+.pop h3{font-size:1.05rem;margin-bottom:2px}
+.pop .meta{color:var(--muted);font-size:.82rem;display:flex;align-items:center;gap:6px}
+.pop img{width:100%;max-height:130px;object-fit:cover;border-radius:8px;margin-top:8px;display:block}
+.pop p.n{margin-top:6px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.pop .acts{display:flex;gap:6px;margin-top:10px}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:8px 14px;font-weight:700;font-size:.92rem;text-decoration:none;color:var(--fg);display:inline-flex;align-items:center;gap:6px}
+.btn.primary{background:var(--fg);border-color:var(--fg);color:var(--bg)}
+.btn.danger{color:var(--danger)}
+.btn.sm{padding:6px 10px;font-size:.85rem}
+
+/* Dialoge */
+dialog{border:0;padding:0;background:var(--surface);color:var(--fg);border-radius:18px;box-shadow:var(--shadow);width:min(560px, calc(100vw - 24px));max-height:calc(100dvh - 24px)}
+dialog::backdrop{background:rgba(8,20,26,.45)}
+@media (max-width:600px){
+  dialog.sheet{margin:auto 0 0;width:100vw;max-width:100vw;border-radius:18px 18px 0 0;max-height:92dvh}
+}
+.dlg{display:flex;flex-direction:column;max-height:inherit}
+.dlg header{display:flex;align-items:center;gap:10px;padding:16px 18px 10px}
+.dlg header h2{font-size:1.25rem;flex:1}
+.x{border:0;background:var(--chip);width:34px;height:34px;border-radius:50%;font-size:1.1rem;line-height:1;flex:none}
+.dlg .body{overflow:auto;padding:4px 18px 16px;display:grid;gap:14px}
+.dlg footer{display:flex;gap:8px;padding:12px 18px calc(14px + env(safe-area-inset-bottom));border-top:1px solid var(--line);flex-wrap:wrap}
+label.f{display:grid;gap:5px;font-weight:700;font-size:.88rem}
+label.f small{font-weight:400;color:var(--muted)}
+input[type=text],input[type=date],input[type=search],textarea{width:100%;border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:10px 12px;font-size:1rem}
+textarea{min-height:96px;resize:vertical}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.seg button{border:2px solid var(--line);background:var(--bg);border-radius:12px;padding:10px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px}
+.seg button[aria-pressed="true"].war{border-color:var(--war);color:var(--war)}
+.seg button[aria-pressed="true"].will{border-color:var(--will);color:var(--will)}
+.searchrow{display:flex;gap:6px}
+.results{display:grid;gap:4px;margin-top:6px}
+.results button{text-align:left;border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:8px 10px;font-size:.9rem}
+.results button b{display:block}
+.results button span{color:var(--muted);font-size:.82rem}
+.pos{font-size:.85rem;color:var(--muted);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.photos{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px}
+.photos figure{margin:0;position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;background:var(--chip)}
+.photos img{width:100%;height:100%;object-fit:cover;display:block}
+.photos figure button{position:absolute;top:4px;right:4px;border:0;width:28px;height:28px;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;font-size:.9rem;line-height:1}
+.addphoto{aspect-ratio:1;border:2px dashed var(--line);border-radius:10px;display:grid;place-items:center;text-align:center;font-weight:700;font-size:.85rem;color:var(--muted);cursor:pointer;padding:6px}
+.addphoto input{display:none}
+.hint{font-size:.85rem;color:var(--muted)}
+
+/* Andenken-Ansicht */
+.memo .hero{width:100%;aspect-ratio:16/10;object-fit:cover;border-radius:14px;display:block;background:var(--chip);cursor:zoom-in}
+.memo .meta{color:var(--muted);display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:.92rem}
+.memo .note{white-space:pre-wrap}
+.memo .photos img{cursor:zoom-in}
+dialog.light{width:100vw;height:100dvh;max-width:none;max-height:none;margin:0;border-radius:0;background:rgba(0,0,0,.94);place-items:center}
+dialog.light[open]{display:grid}
+dialog.light::backdrop{background:rgba(0,0,0,.6)}
+.light img{max-width:100vw;max-height:100dvh;object-fit:contain}
+.light button{position:absolute;border:0;background:rgba(255,255,255,.16);color:#fff;width:46px;height:46px;border-radius:50%;font-size:1.4rem}
+.light .lx{top:calc(14px + env(safe-area-inset-top));right:14px}
+.light .lp{left:10px;top:50%;transform:translateY(-50%)}
+.light .ln{right:10px;top:50%;transform:translateY(-50%)}
+.light .lc{position:absolute;bottom:calc(16px + env(safe-area-inset-bottom));color:#fff;font-size:.9rem}
+
+/* Liste */
+.list{display:grid;gap:6px}
+.list button{display:grid;grid-template-columns:52px 1fr;gap:10px;align-items:center;text-align:left;border:1px solid var(--line);background:var(--bg);border-radius:12px;padding:6px}
+.list .th{width:52px;height:52px;border-radius:9px;background:var(--chip);object-fit:cover;display:grid;place-items:center;font-size:1.3rem}
+.list b{display:block}
+.list span{color:var(--muted);font-size:.84rem;display:flex;gap:6px;align-items:center}
+.empty{color:var(--muted);text-align:center;padding:20px 0}
+</style>
+</head>
+<body>
+
+<div id="map" role="application" aria-label="Weltkarte"></div>
+
+<div class="top">
+  <div class="card brand">
+    <a href="../" aria-label="Zurück zum Portal">‹</a>
+    <div><h1>Weltkarte</h1><p class="stat" id="stat">Lade deine Orte …</p></div>
+  </div>
+  <div class="card filters" role="group" aria-label="Filter">
+    <button type="button" data-f="all" aria-pressed="true">Alle</button>
+    <button type="button" data-f="war" aria-pressed="false"><i class="dot war"></i>War ich</button>
+    <button type="button" data-f="will" aria-pressed="false"><i class="dot will"></i>Will ich hin</button>
+  </div>
+  <div class="spacer"></div>
+  <button type="button" class="iconbtn" id="listbtn">☰ Liste</button>
+</div>
+
+<button type="button" class="fab" id="addbtn" disabled>＋ Ort</button>
+<div class="banner" id="pickbanner" hidden><span>Tippe auf die Karte, wo der Pin hin soll.</span><button type="button" id="pickcancel">Abbrechen</button></div>
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+<div class="card gate" id="gate" hidden><p>Melde dich im <a href="../">Portal</a> an, dann kannst du deine Orte setzen. Jedes Konto hat seine eigene Karte.</p></div>
+
+<!-- Ort anlegen oder bearbeiten -->
+<dialog class="sheet" id="edit" aria-labelledby="edittitle">
+  <form class="dlg" method="dialog" id="editform">
+    <header><h2 id="edittitle">Neuer Ort</h2><button type="button" class="x" data-close aria-label="Schließen">✕</button></header>
+    <div class="body">
+      <div id="searchbox">
+        <label class="f" for="q">Ort suchen <small>oder direkt auf die Karte tippen</small></label>
+        <div class="searchrow" style="margin-top:5px">
+          <input type="search" id="q" placeholder="z. B. Lissabon, Machu Picchu, Kyoto" autocomplete="off" enterkeyhint="search">
+          <button type="button" class="btn" id="qbtn">Suchen</button>
+        </div>
+        <div class="results" id="results"></div>
+      </div>
+      <div class="pos" id="pos"></div>
+      <div class="seg" role="group" aria-label="Art">
+        <button type="button" class="war" data-k="war" aria-pressed="true"><i class="dot war"></i>War ich</button>
+        <button type="button" class="will" data-k="will" aria-pressed="false"><i class="dot will"></i>Will ich hin</button>
+      </div>
+      <label class="f">Name <input type="text" id="name" maxlength="120" required></label>
+      <label class="f"><span id="datelabel">Wann warst du dort?</span> <input type="date" id="date"></label>
+      <label class="f">Notiz <small>Erinnerungen, mit wem, was du dort erlebt hast oder erleben willst</small><textarea id="note" maxlength="5000"></textarea></label>
+      <div>
+        <p class="f" style="font-weight:700;font-size:.88rem;margin-bottom:5px">Bilder <small class="hint">werden vor dem Speichern verkleinert</small></p>
+        <div class="photos" id="editphotos"></div>
+      </div>
+    </div>
+    <footer>
+      <button type="submit" class="btn primary" id="savebtn">Speichern</button>
+      <button type="button" class="btn" data-close>Abbrechen</button>
+      <span class="spacer"></span>
+      <button type="button" class="btn danger" id="delbtn" hidden>Löschen</button>
+    </footer>
+  </form>
+</dialog>
+
+<!-- Andenken-Ansicht eines Ortes -->
+<dialog class="sheet memo" id="memo" aria-labelledby="memotitle">
+  <div class="dlg">
+    <header><h2 id="memotitle"></h2><button type="button" class="x" data-close aria-label="Schließen">✕</button></header>
+    <div class="body" id="memobody"></div>
+    <footer>
+      <button type="button" class="btn primary" id="memoedit">Bearbeiten</button>
+      <button type="button" class="btn" id="memofly">Auf der Karte zeigen</button>
+    </footer>
+  </div>
+</dialog>
+
+<!-- Liste aller Orte -->
+<dialog class="sheet" id="listdlg" aria-labelledby="listtitle">
+  <div class="dlg">
+    <header><h2 id="listtitle">Meine Orte</h2><button type="button" class="x" data-close aria-label="Schließen">✕</button></header>
+    <div class="body"><div class="list" id="list"></div></div>
+  </div>
+</dialog>
+
+<dialog class="light" id="light" aria-label="Bild groß">
+  <img id="lightimg" alt="">
+  <button type="button" class="lx" aria-label="Schließen">✕</button>
+  <button type="button" class="lp" aria-label="Vorheriges Bild">‹</button>
+  <button type="button" class="ln" aria-label="Nächstes Bild">›</button>
+  <p class="lc" id="lightcount"></p>
+</dialog>
+
+<script>
+// Speicherung im Konto der Lebensplattform (Supabase, Tabelle schach_docs):
+//   weltkarte/ort/<id>          {name, kind: "war"|"will", lat, lng, date, note, photos: [bildIds], thumb, created, updated}
+//   weltkarte/bild/<id>/<bild>  {img} als verkleinertes JPEG (data-URL), wird erst beim Öffnen eines Ortes geladen
+// Jede Zeile gehört einem Konto; die Datenbank gibt nur die eigenen Zeilen heraus. Die Orte ohne Bilder liegen zusätzlich im Browser.
+var DOC = "weltkarte/";
+var sb = null, user = null;
+var pins = {};          // id -> Ort
+var markers = {};       // id -> Leaflet-Marker
+var photoCache = {};    // bildId -> data-URL
+var filter = "all";
+var $ = function (id) { return document.getElementById(id); };
+function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+function lkey() { return "weltkarte-" + (user ? user.id : "gast"); }
+function fmtDate(d) {
+  if (!d) return "";
+  var p = d.split("-"); if (p.length !== 3) return d;
+  return new Date(+p[0], +p[1] - 1, +p[2]).toLocaleDateString("de-DE", {day: "numeric", month: "long", year: "numeric"});
+}
+function kindLabel(k) { return k === "will" ? "Will ich hin" : "War ich"; }
+
+var toastTimer = null;
+function toast(t, ms) {
+  var el = $("toast"), host = document.querySelector("dialog[open]") || document.body;
+  if (el.parentNode !== host) host.appendChild(el);
+  el.textContent = t; el.hidden = false;
+  clearTimeout(toastTimer); toastTimer = setTimeout(function () { el.hidden = true; }, ms || 2600);
+}
+
+/* ---------- Karte ---------- */
+var map = L.map("map", {zoomControl: false, worldCopyJump: true, minZoom: 2, maxBounds: [[-85, -400], [85, 400]], maxBoundsViscosity: .8}).setView([30, 10], 2);
+L.control.zoom({position: "bottomleft"}).addTo(map);
+// OpenStreetMap mit deutschen Ortsnamen, ohne Schlüssel
+L.tileLayer("https://tile.openstreetmap.de/{z}/{x}/{y}.png", {maxZoom: 18, attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'}).addTo(map);
+
+function pinIcon(kind) {
+  var c = kind === "will" ? "var(--will)" : "var(--war)";
+  var mark = kind === "will"
+    ? '<path d="M15 7.5l1.9 3.9 4.3.6-3.1 3 .7 4.3-3.8-2-3.8 2 .7-4.3-3.1-3 4.3-.6z" fill="#fff"/>'
+    : '<circle cx="15" cy="13.5" r="4.6" fill="#fff"/>';
+  return L.divIcon({className: "pin", iconSize: [30, 40], iconAnchor: [15, 39], popupAnchor: [0, -34],
+    html: '<svg width="30" height="40" viewBox="0 0 30 40"><path d="M15 1C7.3 1 1.5 6.9 1.5 14.2 1.5 24 15 39 15 39s13.5-15 13.5-24.8C28.5 6.9 22.7 1 15 1z" style="fill:' + c + '" stroke="#fff" stroke-width="2"/>' + mark + '</svg>'});
+}
+
+function popupHtml(p) {
+  return '<div class="pop"><h3>' + esc(p.name) + '</h3>' +
+    '<p class="meta"><i class="dot ' + p.kind + '"></i>' + kindLabel(p.kind) + (p.date ? " · " + esc(fmtDate(p.date)) : "") + '</p>' +
+    (p.thumb ? '<img src="' + p.thumb + '" alt="">' : "") +
+    (p.note ? '<p class="n">' + esc(p.note) + '</p>' : "") +
+    '<div class="acts"><button type="button" class="btn sm primary" data-open="' + p.id + '">Ansehen' + (p.photos && p.photos.length ? " (" + p.photos.length + " Bilder)" : "") + '</button>' +
+    '<button type="button" class="btn sm" data-edit="' + p.id + '">Bearbeiten</button></div></div>';
+}
+
+function drawPin(p) {
+  if (markers[p.id]) map.removeLayer(markers[p.id]);
+  var m = L.marker([p.lat, p.lng], {icon: pinIcon(p.kind), title: p.name, riseOnHover: true, zIndexOffset: p.kind === "war" ? 100 : 0});
+  m.bindPopup(function () { return popupHtml(pins[p.id] || p); }, {maxWidth: 260});
+  markers[p.id] = m;
+  if (filter === "all" || filter === p.kind) m.addTo(map);
+}
+function drawAll() {
+  for (var id in markers) map.removeLayer(markers[id]);
+  markers = {};
+  Object.values(pins).forEach(drawPin);
+  updateStat();
+}
+function applyFilter() {
+  for (var id in markers) {
+    var show = filter === "all" || filter === pins[id].kind;
+    if (show && !map.hasLayer(markers[id])) markers[id].addTo(map);
+    if (!show && map.hasLayer(markers[id])) map.removeLayer(markers[id]);
+  }
+}
+function updateStat() {
+  var all = Object.values(pins), war = all.filter(function (p) { return p.kind === "war"; }).length, will = all.length - war;
+  $("stat").textContent = all.length ? war + (war === 1 ? " Ort besucht" : " Orte besucht") + " · " + will + (will === 1 ? " Ziel" : " Ziele") : "Noch keine Orte gesetzt";
+}
+function fitAll() {
+  var all = Object.values(pins);
+  if (!all.length) return;
+  if (all.length === 1) { map.setView([all[0].lat, all[0].lng], 6); return; }
+  map.fitBounds(L.latLngBounds(all.map(function (p) { return [p.lat, p.lng]; })), {padding: [60, 60], maxZoom: 6});
+}
+
+document.querySelectorAll(".filters button").forEach(function (b) {
+  b.addEventListener("click", function () {
+    filter = b.dataset.f;
+    document.querySelectorAll(".filters button").forEach(function (x) { x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
+    applyFilter();
+  });
+});
+
+// Knöpfe in Popups
+$("map").addEventListener("click", function (e) {
+  var o = e.target.closest("[data-open]"), ed = e.target.closest("[data-edit]"), nw = e.target.closest("[data-new]");
+  if (o) { map.closePopup(); openMemo(o.dataset.open); }
+  if (ed) { map.closePopup(); openEdit(ed.dataset.edit); }
+  if (nw) { map.closePopup(); openEdit(null, {lat: +nw.dataset.lat, lng: +nw.dataset.lng, name: tapName || ""}); }
+}, true);
+
+// Tippen auf die Karte: neuen Ort hier anlegen, oder im Auswahlmodus die Position übernehmen
+var picking = false, tapName = "";
+map.on("click", function (e) {
+  if (!user) return;
+  var ll = e.latlng.wrap();
+  if (picking) { stopPick(); setPos(ll.lat, ll.lng); reverseName(ll.lat, ll.lng, function (n) { if (n && !$("name").value) $("name").value = n; }); $("edit").showModal(); return; }
+  tapName = "";
+  var pop = L.popup({maxWidth: 240}).setLatLng(e.latlng).setContent(newPopup(ll, "…")).openOn(map);
+  reverseName(ll.lat, ll.lng, function (n) { tapName = n || ""; if (pop.isOpen()) pop.setContent(newPopup(ll, n)); });
+});
+function newPopup(ll, n) {
+  return '<div class="pop"><h3>' + esc(n || "Unbenannter Ort") + '</h3><p class="meta">' + ll.lat.toFixed(3) + ", " + ll.lng.toFixed(3) + '</p>' +
+    '<div class="acts"><button type="button" class="btn sm primary" data-new="1" data-lat="' + ll.lat + '" data-lng="' + ll.lng + '">📍 Hier Pin setzen</button></div></div>';
+}
+function startPick() { picking = true; $("edit").close(); $("pickbanner").hidden = false; $("map").style.cursor = "crosshair"; }
+function stopPick() { picking = false; $("pickbanner").hidden = true; $("map").style.cursor = ""; }
+$("pickcancel").addEventListener("click", function () { stopPick(); $("edit").showModal(); });
+
+/* ---------- Ortssuche (OpenStreetMap Nominatim, ohne Schlüssel) ---------- */
+function shortName(r) {
+  var a = r.address || {};
+  return r.name || a.city || a.town || a.village || a.municipality || a.county || a.state || a.country || (r.display_name || "").split(",")[0];
+}
+function reverseName(lat, lng, cb) {
+  fetch("https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=10&accept-language=de&lat=" + lat + "&lon=" + lng)
+    .then(function (r) { return r.json(); })
+    .then(function (r) { if (r && !r.error) { var a = r.address || {}; cb(a.city || a.town || a.village || a.municipality || a.county || a.state || a.country || ""); } else cb(""); })
+    .catch(function () { cb(""); });
+}
+function search() {
+  var q = $("q").value.trim(), box = $("results");
+  if (!q) return;
+  box.innerHTML = '<p class="hint">Suche …</p>';
+  fetch("https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=6&accept-language=de&q=" + encodeURIComponent(q))
+    .then(function (r) { return r.json(); })
+    .then(function (list) {
+      box.innerHTML = "";
+      if (!list.length) { box.innerHTML = '<p class="hint">Nichts gefunden. Versuch es anders oder tippe auf die Karte.</p>'; return; }
+      list.forEach(function (r) {
+        var b = document.createElement("button"); b.type = "button";
+        b.innerHTML = "<b>" + esc(shortName(r)) + "</b><span>" + esc(r.display_name) + "</span>";
+        b.addEventListener("click", function () {
+          setPos(+r.lat, +r.lon); if (!$("name").value) $("name").value = shortName(r);
+          box.innerHTML = ""; $("q").value = "";
+        });
+        box.appendChild(b);
+      });
+    })
+    .catch(function () { box.innerHTML = '<p class="hint">Suche gerade nicht erreichbar. Tippe stattdessen auf die Karte.</p>'; });
+}
+$("qbtn").addEventListener("click", search);
+$("q").addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); search(); } });
+
+/* ---------- Bearbeiten ---------- */
+var draft = null; // {id, isNew, kind, lat, lng, photos:[{id, src, isNew}], removed:[ids]}
+function setPos(lat, lng) {
+  draft.lat = lat; draft.lng = lng;
+  $("pos").innerHTML = '📍 ' + lat.toFixed(4) + ", " + lng.toFixed(4) + ' <button type="button" class="btn sm" id="repick">Auf der Karte ändern</button>';
+  $("repick").addEventListener("click", startPick);
+}
+function setKind(k) {
+  draft.kind = k;
+  document.querySelectorAll(".seg button").forEach(function (b) { b.setAttribute("aria-pressed", b.dataset.k === k ? "true" : "false"); });
+  $("datelabel").textContent = k === "will" ? "Wann willst du hin? (optional)" : "Wann warst du dort?";
+}
+document.querySelectorAll(".seg button").forEach(function (b) { b.addEventListener("click", function () { setKind(b.dataset.k); }); });
+
+function openEdit(id, preset) {
+  if (!user) { toast("Bitte zuerst im Portal anmelden."); return; }
+  var p = id ? pins[id] : null;
+  draft = {id: p ? p.id : uid(), isNew: !p, kind: p ? p.kind : (filter === "will" ? "will" : "war"), lat: null, lng: null, removed: [],
+    photos: p ? (p.photos || []).map(function (bid) { return {id: bid, src: photoCache[bid] || "", isNew: false}; }) : []};
+  $("edittitle").textContent = p ? "Ort bearbeiten" : "Neuer Ort";
+  $("searchbox").hidden = !!p;
+  $("results").innerHTML = ""; $("q").value = "";
+  $("name").value = p ? p.name : (preset && preset.name) || "";
+  $("date").value = p ? p.date || "" : "";
+  $("note").value = p ? p.note || "" : "";
+  $("delbtn").hidden = !p;
+  setKind(draft.kind);
+  $("pos").innerHTML = "";
+  if (p) setPos(p.lat, p.lng); else if (preset && preset.lat != null) setPos(preset.lat, preset.lng);
+  else $("pos").innerHTML = '<button type="button" class="btn sm" id="pickbtn">📍 Auf der Karte tippen</button>';
+  if ($("pickbtn")) $("pickbtn").addEventListener("click", startPick);
+  renderEditPhotos();
+  $("edit").showModal();
+  if (p && p.photos && p.photos.length) loadPhotos(p, function () {
+    if (!draft || draft.id !== p.id) return;
+    draft.photos.forEach(function (x) { if (!x.src && photoCache[x.id]) x.src = photoCache[x.id]; });
+    renderEditPhotos();
+  });
+}
+
+function renderEditPhotos() {
+  var box = $("editphotos"); box.innerHTML = "";
+  draft.photos.forEach(function (ph, i) {
+    var f = document.createElement("figure");
+    f.innerHTML = (ph.src ? '<img alt="" src="' + ph.src + '">' : "") + '<button type="button" aria-label="Bild entfernen">✕</button>';
+    f.querySelector("button").addEventListener("click", function () {
+      if (!ph.isNew) draft.removed.push(ph.id);
+      draft.photos.splice(i, 1); renderEditPhotos();
+    });
+    box.appendChild(f);
+  });
+  var add = document.createElement("label"); add.className = "addphoto";
+  add.innerHTML = '<span>＋<br>Bilder</span><input type="file" accept="image/*" multiple>';
+  add.querySelector("input").addEventListener("change", function (e) { addFiles(e.target.files); });
+  box.appendChild(add);
+}
+
+// Bilder im Browser verkleinern: lange Seite höchstens 1600 px als JPEG, Vorschaubild 240 px
+function loadImg(file) {
+  return new Promise(function (res, rej) {
+    var url = URL.createObjectURL(file), img = new Image();
+    img.onload = function () { URL.revokeObjectURL(url); res(img); };
+    img.onerror = function () { URL.revokeObjectURL(url); rej(new Error("Bild nicht lesbar")); };
+    img.src = url;
+  });
+}
+function shrink(img, max, q) {
+  var w = img.naturalWidth, h = img.naturalHeight, s = Math.min(1, max / Math.max(w, h));
+  var c = document.createElement("canvas"); c.width = Math.round(w * s); c.height = Math.round(h * s);
+  c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+  return c.toDataURL("image/jpeg", q);
+}
+function addFiles(files) {
+  var list = Array.prototype.slice.call(files || []);
+  if (!list.length) return;
+  toast(list.length === 1 ? "Bild wird verkleinert …" : list.length + " Bilder werden verkleinert …");
+  list.reduce(function (chain, file) {
+    return chain.then(function () {
+      return loadImg(file).then(function (img) {
+        var src = shrink(img, 1600, .8);
+        if (src.length > 700000) src = shrink(img, 1280, .72);
+        draft.photos.push({id: uid(), src: src, isNew: true, thumb: shrink(img, 240, .7)});
+        renderEditPhotos();
+      }).catch(function () { toast("Ein Bild ließ sich nicht lesen (z. B. HEIC). Bitte als JPEG wählen.", 4000); });
+    });
+  }, Promise.resolve());
+}
+
+function thumbFromSrc(src) {
+  return new Promise(function (res) {
+    var img = new Image(); img.onload = function () { res(shrink(img, 240, .7)); }; img.onerror = function () { res(""); }; img.src = src;
+  });
+}
+
+$("editform").addEventListener("submit", function (e) {
+  e.preventDefault();
+  var name = $("name").value.trim();
+  if (draft.lat == null) { toast("Bitte zuerst einen Ort suchen oder auf die Karte tippen."); return; }
+  if (!name) { $("name").focus(); toast("Bitte einen Namen eingeben."); return; }
+  var old = pins[draft.id] || {};
+  var first = draft.photos[0];
+  var p = {id: draft.id, name: name, kind: draft.kind, lat: draft.lat, lng: draft.lng, date: $("date").value, note: $("note").value.trim(),
+    photos: draft.photos.map(function (x) { return x.id; }), thumb: old.thumb || "", created: old.created || new Date().toISOString(), updated: new Date().toISOString()};
+  var d = draft;
+  $("savebtn").disabled = true; $("savebtn").textContent = "Speichere …";
+  var thumbP = !first ? Promise.resolve("") : first.thumb ? Promise.resolve(first.thumb) : first.id === (old.photos || [])[0] && old.thumb ? Promise.resolve(old.thumb) : thumbFromSrc(first.src);
+  thumbP.then(function (t) {
+    p.thumb = t;
+    return savePin(p, d);
+  }).then(function () {
+    $("edit").close(); openMemo(p.id);
+  }).catch(function () {
+    toast("Speichern hat nicht geklappt. Bitte nochmal versuchen.", 4000);
+  }).then(function () { $("savebtn").disabled = false; $("savebtn").textContent = "Speichern"; });
+});
+
+$("delbtn").addEventListener("click", function () {
+  var p = pins[draft.id]; if (!p) return;
+  if (!confirm("„" + p.name + "“ mit allen Bildern löschen?")) return;
+  deletePin(p.id).then(function () { $("edit").close(); toast("Gelöscht."); }).catch(function () { toast("Löschen hat nicht geklappt.", 4000); });
+});
+
+/* ---------- Andenken-Ansicht ---------- */
+var memoId = null;
+function openMemo(id) {
+  var p = pins[id]; if (!p) return;
+  memoId = id;
+  $("memotitle").textContent = p.name;
+  renderMemo(p);
+  if (!$("memo").open) $("memo").showModal();
+  if (p.photos && p.photos.length) loadPhotos(p, function () { if (memoId === id) renderMemo(p); });
+}
+function renderMemo(p) {
+  var srcs = (p.photos || []).map(function (bid) { return photoCache[bid]; });
+  var h = "";
+  if (srcs.length) h += '<img class="hero" data-i="0" alt="" src="' + (srcs[0] || p.thumb || "") + '">';
+  h += '<p class="meta"><i class="dot ' + p.kind + '"></i><b>' + kindLabel(p.kind) + '</b>' + (p.date ? " · " + esc(fmtDate(p.date)) : "") + '</p>';
+  if (p.note) h += '<p class="note">' + esc(p.note) + '</p>';
+  if (srcs.length > 1) h += '<div class="photos">' + srcs.slice(1).map(function (s, i) { return '<figure>' + (s ? '<img data-i="' + (i + 1) + '" alt="" src="' + s + '">' : "") + '</figure>'; }).join("") + '</div>';
+  if (!srcs.length && !p.note) h += '<p class="hint">Noch keine Notiz und keine Bilder. Über „Bearbeiten“ kannst du beides ergänzen.</p>';
+  $("memobody").innerHTML = h;
+}
+$("memobody").addEventListener("click", function (e) {
+  var im = e.target.closest("img[data-i]"); if (!im) return;
+  var p = pins[memoId]; openLight((p.photos || []).map(function (b) { return photoCache[b]; }).filter(Boolean), +im.dataset.i);
+});
+$("memoedit").addEventListener("click", function () { $("memo").close(); openEdit(memoId); });
+$("memofly").addEventListener("click", function () {
+  var p = pins[memoId]; $("memo").close();
+  if (filter !== "all" && filter !== p.kind) document.querySelector('.filters [data-f="all"]').click();
+  map.flyTo([p.lat, p.lng], Math.max(map.getZoom(), 7), {duration: 1.2});
+  setTimeout(function () { markers[p.id] && markers[p.id].openPopup(); }, 1300);
+});
+
+// Großansicht mit Wischen
+var lightList = [], lightI = 0;
+function openLight(list, i) { if (!list.length) return; lightList = list; lightI = Math.min(i, list.length - 1); showLight(); $("light").showModal(); }
+function showLight() { $("lightimg").src = lightList[lightI]; $("lightcount").textContent = lightList.length > 1 ? (lightI + 1) + " / " + lightList.length : ""; $("light").querySelector(".lp").hidden = $("light").querySelector(".ln").hidden = lightList.length < 2; }
+function stepLight(d) { lightI = (lightI + d + lightList.length) % lightList.length; showLight(); }
+$("light").querySelector(".lx").addEventListener("click", function () { $("light").close(); });
+$("light").querySelector(".lp").addEventListener("click", function () { stepLight(-1); });
+$("light").querySelector(".ln").addEventListener("click", function () { stepLight(1); });
+$("light").addEventListener("click", function (e) { if (e.target === this) this.close(); });
+var touchX = null;
+$("light").addEventListener("touchstart", function (e) { touchX = e.touches[0].clientX; }, {passive: true});
+$("light").addEventListener("touchend", function (e) { if (touchX == null) return; var dx = e.changedTouches[0].clientX - touchX; if (Math.abs(dx) > 50) stepLight(dx < 0 ? 1 : -1); touchX = null; });
+$("light").addEventListener("keydown", function (e) {
+  if (e.key === "ArrowLeft") stepLight(-1);
+  if (e.key === "ArrowRight") stepLight(1);
+});
+
+/* ---------- Liste ---------- */
+function renderList() {
+  var all = Object.values(pins).filter(function (p) { return filter === "all" || p.kind === filter; });
+  all.sort(function (a, b) { return a.kind !== b.kind ? (a.kind === "war" ? -1 : 1) : (b.date || "").localeCompare(a.date || "") || a.name.localeCompare(b.name, "de"); });
+  var box = $("list"); box.innerHTML = "";
+  if (!all.length) { box.innerHTML = '<p class="empty">Noch keine Orte. Tippe auf die Karte oder auf „＋ Ort“.</p>'; return; }
+  all.forEach(function (p) {
+    var b = document.createElement("button"); b.type = "button";
+    b.innerHTML = (p.thumb ? '<img class="th" alt="" src="' + p.thumb + '">' : '<span class="th">' + (p.kind === "will" ? "⭐" : "📍") + '</span>') +
+      '<div><b>' + esc(p.name) + '</b><span><i class="dot ' + p.kind + '"></i>' + kindLabel(p.kind) + (p.date ? " · " + esc(fmtDate(p.date)) : "") + '</span></div>';
+    b.addEventListener("click", function () { $("listdlg").close(); openMemo(p.id); });
+    box.appendChild(b);
+  });
+}
+$("listbtn").addEventListener("click", function () { renderList(); $("listdlg").showModal(); });
+$("addbtn").addEventListener("click", function () { openEdit(null); });
+
+document.querySelectorAll("[data-close]").forEach(function (b) { b.addEventListener("click", function () { b.closest("dialog").close(); }); });
+document.querySelectorAll("dialog").forEach(function (d) {
+  d.addEventListener("click", function (e) { if (e.target === d) d.close(); });
+});
+
+/* ---------- Speichern im Konto ---------- */
+function saveLocal() { try { localStorage.setItem(lkey(), JSON.stringify(pins)); } catch (e) {} }
+function chk(r) { if (r && r.error) throw r.error; return r; }
+
+function savePin(p, d) {
+  var now = new Date().toISOString(), chain = Promise.resolve();
+  d.photos.filter(function (x) { return x.isNew; }).forEach(function (x) {
+    chain = chain.then(function () {
+      return sb.from("schach_docs").upsert({user_id: user.id, path: DOC + "bild/" + p.id + "/" + x.id, data: {img: x.src}, updated_at: now}).then(chk);
+    }).then(function () { photoCache[x.id] = x.src; x.isNew = false; });
+  });
+  return chain.then(function () {
+    return sb.from("schach_docs").upsert({user_id: user.id, path: DOC + "ort/" + p.id, data: p, updated_at: now}).then(chk);
+  }).then(function () {
+    pins[p.id] = p; saveLocal(); drawPin(p); updateStat();
+    if (d.removed.length) sb.from("schach_docs").delete().eq("user_id", user.id).in("path", d.removed.map(function (b) { return DOC + "bild/" + p.id + "/" + b; })).then(function () {});
+    d.removed.forEach(function (b) { delete photoCache[b]; });
+  });
+}
+
+function deletePin(id) {
+  return sb.from("schach_docs").delete().eq("user_id", user.id).like("path", DOC + "bild/" + id + "/%").then(chk)
+    .then(function () { return sb.from("schach_docs").delete().eq("user_id", user.id).eq("path", DOC + "ort/" + id).then(chk); })
+    .then(function () { if (markers[id]) map.removeLayer(markers[id]); delete markers[id]; delete pins[id]; saveLocal(); updateStat(); });
+}
+
+var loadingPhotos = {};
+function loadPhotos(p, cb) {
+  var need = (p.photos || []).filter(function (b) { return !photoCache[b]; });
+  if (!need.length) { cb(); return; }
+  if (loadingPhotos[p.id]) { loadingPhotos[p.id].push(cb); return; }
+  loadingPhotos[p.id] = [cb];
+  sb.from("schach_docs").select("path,data").eq("user_id", user.id).like("path", DOC + "bild/" + p.id + "/%").then(function (r) {
+    (r.data || []).forEach(function (row) { var b = row.path.split("/").pop(); if (row.data && row.data.img) photoCache[b] = row.data.img; });
+    var cbs = loadingPhotos[p.id]; delete loadingPhotos[p.id];
+    if (r.error) toast("Bilder gerade nicht abrufbar.");
+    cbs.forEach(function (f) { f(); });
+  });
+}
+
+(function () {
+  var cfg = window.SR_CONFIG || {};
+  (async function () {
+    try {
+      if (!cfg.supabaseUrl || !window.supabase) throw new Error("ohne Konfiguration");
+      sb = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+      var s = await sb.auth.getSession();
+      user = s.data.session ? s.data.session.user : null;
+    } catch (e) { user = null; }
+    if (!user) { $("gate").hidden = false; $("addbtn").hidden = true; $("stat").textContent = "Nicht angemeldet"; return; }
+    $("addbtn").disabled = false;
+    try { pins = JSON.parse(localStorage.getItem(lkey()) || "{}") || {}; } catch (e) { pins = {}; }
+    drawAll(); fitAll();
+    var hadLocal = Object.keys(pins).length;
+    try {
+      var r = await sb.from("schach_docs").select("path,data").eq("user_id", user.id).like("path", DOC + "ort/%");
+      if (r.error) throw r.error;
+      pins = {};
+      (r.data || []).forEach(function (row) { var d = row.data || {}; if (d.id && typeof d.lat === "number") pins[d.id] = d; });
+      saveLocal(); drawAll(); if (!hadLocal) fitAll();
+    } catch (e) { toast("Konto gerade nicht erreichbar. Du siehst den letzten Stand aus diesem Browser.", 5000); }
+  })();
+})();
+</script>
+</body>
+</html>
