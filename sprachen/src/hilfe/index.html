@@ -78,7 +78,7 @@ li{margin:.25rem 0}
       <ol>
         <li><b>Stummmodus aus</b>: Schalter oder Aktionstaste an der Seite, im Kontrollzentrum darf die Glocke nicht durchgestrichen sein. Sonst bleibt die Vorlesestimme oft still.</li>
         <li>Lautstärke-Taste drücken, während die Seite offen ist.</li>
-        <li>Stimme laden: <span class="path">Einstellungen › Bedienungshilfen › Gesprochene Inhalte › Stimmen</span>, dann die Sprache wählen und eine Stimme laden, z. B. Japanisch <b>Kyoko</b>, Thai <b>Kanya</b>, Koreanisch <b>Yuna</b>, Englisch <b>Daniel</b> (britisch) oder <b>Samantha</b> (amerikanisch), Niederländisch <b>Xander</b> oder <b>Claire</b>.</li>
+        <li>Stimme laden: <span class="path">Einstellungen › Bedienungshilfen › Gesprochene Inhalte › Stimmen</span>, dann die Sprache wählen und eine Stimme laden, z. B. Japanisch <b>Kyoko</b>, Thai <b>Kanya</b>, Koreanisch <b>Yuna</b>, Türkisch <b>Yelda</b>, Englisch <b>Daniel</b> (britisch) oder <b>Samantha</b> (amerikanisch), Niederländisch <b>Xander</b> oder <b>Claire</b>.</li>
         <li>Safari ganz schließen (von unten wischen, Safari nach oben wegschieben) und die Seite neu öffnen.</li>
         <li>Einmal auf 🔊 tippen. Das iPhone spielt erst nach einer Berührung Ton ab.</li>
       </ol>
@@ -121,7 +121,7 @@ li{margin:.25rem 0}
       <ol>
         <li><span class="path">Systemeinstellungen › Bedienungshilfen › Gesprochene Inhalte</span>.</li>
         <li>Bei „Systemstimme“ auf das ⓘ oder „Stimmen verwalten …“ klicken.</li>
-        <li>Sprache suchen und eine Stimme laden, z. B. Japanisch <b>Kyoko</b>, Thai <b>Kanya</b>, Koreanisch <b>Yuna</b>, Niederländisch <b>Xander</b>. Die Systemstimme selbst musst du nicht umstellen.</li>
+        <li>Sprache suchen und eine Stimme laden, z. B. Japanisch <b>Kyoko</b>, Thai <b>Kanya</b>, Koreanisch <b>Yuna</b>, Türkisch <b>Yelda</b>, Niederländisch <b>Xander</b>. Die Systemstimme selbst musst du nicht umstellen.</li>
         <li>Safari oder Chrome ganz beenden (⌘Q) und neu öffnen.</li>
       </ol>
       <p class="small">Safari: unter <span class="path">Safari › Einstellungen › Websites › Automatische Wiedergabe</span> darf die Seite nicht auf „Nie“ stehen.</p>
@@ -147,7 +147,8 @@ var LANGS = [
   {lang: "th-TH", name: "Thai", text: "สวัสดีครับ ได้ยินเสียงไหมครับ"},
   {lang: "ko-KR", name: "Koreanisch", text: "안녕하세요. 소리가 들려요?"},
   {lang: "en-GB", name: "Englisch (britisch)", text: "Hello, can you hear me?"},
-  {lang: "en-US", name: "Englisch (amerikanisch)", text: "Hi there, the sound is working."}
+  {lang: "en-US", name: "Englisch (amerikanisch)", text: "Hi there, the sound is working."},
+  {lang: "tr-TR", name: "Türkisch", text: "Merhaba, ses çalışıyor mu?"}
 ];
 var box = document.getElementById("tests"), info = document.getElementById("info"), rows = [], waited = false;
 LANGS.forEach(function (l) {
