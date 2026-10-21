@@ -1,0 +1,869 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Thai lernen</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23a3342f'/%3E%3Ctext x='32' y='46' font-size='40' text-anchor='middle' fill='white' font-family='sans-serif'%3E%E0%B8%81%3C/text%3E%3C/svg%3E">
+<script src="../../config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Atkinson+Hyperlegible:wght@400;700&family=Noto+Sans+Thai+Looped:wght@400;600&display=swap">
+<style>
+/* Thai-Modul der Sprachen-Seite: Schrift, Töne, Lesen, Sprechen, Dialoge, Schreiben. Eine Datei, keine Abhängigkeiten außer Supabase fürs Konto. */
+:root{
+  --bg:#f7f4ef; --surface:#ffffff; --fg:#1f1a17; --muted:#6b625b; --line:#e2dad1; --chip:#efe8df;
+  --accent:#a3342f; --accent-fg:#ffffff; --ok:#2e7d4f; --bad:#b8423f; --warn:#b8860b;
+  --mid:#2f6f8c; --high:#a3342f; --low:#3f7d3a;
+  --t-mid:#6b625b; --t-low:#2f6f8c; --t-fall:#a3342f; --t-high:#b8860b; --t-rise:#3f7d3a;
+  --display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
+  --body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+  --thai:"Noto Sans Thai Looped","Noto Sans Thai","Thonburi",sans-serif;
+  box-sizing:border-box;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#171310; --surface:#221c18; --fg:#efe7df; --muted:#a89c91; --line:#3a312a; --chip:#2d2520;
+  --accent:#e0716a; --accent-fg:#1a0f0d; --ok:#62c08a; --bad:#e57f7b; --warn:#e0b44a;
+  --mid:#6fb3d1; --high:#e0716a; --low:#86c27e;
+  --t-mid:#a89c91; --t-low:#6fb3d1; --t-fall:#e0716a; --t-high:#e0b44a; --t-rise:#86c27e; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#171310; --surface:#221c18; --fg:#efe7df; --muted:#a89c91; --line:#3a312a; --chip:#2d2520;
+  --accent:#e0716a; --accent-fg:#1a0f0d; --ok:#62c08a; --bad:#e57f7b; --warn:#e0b44a;
+  --mid:#6fb3d1; --high:#e0716a; --low:#86c27e;
+  --t-mid:#a89c91; --t-low:#6fb3d1; --t-fall:#e0716a; --t-high:#e0b44a; --t-rise:#86c27e; color-scheme:dark}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.55}
+[hidden]{display:none!important}
+.wrap{max-width:900px;margin:0 auto;padding:20px max(16px,env(safe-area-inset-right)) 64px max(16px,env(safe-area-inset-left))}
+h1,h2,h3{font-family:var(--display);margin:0;line-height:1.2;text-wrap:balance}
+h1{font-size:clamp(1.7rem,5vw,2.4rem)}
+h2{font-size:1.3rem;margin:22px 0 10px}
+h3{font-size:1.05rem;margin:14px 0 6px}
+p{margin:6px 0}
+a{color:var(--accent)}
+.th{font-family:var(--thai);font-weight:400}
+.muted{color:var(--muted)}
+.small{font-size:.88rem}
+.top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:space-between}
+.back{text-decoration:none;font-weight:700}
+.stats{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 6px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:8px 12px;min-width:92px}
+.stat b{display:block;font-family:var(--display);font-size:1.2rem}
+.stat span{font-size:.8rem;color:var(--muted)}
+.goal{height:8px;background:var(--chip);border-radius:6px;overflow:hidden;margin-top:6px}
+.goal i{display:block;height:100%;background:var(--ok);width:0;transition:width .4s}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:var(--surface)}
+.seg button{border:0;background:none;padding:7px 14px;font:inherit;cursor:pointer;color:var(--fg)}
+.seg button.on{background:var(--accent);color:var(--accent-fg);font-weight:700}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding:10px 0;margin:6px 0 4px;scrollbar-width:none;position:sticky;top:0;background:var(--bg);z-index:5}
+.tabs::-webkit-scrollbar{display:none}
+.tabs button{flex:none;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:999px;padding:8px 14px;font:inherit;cursor:pointer;white-space:nowrap}
+.tabs button.on{background:var(--fg);color:var(--bg);border-color:var(--fg);font-weight:700}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:10px 0}
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:10px;padding:8px 12px;font:inherit;cursor:pointer;text-decoration:none}
+.btn:hover{border-color:var(--muted)}
+.btn.pri{background:var(--accent);color:var(--accent-fg);border-color:var(--accent);font-weight:700}
+.btn.sm{padding:4px 9px;font-size:.9rem}
+.btn:disabled{opacity:.45;cursor:default}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.sub{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.sub button{border:1px solid var(--line);background:var(--chip);color:var(--fg);border-radius:8px;padding:6px 11px;font:inherit;cursor:pointer}
+.sub button.on{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:6px}
+.letter{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:6px 2px 4px;text-align:center;cursor:pointer;position:relative;font:inherit;color:var(--fg)}
+.letter .th{font-size:2rem;line-height:1.3;display:block}
+.letter small{font-size:.72rem;color:var(--muted)}
+.letter.M{border-top:4px solid var(--mid)} .letter.H{border-top:4px solid var(--high)} .letter.L{border-top:4px solid var(--low)}
+.letter .dot{position:absolute;top:5px;right:5px;width:8px;height:8px;border-radius:50%;background:var(--chip)}
+.letter .dot.b1{background:var(--warn)} .letter .dot.b2{background:var(--mid)} .letter .dot.b3,.letter .dot.b4{background:var(--ok)}
+.letter.rare{opacity:.6}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.85rem;color:var(--muted);margin:6px 0}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-1px;margin-right:4px}
+.big{font-size:4.2rem;line-height:1.25;text-align:center}
+.detail{display:grid;grid-template-columns:auto 1fr;gap:4px 16px;align-items:center}
+.quiz-q{text-align:center;margin:8px 0 12px}
+.quiz-q .th{font-size:3.4rem;line-height:1.35}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.opt{border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:10px;padding:12px;font:inherit;cursor:pointer;text-align:center}
+.opt .th{font-size:1.8rem}
+.opt.right{background:color-mix(in srgb,var(--ok) 18%,var(--surface));border-color:var(--ok)}
+.opt.wrong{background:color-mix(in srgb,var(--bad) 18%,var(--surface));border-color:var(--bad)}
+.fb{min-height:1.6em;margin-top:10px;font-weight:700}
+.fb.ok{color:var(--ok)} .fb.no{color:var(--bad)}
+.phrase{display:grid;grid-template-columns:1fr auto;gap:4px 10px;align-items:center;border-bottom:1px solid var(--line);padding:10px 0}
+.phrase:last-child{border-bottom:0}
+.phrase .th{font-size:1.35rem}
+.tr{color:var(--muted);font-style:italic}
+.de{font-size:.95rem}
+.res{grid-column:1/-1;font-size:.9rem}
+.res.ok{color:var(--ok)} .res.mid{color:var(--warn)} .res.no{color:var(--bad)}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+th,td{border-bottom:1px solid var(--line);padding:6px 6px;text-align:left;vertical-align:top}
+.scroll{overflow-x:auto}
+.tone-mid{color:var(--t-mid)} .tone-low{color:var(--t-low)} .tone-fall{color:var(--t-fall)} .tone-high{color:var(--t-high)} .tone-rise{color:var(--t-rise)}
+.contours{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.contour{border:1px solid var(--line);border-radius:12px;padding:10px;background:var(--surface);cursor:pointer;text-align:center;font:inherit;color:var(--fg)}
+.contour svg{width:100%;height:60px}
+.contour .th{font-size:1.9rem}
+.line{padding:8px 10px;border-radius:12px;margin:8px 0;max-width:88%}
+.line.them{background:var(--chip)}
+.line.me{background:color-mix(in srgb,var(--accent) 14%,var(--surface));margin-left:auto;border:1px solid color-mix(in srgb,var(--accent) 35%,var(--line))}
+.line .who{font-size:.78rem;color:var(--muted)}
+.line .th{font-size:1.25rem}
+.sent{padding:8px 0;border-bottom:1px dashed var(--line)}
+.sent .th{font-size:1.45rem;line-height:1.7}
+.sent .th span{cursor:pointer;border-radius:4px}
+.sent .th span:hover{background:var(--chip)}
+.tiles{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+.tile{min-width:52px;height:58px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--fg);font-family:var(--thai);font-size:1.8rem;cursor:pointer}
+.tile:disabled{opacity:.25}
+.answer{min-height:70px;border:2px dashed var(--line);border-radius:12px;font-family:var(--thai);font-size:2.4rem;display:flex;align-items:center;justify-content:center;padding:4px 10px}
+.note{background:var(--chip);border-radius:10px;padding:10px 12px;font-size:.92rem}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:999px;font-weight:700;opacity:0;transition:opacity .3s;pointer-events:none;z-index:20}
+.toast.on{opacity:1}
+label.chk{display:inline-flex;gap:6px;align-items:center;cursor:pointer;font-size:.92rem}
+input[type=range]{width:120px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <a class="back" href="../">← Sprachen</a>
+    <div class="seg" id="levelSeg"><button data-l="a">Anfänger</button><button data-l="f">Fortgeschritten</button></div>
+  </div>
+  <h1 style="margin-top:12px">Thai <span class="th" style="font-weight:600">ภาษาไทย</span></h1>
+  <p class="muted" id="store">Fortschritt wird geladen …</p>
+  <div class="stats">
+    <div class="stat"><b id="sStufe">1</b><span id="sStufeName">Neuling</span></div>
+    <div class="stat"><b id="sPunkte">0</b><span>Punkte</span></div>
+    <div class="stat"><b id="sSerie">0 🔥</b><span>Tage in Folge</span></div>
+    <div class="stat" style="flex:1;min-width:160px"><b id="sHeute">0 / 100</b><span>Tagesziel</span><div class="goal"><i id="sGoal"></i></div></div>
+  </div>
+  <nav class="tabs" id="tabs"></nav>
+  <main id="view"></main>
+  <p class="small muted" style="margin-top:28px">Aussprache kommt aus der Thai-Stimme deines Geräts, Nachsprechen nutzt die Spracherkennung des Browsers (am besten Chrome oder Safari). Umschrift: ohne Akzent = Mittelton, à tief, â fallend, á hoch, ǎ steigend.</p>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+"use strict";
+// ---------- Inhalte ----------
+// Konsonanten: Zeichen, Merkwort, Umschrift des Merkworts, Bedeutung, Anlaut, Auslaut, Klasse (M mittel, H hoch, L tief), selten
+const CONS = [
+  ["ก","ไก่","kài","Huhn","k","k","M"],["ข","ไข่","khài","Ei","kh","k","H"],["ฃ","ขวด","khùat","Flasche","kh","k","H",1],
+  ["ค","ควาย","khwaai","Wasserbüffel","kh","k","L"],["ฅ","คน","khon","Mensch","kh","k","L",1],["ฆ","ระฆัง","rá-khang","Glocke","kh","k","L",1],
+  ["ง","งู","nguu","Schlange","ng","ng","L"],["จ","จาน","jaan","Teller","j","t","M"],["ฉ","ฉิ่ง","chìng","Zimbel","ch","–","H"],
+  ["ช","ช้าง","cháang","Elefant","ch","t","L"],["ซ","โซ่","sôo","Kette","s","t","L"],["ฌ","เฌอ","choe","Baum","ch","–","L",1],
+  ["ญ","หญิง","yǐng","Frau","y","n","L",1],["ฎ","ชฎา","chá-daa","Kopfschmuck","d","t","M",1],["ฏ","ปฏัก","pà-tàk","Speer","t","t","M",1],
+  ["ฐ","ฐาน","thǎan","Sockel","th","t","H",1],["ฑ","มณโฑ","mon-thoo","Montho (Ramakien-Figur)","th","t","L",1],["ฒ","ผู้เฒ่า","phûu-thâo","alter Mann","th","t","L",1],
+  ["ณ","เณร","neen","Novize","n","n","L",1],["ด","เด็ก","dèk","Kind","d","t","M"],["ต","เต่า","tào","Schildkröte","t","t","M"],
+  ["ถ","ถุง","thǔng","Beutel","th","t","H"],["ท","ทหาร","thá-hǎan","Soldat","th","t","L"],["ธ","ธง","thong","Fahne","th","t","L"],
+  ["น","หนู","nǔu","Maus","n","n","L"],["บ","ใบไม้","bai-máai","Blatt","b","p","M"],["ป","ปลา","plaa","Fisch","p","p","M"],
+  ["ผ","ผึ้ง","phûeng","Biene","ph","–","H"],["ฝ","ฝา","fǎa","Deckel","f","–","H"],["พ","พาน","phaan","Opferschale","ph","p","L"],
+  ["ฟ","ฟัน","fan","Zahn","f","p","L"],["ภ","สำเภา","sǎm-phao","Dschunke","ph","p","L",1],["ม","ม้า","máa","Pferd","m","m","L"],
+  ["ย","ยักษ์","yák","Riese","y","(i)","L"],["ร","เรือ","ruea","Boot","r","n","L"],["ล","ลิง","ling","Affe","l","n","L"],
+  ["ว","แหวน","wǎen","Ring","w","(o)","L"],["ศ","ศาลา","sǎa-laa","Pavillon","s","t","H",1],["ษ","ฤๅษี","rue-sǐi","Einsiedler","s","t","H",1],
+  ["ส","เสือ","sǔea","Tiger","s","t","H"],["ห","หีบ","hìip","Truhe","h","–","H"],["ฬ","จุฬา","jù-laa","Drachen","l","n","L",1],
+  ["อ","อ่าง","àang","Schüssel","stumm","–","M"],["ฮ","นกฮูก","nók-hûuk","Eule","h","–","L"]
+].map(([c,w,wt,de,ini,fin,cls,rare]) => ({c,w,wt,de,ini,fin,cls,rare:!!rare}));
+const CLS = {M:"Mittelklasse",H:"Hochklasse",L:"Tiefklasse"};
+// Name eines Konsonanten wie in der Schule: Laut + "o" + Merkwort, z. B. "kaw kài".
+const consName = k => (k.ini==="stumm" ? "" : k.ini) + (k.cls==="H" ? "ǎw" : "aw") + " " + k.wt;
+
+// Vokale, mit อ als Platzhalter für den Konsonanten
+const VOW = [
+  ["อะ","a","kurz","จะ","jà","wird (Zukunft)"],["อา","aa","lang","มา","maa","kommen"],
+  ["อิ","i","kurz","บิน","bin","fliegen"],["อี","ii","lang","ดี","dii","gut"],
+  ["อึ","ue","kurz","ขึ้น","khûen","hinaufgehen"],["อือ","ue","lang","มือ","mue","Hand"],
+  ["อุ","u","kurz","คุณ","khun","Sie, du (höflich)"],["อู","uu","lang","ดู","duu","schauen"],
+  ["เอะ","e","kurz","เตะ","tè","treten"],["เอ","ee","lang","เลข","lêek","Zahl, Ziffer"],
+  ["แอะ","ae","kurz","แกะ","kàe","Schaf"],["แอ","ae","lang","แม่","mâe","Mutter"],
+  ["โอะ","o","kurz","โต๊ะ","tó","Tisch"],["โอ","oo","lang","โต","too","groß"],
+  ["เอาะ","aw","kurz","เกาะ","kàw","Insel"],["ออ","aw","lang","พอ","phaw","genug"],
+  ["เออ","oe","lang","เจอ","joe","treffen"],["เอีย","ia","lang","เรียน","rian","lernen"],
+  ["เอือ","uea","lang","เรือ","ruea","Boot"],["อัว","ua","lang","วัว","wua","Kuh"],
+  ["อำ","am","kurz","ทำ","tham","machen"],["ไอ","ai","kurz","ไป","pai","gehen"],
+  ["ใอ","ai","kurz","ใจ","jai","Herz"],["เอา","ao","kurz","เรา","rao","wir"]
+].map(([v,s,len,ex,ext,de]) => ({v,s,len,ex,ext,de}));
+const VOW_HINT = {"ue":"wie u, aber mit breiten, ungerundeten Lippen","ae":"offenes ä wie in »Bär«","aw":"offenes o wie in »Sonne«","oe":"wie ö, aber ohne Lippenrundung","uea":"ue mit kurzem a am Ende","ia":"i mit kurzem a am Ende","ua":"u mit kurzem a am Ende"};
+
+const MARKS = [
+  {m:"่",name:"ไม้เอก",nt:"mái èk",ex:"ไก่",ext:"kài",de:"Huhn",rule:"Mittel- und Hochklasse: tief · Tiefklasse: fallend"},
+  {m:"้",name:"ไม้โท",nt:"mái thoo",ex:"ข้าว",ext:"khâao",de:"Reis",rule:"Mittel- und Hochklasse: fallend · Tiefklasse: hoch"},
+  {m:"๊",name:"ไม้ตรี",nt:"mái trii",ex:"โต๊ะ",ext:"tó",de:"Tisch",rule:"nur Mittelklasse: hoch"},
+  {m:"๋",name:"ไม้จัตวา",nt:"mái jàt-tà-waa",ex:"จ๋า",ext:"jǎa",de:"ja, Liebes (Antwortwort)",rule:"nur Mittelklasse: steigend"}
+];
+
+const TONES = {
+  mid:{de:"mittel",cls:"tone-mid",path:"M10 30 L140 30",desc:"gerade, entspannt in normaler Höhe"},
+  low:{de:"tief",cls:"tone-low",path:"M10 38 L140 46",desc:"etwas unter der Normallage, leicht sinkend"},
+  fall:{de:"fallend",cls:"tone-fall",path:"M10 30 Q50 6 140 52",desc:"hoch ansetzen und deutlich fallen, wie ein bestimmtes »Nein!«"},
+  high:{de:"hoch",cls:"tone-high",path:"M10 22 Q90 22 140 8",desc:"höher als normal, gespannt, am Ende noch etwas steigend"},
+  rise:{de:"steigend",cls:"tone-rise",path:"M10 34 Q70 50 140 8",desc:"erst tief, dann hoch wie eine erstaunte Frage »Ja?«"}
+};
+// Fünf Töne mit derselben Silbe
+const FIVE = [["ปา","paa","werfen","mid"],["ป่า","pàa","Wald","low"],["ป้า","pâa","Tante (ältere)","fall"],["ป๊า","páa","Papa","high"],["ป๋า","pǎa","Papa (umgangssprachlich)","rise"]];
+const MINI = [
+  {title:"Weiß, Nachricht, Reis",items:[["ขาว","khǎao","weiß","rise"],["ข่าว","khàao","Nachricht","low"],["ข้าว","khâao","Reis","fall"]]},
+  {title:"Kommen, Hund, Pferd",items:[["มา","maa","kommen","mid"],["หมา","mǎa","Hund","rise"],["ม้า","máa","Pferd","high"]]},
+  {title:"Der Zungenbrecher",items:[["ไม้","mái","Holz","high"],["ใหม่","mài","neu","low"],["ไม่","mâi","nicht","fall"],["ไหม้","mâi","brennen","fall"],["ไหม","mǎi","Frageteilchen","rise"]],sentence:["ไม้ใหม่ไม่ไหม้ไหม","Brennt neues Holz nicht?"]}
+];
+// Silben zum Ton bestimmen: Klasse (ห/อ als Vorsatz schon eingerechnet), lebendig, langer Vokal, Tonzeichen 0–4
+const TONEQ = [
+  ["มา","maa","kommen","L",1,1,0],["หมา","mǎa","Hund","H",1,1,0,"ห vorne macht das ม zur Hochklasse"],["ม้า","máa","Pferd","L",1,1,2],
+  ["ไก่","kài","Huhn","M",1,0,1],["ข้าว","khâao","Reis","H",1,1,2],["ขาว","khǎao","weiß","H",1,1,0],["ข่าว","khàao","Nachricht","H",1,1,1],
+  ["เด็ก","dèk","Kind","M",0,0,0],["รัก","rák","lieben","L",0,0,0],["มาก","mâak","sehr, viel","L",0,1,0],["สิบ","sìp","zehn","H",0,0,0],
+  ["พ่อ","phâw","Vater","L",1,1,1],["ป้า","pâa","Tante","M",1,1,2],["โต๊ะ","tó","Tisch","M",0,0,3],["จ๋า","jǎa","ja, Liebes","M",1,1,4],
+  ["สวย","sǔai","schön","H",1,0,0],["นอน","nawn","schlafen","L",1,1,0],["ถูก","thùuk","billig, richtig","H",0,1,0],["ลูก","lûuk","Kind (eigenes)","L",0,1,0],
+  ["นก","nók","Vogel","L",0,0,0],["น้ำ","náam","Wasser","L",1,1,2],["ใหม่","mài","neu","H",1,0,1,"ห vorne macht das ม zur Hochklasse"],
+  ["ไม้","mái","Holz","L",1,0,2],["ไม่","mâi","nicht","L",1,0,1],["ไหม","mǎi","Frageteilchen","H",1,0,0,"ห vorne macht das ม zur Hochklasse"],
+  ["ปลา","plaa","Fisch","M",1,1,0],["อยู่","yùu","sein, sich befinden","M",1,1,1,"อ vorne macht das ย zur Mittelklasse"],["ผัด","phàt","braten","H",0,0,0],["ชอบ","châwp","mögen","L",0,1,0]
+].map(([s,t,de,cls,live,long,mark,note]) => ({s,t,de,cls,live:!!live,long:!!long,mark,note}));
+function ruleTone(q){
+  if (q.mark===1) return q.cls==="L" ? "fall" : "low";
+  if (q.mark===2) return q.cls==="L" ? "high" : "fall";
+  if (q.mark===3) return "high";
+  if (q.mark===4) return "rise";
+  if (q.live) return q.cls==="H" ? "rise" : "mid";
+  return q.cls==="L" ? (q.long ? "fall" : "high") : "low";
+}
+function ruleWhy(q){
+  const m = q.mark ? MARKS[q.mark-1].name+" ("+MARKS[q.mark-1].nt+")" : "kein Tonzeichen";
+  const syl = q.live ? "lebendige Silbe" : "tote Silbe" + (q.cls==="L" && !q.mark ? (q.long ? ", langer Vokal" : ", kurzer Vokal") : "");
+  return CLS[q.cls]+", "+(q.mark ? m : syl+", "+m)+" → "+TONES[ruleTone(q)].de+(q.note ? ". "+q.note+"." : ".");
+}
+
+// Wörter zum Lesen: Stufe 1 nur ohne Tonzeichen, Stufe 2 mit Tonzeichen und Hochklasse, Stufe 3 mehrsilbig
+const WORDS = {
+  1:[["มา","maa","kommen"],["ตา","taa","Auge"],["นา","naa","Reisfeld"],["ดี","dii","gut"],["ดู","duu","schauen"],["งู","nguu","Schlange"],["ปู","puu","Krabbe"],["ยา","yaa","Medizin"],["มือ","mue","Hand"],["ลิง","ling","Affe"],["ไป","pai","gehen"],["ใจ","jai","Herz"],["เรา","rao","wir"],["โต","too","groß"],["นอน","nawn","schlafen"],["กิน","kin","essen"]],
+  2:[["หมา","mǎa","Hund"],["ไก่","kài","Huhn"],["ข้าว","khâao","Reis"],["ขาว","khǎao","weiß"],["ช้าง","cháang","Elefant"],["ปลา","plaa","Fisch"],["น้ำ","náam","Wasser"],["บ้าน","bâan","Haus"],["แม่","mâe","Mutter"],["พ่อ","phâw","Vater"],["เสือ","sǔea","Tiger"],["ไม่","mâi","nicht"],["หนู","nǔu","Maus"],["สวย","sǔai","schön"],["เด็ก","dèk","Kind"]],
+  3:[["สวัสดี","sà-wàt-dii","Hallo"],["ขอบคุณ","khàwp-khun","danke"],["อร่อย","à-ròi","lecker"],["ประเทศไทย","prà-thêet thai","Thailand"],["กรุงเทพ","krung-thêep","Bangkok"],["โรงเรียน","roong-rian","Schule"],["โรงแรม","roong-raem","Hotel"],["ร้านอาหาร","ráan aa-hǎan","Restaurant"],["มหาวิทยาลัย","má-hǎa-wít-thá-yaa-lai","Universität"],["ภาษาไทย","phaa-sǎa thai","Thai (Sprache)"],["โทรศัพท์","thoo-rá-sàp","Telefon"],["ตลาดน้ำ","tà-làat náam","schwimmender Markt"],["อาหารเช้า","aa-hǎan cháao","Frühstück"],["เพื่อน","phûean","Freund, Freundin"]]
+};
+const SIGNS = [["ทางเข้า","thaang-khâo","Eingang"],["ทางออก","thaang-àwk","Ausgang"],["ทางหนีไฟ","thaang-nǐi-fai","Notausgang"],["เปิด","pòet","offen"],["ปิด","pìt","geschlossen"],["ดึง","dueng","ziehen"],["ผลัก","phlàk","drücken"],["ห้องน้ำชาย","hâwng-náam chaai","Herrentoilette"],["ห้องน้ำหญิง","hâwng-náam yǐng","Damentoilette"],["ห้ามสูบบุหรี่","hâam sùup bù-rìi","Rauchen verboten"],["ระวัง","rá-wang","Vorsicht"],["สถานีรถไฟฟ้า","sà-thǎa-nii rót-fai-fáa","Skytrain-Station"]];
+
+// Lesetexte: Sätze als [Thai mit Leerzeichen zwischen Wörtern, Umschrift, Deutsch]
+const TEXTS = {
+  a:[
+    {title:"Auf dem Markt",th:"ไปตลาด",s:[
+      ["วันนี้ ผม ไป ตลาด","wan-níi phǒm pai tà-làat","Heute gehe ich auf den Markt."],
+      ["ตลาด อยู่ ใกล้ บ้าน ผม","tà-làat yùu klâi bâan phǒm","Der Markt ist nah bei meinem Haus."],
+      ["ผม ซื้อ มะม่วง และ กล้วย","phǒm súe má-mûang láe klûai","Ich kaufe Mangos und Bananen."],
+      ["มะม่วง หวาน มาก","má-mûang wǎan mâak","Die Mangos sind sehr süß."],
+      ["ผม มี ความสุข","phǒm mii khwaam-sùk","Ich bin glücklich."]]},
+    {title:"Das Wetter",th:"อากาศ",s:[
+      ["วันนี้ อากาศ ดี","wan-níi aa-kàat dii","Heute ist schönes Wetter."],
+      ["ไม่ ร้อน ไม่ หนาว","mâi ráwn mâi nǎao","Nicht heiß, nicht kalt."],
+      ["ผม อยาก ไป ทะเล","phǒm yàak pai thá-lee","Ich möchte ans Meer."],
+      ["ทะเล สวย มาก","thá-lee sǔai mâak","Das Meer ist sehr schön."]]}
+  ],
+  f:[
+    {title:"Reise nach Chiang Mai",th:"เที่ยวเชียงใหม่",s:[
+      ["เดือนที่แล้ว ผม ไป เที่ยว เชียงใหม่ กับ เพื่อน","duean thîi láew phǒm pai thîao chiang-mài kàp phûean","Letzten Monat bin ich mit Freunden nach Chiang Mai gereist."],
+      ["เรา ขึ้น รถไฟ กลางคืน จาก กรุงเทพ","rao khûen rót-fai klaang-khuen jàak krung-thêep","Wir nahmen den Nachtzug aus Bangkok."],
+      ["ที่ เชียงใหม่ อากาศ เย็น กว่า กรุงเทพ มาก","thîi chiang-mài aa-kàat yen kwàa krung-thêep mâak","In Chiang Mai ist es viel kühler als in Bangkok."],
+      ["เรา ไป ไหว้พระ ที่ วัดพระธาตุดอยสุเทพ","rao pai wâi-phrá thîi wát phrá-thâat dooi sù-thêep","Wir besuchten den Tempel Wat Phra That Doi Suthep."],
+      ["ตอนเย็น เรา เดินเล่น ที่ ไนท์บาซาร์ และ กิน ข้าวซอย","tawn-yen rao doen-lên thîi nai-baa-saa láe kin khâao-sawy","Abends bummelten wir über den Night Bazaar und aßen Khao Soi."],
+      ["ผม อยาก กลับ ไป อีก ครั้ง","phǒm yàak klàp pai ìik khráng","Ich möchte noch einmal hinfahren."]]},
+    {title:"Im Café",th:"ร้านกาแฟ",s:[
+      ["ทุก เช้า ผม ไป ร้านกาแฟ ใกล้ ที่ทำงาน","thúk cháao phǒm pai ráan-kaa-fae klâi thîi-tham-ngaan","Jeden Morgen gehe ich in ein Café nahe der Arbeit."],
+      ["ผม มัก จะ สั่ง กาแฟเย็น หวาน น้อย","phǒm mák jà sàng kaa-fae-yen wǎan náwy","Meistens bestelle ich Eiskaffee mit wenig Zucker."],
+      ["พนักงาน จำ ผม ได้ แล้ว","phá-nák-ngaan jam phǒm dâai láew","Die Bedienung kennt mich schon."],
+      ["บางวัน เรา คุย กัน เรื่อง ฟุตบอล","baang-wan rao khui kan rûeang fút-bawn","Manchmal plaudern wir über Fußball."]]}
+  ]
+};
+
+// Sätze zum Nachsprechen, nach Themen
+const PHRASES = {
+  a:{
+    "Begrüßen":[["สวัสดีครับ","sà-wàt-dii khráp","Hallo / Guten Tag"],["สบายดีไหมครับ","sà-baai-dii mǎi khráp","Wie geht es Ihnen?"],["สบายดีครับ","sà-baai-dii khráp","Mir geht es gut."],["ผมชื่อราล์ฟครับ","phǒm chûe Ralf khráp","Ich heiße Ralf."],["ผมมาจากเยอรมนีครับ","phǒm maa jàak yoe-rá-má-nii khráp","Ich komme aus Deutschland."],["ลาก่อนครับ","laa-kàwn khráp","Auf Wiedersehen"]],
+    "Höflich":[["ขอบคุณครับ","khàwp-khun khráp","Danke"],["ขอโทษครับ","khǎw-thôot khráp","Entschuldigung"],["ไม่เป็นไรครับ","mâi pen rai khráp","Macht nichts / Kein Problem"],["ไม่เข้าใจครับ","mâi khâo-jai khráp","Ich verstehe nicht."],["พูดช้าๆ หน่อยครับ","phûut cháa-cháa nòi khráp","Bitte etwas langsamer."],["ใช่ครับ","châi khráp","Ja (stimmt)"],["ไม่ใช่ครับ","mâi châi khráp","Nein (stimmt nicht)"]],
+    "Essen":[["อร่อยมากครับ","à-ròi mâak khráp","Sehr lecker!"],["ไม่เผ็ดครับ","mâi phèt khráp","Nicht scharf, bitte."],["ขอน้ำเปล่าครับ","khǎw náam-plào khráp","Wasser, bitte."],["เช็คบิลครับ","chék bin khráp","Die Rechnung, bitte."]],
+    "Unterwegs":[["เท่าไหร่ครับ","thâo-rài khráp","Wie viel kostet das?"],["ห้องน้ำอยู่ที่ไหนครับ","hâwng-náam yùu thîi-nǎi khráp","Wo ist die Toilette?"],["ไปสนามบินครับ","pai sà-nǎam-bin khráp","Zum Flughafen, bitte."]],
+    "Zahlen":[["หนึ่ง","nùeng","1"],["สอง","sǎwng","2"],["สาม","sǎam","3"],["สี่","sìi","4"],["ห้า","hâa","5"],["หก","hòk","6"],["เจ็ด","jèt","7"],["แปด","pàet","8"],["เก้า","kâo","9"],["สิบ","sìp","10"],["ยี่สิบ","yîi-sìp","20"],["ร้อย","ráwy","100"]]
+  },
+  f:{
+    "Gespräch":[["ช่วยพูดอีกครั้งได้ไหมครับ","chûai phûut ìik khráng dâai mǎi khráp","Können Sie das bitte wiederholen?"],["ผมเรียนภาษาไทยมาสองเดือนแล้วครับ","phǒm rian phaa-sǎa thai maa sǎwng duean láew khráp","Ich lerne seit zwei Monaten Thai."],["คำนี้แปลว่าอะไรครับ","kham níi plae wâa à-rai khráp","Was bedeutet dieses Wort?"],["เคยไปเชียงใหม่ไหมครับ","khoei pai chiang-mài mǎi khráp","Waren Sie schon einmal in Chiang Mai?"],["วันนี้อากาศร้อนมากเลยนะครับ","wan-níi aa-kàat ráwn mâak loei ná khráp","Heute ist es aber richtig heiß."]],
+    "Unterwegs":[["ไปสนามบินสุวรรณภูมิเท่าไหร่ครับ","pai sà-nǎam-bin sù-wan-ná-phuum thâo-rài khráp","Was kostet es zum Flughafen Suvarnabhumi?"],["ช่วยเปิดมิเตอร์ด้วยครับ","chûai pòet mí-tôe dûai khráp","Bitte das Taxameter einschalten."],["จอดตรงนี้ได้เลยครับ","jàwt trong níi dâai loei khráp","Sie können hier halten."],["ผมกำลังหาร้านขายยาอยู่ครับ","phǒm kam-lang hǎa ráan khǎai yaa yùu khráp","Ich suche gerade eine Apotheke."]],
+    "Einkaufen & Essen":[["ลดหน่อยได้ไหมครับ","lót nòi dâai mǎi khráp","Geht es etwas billiger?"],["ผมแพ้ถั่วลิสงครับ","phǒm pháe thùa-lí-sǒng khráp","Ich bin allergisch gegen Erdnüsse."],["ขอน้ำเปล่าขวดหนึ่งครับ","khǎw náam-plào khùat nùeng khráp","Eine Flasche Wasser, bitte."],["ไม่ใส่น้ำตาลนะครับ","mâi sài náam-taan ná khráp","Bitte ohne Zucker."]],
+    "Satzbau":[["ถ้าฝนตก เราจะไปพิพิธภัณฑ์แทน","thâa fǒn tòk rao jà pai phí-phít-thá-phan thaen","Wenn es regnet, gehen wir stattdessen ins Museum."],["ผมยังไม่เคยกินทุเรียนเลย","phǒm yang mâi khoei kin thú-rian loei","Ich habe noch nie Durian gegessen."],["ขึ้นอยู่กับราคาครับ","khûen yùu kàp raa-khaa khráp","Das hängt vom Preis ab."]]
+  }
+};
+
+// Dialoge: me = deine Rolle
+const DIALOGS = {
+  a:[
+    {title:"Kennenlernen",them:"Nit",lines:[
+      [0,"สวัสดีค่ะ คุณชื่ออะไรคะ","sà-wàt-dii khâ, khun chûe à-rai khá","Hallo, wie heißen Sie?"],
+      [1,"ผมชื่อราล์ฟครับ แล้วคุณล่ะครับ","phǒm chûe Ralf khráp, láew khun lâ khráp","Ich heiße Ralf. Und Sie?"],
+      [0,"ฉันชื่อนิดค่ะ คุณมาจากไหนคะ","chǎn chûe Nít khâ. khun maa jàak nǎi khá","Ich heiße Nit. Woher kommen Sie?"],
+      [1,"ผมมาจากเยอรมนีครับ","phǒm maa jàak yoe-rá-má-nii khráp","Ich komme aus Deutschland."],
+      [0,"ยินดีที่ได้รู้จักค่ะ","yin-dii thîi dâai rúu-jàk khâ","Freut mich, Sie kennenzulernen."],
+      [1,"ยินดีที่ได้รู้จักเช่นกันครับ","yin-dii thîi dâai rúu-jàk chên-kan khráp","Ganz meinerseits."]]},
+    {title:"Im Restaurant",them:"Bedienung",lines:[
+      [0,"สวัสดีค่ะ รับอะไรดีคะ","sà-wàt-dii khâ, ráp à-rai dii khá","Hallo, was darf es sein?"],
+      [1,"ขอผัดไทยหนึ่งจานครับ","khǎw phàt-thai nùeng jaan khráp","Ein Pad Thai, bitte."],
+      [0,"เผ็ดไหมคะ","phèt mǎi khá","Scharf?"],
+      [1,"เผ็ดนิดหน่อยครับ","phèt nít-nòi khráp","Ein bisschen scharf."],
+      [0,"ดื่มอะไรคะ","dùem à-rai khá","Was möchten Sie trinken?"],
+      [1,"ขอน้ำมะพร้าวครับ","khǎw náam-má-phráao khráp","Ein Kokoswasser, bitte."],
+      [0,"ได้ค่ะ","dâai khâ","Gern."]]},
+    {title:"Auf dem Markt",them:"Händlerin",lines:[
+      [1,"มะม่วงกิโลละเท่าไหร่ครับ","má-mûang kì-loo lá thâo-rài khráp","Was kostet ein Kilo Mangos?"],
+      [0,"หกสิบบาทค่ะ","hòk-sìp bàat khâ","Sechzig Baht."],
+      [1,"ลดหน่อยได้ไหมครับ","lót nòi dâai mǎi khráp","Geht es etwas billiger?"],
+      [0,"ห้าสิบห้าบาทค่ะ","hâa-sìp-hâa bàat khâ","Fünfundfünfzig Baht."],
+      [1,"โอเค เอาหนึ่งกิโลครับ","oo-khee, ao nùeng kì-loo khráp","Okay, ich nehme ein Kilo."],
+      [0,"ขอบคุณค่ะ","khàwp-khun khâ","Danke schön."]]}
+  ],
+  f:[
+    {title:"Im Taxi",them:"Fahrer",lines:[
+      [1,"ไปถนนสุขุมวิทซอยสิบเอ็ดครับ","pai thà-nǒn sù-khǔm-wít sawy sìp-èt khráp","Zur Sukhumvit Soi 11, bitte."],
+      [0,"ได้ครับ รถติดมากนะครับ","dâai khráp, rót tìt mâak ná khráp","Gut. Es ist aber viel Stau."],
+      [1,"ไม่เป็นไรครับ ช่วยเปิดมิเตอร์ด้วยครับ","mâi pen rai khráp, chûai pòet mí-tôe dûai khráp","Macht nichts. Bitte das Taxameter einschalten."],
+      [0,"ได้ครับ จะขึ้นทางด่วนไหมครับ","dâai khráp, jà khûen thaang-dùan mǎi khráp","Gern. Sollen wir die Schnellstraße nehmen?"],
+      [1,"ขึ้นเลยครับ ผมจ่ายค่าทางด่วนเอง","khûen loei khráp, phǒm jàai khâa thaang-dùan eeng","Ja, gern. Die Maut zahle ich selbst."],
+      [0,"ถึงแล้วครับ ร้อยยี่สิบบาทครับ","thǔeng láew khráp, ráwy-yîi-sìp bàat khráp","Wir sind da. Hundertzwanzig Baht."],
+      [1,"นี่ครับ ไม่ต้องทอนครับ","nîi khráp, mâi tâwng thawn khráp","Bitte schön, stimmt so."]]},
+    {title:"In der Apotheke",them:"Apothekerin",lines:[
+      [1,"ผมปวดหัวและเจ็บคอมาสองวันแล้วครับ","phǒm pùat hǔa láe jèp khaw maa sǎwng wan láew khráp","Ich habe seit zwei Tagen Kopf- und Halsschmerzen."],
+      [0,"มีไข้ไหมคะ","mii khâi mǎi khá","Haben Sie Fieber?"],
+      [1,"นิดหน่อยครับ","nít-nòi khráp","Ein bisschen."],
+      [0,"แพ้ยาอะไรไหมคะ","pháe yaa à-rai mǎi khá","Sind Sie gegen ein Medikament allergisch?"],
+      [1,"ไม่แพ้ครับ","mâi pháe khráp","Nein."],
+      [0,"ทานยานี้หลังอาหารวันละสามครั้งนะคะ","thaan yaa níi lǎng aa-hǎan wan lá sǎam khráng ná khá","Nehmen Sie das dreimal täglich nach dem Essen."],
+      [1,"ขอบคุณมากครับ","khàwp-khun mâak khráp","Vielen Dank."]]},
+    {title:"Hotel-Rezeption",them:"Rezeption",lines:[
+      [0,"สวัสดีค่ะ ยินดีต้อนรับค่ะ","sà-wàt-dii khâ, yin-dii tâwn-ráp khâ","Guten Tag, herzlich willkommen."],
+      [1,"ผมจองห้องไว้สามคืนครับ ชื่อราล์ฟครับ","phǒm jawng hâwng wái sǎam khuen khráp, chûe Ralf khráp","Ich habe ein Zimmer für drei Nächte reserviert, auf den Namen Ralf."],
+      [0,"ขอดูพาสปอร์ตหน่อยค่ะ","khǎw duu pháat-sà-pàwt nòi khâ","Darf ich bitte Ihren Pass sehen?"],
+      [1,"นี่ครับ อาหารเช้าเริ่มกี่โมงครับ","nîi khráp. aa-hǎan cháao rôem kìi moong khráp","Hier bitte. Ab wann gibt es Frühstück?"],
+      [0,"หกโมงครึ่งถึงสิบโมงค่ะ","hòk moong khrûeng thǔeng sìp moong khâ","Von halb sieben bis zehn Uhr."],
+      [1,"ขอบคุณครับ","khàwp-khun khráp","Danke."]]}
+  ]
+};
+// Schreiben: Wörter aus Zeichen zusammensetzen
+const WRITE = {a:WORDS[1].concat(WORDS[2]),f:WORDS[2].slice(0,6).concat(WORDS[3])};
+
+// ---------- Zustand, Punkte, Serien, Stufen ----------
+const LEVELS = [[0,"Neuling"],[60,"Entdecker"],[180,"Tourist"],[360,"Reisender"],[600,"Marktgänger"],[900,"Gesprächspartner"],[1300,"Kenner"],[1800,"Leser"],[2500,"Erzähler"],[3400,"Meister"]];
+const GOAL = 100;
+const todayStr = () => { const d = new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); };
+const dayDiff = (a,b) => Math.round((new Date(b+"T12:00")-new Date(a+"T12:00"))/864e5);
+const lsGet = k => { try { return localStorage.getItem("th_"+k); } catch(e) { return null; } };
+const lsSet = (k,v) => { try { localStorage.setItem("th_"+k, v); } catch(e) {} };
+let S = {punkte:0,serie:0,lastDay:"",heute:{date:"",punkte:0},boxes:{},level:"a",updated:0};
+try { Object.assign(S, JSON.parse(lsGet("state") || "{}")); } catch(e) {}
+const stufeOf = p => { let i = 0; LEVELS.forEach((l,j) => { if (p >= l[0]) i = j; }); return i; };
+
+let sb = null, user = null, saveTimer = null;
+function save(){
+  S.updated = Date.now();
+  lsSet("state", JSON.stringify(S));
+  if (!sb || !user) return;
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(async () => {
+    const i = stufeOf(S.punkte);
+    const data = {punkte:S.punkte, serie:S.serie, stufe:i+1, stufeName:LEVELS[i][1], lastDay:S.lastDay, heute:S.heute, boxes:S.boxes, level:S.level, updated:S.updated};
+    try { const r = await sb.from("schach_docs").upsert({user_id:user.id, path:"sprachen/thai/fortschritt", data, updated_at:new Date().toISOString()}); setStore(r.error ? "error" : "db"); } catch(e) { setStore("error"); }
+  }, 800);
+}
+function setStore(s){
+  const el = document.getElementById("store");
+  el.textContent = s==="db" ? "Fortschritt wird in deinem Konto gespeichert." : s==="error" ? "Speichern im Konto gerade nicht möglich, Fortschritt liegt in diesem Browser." : "";
+  if (s==="local") { el.textContent = "Nicht angemeldet: Fortschritt bleibt in diesem Browser. "; el.appendChild(Object.assign(document.createElement("a"),{href:"../../",textContent:"Im Portal anmelden"})); }
+}
+function award(n, msg){
+  const t = todayStr();
+  if (S.lastDay !== t) { S.serie = S.lastDay && dayDiff(S.lastDay,t) === 1 ? S.serie+1 : 1; S.lastDay = t; }
+  if (S.heute.date !== t) S.heute = {date:t,punkte:0};
+  const before = stufeOf(S.punkte), goalBefore = S.heute.punkte >= GOAL;
+  S.punkte += n; S.heute.punkte += n;
+  save(); renderStats();
+  if (stufeOf(S.punkte) > before) toast("Neue Stufe: "+LEVELS[stufeOf(S.punkte)][1]+" 🎉");
+  else if (!goalBefore && S.heute.punkte >= GOAL) toast("Tagesziel geschafft 🔥");
+  else if (msg) toast(msg);
+}
+function renderStats(){
+  const i = stufeOf(S.punkte), t = todayStr();
+  const heute = S.heute.date === t ? S.heute.punkte : 0;
+  const alive = S.lastDay && dayDiff(S.lastDay,t) <= 1 ? S.serie : 0;
+  $("sStufe").textContent = "Stufe "+(i+1);
+  $("sStufeName").textContent = LEVELS[i][1] + (LEVELS[i+1] ? " · noch "+(LEVELS[i+1][0]-S.punkte) : "");
+  $("sPunkte").textContent = S.punkte;
+  $("sSerie").textContent = alive+" 🔥";
+  $("sHeute").textContent = Math.min(heute,GOAL)+" / "+GOAL;
+  $("sGoal").style.width = Math.min(100, heute/GOAL*100)+"%";
+}
+let toastT;
+function toast(m){ const t = $("toast"); t.textContent = m; t.classList.add("on"); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("on"), 2200); }
+
+// ---------- Hilfen ----------
+function $(id){ return document.getElementById(id); }
+function el(tag, attrs, kids){
+  const e = document.createElement(tag);
+  for (const [k,v] of Object.entries(attrs||{})) {
+    if (k==="text") e.textContent = v; else if (k==="class") e.className = v;
+    else if (k.startsWith("on")) e.addEventListener(k.slice(2), v); else if (v!==false && v!=null) e.setAttribute(k, v===true ? "" : v);
+  }
+  for (const c of [].concat(kids||[])) if (c!=null) e.appendChild(typeof c==="string" ? document.createTextNode(c) : c);
+  return e;
+}
+const thai = (t, extra) => el("span",{class:"th"+(extra?" "+extra:""),lang:"th",text:t});
+const shuffle = a => { a = a.slice(); for (let i=a.length-1;i>0;i--){ const j = Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; };
+const pick = a => a[Math.floor(Math.random()*a.length)];
+function sampleOthers(pool, right, n, key){ const k = key || (x => x); const seen = new Set([k(right)]); const out = []; for (const x of shuffle(pool)) { if (out.length>=n) break; if (!seen.has(k(x))) { seen.add(k(x)); out.push(x); } } return out; }
+
+// Sprachausgabe
+let voices = [], rate = parseFloat(lsGet("rate") || "0.85");
+function loadVoices(){ try { voices = speechSynthesis.getVoices().filter(v => /^th/i.test(v.lang)); } catch(e) { voices = []; } }
+if ("speechSynthesis" in window) { loadVoices(); speechSynthesis.onvoiceschanged = loadVoices; }
+function speak(text, opts){
+  opts = opts || {};
+  if (!("speechSynthesis" in window)) { toast("Keine Sprachausgabe in diesem Browser"); return Promise.resolve(); }
+  return new Promise(res => {
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text.replace(/\s+/g," "));
+    u.lang = "th-TH"; if (voices[0]) u.voice = voices[opts.voice||0] || voices[0];
+    u.rate = (opts.slow ? 0.55 : rate); u.pitch = opts.pitch || 1;
+    u.onend = res; u.onerror = res;
+    speechSynthesis.speak(u);
+    setTimeout(res, 15000);
+  });
+}
+const sayBtn = (text, label, opts) => el("button",{class:"btn sm",title:"Anhören",onclick:e => { e.stopPropagation(); speak(text, opts); }, text:label||"🔊"});
+
+// Spracherkennung
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+const norm = s => s.replace(/[\s.,!?ๆ]/g,"").replace(/(ครับ|ค่ะ|คะ|นะ)$/,"");
+function lev(a,b){ a=[...a]; b=[...b]; const d = Array.from({length:a.length+1},(_,i)=>[i]); for (let j=1;j<=b.length;j++) d[0][j]=j; for (let i=1;i<=a.length;i++) for (let j=1;j<=b.length;j++) d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1)); return d[a.length][b.length]; }
+function similarity(heard, target){ const a = norm(heard), b = norm(target); if (!a||!b) return 0; if (a.includes(b)) return 1; return Math.max(0, 1 - lev(a,b)/Math.max(a.length,b.length)); }
+function listen(){
+  return new Promise((res, rej) => {
+    if (!SR) { rej(new Error("nosr")); return; }
+    const r = new SR(); r.lang = "th-TH"; r.interimResults = false; r.maxAlternatives = 5;
+    let done = false;
+    r.onresult = e => { done = true; res([...e.results[0]].map(x => x.transcript)); };
+    r.onerror = e => { if (!done) { done = true; rej(new Error(e.error||"err")); } };
+    r.onend = () => { if (!done) { done = true; res([]); } };
+    try { speechSynthesis.cancel(); r.start(); } catch(e) { rej(e); }
+  });
+}
+// Nachsprechen-Knopf mit Ergebnisfeld; gibt Promise auf Bewertung 0..1 zurück
+function speakCheck(target, resEl, pts){
+  return async () => {
+    resEl.className = "res"; resEl.textContent = "🎤 Ich höre zu …";
+    if (!SR) { resEl.replaceChildren("Keine Spracherkennung in diesem Browser. Sprich laut nach und bewerte dich selbst: ",
+      el("button",{class:"btn sm",text:"👍 Klang gut",onclick:() => { resEl.textContent = "👍 +"+Math.round(pts/2); award(Math.round(pts/2)); }}), " ",
+      el("button",{class:"btn sm",text:"🔁 Nochmal",onclick:() => speak(target)})); return; }
+    try {
+      const alts = await listen();
+      if (!alts.length) { resEl.className = "res no"; resEl.textContent = "Nichts gehört. Noch einmal versuchen?"; return; }
+      let best = 0, bestAlt = alts[0];
+      for (const a of alts) { const s = similarity(a, target); if (s > best) { best = s; bestAlt = a; } }
+      const pct = Math.round(best*100);
+      if (best >= 0.8) { resEl.className = "res ok"; resEl.replaceChildren("✓ Sehr gut ("+pct+" %). Gehört: ", thai(bestAlt), " · +"+pts); award(pts); }
+      else if (best >= 0.5) { resEl.className = "res mid"; resEl.replaceChildren("Fast ("+pct+" %). Gehört: ", thai(bestAlt), " · +"+Math.round(pts/3)+". Achte auf Töne und Vokallänge."); award(Math.round(pts/3)); }
+      else { resEl.className = "res no"; resEl.replaceChildren("Noch nicht ("+pct+" %). Gehört: ", thai(bestAlt), ". Hör es dir langsam an und versuche es erneut."); }
+    } catch(e) {
+      resEl.className = "res no";
+      resEl.textContent = e.message==="not-allowed" ? "Mikrofon ist nicht erlaubt. Bitte in den Browser-Einstellungen freigeben." : "Spracherkennung nicht verfügbar ("+e.message+").";
+    }
+  };
+}
+
+// ---------- Ansichten ----------
+const TABS = [["start","Start"],["schrift","Schrift"],["toene","Töne"],["lesen","Lesen"],["sprechen","Sprechen"],["dialoge","Dialoge"],["schreiben","Schreiben"]];
+let tab = "start";
+function show(t){
+  tab = t; lsSet("tab", t);
+  for (const b of $("tabs").children) b.classList.toggle("on", b.dataset.t===t);
+  const v = $("view"); v.replaceChildren();
+  ({start:viewStart,schrift:viewSchrift,toene:viewToene,lesen:viewLesen,sprechen:viewSprechen,dialoge:viewDialoge,schreiben:viewSchreiben})[t](v);
+  speechSynthesis && speechSynthesis.cancel && speechSynthesis.cancel();
+}
+const adv = () => S.level === "f";
+
+function viewStart(v){
+  const known = Object.values(S.boxes).filter(b => b >= 3).length;
+  v.append(
+    el("div",{class:"card"},[
+      el("h3",{text: adv() ? "Fortgeschritten" : "Anfänger"}),
+      el("p",{text: adv()
+        ? "Alle 44 Konsonanten mit Klassen, Tonregeln selbst anwenden, längere Texte und Schilder lesen, Dialoge im Taxi, in der Apotheke und im Hotel, Diktat ohne Umschrift."
+        : "Die häufigen Konsonanten und Vokale, die fünf Töne hören, erste Wörter lesen, Begrüßen, Danken, Bestellen und Zählen, kurze Dialoge zum Nachsprechen."}),
+      el("p",{class:"muted small",text:"Buchstaben sicher erkannt: "+known+" von "+(CONS.length+VOW.length)+"."})
+    ]),
+    el("h2",{text:"Heute üben"}),
+    el("div",{class:"row"},[
+      el("button",{class:"btn pri",text:"Buchstaben-Quiz",onclick:() => { schriftSub = "ueben"; show("schrift"); }}),
+      el("button",{class:"btn",text:"Töne hören",onclick:() => show("toene")}),
+      el("button",{class:"btn",text:"Wörter lesen",onclick:() => show("lesen")}),
+      el("button",{class:"btn",text:"Nachsprechen",onclick:() => show("sprechen")}),
+      el("button",{class:"btn",text:"Dialog",onclick:() => show("dialoge")})
+    ]),
+    el("h2",{text:"So funktioniert Thai"}),
+    el("div",{class:"card"},[
+      el("p",{},["Thai hat ",el("b",{text:"44 Konsonanten"}),", rund 30 Vokalformen und ",el("b",{text:"fünf Töne"}),". Der Ton ändert die Bedeutung: ",thai("ขาว")," weiß, ",thai("ข่าว")," Nachricht, ",thai("ข้าว")," Reis."]),
+      el("p",{},["Vokale stehen vor, über, unter oder hinter dem Konsonanten, gesprochen wird trotzdem zuerst der Konsonant: ",thai("เ")," + ",thai("ก")," = ",thai("เก")," (kee). Zwischen Wörtern stehen keine Leerzeichen, nur zwischen Sätzen."]),
+      el("p",{},["Welchen Ton eine Silbe hat, ergibt sich aus der ",el("b",{text:"Klasse des Konsonanten"})," (mittel, hoch, tief), der Silbenart und dem Tonzeichen. Das lernst du unter Schrift und Töne."]),
+      el("p",{},["Höflichkeit: Männer hängen ",thai("ครับ")," (khráp) an, Frauen ",thai("ค่ะ")," (khâ). Die Sätze hier nutzen ",thai("ครับ"),"."])
+    ]),
+    el("h2",{text:"Einstellungen"}),
+    el("div",{class:"card row"},[
+      el("span",{text:"Sprechtempo"}),
+      (() => { const r = el("input",{type:"range",min:"0.5",max:"1.1",step:"0.05",value:String(rate)}); r.oninput = () => { rate = parseFloat(r.value); lsSet("rate", r.value); }; return r; })(),
+      sayBtn("สวัสดีครับ ยินดีต้อนรับ","🔊 Probe"),
+      el("span",{class:"small muted",text: voices.length ? "Thai-Stimme: "+voices[0].name : "Keine Thai-Stimme gefunden. Auf iPhone/Mac unter Bedienungshilfen › Gesprochene Inhalte › Stimmen › Thai laden."})
+    ])
+  );
+}
+
+// Schrift
+let schriftSub = "kons";
+function viewSchrift(v){
+  const sub = el("div",{class:"sub"});
+  const box = el("div");
+  const subs = [["kons","Konsonanten"],["vok","Vokale"],["ton","Tonzeichen"],["ueben","Üben"]];
+  const go = s => { schriftSub = s; for (const b of sub.children) b.classList.toggle("on", b.dataset.s===s); box.replaceChildren(); ({kons:schriftKons,vok:schriftVok,ton:schriftTon,ueben:schriftUeben})[s](box); };
+  for (const [s,l] of subs) sub.appendChild(el("button",{text:l,"data-s":s,onclick:() => go(s)}));
+  v.append(sub, box); go(schriftSub);
+}
+const dotOf = key => el("i",{class:"dot b"+(S.boxes[key]||0)});
+function schriftKons(box){
+  const detail = el("div",{class:"card"},[el("p",{class:"muted",text:"Tippe auf einen Buchstaben."})]);
+  const showC = k => {
+    detail.replaceChildren(el("div",{class:"row",style:"align-items:flex-start;gap:20px"},[
+      thai(k.c,"big"),
+      el("div",{class:"detail",style:"flex:1;min-width:200px"},[
+        el("span",{class:"muted",text:"Name"}),el("span",{},[thai(k.c+"อ "+k.w)," ",el("i",{class:"tr",text:consName(k)})]),
+        el("span",{class:"muted",text:"Merkwort"}),el("span",{text:k.de}),
+        el("span",{class:"muted",text:"Laut"}),el("span",{text:"am Anfang "+k.ini+", am Ende "+k.fin}),
+        el("span",{class:"muted",text:"Klasse"}),el("span",{text:CLS[k.cls]+(k.rare?" · selten":"")+(k.c==="ฃ"||k.c==="ฅ"?" · nicht mehr in Gebrauch":"")})
+      ])
+    ]), el("div",{class:"row",style:"margin-top:8px"},[sayBtn(k.c+"อ "+k.w,"🔊 Name"),sayBtn(k.w,"🔊 Merkwort")]));
+    speak(k.c+"อ "+k.w);
+  };
+  const grid = el("div",{class:"grid"});
+  for (const k of CONS) grid.appendChild(el("button",{class:"letter "+k.cls+(k.rare?" rare":""),onclick:() => showC(k)},[dotOf(k.c),thai(k.c),el("small",{text:k.ini})]));
+  box.append(
+    el("div",{class:"legend"},[el("span",{},[el("i",{style:"background:var(--mid)"}),"Mittelklasse (9)"]),el("span",{},[el("i",{style:"background:var(--high)"}),"Hochklasse (11)"]),el("span",{},[el("i",{style:"background:var(--low)"}),"Tiefklasse (24)"]),el("span",{text:"blass = selten · Punkt = Lernstand"})]),
+    grid, detail,
+    el("div",{class:"note"},["Merkhilfe: Die Mittelklasse passt in einen Satz: ",thai("ไก่ จิก เด็ก ตาย บน ปาก โอ่ง"),", gesprochen kài jìk dèk taai bon pàak òong, »das Huhn pickt das tote Kind auf dem Rand des Krugs«. Er enthält ก จ ด ต บ ป อ, dazu kommen ฎ und ฏ."])
+  );
+}
+function schriftVok(box){
+  const t = el("table");
+  t.appendChild(el("tr",{},[el("th",{text:"Form"}),el("th",{text:"Laut"}),el("th",{text:"Beispiel"}),el("th",{text:""})]));
+  for (const w of VOW) {
+    t.appendChild(el("tr",{},[
+      el("td",{},[dotOf(w.v), thai(w.v,"")]),
+      el("td",{},[el("b",{text:w.s})," ",el("span",{class:"muted small",text:w.len+(VOW_HINT[w.s]?", "+VOW_HINT[w.s]:"")})]),
+      el("td",{},[thai(w.ex)," ",el("i",{class:"tr",text:w.ext})," ",el("span",{class:"small",text:w.de})]),
+      el("td",{},[sayBtn(w.ex)])
+    ]));
+  }
+  for (const td of t.querySelectorAll("td:first-child .th")) td.style.fontSize = "1.7rem";
+  for (const d of t.querySelectorAll(".dot")) { d.style.cssText = "display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:middle"; }
+  box.append(
+    el("p",{class:"muted",text:"Das อ steht hier nur als Platzhalter für einen beliebigen Konsonanten."}),
+    el("div",{class:"scroll"},[t]),
+    el("div",{class:"note",style:"margin-top:10px"},["Mit Endkonsonant ändern manche Vokale ihre Form: ",thai("อะ")," wird zu ",thai("อั")," (",thai("กัน"),", kan, zusammen), ",thai("เอะ")," zu ",thai("เอ็")," (",thai("เด็ก"),", dèk, Kind), ",thai("โอะ")," verschwindet ganz (",thai("นก"),", nók, Vogel)."])
+  );
+}
+function schriftTon(box){
+  const t = el("table");
+  t.appendChild(el("tr",{},[el("th",{text:"Zeichen"}),el("th",{text:"Name"}),el("th",{text:"Wirkung"}),el("th",{text:"Beispiel"})]));
+  for (const m of MARKS) t.appendChild(el("tr",{},[el("td",{},[thai("อ"+m.m,"")]),el("td",{},[thai(m.name)," ",el("i",{class:"tr",text:m.nt})]),el("td",{text:m.rule}),el("td",{},[thai(m.ex)," ",el("i",{class:"tr",text:m.ext})," ",sayBtn(m.ex)])]));
+  for (const x of t.querySelectorAll("td:first-child .th")) x.style.fontSize = "1.8rem";
+  const r = el("table");
+  r.appendChild(el("tr",{},[el("th",{text:"ohne Tonzeichen"}),el("th",{text:"lebendige Silbe"}),el("th",{text:"tote Silbe"})]));
+  r.append(
+    el("tr",{},[el("td",{text:"Mittelklasse"}),el("td",{class:"tone-mid",text:"mittel"}),el("td",{class:"tone-low",text:"tief"})]),
+    el("tr",{},[el("td",{text:"Hochklasse"}),el("td",{class:"tone-rise",text:"steigend"}),el("td",{class:"tone-low",text:"tief"})]),
+    el("tr",{},[el("td",{text:"Tiefklasse"}),el("td",{class:"tone-mid",text:"mittel"}),el("td",{},[el("span",{class:"tone-high",text:"hoch"})," bei kurzem, ",el("span",{class:"tone-fall",text:"fallend"})," bei langem Vokal"])])
+  );
+  box.append(el("div",{class:"scroll"},[t]), el("h3",{text:"Die Tonregel"}),
+    el("p",{text:"Lebendig ist eine Silbe mit langem Vokal oder mit Endlaut m, n, ng, w, y. Tot ist sie mit kurzem Vokal ohne Endlaut oder mit Endlaut k, p, t."}),
+    el("div",{class:"scroll"},[r]),
+    el("p",{class:"muted small",text:"Ein stummes ห vor einem Tiefklasse-Konsonanten ohne Partner (ง ญ น ม ย ร ล ว) macht ihn zur Hochklasse: หมา mǎa. Ein stummes อ vor ย macht es zur Mittelklasse: อยู่ yùu."}));
+}
+function schriftUeben(box){
+  const modes = adv() ? [["name","Buchstabe → Laut"],["hear","Hören → Buchstabe"],["vow","Vokale"],["cls","Klasse bestimmen"]] : [["name","Buchstabe → Laut"],["hear","Hören → Buchstabe"],["vow","Vokale"]];
+  let mode = lsGet("qmode") || "name"; if (!modes.some(m => m[0]===mode)) mode = "name";
+  const sub = el("div",{class:"sub"}), q = el("div",{class:"card"});
+  const pool = adv() ? CONS : CONS.filter(k => !k.rare);
+  // Leitner: niedrige Kästen kommen öfter dran
+  const weighted = (items, key) => { const w = items.map(x => 5 - Math.min(4, S.boxes[key(x)]||0)); let r = Math.random()*w.reduce((a,b)=>a+b,0); for (let i=0;i<items.length;i++){ r -= w[i]; if (r<=0) return items[i]; } return items[0]; };
+  let streak = 0;
+  const next = () => {
+    q.replaceChildren();
+    const fb = el("div",{class:"fb"}), opts = el("div",{class:"opts"});
+    let key, right, options, label, prompt;
+    if (mode === "vow") {
+      const w = weighted(VOW, x => x.v); key = w.v;
+      prompt = [thai(w.v)];
+      const others = sampleOthers(VOW, w, 3, x => x.s+x.len);
+      options = shuffle([w].concat(others)).map(x => ({ok:x===w, node:[el("b",{text:x.s}), el("div",{class:"small muted",text:x.len})]}));
+      label = "Wie klingt dieser Vokal?";
+      right = () => { speak(w.ex); return [thai(w.ex)," ",w.ext," · ",w.de]; };
+    } else {
+      const k = weighted(pool, x => x.c); key = k.c;
+      if (mode === "name") {
+        prompt = [thai(k.c)]; label = "Welcher Laut am Wortanfang?";
+        const others = sampleOthers(pool, k, 3, x => x.ini);
+        options = shuffle([k].concat(others)).map(x => ({ok:x.ini===k.ini, node:[el("b",{text:x.ini})]}));
+      } else if (mode === "hear") {
+        prompt = [el("button",{class:"btn pri",text:"🔊 Nochmal hören",onclick:() => speak(k.c+"อ "+k.w)})]; label = "Welchen Buchstaben hörst du?";
+        setTimeout(() => speak(k.c+"อ "+k.w), 200);
+        const others = sampleOthers(pool, k, 3, x => x.ini);
+        options = shuffle([k].concat(others)).map(x => ({ok:x===k, node:[thai(x.c)]}));
+      } else {
+        prompt = [thai(k.c)]; label = "Zu welcher Klasse gehört er?";
+        options = ["M","H","L"].map(c => ({ok:c===k.cls, node:[el("b",{text:CLS[c]})]}));
+      }
+      right = () => { speak(k.c+"อ "+k.w); return [thai(k.c+"อ "+k.w)," ",consName(k)," · ",k.de," · ",CLS[k.cls]]; };
+    }
+    let answered = false;
+    for (const o of options) {
+      const b = el("button",{class:"opt"}, o.node);
+      b.onclick = () => {
+        if (answered) return; answered = true;
+        const box0 = S.boxes[key]||0;
+        if (o.ok) { b.classList.add("right"); S.boxes[key] = Math.min(4, box0+1); streak++; fb.className = "fb ok"; fb.replaceChildren("✓ "+(streak>=5?streak+" richtig in Folge! ":""), ...right()); award(streak>=5?7:5); }
+        else { b.classList.add("wrong"); S.boxes[key] = Math.max(0, box0-1); streak = 0; fb.className = "fb no"; fb.replaceChildren("✗ Richtig: ", ...right()); save();
+          [...opts.children].forEach((x,i) => { if (options[i].ok) x.classList.add("right"); }); }
+        setTimeout(next, o.ok ? 1400 : 2600);
+      };
+      opts.appendChild(b);
+    }
+    q.append(el("p",{class:"muted",text:label}), el("div",{class:"quiz-q"},prompt), opts, fb);
+  };
+  for (const [m,l] of modes) sub.appendChild(el("button",{text:l,class:m===mode?"on":"",onclick:() => { mode = m; lsSet("qmode",m); for (const b of sub.children) b.classList.toggle("on", b.textContent===l); next(); }}));
+  box.append(sub, q); next();
+}
+
+// Töne
+function contourSvg(t){ return `<svg viewBox="0 0 150 60" aria-hidden="true"><line x1="10" y1="30" x2="140" y2="30" stroke="currentColor" stroke-opacity=".15"/><path d="${TONES[t].path}" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg>`; }
+function viewToene(v){
+  const cards = el("div",{class:"contours"});
+  for (const [w,tr,de,t] of FIVE) { const b = el("button",{class:"contour "+TONES[t].cls,onclick:() => speak(w)}); b.innerHTML = contourSvg(t); b.append(thai(w), el("div",{},[el("b",{text:TONES[t].de})]), el("div",{class:"small muted",text:tr+" · "+de})); cards.appendChild(b); }
+  const desc = el("div",{class:"card"});
+  for (const k of Object.keys(TONES)) desc.appendChild(el("p",{},[el("b",{class:TONES[k].cls,text:TONES[k].de+": "}),TONES[k].desc]));
+  const minis = el("div");
+  for (const m of MINI) {
+    const row = el("div",{class:"row"});
+    for (const [w,tr,de,t] of m.items) row.appendChild(el("button",{class:"btn",onclick:() => speak(w)},[thai(w)," ",el("span",{class:TONES[t].cls,text:tr})," ",el("span",{class:"small muted",text:de})]));
+    minis.appendChild(el("div",{class:"card"},[el("h3",{text:m.title,style:"margin-top:0"}),row].concat(m.sentence ? [el("p",{style:"margin-top:8px"},[thai(m.sentence[0])," ",sayBtn(m.sentence[0])," ",el("span",{class:"small",text:m.sentence[1]})])] : [])));
+  }
+  const quiz = el("div",{class:"card"});
+  v.append(el("h2",{text:"Die fünf Töne",style:"margin-top:6px"}), el("p",{class:"muted",text:"Tippe auf eine Karte, um sie zu hören. Dieselbe Silbe pa, fünf Bedeutungen."}), cards, desc,
+    el("h2",{text:"Tonpaare"}), minis,
+    el("h2",{text: adv() ? "Ton bestimmen" : "Hörquiz"}), quiz);
+  (adv() ? toneRuleQuiz : toneEarQuiz)(quiz);
+  if (adv()) { const ear = el("div",{class:"card"}); v.append(el("h2",{text:"Hörquiz"}), ear); toneEarQuiz(ear); }
+}
+function toneEarQuiz(q){
+  const sets = [FIVE].concat(MINI.slice(0,2).map(m => m.items));
+  const next = () => {
+    const set = pick(sets), it = pick(set);
+    const fb = el("div",{class:"fb"}), opts = el("div",{class:"opts"});
+    let done = false;
+    for (const x of set) {
+      const b = el("button",{class:"opt"},[thai(x[0]),el("div",{class:"small "+TONES[x[3]].cls,text:x[1]+" · "+TONES[x[3]].de}),el("div",{class:"small muted",text:x[2]})]);
+      b.onclick = () => { if (done) return; done = true; if (x===it) { b.classList.add("right"); fb.className = "fb ok"; fb.textContent = "✓ Richtig gehört"; award(5); } else { b.classList.add("wrong"); fb.className = "fb no"; fb.textContent = "✗ Es war "+it[1]+" ("+TONES[it[3]].de+")"; [...opts.children][set.indexOf(it)].classList.add("right"); speak(it[0]); } setTimeout(next, 1800); };
+      opts.appendChild(b);
+    }
+    q.replaceChildren(el("p",{class:"muted",text:"Welches Wort hörst du?"}), el("div",{class:"quiz-q"},[el("button",{class:"btn pri",text:"🔊 Abspielen",onclick:() => speak(it[0])})]), opts, fb);
+    setTimeout(() => speak(it[0]), 250);
+  };
+  next();
+}
+function toneRuleQuiz(q){
+  const next = () => {
+    const it = pick(TONEQ), right = ruleTone(it);
+    const fb = el("div",{class:"fb"}), opts = el("div",{class:"opts"});
+    let done = false;
+    for (const t of ["mid","low","fall","high","rise"]) {
+      const b = el("button",{class:"opt "+TONES[t].cls},[el("b",{text:TONES[t].de})]);
+      b.onclick = () => { if (done) return; done = true; speak(it.s);
+        if (t===right) { b.classList.add("right"); fb.className = "fb ok"; award(8); } else { b.classList.add("wrong"); fb.className = "fb no"; [...opts.children][["mid","low","fall","high","rise"].indexOf(right)].classList.add("right"); }
+        fb.replaceChildren((t===right?"✓ ":"✗ ")+it.t+" · "+it.de+". ", el("span",{class:"small",style:"font-weight:400",text:ruleWhy(it)}));
+        setTimeout(next, t===right ? 2600 : 4200); };
+      opts.appendChild(b);
+    }
+    q.replaceChildren(el("p",{class:"muted",text:"Welchen Ton hat diese Silbe? Erst überlegen, dann hören."}), el("div",{class:"quiz-q"},[thai(it.s)]), opts, fb);
+  };
+  next();
+}
+
+// Lesen
+function viewLesen(v){
+  const stages = adv() ? [2,3,"s"] : [1,2,3];
+  let stage = lsGet("rstage"); stage = stages.map(String).includes(stage) ? (stage==="s"?"s":+stage) : stages[0];
+  const sub = el("div",{class:"sub"}), q = el("div",{class:"card"});
+  const pool = () => stage==="s" ? SIGNS : WORDS[stage];
+  const next = () => {
+    const p = pool(), w = pick(p);
+    const fb = el("div",{class:"fb"}), opts = el("div",{class:"opts"});
+    const others = sampleOthers(p, w, 3, x => x[1]);
+    let done = false;
+    const all = shuffle([w].concat(others));
+    for (const x of all) {
+      const b = el("button",{class:"opt"},[el("b",{text:x[1]}), el("div",{class:"small muted",text:x[2]})]);
+      b.onclick = () => { if (done) return; done = true; speak(w[0]);
+        if (x===w) { b.classList.add("right"); fb.className = "fb ok"; fb.textContent = "✓ "+w[1]+" · "+w[2]; award(stage===1?5:8); }
+        else { b.classList.add("wrong"); fb.className = "fb no"; fb.textContent = "✗ "+w[0]+" liest man "+w[1]+" · "+w[2]; [...opts.children][all.indexOf(w)].classList.add("right"); }
+        setTimeout(next, x===w ? 1500 : 2800); };
+      opts.appendChild(b);
+    }
+    q.replaceChildren(el("p",{class:"muted",text:"Lies das Wort und wähle die passende Aussprache."}), el("div",{class:"quiz-q"},[thai(w[0])]), opts, fb);
+  };
+  const names = {1:"Stufe 1: ohne Tonzeichen",2:"Stufe 2: mit Tonzeichen",3:"Stufe 3: lange Wörter",s:"Schilder"};
+  for (const s of stages) sub.appendChild(el("button",{text:names[s],class:s===stage?"on":"",onclick:e => { stage = s; lsSet("rstage", String(s)); for (const b of sub.children) b.classList.remove("on"); e.target.classList.add("on"); next(); }}));
+  v.append(el("h2",{text:"Wörter lesen",style:"margin-top:6px"}), sub, q, el("h2",{text:"Texte lesen"}));
+  next();
+  const showTr = el("input",{type:"checkbox"}), showDe = el("input",{type:"checkbox"});
+  showTr.checked = lsGet("showTr")!=="0" && !adv(); showDe.checked = lsGet("showDe")==="1";
+  const holder = el("div");
+  const toggles = el("div",{class:"row"},[el("label",{class:"chk"},[showTr,"Umschrift"]),el("label",{class:"chk"},[showDe,"Deutsch"]),el("span",{class:"small muted",text:"Tippe auf ein Wort, um es zu hören."})]);
+  const apply = () => { lsSet("showTr", showTr.checked?"1":"0"); lsSet("showDe", showDe.checked?"1":"0"); for (const e of holder.querySelectorAll(".tr")) e.hidden = !showTr.checked; for (const e of holder.querySelectorAll(".de")) e.hidden = !showDe.checked; };
+  showTr.onchange = apply; showDe.onchange = apply;
+  for (const tx of TEXTS[S.level]) {
+    const c = el("div",{class:"card"},[el("div",{class:"row",style:"justify-content:space-between"},[el("h3",{style:"margin:0"},[tx.title," ",thai(tx.th)]), el("button",{class:"btn sm",text:"🔊 Ganzer Text",onclick:async () => { for (const s of tx.s) await speak(s[0]); }})])]);
+    let read = 0;
+    for (const [th,tr,de] of tx.s) {
+      const line = el("span",{class:"th",lang:"th"});
+      th.split(" ").forEach((w,i) => { if (i) line.append("​"); line.appendChild(el("span",{text:w,onclick:() => speak(w, {slow:true})})); });
+      const deEl = el("div",{class:"de",text:de});
+      const doneBtn = el("button",{class:"btn sm",text:"✓ verstanden",onclick:() => { doneBtn.disabled = true; deEl.hidden = false; read++; award(3); if (read===tx.s.length) toast("Text fertig gelesen 📖"); }});
+      c.appendChild(el("div",{class:"sent"},[el("div",{class:"row",style:"justify-content:space-between;flex-wrap:nowrap;align-items:flex-start"},[line, el("div",{class:"row",style:"flex:none"},[sayBtn(th.replace(/ /g,"")),doneBtn])]), el("div",{class:"tr",text:tr}), deEl]));
+    }
+    holder.appendChild(c);
+  }
+  v.append(toggles, holder); apply();
+}
+
+// Sprechen
+function viewSprechen(v){
+  const groups = PHRASES[S.level];
+  let g = lsGet("pgroup"); if (!groups[g]) g = Object.keys(groups)[0];
+  const sub = el("div",{class:"sub"}), list = el("div",{class:"card"});
+  const render = () => {
+    list.replaceChildren();
+    for (const [th,tr,de] of groups[g]) {
+      const res = el("div",{class:"res"});
+      list.appendChild(el("div",{class:"phrase"},[
+        el("div",{},[thai(th), el("div",{class:"tr",text:tr}), el("div",{class:"de",text:de})]),
+        el("div",{class:"row",style:"justify-content:flex-end"},[sayBtn(th), sayBtn(th,"🐢",{slow:true}), el("button",{class:"btn sm pri",text:"🎤",title:"Nachsprechen",onclick:speakCheck(th,res,10)})]),
+        res]));
+    }
+  };
+  for (const k of Object.keys(groups)) sub.appendChild(el("button",{text:k,class:k===g?"on":"",onclick:e => { g = k; lsSet("pgroup",k); for (const b of sub.children) b.classList.remove("on"); e.target.classList.add("on"); render(); }}));
+  v.append(el("p",{class:"muted",text:"Erst anhören, dann auf 🎤 tippen und nachsprechen. 🐢 spielt langsam ab."}), sub, list);
+  if (!SR) v.appendChild(el("p",{class:"note",text:"Dein Browser hat keine Spracherkennung. Du kannst trotzdem nachsprechen und dich selbst bewerten. Chrome auf dem Computer oder Android erkennt Thai am besten."}));
+  render();
+}
+
+// Dialoge
+function viewDialoge(v){
+  const ds = DIALOGS[S.level];
+  let di = Math.min(+(lsGet("dlg")||0), ds.length-1);
+  const sub = el("div",{class:"sub"}), stage = el("div",{class:"card"});
+  const hide = el("input",{type:"checkbox"}); hide.checked = adv();
+  const run = () => {
+    const d = ds[di]; let i = 0;
+    stage.replaceChildren(el("h3",{style:"margin-top:0",text:d.title}));
+    const area = el("div"), ctl = el("div",{class:"row",style:"margin-top:10px"});
+    stage.append(area, ctl);
+    const step = async () => {
+      ctl.replaceChildren();
+      if (i >= d.lines.length) { award(15, "Dialog geschafft 💬"); ctl.append(el("button",{class:"btn pri",text:"Nochmal",onclick:run}), di < ds.length-1 ? el("button",{class:"btn",text:"Nächster Dialog",onclick:() => { di++; lsSet("dlg",di); mark(); run(); }}) : null); return; }
+      const [me,th,tr,de] = d.lines[i];
+      if (!me) {
+        area.appendChild(el("div",{class:"line them"},[el("div",{class:"who",text:d.them}),thai(th),el("div",{class:"tr",text:tr}),el("div",{class:"small",text:de})," ",sayBtn(th,"🔊",{pitch:1.15})]));
+        await speak(th,{pitch:1.15}); i++; step();
+      } else {
+        const res = el("div",{class:"res"});
+        const thEl = thai(th), trEl = el("div",{class:"tr",text:tr});
+        if (hide.checked) { thEl.hidden = true; trEl.hidden = true; }
+        const line = el("div",{class:"line me"},[el("div",{class:"who",text:"Du"}),thEl,trEl,el("div",{class:"small",text:de}),res]);
+        area.appendChild(line);
+        ctl.append(el("button",{class:"btn pri",text:"🎤 Sprechen",onclick:async () => { await speakCheck(th,res,12)(); thEl.hidden = false; trEl.hidden = false; }}),
+          el("button",{class:"btn",text:"🔊 Vorsagen",onclick:() => { thEl.hidden = false; trEl.hidden = false; speak(th); }}),
+          el("button",{class:"btn",text:"Weiter →",onclick:() => { thEl.hidden = false; trEl.hidden = false; i++; step(); }}));
+      }
+    };
+    step();
+  };
+  const mark = () => { [...sub.children].forEach((b,j) => b.classList.toggle("on", j===di)); };
+  ds.forEach((d,j) => sub.appendChild(el("button",{text:d.title,onclick:() => { di = j; lsSet("dlg",j); mark(); run(); }})));
+  v.append(el("p",{class:"muted",text:"Dein Gegenüber spricht, du antwortest. Sprich deine Zeile, lass sie dir vorsagen oder geh weiter."}), sub,
+    el("label",{class:"chk"},[hide,"Meine Zeilen erst nach dem Sprechen zeigen (nur Deutsch als Vorlage)"]), stage);
+  mark(); run();
+}
+
+// Schreiben
+function viewSchreiben(v){
+  const words = WRITE[S.level];
+  const diktat = el("input",{type:"checkbox"}); diktat.checked = adv();
+  const card = el("div",{class:"card"});
+  const extra = ["า","ี","่","้","เ","ร","น","ม","อ","ก","ด","ย","ไ","ั","ว","ง"];
+  const next = () => {
+    const w = pick(words), chars = [...w[0]];
+    const tiles = shuffle(chars.concat(sampleOthers(extra.filter(c => !chars.includes(c)), null, 2)));
+    let built = [];
+    const ans = el("div",{class:"answer",lang:"th"}), fb = el("div",{class:"fb"}), tl = el("div",{class:"tiles"});
+    const draw = () => { ans.textContent = built.map(b => tiles[b]).join("") || " "; [...tl.children].forEach((t,i) => t.disabled = built.includes(i)); };
+    tiles.forEach((c,i) => tl.appendChild(el("button",{class:"tile",text:/[ัิ-ฺ็-๎]/.test(c) ? "◌"+c : c,onclick:() => { built.push(i); draw(); check(); }})));
+    const check = () => {
+      const s = built.map(b => tiles[b]).join("");
+      if (s === w[0]) { fb.className = "fb ok"; fb.textContent = "✓ "+w[0]+" · "+w[1]+" · "+w[2]; award(chars.length>4?10:6); speak(w[0]); [...tl.children].forEach(t => t.disabled = true); setTimeout(next, 1800); }
+      else if (built.length >= chars.length) { fb.className = "fb no"; fb.textContent = "Noch nicht ganz. Tipp: Vokale wie เ แ โ ไ ใ stehen vor dem Konsonanten, Tonzeichen kommen nach dem Vokal oben."; }
+      else { fb.className = "fb"; fb.textContent = ""; }
+    };
+    const hint = el("div",{},[el("b",{text:w[2]}), diktat.checked ? null : el("span",{class:"tr",text:"  "+w[1]})]);
+    card.replaceChildren(
+      el("p",{class:"muted",text: diktat.checked ? "Diktat: Hör das Wort und setze es aus den Zeichen zusammen." : "Setze das Wort aus den Zeichen zusammen."}),
+      el("div",{class:"row"},[sayBtn(w[0],"🔊 Anhören"), sayBtn(w[0],"🐢",{slow:true}), hint]),
+      ans, tl, fb,
+      el("div",{class:"row"},[el("button",{class:"btn",text:"⌫ Zurück",onclick:() => { built.pop(); draw(); check(); }}), el("button",{class:"btn",text:"Lösung zeigen",onclick:() => { fb.className = "fb"; fb.textContent = w[0]+" = "+chars.join(" + "); }}), el("button",{class:"btn",text:"Neues Wort",onclick:next})])
+    );
+    draw(); if (diktat.checked) setTimeout(() => speak(w[0]), 250);
+  };
+  diktat.onchange = next;
+  v.append(el("label",{class:"chk"},[diktat,"Diktat (ohne Umschrift)"]), card,
+    el("p",{class:"small muted",text:"Die Reihenfolge der Zeichen ist die Schreibreihenfolge: vorangestellte Vokale zuerst, dann Konsonant, dann Vokale oben oder unten, dann das Tonzeichen."}));
+  next();
+}
+
+// ---------- Start ----------
+for (const [t,l] of TABS) $("tabs").appendChild(el("button",{text:l,"data-t":t,onclick:() => show(t)}));
+function setLevel(l){ S.level = l; for (const b of $("levelSeg").children) b.classList.toggle("on", b.dataset.l===l); }
+for (const b of $("levelSeg").children) b.onclick = () => { setLevel(b.dataset.l); save(); show(tab); };
+setLevel(S.level === "f" ? "f" : "a");
+renderStats();
+show(TABS.some(t => t[0]===lsGet("tab")) ? lsGet("tab") : "start");
+
+(async () => {
+  const cfg = window.SR_CONFIG || {};
+  try {
+    if (!cfg.supabaseUrl || !window.supabase) throw new Error("ohne Konfiguration");
+    sb = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+    const s = await sb.auth.getSession();
+    user = s.data.session ? s.data.session.user : null;
+  } catch(e) { user = null; }
+  if (!user) { setStore("local"); return; }
+  try {
+    const r = await sb.from("schach_docs").select("data").eq("user_id", user.id).eq("path", "sprachen/thai/fortschritt").maybeSingle();
+    if (r.error) throw r.error;
+    const d = r.data && r.data.data;
+    if (d && (d.updated||0) > (S.updated||0)) {
+      S = Object.assign(S, {punkte:d.punkte||0, serie:d.serie||0, lastDay:d.lastDay||"", heute:d.heute||{date:"",punkte:0}, boxes:d.boxes||{}, level:d.level||S.level, updated:d.updated});
+      lsSet("state", JSON.stringify(S)); setLevel(S.level === "f" ? "f" : "a"); renderStats(); show(tab);
+      setStore("db");
+    } else if (S.punkte > 0) save(); else setStore("db");
+  } catch(e) { setStore("error"); }
+})();
+</script>
+</body>
+</html>
