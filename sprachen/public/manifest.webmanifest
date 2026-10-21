@@ -1,0 +1,14 @@
+{
+  "name": "Sprachen",
+  "short_name": "Sprachen",
+  "description": "Niederländisch, Japanisch und Thai lernen: sprechen, hören, schreiben, lesen.",
+  "lang": "de",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f4f2ee",
+  "theme_color": "#1f4e79",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}
