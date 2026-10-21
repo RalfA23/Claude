@@ -630,6 +630,37 @@ function loadPhotos(p, cb) {
   });
 }
 
+// Orte per Link übernehmen: #orte=<URI-codiertes JSON [{name, lat, lng, kind, note?, date?}]>.
+// Der Link wird gemerkt, bis die Seite angemeldet ist; Orte mit schon vorhandenem Namen werden übersprungen.
+var IMPORT_KEY = "weltkarte-import";
+function takeHash() {
+  var m = location.hash.match(/^#orte=(.+)$/);
+  if (m) { try { localStorage.setItem(IMPORT_KEY, m[1]); } catch (e) {} history.replaceState(null, "", location.pathname + location.search); }
+  return !!m;
+}
+takeHash();
+window.addEventListener("hashchange", function () { if (takeHash() && user && sb) importPlaces(); });
+function importPlaces() {
+  var code = null; try { code = localStorage.getItem(IMPORT_KEY); } catch (e) {}
+  if (!code) return Promise.resolve();
+  var list; try { list = JSON.parse(decodeURIComponent(code)); } catch (e) { list = null; }
+  try { localStorage.removeItem(IMPORT_KEY); } catch (e) {}
+  if (!Array.isArray(list)) { toast("Der Link mit den Orten ließ sich nicht lesen.", 4000); return Promise.resolve(); }
+  var have = {}; Object.values(pins).forEach(function (p) { have[p.name.toLowerCase()] = 1; });
+  var n = 0, chain = Promise.resolve();
+  list.forEach(function (x) {
+    if (!x || !x.name || typeof x.lat !== "number" || typeof x.lng !== "number" || have[String(x.name).toLowerCase()]) return;
+    have[String(x.name).toLowerCase()] = 1;
+    var now = new Date().toISOString();
+    var p = {id: uid(), name: String(x.name).slice(0, 120), kind: x.kind === "will" ? "will" : "war", lat: x.lat, lng: x.lng, date: x.date || "", note: x.note || "", photos: [], thumb: "", created: now, updated: now};
+    chain = chain.then(function () { return savePin(p, {photos: [], removed: []}); }).then(function () { n++; });
+  });
+  return chain.catch(function () {}).then(function () {
+    toast(n ? (n === 1 ? "1 Ort übernommen." : n + " Orte übernommen.") : "Alle Orte aus dem Link sind schon auf deiner Karte.", 4000);
+    if (n) fitAll();
+  });
+}
+
 (function () {
   var cfg = window.SR_CONFIG || {};
   (async function () {
@@ -650,6 +681,7 @@ function loadPhotos(p, cb) {
       pins = {};
       (r.data || []).forEach(function (row) { var d = row.data || {}; if (d.id && typeof d.lat === "number") pins[d.id] = d; });
       saveLocal(); drawAll(); if (!hadLocal) fitAll();
+      await importPlaces();
     } catch (e) { toast("Konto gerade nicht erreichbar. Du siehst den letzten Stand aus diesem Browser.", 5000); }
   })();
 })();
