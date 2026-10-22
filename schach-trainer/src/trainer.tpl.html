@@ -213,7 +213,7 @@ body.sorting{cursor:grabbing;user-select:none}
 }
 nav.tabs{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;max-width:100%;-webkit-overflow-scrolling:touch}
 nav.tabs::-webkit-scrollbar{display:none}
-nav.tabs button{white-space:nowrap;flex:none;touch-action:pan-x}
+nav.tabs button{white-space:nowrap;flex:none;touch-action:pan-x;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 nav.tabs button.drag{background:var(--line);transform:scale(1.08);box-shadow:0 4px 14px rgba(0,0,0,.25);cursor:grabbing;position:relative;z-index:1}
 nav.tabs.dragging button{cursor:grabbing}
 .pref{display:flex;flex-direction:column;gap:10px;margin-bottom:14px}
@@ -908,7 +908,9 @@ function show(v){
   const sel=document.querySelector('#tabs [aria-selected="true"]');if(sel&&sel.scrollIntoView)try{sel.scrollIntoView({block:'nearest',inline:'nearest'})}catch(e){}
 }
 $('tabs').addEventListener('click',e=>{const b=e.target.closest('button[data-v]');if(b)show(b.dataset.v)});
-/* Reiter per Ziehen anordnen: Maus ziehen, am Handy gedrückt halten und ziehen */
+/* Reiter per Ziehen anordnen: Maus ziehen, am Handy gedrückt halten und ziehen.
+   Maus über Pointer Events, Finger über Touch Events: iOS Safari bricht Pointer-Gesten im scrollbaren Reiterstreifen ab
+   (pointercancel), Touch Events mit nicht-passivem touchmove lassen sich dagegen zuverlässig festhalten. */
 (function(){
   const nav=$('tabs');let st=null,justDragged=false;
   const btns=()=>[...nav.querySelectorAll('button[data-v]')];
@@ -918,18 +920,26 @@ $('tabs').addEventListener('click',e=>{const b=e.target.closest('button[data-v]'
     if(idx!==btns().indexOf(me))nav.insertBefore(me,others[idx]||null);
     const nr=nav.getBoundingClientRect();if(x<nr.left+30)nav.scrollLeft-=12;else if(x>nr.right-30)nav.scrollLeft+=12}
   function finish(){if(!st)return;clearTimeout(st.timer);const was=st.active;st.b.classList.remove('drag');nav.classList.remove('dragging');st=null;if(!was)return;
-    justDragged=true;setTimeout(()=>{justDragged=false},60);
+    justDragged=true;setTimeout(()=>{justDragged=false},400);
     const vis=btns().map(b=>b.dataset.v),full=tabList().map(t=>t.id),inVis=new Set(vis);let k=0;
     setPref({order:full.map(id=>inVis.has(id)?vis[k++]:id)},false);if(curView==='an')renderCustomize()}
-  nav.addEventListener('pointerdown',e=>{const b=e.target.closest('button[data-v]');if(!b||e.button>0)return;
-    const touch=e.pointerType!=='mouse';st={b,x0:e.clientX,y0:e.clientY,id:e.pointerId,touch,active:false,timer:null};if(touch)st.timer=setTimeout(begin,380)});
-  document.addEventListener('pointermove',e=>{if(!st||e.pointerId!==st.id)return;
-    if(!st.active){if(st.touch){if(Math.hypot(e.clientX-st.x0,e.clientY-st.y0)>8){clearTimeout(st.timer);st=null}}else if(Math.abs(e.clientX-st.x0)>6)begin();return}
+  // Maus
+  nav.addEventListener('pointerdown',e=>{if(e.pointerType!=='mouse'||e.button>0)return;const b=e.target.closest('button[data-v]');if(!b)return;
+    st={b,x0:e.clientX,id:e.pointerId,touch:false,active:false,timer:null}});
+  document.addEventListener('pointermove',e=>{if(!st||st.touch||e.pointerId!==st.id)return;
+    if(!st.active){if(Math.abs(e.clientX-st.x0)>6)begin();return}
     e.preventDefault();moveTo(e.clientX)});
-  nav.addEventListener('touchmove',e=>{if(st&&st.active)e.preventDefault()},{passive:false});
-  nav.addEventListener('contextmenu',e=>{if(st)e.preventDefault()});
-  document.addEventListener('pointerup',e=>{if(st&&e.pointerId===st.id)finish()});
-  document.addEventListener('pointercancel',e=>{if(st&&e.pointerId===st.id)finish()});
+  document.addEventListener('pointerup',e=>{if(st&&!st.touch&&e.pointerId===st.id)finish()});
+  // Finger: kurz halten, dann ziehen. Wer gleich wischt, scrollt den Streifen wie gewohnt.
+  const tp=(e,id)=>[...e.changedTouches].find(t=>t.identifier===id);
+  nav.addEventListener('touchstart',e=>{if(st||e.touches.length>1)return;const b=e.target.closest('button[data-v]');if(!b)return;const t=e.changedTouches[0];
+    st={b,x0:t.clientX,y0:t.clientY,id:t.identifier,touch:true,active:false,timer:setTimeout(begin,350)}},{passive:true});
+  nav.addEventListener('touchmove',e=>{if(!st||!st.touch)return;const t=tp(e,st.id);if(!t)return;
+    if(!st.active){if(Math.hypot(t.clientX-st.x0,t.clientY-st.y0)>10){clearTimeout(st.timer);st=null}return}
+    if(e.cancelable)e.preventDefault();moveTo(t.clientX)},{passive:false});
+  const tend=e=>{if(st&&st.touch&&tp(e,st.id)){if(st.active&&e.cancelable)e.preventDefault();finish()}};
+  nav.addEventListener('touchend',tend,{passive:false});nav.addEventListener('touchcancel',tend);
+  nav.addEventListener('contextmenu',e=>{if(e.target.closest('button[data-v]'))e.preventDefault()});
   nav.addEventListener('click',e=>{if(justDragged){e.stopImmediatePropagation();e.preventDefault()}},true);
 })();
 /* Kästen per Ziehen anordnen: Griff oben rechts an jedem Kasten (Heute, Anpassen, beide Seitenleisten). Reihenfolge wird in den Einstellungen gespeichert. */
