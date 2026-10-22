@@ -28,6 +28,8 @@ fill("__RATE__", JSON.stringify(seed.rate));
 fill("__LINES__", JSON.stringify(seed.lines));
 fill("__EF__", safe(JSON.stringify(seed.ef)));
 fill("__CHESSJS__", safe(read("src/data/chess.js")));
+// Stappen exercises: made for this page by tools/stappen-gen.mjs (own positions, checked with Stockfish), so they can be public.
+fill("__STAPPEN__", safe(read("src/data/stappen.json").trim()));
 // Without an embedded seed the main script waits until login and data are there (see shell.html), so it is stored inert here.
 if (!process.env.SCH_DATA_FILE) {
   const i = trainer.lastIndexOf("<script>");
