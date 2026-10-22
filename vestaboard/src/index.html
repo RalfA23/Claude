@@ -323,7 +323,9 @@ body.saver.moved { cursor: default; }
     }, reduce ? 0 : FT*2 + 5);
   }
 
-  function show(grid) {
+  // keep = true: nur Aktualisierung derselben Anzeige (Uhr-Minute), die Farbwelt bleibt.
+  function show(grid, keep = false) {
+    if (!keep) farbwelt();
     grid.forEach((code, i) => {
       const c = cells[i];
       c.target = code;
@@ -413,7 +415,7 @@ body.saver.moved { cursor: default; }
   // Das Konto kommt aus der Portal-Anmeldung (Supabase-Sitzung im Browser), die Seite selbst braucht kein Login.
   // Anrede: zuerst user_metadata.anrede des Kontos, sonst diese Tabelle (Muster auf die E-Mail), sonst keine.
   const ANREDEN = [
-    { fuer: /kudnick/i, anrede: 'CAPICOP', farben: ['lila','blau','gruen'] },
+    { fuer: /kudnick/i, anrede: 'CAPICOP', farben: ['lila','blau','gruen'], farbwelten: true },
   ];
   let konto = '', meta = {};
   try {
@@ -424,6 +426,28 @@ body.saver.moved { cursor: default; }
   } catch {}
   const eintrag = konto ? ANREDEN.find(a => a.fuer.test(konto)) : null;
   const anrede = String(meta.anrede || eintrag?.anrede || '').toUpperCase().trim().slice(0, 22);
+
+  // Farbwelten: wer sie hat (Tabelle oder user_metadata.farbwelten), bekommt jede neue Nachricht in einer anderen
+  // Farbgebung von Kacheln, Schrift und Rahmen. Ohne bleibt das Board wie gewohnt dunkel mit heller Schrift.
+  const FARBWELTEN = [
+    { tile: '#14324f', glyph: '#f6e7b0', frame: '#071522' }, // Nachtblau, Sand
+    { tile: '#3b1d4f', glyph: '#f9c6e8', frame: '#160a1f' }, // Aubergine, Rosa
+    { tile: '#123f2c', glyph: '#d9f5c4', frame: '#061810' }, // Tannengrün, Lindgrün
+    { tile: '#5a1e1a', glyph: '#ffd9a8', frame: '#200907' }, // Weinrot, Aprikose
+    { tile: '#0f4246', glyph: '#bff3ef', frame: '#041819' }, // Petrol, Eisblau
+    { tile: '#4a3510', glyph: '#ffe27a', frame: '#1b1205' }, // Bernstein, Gold
+    { tile: '#e9e4d8', glyph: '#1f2a5a', frame: '#bdb6a6' }, // Papierweiß, Tinte
+    { tile: '#22264a', glyph: '#ffb36b', frame: '#0b0d1d' }, // Indigo, Orange
+  ];
+  const mitFarbwelten = !!(meta.farbwelten ?? eintrag?.farbwelten);
+  let weltIdx = Math.floor(Math.random() * FARBWELTEN.length);
+  function farbwelt() {
+    if (!mitFarbwelten) return;
+    const w = FARBWELTEN[weltIdx++ % FARBWELTEN.length];
+    board.style.setProperty('--tile', w.tile);
+    board.style.setProperty('--glyph', w.glyph);
+    board.style.setProperty('--frame', w.frame);
+  }
   function grussText(d = new Date()) {
     const h = d.getHours();
     const [gruss, f] = h >= 5 && h < 11 ? ['GUTEN MORGEN', 'gelb'] : h < 17 && h >= 11 ? ['GUTEN TAG', 'orange'] : h < 22 && h >= 17 ? ['GUTEN ABEND', 'blau'] : ['GUTE NACHT', 'lila'];
@@ -488,7 +512,7 @@ body.saver.moved { cursor: default; }
     const hh = String(d.getHours()).padStart(2,'0'), mm = String(d.getMinutes()).padStart(2,'0');
     return `${TAGE[d.getDay()]}\n${d.getDate()}. ${MONATE[d.getMonth()]} ${d.getFullYear()}\n\n${hh}:${mm} UHR`;
   }
-  function showClock() { show(textToGrid(clockText(), true).grid); }
+  function showClock(keep = false) { show(textToGrid(clockText(), true).grid, keep); }
 
   // ---------- Inhalte: Wetter, Kalender, Nachrichten, Sprüche, Countdowns ----------
   // config.js (Einstellungen) und data.js (vom Hintergrundskript geschrieben) liegen neben dieser Datei.
@@ -790,7 +814,7 @@ body.saver.moved { cursor: default; }
     timer = setInterval(() => {
       const now = new Date();
       if (Date.now() - last >= cfg().sekunden * 1000) { last = Date.now(); rotateStep(); }
-      else if (current?.live && now.getSeconds() === 0) show(textToGrid(clockScreen().text, true).grid);
+      else if (current?.live && now.getSeconds() === 0) show(textToGrid(clockScreen().text, true).grid, true);
     }, 1000);
   }
 
@@ -801,7 +825,7 @@ body.saver.moved { cursor: default; }
     $('m-rot').setAttribute('aria-pressed', m==='rot');
     if (m === 'clock') {
       showClock();
-      timer = setInterval(() => { if (new Date().getSeconds() === 0) showClock(); }, 1000);
+      timer = setInterval(() => { if (new Date().getSeconds() === 0) showClock(true); }, 1000);
       status.textContent = 'Uhr läuft und aktualisiert sich jede Minute.';
     } else if (m === 'rot') {
       startRotation();
