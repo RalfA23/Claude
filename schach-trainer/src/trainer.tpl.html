@@ -638,16 +638,30 @@ const stLevelDone=n=>ST_LEVELS.find(L=>L.n===n).lessons.every(x=>stDone(x.id))||
 const stLevelOpen=n=>n===1||stLevelDone(n-1);
 function stNext(){return ST_ALL.find(x=>stLevelOpen(x.level)&&!stLevelDone(x.level)&&!stDone(x.id)&&stEx(x.id).length)}
 async function stSave(){if(db){try{await db.doc('stappen/stand').set(stStand)}catch(e){}}}
+// Jede beantwortete Aufgabe zählt sofort: Zähler gesamt und pro Tag, laufende Lektion mit Zwischenstand (zum Weitermachen).
+function stCount(ok){const R=stRun,d=today();const z=stStand.z=stStand.z||{gemacht:0,richtig:0,tage:{}};z.gemacht++;if(ok)z.richtig++;
+  const t=z.tage[d]=z.tage[d]||[0,0];t[0]++;if(ok)t[1]++;Object.keys(z.tage).sort().slice(0,-60).forEach(k=>delete z.tage[k]);
+  if(R.kind==='lektion'){const o=stStand.l[R.id]=stStand.l[R.id]||{};o.lauf={res:R.res.slice(),t0:R.t0};o.zuletzt=d}
+  stSave()}
+// Runde abgebrochen: gelöste Aufgaben und Minuten trotzdem als Sitzung festhalten.
+function stLeave(){const R=stRun;stRun=null;clearTimeout(animTimer);if(R&&R.res.length&&!R.logged)stLog(R,false);renderStappen()}
+function stLog(R,end){R.logged=true;const n=R.list.length,r=R.res.filter(Boolean).length,d=today();
+  const mins=Math.max(1,Math.min(90,Math.round((Date.now()-(R.s0||R.t0))/60000)));
+  const doc={typ:'stappen',datum:d,ts:new Date().toISOString(),minuten:mins,lektion:R.title+(R.kind==='wdh'?' (Wiederholung)':''),richtig:r,gesamt:R.res.length,notiz:!end?'unterbrochen nach '+R.res.length+' von '+n:R.kind==='wdh'?'':r>=Math.ceil(n*ST_PASS)?'bestanden':'noch nicht bestanden, nötig '+Math.ceil(n*ST_PASS)};
+  const id='stappen-'+Date.now();sitzungen.push({id,...doc});if(db){try{Promise.resolve(db.doc('sitzungen/'+id).set(doc)).catch(()=>{})}catch(e){}}
+  renderSide()}
 function renderStappen(){
   const box=$('v-st');if(!box)return;if(stRun)return;
   const nx=stNext();const total=ST_ALL.filter(x=>stEx(x.id).length).length,done=ST_ALL.filter(x=>stDone(x.id)||stLevelDone(x.level)).length;
   box.innerHTML='<div class="card st-intro"><h3 style="margin:0 0 6px">Stappenmethode</h3>'+
     '<p style="margin:0 0 8px">Schach in kleinen Schritten, nach dem Prinzip der niederländischen Stappenmethode: Jede Lektion erklärt ein Thema kurz, dann folgen viele Aufgaben genau dazu. Ab 80 Prozent richtig ist die Lektion bestanden. Sind alle Lektionen einer Stufe bestanden, öffnet sich die nächste. Kannst du eine Stufe schon, mach den Test und spring weiter.</p>'+
     '<div class="progress"><span style="width:'+(total?Math.round(done/total*100):0)+'%"></span></div><p class="note" style="margin:6px 0 0">'+done+' von '+total+' Lektionen bestanden.'+(nx?' Als Nächstes: '+nx.id+' '+nx.title+'.':'')+'</p>'+
+    (()=>{const z=stStand.z;if(!z||!z.gemacht)return '';const td=(z.tage||{})[today()]||[0,0];return '<p class="note" style="margin:4px 0 0">Gelöst: '+z.richtig+' von '+z.gemacht+' Aufgaben richtig'+(td[0]?', heute '+td[1]+' von '+td[0]:'')+'.</p>'})()+
     (nx?'<div class="btns" style="margin-top:10px"><span class="here">▶ Hier weiter</span><button class="b primary" type="button" data-st-go="'+nx.id+'">'+nx.id+' '+nx.title+'</button></div>':'')+'</div>'+
     '<div class="st-levels">'+ST_LEVELS.map(L=>{const open=stLevelOpen(L.n),ld=stLevelDone(L.n),t=stStand.t[L.n];
       const items=L.lessons.filter(x=>stEx(x.id).length).map(x=>{const r=stStand.l[x.id];const ok=stDone(x.id)||ld;
-        const sub=stDone(x.id)?'Bestanden'+(r.best!=null?', bestes Ergebnis '+r.best+' von '+r.n:''):ld?'Per Test übersprungen':r?'Bisher '+r.best+' von '+r.n+', nötig '+Math.ceil(r.n*ST_PASS):stEx(x.id).length+' Aufgaben';
+        const n0=stEx(x.id).length,lf=r&&r.lauf&&r.lauf.res.length<n0?r.lauf:null;
+        const sub=(lf?'Angefangen: '+lf.res.length+' von '+n0+' gemacht, '+lf.res.filter(Boolean).length+' richtig. ':'')+(stDone(x.id)?'Bestanden'+(r.best!=null?', bestes Ergebnis '+r.best+' von '+r.n:''):ld?'Per Test übersprungen':r&&r.n?'Bisher '+r.best+' von '+r.n+', nötig '+Math.ceil(r.n*ST_PASS):lf?'':n0+' Aufgaben');
         return '<button class="st-item'+(ok?' done':'')+(nx&&nx.id===x.id?' next':'')+'" type="button" data-st-go="'+x.id+'"'+(open?'':' disabled')+'><b>'+x.id+' '+x.title+'</b><small>'+(ok?'✓ ':'')+sub+'</small></button>'}).join('');
       return '<div class="card st-level'+(open?'':' locked')+'"><div class="meta"><h3>'+L.title+'</h3>'+(ld?'<span class="pill good">geschafft</span>':open?'':'<span class="pill warn">noch zu</span>')+'</div><p class="note" style="margin:0">'+L.text+(open?'':' Öffnet sich, wenn Stufe '+(L.n-1)+' geschafft ist, oder per Test.')+'</p>'+
         '<div class="st-list">'+items+'</div>'+
@@ -657,11 +671,13 @@ function renderStappen(){
   box.querySelectorAll('[data-st-test]').forEach(b=>b.addEventListener('click',()=>stTest(+b.dataset.stTest)));
 }
 function stStart(id,only){const L=ST_ALL.find(x=>x.id===id);let list=stEx(id).map((e,i)=>({e,lesson:L,i}));if(only)list=list.filter(x=>only.includes(x.i));
-  stRun={kind:only?'wdh':'lektion',id,title:id+' '+L.title,list,k:0,res:[],t0:Date.now(),intro:!only};stRender()}
+  stRun={kind:only?'wdh':'lektion',id,title:id+' '+L.title,list,k:0,res:[],t0:Date.now(),s0:Date.now(),intro:!only};
+  const lf=!only&&stStand.l[id]&&stStand.l[id].lauf;if(lf&&lf.res&&lf.res.length&&lf.res.length<list.length){stRun.res=lf.res.slice();stRun.k=lf.res.length;stRun.t0=lf.t0||Date.now();stRun.intro=false}
+  stRender()}
 function stTest(n){const L=ST_LEVELS.find(x=>x.n===n);const pool=[];L.lessons.forEach(x=>{const ex=stEx(x.id);const lx=ST_ALL.find(y=>y.id===x.id);
   const seed=dayNum()+n;const per=Math.ceil(10/L.lessons.length);const picks=[...ex.keys()].sort((a,b)=>((a*7919+seed)%97)-((b*7919+seed)%97)).slice(0,per);picks.forEach(i=>pool.push({e:ex[i],lesson:lx,i}))});
   const list=pool.sort((a,b)=>((a.i*31+a.lesson.id.length+a.e.f.length)%13)-((b.i*31+b.lesson.id.length+b.e.f.length)%13)).slice(0,10);
-  stRun={kind:'test',level:n,title:'Test Stufe '+n,list,k:0,res:[],t0:Date.now(),intro:false};stRender()}
+  stRun={kind:'test',level:n,title:'Test Stufe '+n,list,k:0,res:[],t0:Date.now(),s0:Date.now(),intro:false};stRender()}
 function stPrompt(x){const L=x.lesson,w=x.e.f.split(' ')[1]==='w'?'Weiß':'Schwarz';
   if(L.kind==='matt')return w+' am Zug. Matt in '+(L.n===1?'einem Zug':L.n+' Zügen')+'.';
   if(L.kind==='ende')return w+' am Zug. Finde den einzigen Zug, der '+(x.e.z||'das Beste herausholt')+'.';
@@ -673,7 +689,7 @@ function stRender(){
   const intro=R.kind!=='test'?'<details'+(R.intro&&R.k===0?' open':'')+'><summary>Erklärung</summary>'+L.expl.map(p=>'<p>'+p+'</p>').join('')+'<p class="merk">'+L.merk+'</p></details>':'';
   box.innerHTML='<div class="card st-run"><div class="inline" style="justify-content:space-between"><h3 style="margin:0">'+R.title+(R.kind==='wdh'?' · Wiederholung':'')+'</h3><button class="b sm" type="button" id="stBack">Zur Übersicht</button></div>'+intro+chips+
     '<p class="q">Aufgabe '+(R.k+1)+' von '+R.list.length+(R.kind==='test'?' ('+L.title+')':'')+': '+stPrompt(x)+'</p><div class="board" id="stB"></div><div class="fb" id="stFb" hidden></div><div class="btns" id="stBtns"></div></div>';
-  $('stBack').addEventListener('click',()=>{stRun=null;renderStappen()});
+  $('stBack').addEventListener('click',stLeave);
   const ex=x.e;let ply=0,failed=false;
   stBoard=makeBoard($('stB'),(from,to)=>{const g=stBoard.game;const exp=ex.l[ply];const c=g.moves({square:from,verbose:true}).filter(m=>m.to===to);
     const promo=c[0]&&c[0].promotion?(exp&&exp.slice(0,4)===from+to&&exp[4]?exp[4]:'q'):undefined;const u=from+to+(promo||'');
@@ -687,7 +703,7 @@ function stRender(){
       f.textContent='Der Gegner spielt '+figurine(mm?mm.san:r)+'. Weiter.'},600)});
   const B=stBoard;stBoard.load(ex.f);stBoard.locked=false;stBoard.draw();
 }
-function stAnswer(ok,msg,ex){const R=stRun;R.res.push(ok);const f=$('stFb');f.hidden=false;f.className='fb '+(ok?'ok':'no');f.textContent=msg;
+function stAnswer(ok,msg,ex){const R=stRun;R.res.push(ok);stCount(ok);const f=$('stFb');f.hidden=false;f.className='fb '+(ok?'ok':'no');f.textContent=msg;
   const lastQ=R.k>=R.list.length-1;
   $('stBtns').innerHTML='<button class="b" type="button" id="stSol">Lösung zeigen</button> <button class="b primary" type="button" id="stNx">'+(lastQ?'Auswerten':'Weiter')+'</button>';
   $('stSol').addEventListener('click',()=>{f.className='fb hint';f.textContent='Lösung: '+germanLine(ex.f,ex.l).text;animateLine(stBoard,ex.f,ex.l,(t,l)=>{f.textContent=t+(l?'  (Ende der Lösung)':'')},1000)});
@@ -696,14 +712,11 @@ function stAnswer(ok,msg,ex){const R=stRun;R.res.push(ok);const f=$('stFb');f.hi
 }
 async function stFinish(){
   clearTimeout(animTimer);const R=stRun;const n=R.list.length,r=R.res.filter(Boolean).length,pass=r>=Math.ceil(n*ST_PASS);const d=today();
-  const mins=Math.max(1,Math.min(90,Math.round((Date.now()-R.t0)/60000)));
   if(R.kind==='lektion'){const o=stStand.l[R.id]||{};stStand.l[R.id]={best:Math.max(o.best||0,r),n,ok:o.ok||(pass?d:null),zuletzt:d,versuche:(o.versuche||0)+1}}
   if(R.kind==='test'){const o=stStand.t[R.level]||{};stStand.t[R.level]={best:Math.max(o.best||0,r),n,ok:o.ok||(pass?d:null),zuletzt:d}}
   const wrong=R.list.filter((_,i)=>!R.res[i]).map(x=>x.i);
-  const doc={typ:'stappen',datum:d,ts:new Date().toISOString(),minuten:mins,lektion:R.title+(R.kind==='wdh'?' (Wiederholung)':''),richtig:r,gesamt:n,notiz:R.kind==='wdh'?'':pass?'bestanden':'noch nicht bestanden, nötig '+Math.ceil(n*ST_PASS)};
-  const id='stappen-'+Date.now();sitzungen.push({id,...doc});
+  stLog(R,true);
   if(R.kind!=='wdh')await stSave();
-  if(db){try{await db.doc('sitzungen/'+id).set(doc)}catch(e){}}
   const nx=stNext();const box=$('v-st');
   box.innerHTML='<div class="card st-run"><h3 style="margin:0 0 6px">'+R.title+'</h3><div class="res">'+R.res.map((ok,i)=>'<span class="'+(ok?'ok':'no')+'">'+(i+1)+'</span>').join('')+'</div>'+
     '<p class="q">'+r+' von '+n+' richtig. '+(R.kind==='wdh'?'Wiederholung erledigt.':pass?(R.kind==='test'?'Stufe '+R.level+' geschafft.':'Bestanden.'):'Noch nicht bestanden, nötig sind '+Math.ceil(n*ST_PASS)+'. Lies die Erklärung noch einmal und versuch es wieder.')+'</p>'+
@@ -1299,6 +1312,7 @@ function renderSide(){
   nums.innerHTML='<h3>Deine Zahlen</h3>'+
     '<div class="row"><span>Rapid-Wertung</span><b>'+(cr==null?'–':cr)+'</b></div>'+bar(cr==null?0:(cr-800)/Math.max(100,ziel()-800))+'<div class="note" style="margin:-6px 0 10px">'+(cr==null?'Noch keine Wertung':'noch '+Math.max(0,ziel()-cr)+' bis '+ziel())+'</div>'+
     '<div class="row"><span>Woodpecker Runde '+z+'</span><b>'+done+'/'+SET+'</b></div>'+bar(done/SET)+
+    (()=>{const z=stStand.z,ld=ST_ALL.filter(x=>stDone(x.id)||stLevelDone(x.level)).length;return z&&z.gemacht?'<div class="row"><span>Stappen gelöst</span><b>'+z.richtig+'/'+z.gemacht+'</b></div><div class="note" style="margin:-6px 0 10px">'+ld+' von '+ST_ALL.length+' Lektionen bestanden</div>':''})()+
     '<div class="row"><span>Minuten, 7 Tage</span><b>'+wmin+'</b></div>'+bar(wmin/210)+'<div class="note" style="margin:-6px 0 10px">Ziel 210</div>'+
     '<div class="row"><span>Tage in Folge</span><b>'+sk+'</b></div>';
   const rl=LESSONS[dayNum()%LESSONS.length];
@@ -1603,7 +1617,7 @@ show(startTab||'heute');renderSide();
   db.doc('stand/woodpecker').onSnapshot(s=>{if(s.exists&&!sess){stand=Object.assign({zyklus:1,naechste:1},s.data());renderStand();showPuzzle(Math.min(SET,stand.naechste||1),'idle')}},()=>{});
   db.collection('sitzungen').onSnapshot(q=>{const live=sess?sitzungen.find(s=>s.id===sess.id):null;sitzungen=q.docs.map(d=>({id:d.id,...d.data()}));if(live&&!sitzungen.find(s=>s.id===live.id))sitzungen.push(live);renderStand();checkWpTask();renderSide();if(!$('v-heute').hidden){renderHeute()}if(!$('v-sm').hidden)renderLessons();if(!$('v-fs').hidden)renderProgress()},()=>{});
   db.doc('stand/heute').onSnapshot(s=>{if(s.exists&&s.data().plan){heute=JSON.parse(JSON.stringify(s.data()));if(heute.idx>=heute.plan.length){heute=makePlan(heute.rot||0);saveHeute();return}renderHeute()}else{heute=makePlan(0);saveHeute()}},()=>{});
-  db.doc('stappen/stand').onSnapshot(s=>{if(s.exists&&!stRun){stStand=Object.assign({l:{},t:{}},JSON.parse(JSON.stringify(s.data())));if(curView==='st')renderStappen()}},()=>{});
+  db.doc('stappen/stand').onSnapshot(s=>{if(s.exists&&!stRun){stStand=Object.assign({l:{},t:{}},JSON.parse(JSON.stringify(s.data())));if(curView==='st')renderStappen();renderSide()}},()=>{});
   db.collection('wertungen').onSnapshot(q=>{wertungen=q.docs.map(d=>({id:d.id,...d.data()}));renderSide();if(!$('v-fs').hidden)renderProgress()},()=>{});
 })();
 })();
