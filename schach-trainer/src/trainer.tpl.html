@@ -8,7 +8,7 @@
   --accent:#B3261E; --accent-ink:#FFFFFF;
   --sq-light:#E9E2CF; --sq-dark:#7D9473;
   --good:#2E7D4F; --bad:#B3261E; --warn:#A86B00;
-  --c-wp:#B3261E; --c-partie:#2F5D8A; --c-smirnov:#7D9473; --c-abfrage:#A86B00; --c-puzzle:#8A6FB0;
+  --c-wp:#B3261E; --c-partie:#2F5D8A; --c-smirnov:#7D9473; --c-abfrage:#A86B00; --c-puzzle:#8A6FB0; --c-stappen:#2F7D7D;
   --f-display:"Barlow Condensed","Arial Narrow",sans-serif;
   --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
   --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
@@ -19,14 +19,14 @@
   --accent:#E0574C; --accent-ink:#1A0E0D;
   --sq-light:#CFC6AE; --sq-dark:#5E7556;
   --good:#5DBB82; --bad:#E0574C; --warn:#E0A440;
-  --c-wp:#E0574C; --c-partie:#6E9FCF; --c-smirnov:#9DB58F; --c-abfrage:#E0A440; --c-puzzle:#B39AD6;
+  --c-wp:#E0574C; --c-partie:#6E9FCF; --c-smirnov:#9DB58F; --c-abfrage:#E0A440; --c-puzzle:#B39AD6; --c-stappen:#6FC1C1;
   color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#151916; --surface:#1E2420; --ink:#E7EBE4; --muted:#9AA69C; --line:#323A34;
   --accent:#E0574C; --accent-ink:#1A0E0D;
   --sq-light:#CFC6AE; --sq-dark:#5E7556;
   --good:#5DBB82; --bad:#E0574C; --warn:#E0A440;
-  --c-wp:#E0574C; --c-partie:#6E9FCF; --c-smirnov:#9DB58F; --c-abfrage:#E0A440; --c-puzzle:#B39AD6;
+  --c-wp:#E0574C; --c-partie:#6E9FCF; --c-smirnov:#9DB58F; --c-abfrage:#E0A440; --c-puzzle:#B39AD6; --c-stappen:#6FC1C1;
   color-scheme:dark}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
@@ -231,6 +231,27 @@ nav.tabs.dragging button{cursor:grabbing}
 .colors{display:flex;flex-wrap:wrap;gap:14px}
 .colors input[type=color]{width:56px;height:36px;padding:2px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+/* Stappen */
+.st-intro{margin-bottom:14px}
+.st-levels{display:flex;flex-direction:column;gap:14px}
+.st-level h3{margin:0 0 4px}
+.st-level.locked{opacity:.6}
+.st-level .meta{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;margin-bottom:8px}
+.st-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px;margin-top:10px}
+.st-item{display:flex;flex-direction:column;gap:4px;text-align:left;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit;cursor:pointer}
+.st-item:disabled{cursor:default}
+.st-item b{font-weight:600}
+.st-item small{color:var(--muted)}
+.st-item.done{border-color:var(--good)} .st-item.done small{color:var(--good)}
+.st-item.next{border-color:var(--accent);box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 25%,transparent)}
+.st-run .board{max-width:min(100%,56vh);margin:10px auto}
+.st-run .q{font-weight:600;margin:8px 0}
+.st-run .res{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.st-run .res span{font-family:var(--f-mono);font-size:.75rem;padding:2px 7px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+.st-run .res span.ok{border-color:var(--good);color:var(--good)} .st-run .res span.no{border-color:var(--bad);color:var(--bad)} .st-run .res span.cur{border-color:var(--accent);color:var(--ink);font-weight:600}
+.st-run details{margin:8px 0}
+.st-run details p{margin:6px 0}
+.st-run .merk{border-left:3px solid var(--c-stappen);padding-left:10px;font-weight:600}
 </style>
 
 <div class="wrap">
@@ -321,6 +342,9 @@ nav.tabs.dragging button{cursor:grabbing}
     <div class="lessons" id="lessons"></div>
     <p class="note" style="margin-top:14px">Die gekauften Kurse (Super Pack, Boost Your ELO) liegen nur auf deinem Rechner. Wenn du daraus PDFs oder PGNs hochlädst, bauen wir die Inhalte hier ein.</p>
   </section>
+
+  <!-- Stappen -->
+  <section class="view" id="v-st" hidden></section>
 
   <!-- Anpassen -->
   <section class="view" id="v-an" hidden></section>
@@ -422,7 +446,7 @@ nav.tabs.dragging button{cursor:grabbing}
     <div class="kpis" id="kpis"></div>
     <div class="charts">
       <div class="card chart"><h3>Trainingsminuten, letzte 28 Tage</h3><div id="chMin"></div>
-        <div class="legend"><span style="--c:var(--c-wp)">Woodpecker</span><span style="--c:var(--c-partie)">Partie</span><span style="--c:var(--c-smirnov)">Smirnov</span><span style="--c:var(--c-abfrage)">Abfrage</span></div></div>
+        <div class="legend"><span style="--c:var(--c-wp)">Woodpecker</span><span style="--c:var(--c-partie)">Partie</span><span style="--c:var(--c-smirnov)">Smirnov</span><span style="--c:var(--c-abfrage)">Abfrage</span><span style="--c:var(--c-stappen)">Stappen</span></div></div>
       <div class="card chart"><h3>Rapid-Wertung</h3><div id="chRate"></div></div>
       <div class="card chart"><h3>Woodpecker je Runde</h3><div id="chWp"></div>
         <div class="legend"><span style="--c:var(--accent)">Trefferquote</span><span style="--c:var(--muted)">Sekunden pro Aufgabe</span></div></div>
@@ -437,6 +461,7 @@ nav.tabs.dragging button{cursor:grabbing}
 
 <script type="application/json" id="wpdata">__WP__</script>
 <script type="application/json" id="efdata">__EF__</script>
+<script type="application/json" id="stdata">__STAPPEN__</script>
 <script type="application/json" id="ratehist">__RATE__</script>
 <script type="application/json" id="linesdata">__LINES__</script>
 <script>
@@ -526,6 +551,170 @@ function bindExercises(box,lessonIdx){if(!EF.length)return;const seed=(+today().
 let lessonShownAt=0;
 function renderLessons(){const box=$('lessons');if(!box)return;const logged=lessonLogged();box.innerHTML=LESSONS.map((l,i)=>lessonCard(l,logged).replace('</div></div>','<button class="b sm" type="button" data-ex="'+i+'">Üben</button></div><div class="exbox"></div></div>')).join('');bindLearn(box);lessonShownAt=Date.now();
   box.querySelectorAll('[data-ex]').forEach(b=>b.addEventListener('click',()=>{const i=+b.dataset.ex;const eb=b.closest('.lesson').querySelector('.exbox');eb.innerHTML=exercisesHtml(i);bindExercises(eb,i);b.hidden=true}))}
+
+/* Stappen: Stufen mit aufbauenden Aufgaben nach dem Prinzip der niederländischen Stappenmethode.
+   Jede Lektion: kurz erklären, dann üben. Bestanden ab 80 Prozent, dann ist die nächste dran. Die Aufgaben sind selbst erstellt
+   (tools/stappen-gen.mjs, jede Lösung mit Stockfish geprüft), nicht aus den Arbeitsheften. Stand pro Konto in stappen/stand. */
+const STX=JSON.parse(document.getElementById('stdata').textContent||'{}');
+const ST_PASS=.8;
+const ST_LEVELS=[
+ {n:1,title:'Stufe 1 · Grundlagen',text:'Sehen, was frei ist, was bedroht ist und wie ein Matt aussieht.',lessons:[
+  {id:'1.1',title:'Freie Figuren schlagen',kind:'gewinn',task:'Schlag eine Figur, die nicht gedeckt ist.',
+   expl:['Eine Figur ist frei, wenn sie angegriffen ist und keine eigene Figur sie deckt. Wer sie nimmt, gewinnt Material, ohne etwas herzugeben.','Zähle bei jeder Figur: Wer greift an, wer deckt? Mehr Angreifer als Verteidiger oder ein billigerer Angreifer heißt meistens Gewinn.'],
+   merk:'Vor jedem Zug: Was hängt beim Gegner, was hängt bei mir?'},
+  {id:'1.2',title:'Matt in einem Zug mit Dame und Turm',kind:'matt',n:1,task:'Setz Matt in einem Zug.',
+   expl:['Matt heißt: Der König steht im Schach und hat kein Feld mehr, keine Figur kann dazwischen, und der Angreifer kann nicht geschlagen werden.','Dame und Turm setzen besonders oft am Rand matt, wenn eigene Bauern dem König die Flucht versperren.'],
+   merk:'Prüfe bei einem Schach alle drei Auswege: wegziehen, schlagen, dazwischenstellen.'},
+  {id:'1.3',title:'Bedrohte Figur retten',kind:'sicher',task:'Eine deiner Figuren ist bedroht. Finde einen Zug, der kein Material kostet.',
+   expl:['Wenn eine Figur angegriffen wird, gibt es vier Antworten: wegziehen, decken, einen Gegenangriff starten oder die angreifende Figur schlagen.','Mehrere Züge können richtig sein. Falsch ist jeder Zug, nach dem du Material verlierst.'],
+   merk:'Erst die Drohung beantworten, dann den eigenen Plan.'},
+  {id:'1.4',title:'Schach abwehren',kind:'sicher',task:'Du stehst im Schach. Wehr es ab, ohne Material zu verlieren.',
+   expl:['Gegen ein Schach helfen nur drei Dinge: den König wegziehen, die schachgebende Figur schlagen oder eine Figur dazwischenstellen.','Nicht jeder legale Zug ist gut. Achte darauf, dass danach keine Figur hängt und der König nicht in ein Matt läuft.'],
+   merk:'Alle drei Auswege prüfen und den billigsten nehmen.'}]},
+ {n:2,title:'Stufe 2 · Doppelangriff',text:'Eine Figur greift zwei Ziele an, der Gegner kann nur eines retten.',lessons:[
+  {id:'2.1',title:'Springergabel',kind:'gewinn',task:'Finde die Springergabel und gewinne Material.',
+   expl:['Der Springer greift über Eck an und kann deshalb zwei Figuren gleichzeitig treffen, die sich gegenseitig nicht helfen können.','Am stärksten ist die Gabel mit Schach: Der König muss weg, danach fällt die zweite Figur.'],
+   merk:'Suche Felder, von denen der Springer König, Dame und Türme zugleich angreift.'},
+  {id:'2.2',title:'Doppelangriff mit Dame, Turm und Läufer',kind:'gewinn',task:'Greif zwei Ziele auf einmal an und gewinne Material.',
+   expl:['Langschrittige Figuren können in zwei Richtungen gleichzeitig angreifen. Die Dame ist dafür die beste Figur, weil sie in acht Richtungen zieht.','Gute Ziele sind der König, ungedeckte Figuren und Figuren, die mehr wert sind als der Angreifer.'],
+   merk:'Ungedeckte Figuren sind Ziele für einen Doppelangriff.'},
+  {id:'2.3',title:'Bauerngabel',kind:'gewinn',task:'Ein Bauernzug greift zwei Figuren an. Finde ihn.',
+   expl:['Ein Bauer ist die billigste Figur. Greift er zwei Figuren an, verliert der Gegner fast immer eine davon.','Achte auf zwei gegnerische Figuren, die auf gleicher Reihe mit einem Feld Abstand stehen.'],
+   merk:'Zwei Figuren mit einer Lücke dazwischen: Platz für eine Bauerngabel.'},
+  {id:'2.4',title:'Matt in einem Zug mit allen Figuren',kind:'matt',n:1,task:'Setz Matt in einem Zug.',
+   expl:['Jetzt helfen auch Läufer, Springer und Bauern beim Matt. Oft decken sie die Fluchtfelder, während eine andere Figur Schach gibt.','Schau dir zuerst die Felder um den gegnerischen König an: Welche sind frei, welche schon gedeckt?'],
+   merk:'Fluchtfelder zählen, dann das Schach suchen, das alle abdeckt.'},
+  {id:'2.5',title:'Mattdrohung abwehren',kind:'sicher',task:'Der Gegner droht Matt. Finde einen Zug, der es verhindert.',
+   expl:['Bevor du selbst angreifst: Was würde der Gegner ziehen, wenn du jetzt passt? Droht ein Matt, geht die Abwehr vor.','Abwehren kannst du, indem du ein Fluchtfeld schaffst, das Mattfeld deckst oder die angreifende Figur vertreibst.'],
+   merk:'Frag nach jedem Gegnerzug: Was droht er?'}]},
+ {n:3,title:'Stufe 3 · Linien',text:'Fesselung, Spieß und Abzug: Figuren auf einer Linie werden zum Ziel.',lessons:[
+  {id:'3.1',title:'Fesselung',kind:'gewinn',task:'Fessel eine Figur und gewinne Material.',
+   expl:['Bei einer Fesselung steht eine Figur vor einer wertvolleren, meist vor dem König oder der Dame. Zieht sie weg, geht die wertvollere verloren oder der Zug ist gar nicht erlaubt.','Eine gefesselte Figur ist wie gelähmt. Greif sie danach noch einmal an.'],
+   merk:'Gefesselte Figuren noch einmal angreifen.'},
+  {id:'3.2',title:'Spieß',kind:'gewinn',task:'Spieße zwei Figuren auf und gewinne Material.',
+   expl:['Der Spieß ist die umgekehrte Fesselung: Vorne steht die wertvollere Figur, sie muss weichen, und die Figur dahinter fällt.','Besonders wirksam mit Schach: Der König muss weg, dahinter steht ein Turm oder die Dame.'],
+   merk:'König und Figur auf einer Linie: Schach geben und dahinter schlagen.'},
+  {id:'3.3',title:'Abzugsangriff',kind:'gewinn',task:'Zieh eine Figur weg und öffne eine Linie für eine andere.',
+   expl:['Beim Abzug steht eine eigene Figur vor einem Turm, Läufer oder der Dame. Zieht sie weg, greift die hintere Figur an.','Die weggezogene Figur kann selbst noch etwas angreifen. So entstehen zwei Drohungen auf einmal.'],
+   merk:'Eigene Figur im Weg? Mit Wirkung wegziehen.'},
+  {id:'3.4',title:'Matt in zwei Zügen',kind:'matt',n:2,task:'Setz Matt in zwei Zügen.',
+   expl:['Bei Matt in zwei bereitet der erste Zug das Matt vor: ein Schach, das den König in eine Falle treibt, oder ein stiller Zug, der ein Fluchtfeld wegnimmt.','Rechne die beste Antwort des Gegners mit, nicht die, die du dir wünschst.'],
+   merk:'Erst Schachs, dann Schlagzüge, dann Drohungen prüfen.'},
+  {id:'3.5',title:'Quadratregel und Bauernrennen',kind:'ende',task:'Finde den einzigen Zug, der das beste Ergebnis hält.',
+   expl:['Die Quadratregel: Zieh vom Bauern ein Quadrat bis zur Umwandlungsreihe. Steht der gegnerische König darin oder kann er mit seinem Zug hinein, holt er den Bauern ein.','Ein Tempo entscheidet. Zähle die Züge für beide Seiten, bevor du ziehst.'],
+   merk:'Quadrat ziehen, Züge zählen, dann entscheiden.'}]},
+ {n:4,title:'Stufe 4 · Kombinationen',text:'Mit einem Opfer oder Schlagzug den Gegner zwingen, dann zuschlagen.',lessons:[
+  {id:'4.1',title:'Beseitigung des Verteidigers',kind:'gewinn',task:'Schlag den Verteidiger und gewinne dann die Figur, die er gedeckt hat.',
+   expl:['Manche Figur ist nur gedeckt, weil eine andere sie schützt. Wird der Verteidiger geschlagen oder getauscht, steht die Figur frei.','Frag bei jeder gegnerischen Figur: Wer deckt sie? Kann ich diesen Verteidiger beseitigen?'],
+   merk:'Wer deckt was? Den Verteidiger zuerst angreifen.'},
+  {id:'4.2',title:'Hinlenkung',kind:'gewinn',task:'Lock eine gegnerische Figur mit einem Opfer auf ein schlechtes Feld.',
+   expl:['Bei der Hinlenkung zwingst du König oder Dame auf ein bestimmtes Feld, oft mit einem Opfer, das geschlagen werden muss.','Auf diesem Feld steht die Figur dann einer Gabel, einem Spieß oder einem Matt im Weg.'],
+   merk:'Welches Feld wäre für seinen König oder seine Dame tödlich?'},
+  {id:'4.3',title:'Ablenkung',kind:'gewinn',task:'Lenk einen Verteidiger von seiner Aufgabe ab.',
+   expl:['Eine Figur, die etwas Wichtiges deckt, wird mit einem Schlag- oder Schachzug weggelockt. Danach fehlt sie dort, wo sie gebraucht wurde.','Typisch: Der Verteidiger der Grundreihe oder eines Mattfelds wird abgelenkt.'],
+   merk:'Überlastete Figuren mit einer zweiten Aufgabe beschäftigen.'},
+  {id:'4.4',title:'Opposition',kind:'ende',task:'Finde den einzigen Königszug, der das beste Ergebnis hält.',
+   expl:['Opposition heißt: Die Könige stehen sich mit einem Feld Abstand gegenüber, und wer nicht ziehen muss, ist im Vorteil.','Im Endspiel König und Bauer gegen König entscheidet die Opposition oft zwischen Sieg und Remis.'],
+   merk:'Im Bauernendspiel: Wer hat die Opposition?'},
+  {id:'4.5',title:'Matt in zwei mit Opfer',kind:'matt',n:2,task:'Setz Matt in zwei Zügen. Der erste Zug darf etwas kosten.',
+   expl:['Für ein Matt darfst du alles opfern. Oft öffnet ein Opfer eine Linie oder zwingt den König auf ein Mattfeld.','Prüfe auch Züge, die auf den ersten Blick eine Figur verschenken.'],
+   merk:'Matt geht vor Material.'}]},
+ {n:5,title:'Stufe 5 · Rechnen',text:'Längere Varianten, mehrere Motive in einer Stellung, genaue Endspiele.',lessons:[
+  {id:'5.1',title:'Matt in drei Zügen',kind:'matt',n:3,task:'Setz Matt in drei Zügen.',
+   expl:['Drei Züge tief rechnen heißt: Kandidatenzüge sammeln, jeweils die beste Verteidigung suchen und erst dann ziehen.','Die Lösung beginnt fast immer mit einem Schach oder einem Opfer, das dem Gegner keine Wahl lässt.'],
+   merk:'Zwingende Züge zuerst rechnen.'},
+  {id:'5.2',title:'Kombinationen gemischt',kind:'gewinn',task:'Gewinne Material. Welches Motiv passt?',
+   expl:['Jetzt ist nicht mehr verraten, welches Motiv wartet: Gabel, Fesselung, Spieß, Abzug oder Ablenkung.','Geh die Stellung systematisch durch: Schachs, Schlagzüge, Drohungen.'],
+   merk:'Kein Motiv erraten, sondern systematisch suchen.'},
+  {id:'5.3',title:'Bauernendspiel: der einzige Zug',kind:'ende',task:'Finde den einzigen Zug, der das beste Ergebnis hält.',
+   expl:['In Bauernendspielen gibt es oft nur einen Zug, der gewinnt oder hält. Alle anderen verlieren ein entscheidendes Tempo.','Zähle Tempi, denk an Opposition und Quadratregel, und frag dich, wo dein König hingehört.'],
+   merk:'Im Bauernendspiel zählt jedes Tempo.'}]}
+];
+const ST_ALL=ST_LEVELS.flatMap(L=>L.lessons.map(x=>Object.assign({level:L.n},x)));
+let stStand={l:{},t:{}}, stRun=null, stBoard=null;
+const stEx=id=>STX[id]||[];
+const stDone=id=>!!(stStand.l[id]&&stStand.l[id].ok);
+const stLevelDone=n=>ST_LEVELS.find(L=>L.n===n).lessons.every(x=>stDone(x.id))||!!(stStand.t[n]&&stStand.t[n].ok);
+const stLevelOpen=n=>n===1||stLevelDone(n-1);
+function stNext(){return ST_ALL.find(x=>stLevelOpen(x.level)&&!stLevelDone(x.level)&&!stDone(x.id)&&stEx(x.id).length)}
+async function stSave(){if(db){try{await db.doc('stappen/stand').set(stStand)}catch(e){}}}
+function renderStappen(){
+  const box=$('v-st');if(!box)return;if(stRun)return;
+  const nx=stNext();const total=ST_ALL.filter(x=>stEx(x.id).length).length,done=ST_ALL.filter(x=>stDone(x.id)||stLevelDone(x.level)).length;
+  box.innerHTML='<div class="card st-intro"><h3 style="margin:0 0 6px">Stappenmethode</h3>'+
+    '<p style="margin:0 0 8px">Schach in kleinen Schritten, nach dem Prinzip der niederländischen Stappenmethode: Jede Lektion erklärt ein Thema kurz, dann folgen viele Aufgaben genau dazu. Ab 80 Prozent richtig ist die Lektion bestanden. Sind alle Lektionen einer Stufe bestanden, öffnet sich die nächste. Kannst du eine Stufe schon, mach den Test und spring weiter.</p>'+
+    '<div class="progress"><span style="width:'+(total?Math.round(done/total*100):0)+'%"></span></div><p class="note" style="margin:6px 0 0">'+done+' von '+total+' Lektionen bestanden.'+(nx?' Als Nächstes: '+nx.id+' '+nx.title+'.':'')+'</p>'+
+    (nx?'<div class="btns" style="margin-top:10px"><span class="here">▶ Hier weiter</span><button class="b primary" type="button" data-st-go="'+nx.id+'">'+nx.id+' '+nx.title+'</button></div>':'')+'</div>'+
+    '<div class="st-levels">'+ST_LEVELS.map(L=>{const open=stLevelOpen(L.n),ld=stLevelDone(L.n),t=stStand.t[L.n];
+      const items=L.lessons.filter(x=>stEx(x.id).length).map(x=>{const r=stStand.l[x.id];const ok=stDone(x.id)||ld;
+        const sub=stDone(x.id)?'Bestanden'+(r.best!=null?', bestes Ergebnis '+r.best+' von '+r.n:''):ld?'Per Test übersprungen':r?'Bisher '+r.best+' von '+r.n+', nötig '+Math.ceil(r.n*ST_PASS):stEx(x.id).length+' Aufgaben';
+        return '<button class="st-item'+(ok?' done':'')+(nx&&nx.id===x.id?' next':'')+'" type="button" data-st-go="'+x.id+'"'+(open?'':' disabled')+'><b>'+x.id+' '+x.title+'</b><small>'+(ok?'✓ ':'')+sub+'</small></button>'}).join('');
+      return '<div class="card st-level'+(open?'':' locked')+'"><div class="meta"><h3>'+L.title+'</h3>'+(ld?'<span class="pill good">geschafft</span>':open?'':'<span class="pill warn">noch zu</span>')+'</div><p class="note" style="margin:0">'+L.text+(open?'':' Öffnet sich, wenn Stufe '+(L.n-1)+' geschafft ist, oder per Test.')+'</p>'+
+        '<div class="st-list">'+items+'</div>'+
+        (ld?'':'<div class="btns" style="margin-top:10px"><button class="b sm" type="button" data-st-test="'+L.n+'">Test für Stufe '+L.n+(t?' (bisher '+t.best+' von '+t.n+')':'')+'</button><span class="note" style="margin:0">10 gemischte Aufgaben, ab 8 richtig gilt die Stufe als geschafft.</span></div>')+'</div>'}).join('')+'</div>'+
+    '<p class="note" style="margin-top:14px">Die Aufgaben sind für diese Seite erstellt und jede Lösung ist mit Stockfish geprüft. Sie stammen nicht aus den Arbeitsheften der Stappenmethode. Dein Stand wird in deinem Konto gespeichert.</p>';
+  box.querySelectorAll('[data-st-go]').forEach(b=>b.addEventListener('click',()=>stStart(b.dataset.stGo)));
+  box.querySelectorAll('[data-st-test]').forEach(b=>b.addEventListener('click',()=>stTest(+b.dataset.stTest)));
+}
+function stStart(id,only){const L=ST_ALL.find(x=>x.id===id);let list=stEx(id).map((e,i)=>({e,lesson:L,i}));if(only)list=list.filter(x=>only.includes(x.i));
+  stRun={kind:only?'wdh':'lektion',id,title:id+' '+L.title,list,k:0,res:[],t0:Date.now(),intro:!only};stRender()}
+function stTest(n){const L=ST_LEVELS.find(x=>x.n===n);const pool=[];L.lessons.forEach(x=>{const ex=stEx(x.id);const lx=ST_ALL.find(y=>y.id===x.id);
+  const seed=dayNum()+n;const per=Math.ceil(10/L.lessons.length);const picks=[...ex.keys()].sort((a,b)=>((a*7919+seed)%97)-((b*7919+seed)%97)).slice(0,per);picks.forEach(i=>pool.push({e:ex[i],lesson:lx,i}))});
+  const list=pool.sort((a,b)=>((a.i*31+a.lesson.id.length+a.e.f.length)%13)-((b.i*31+b.lesson.id.length+b.e.f.length)%13)).slice(0,10);
+  stRun={kind:'test',level:n,title:'Test Stufe '+n,list,k:0,res:[],t0:Date.now(),intro:false};stRender()}
+function stPrompt(x){const L=x.lesson,w=x.e.f.split(' ')[1]==='w'?'Weiß':'Schwarz';
+  if(L.kind==='matt')return w+' am Zug. Matt in '+(L.n===1?'einem Zug':L.n+' Zügen')+'.';
+  if(L.kind==='ende')return w+' am Zug. Finde den einzigen Zug, der '+(x.e.z||'das Beste herausholt')+'.';
+  if(L.kind==='sicher')return w+' am Zug. '+L.task;
+  return w+' am Zug. '+L.task}
+function stRender(){
+  clearTimeout(animTimer);const box=$('v-st');const R=stRun;const x=R.list[R.k];const L=x.lesson;
+  const chips='<div class="res">'+R.list.map((_,i)=>'<span class="'+(i<R.res.length?(R.res[i]?'ok':'no'):i===R.k?'cur':'')+'">'+(i+1)+'</span>').join('')+'</div>';
+  const intro=R.kind!=='test'?'<details'+(R.intro&&R.k===0?' open':'')+'><summary>Erklärung</summary>'+L.expl.map(p=>'<p>'+p+'</p>').join('')+'<p class="merk">'+L.merk+'</p></details>':'';
+  box.innerHTML='<div class="card st-run"><div class="inline" style="justify-content:space-between"><h3 style="margin:0">'+R.title+(R.kind==='wdh'?' · Wiederholung':'')+'</h3><button class="b sm" type="button" id="stBack">Zur Übersicht</button></div>'+intro+chips+
+    '<p class="q">Aufgabe '+(R.k+1)+' von '+R.list.length+(R.kind==='test'?' ('+L.title+')':'')+': '+stPrompt(x)+'</p><div class="board" id="stB"></div><div class="fb" id="stFb" hidden></div><div class="btns" id="stBtns"></div></div>';
+  $('stBack').addEventListener('click',()=>{stRun=null;renderStappen()});
+  const ex=x.e;let ply=0,failed=false;
+  stBoard=makeBoard($('stB'),(from,to)=>{const g=stBoard.game;const exp=ex.l[ply];const c=g.moves({square:from,verbose:true}).filter(m=>m.to===to);
+    const promo=c[0]&&c[0].promotion?(exp&&exp.slice(0,4)===from+to&&exp[4]?exp[4]:'q'):undefined;const u=from+to+(promo||'');
+    const m=g.move({from,to,promotion:promo});if(!m)return;stBoard.last=[from,to];stBoard.locked=true;stBoard.draw();
+    const last=ply>=ex.l.length-1;
+    const ok=u===exp||(last&&ex.a&&ex.a.includes(u))||(last&&ex.m&&g.in_checkmate());
+    if(!ok){failed=true;stAnswer(false,'Nicht der gesuchte Zug: '+figurine(m.san)+'.',ex);return}
+    if(last){stAnswer(true,g.in_checkmate()?'Richtig, Matt!':'Richtig, '+figurine(m.san)+'.',ex);return}
+    const f=$('stFb');f.hidden=false;f.className='fb hint';f.textContent='Gut, '+figurine(m.san)+'. Der Gegner antwortet …';
+    setTimeout(()=>{if(stBoard!==B)return;const r=ex.l[ply+1];const mm=g.move({from:r.slice(0,2),to:r.slice(2,4),promotion:r[4]||undefined});stBoard.last=[r.slice(0,2),r.slice(2,4)];ply+=2;stBoard.locked=false;stBoard.draw();
+      f.textContent='Der Gegner spielt '+figurine(mm?mm.san:r)+'. Weiter.'},600)});
+  const B=stBoard;stBoard.load(ex.f);stBoard.locked=false;stBoard.draw();
+}
+function stAnswer(ok,msg,ex){const R=stRun;R.res.push(ok);const f=$('stFb');f.hidden=false;f.className='fb '+(ok?'ok':'no');f.textContent=msg;
+  const lastQ=R.k>=R.list.length-1;
+  $('stBtns').innerHTML='<button class="b" type="button" id="stSol">Lösung zeigen</button> <button class="b primary" type="button" id="stNx">'+(lastQ?'Auswerten':'Weiter')+'</button>';
+  $('stSol').addEventListener('click',()=>{f.className='fb hint';f.textContent='Lösung: '+germanLine(ex.f,ex.l).text;animateLine(stBoard,ex.f,ex.l,(t,l)=>{f.textContent=t+(l?'  (Ende der Lösung)':'')},1000)});
+  $('stNx').addEventListener('click',()=>{if(lastQ)stFinish();else{R.k++;stRender()}});
+  const chips=$('v-st').querySelectorAll('.res span');if(chips[R.k])chips[R.k].className=ok?'ok':'no';
+}
+async function stFinish(){
+  clearTimeout(animTimer);const R=stRun;const n=R.list.length,r=R.res.filter(Boolean).length,pass=r>=Math.ceil(n*ST_PASS);const d=today();
+  const mins=Math.max(1,Math.min(90,Math.round((Date.now()-R.t0)/60000)));
+  if(R.kind==='lektion'){const o=stStand.l[R.id]||{};stStand.l[R.id]={best:Math.max(o.best||0,r),n,ok:o.ok||(pass?d:null),zuletzt:d,versuche:(o.versuche||0)+1}}
+  if(R.kind==='test'){const o=stStand.t[R.level]||{};stStand.t[R.level]={best:Math.max(o.best||0,r),n,ok:o.ok||(pass?d:null),zuletzt:d}}
+  const wrong=R.list.filter((_,i)=>!R.res[i]).map(x=>x.i);
+  const doc={typ:'stappen',datum:d,ts:new Date().toISOString(),minuten:mins,lektion:R.title+(R.kind==='wdh'?' (Wiederholung)':''),richtig:r,gesamt:n,notiz:R.kind==='wdh'?'':pass?'bestanden':'noch nicht bestanden, nötig '+Math.ceil(n*ST_PASS)};
+  const id='stappen-'+Date.now();sitzungen.push({id,...doc});
+  if(R.kind!=='wdh')await stSave();
+  if(db){try{await db.doc('sitzungen/'+id).set(doc)}catch(e){}}
+  const nx=stNext();const box=$('v-st');
+  box.innerHTML='<div class="card st-run"><h3 style="margin:0 0 6px">'+R.title+'</h3><div class="res">'+R.res.map((ok,i)=>'<span class="'+(ok?'ok':'no')+'">'+(i+1)+'</span>').join('')+'</div>'+
+    '<p class="q">'+r+' von '+n+' richtig. '+(R.kind==='wdh'?'Wiederholung erledigt.':pass?(R.kind==='test'?'Stufe '+R.level+' geschafft.':'Bestanden.'):'Noch nicht bestanden, nötig sind '+Math.ceil(n*ST_PASS)+'. Lies die Erklärung noch einmal und versuch es wieder.')+'</p>'+
+    '<div class="btns">'+(wrong.length&&R.kind!=='test'?'<button class="b" type="button" id="stWdh">Fehler wiederholen</button> ':'')+(!pass&&R.kind==='lektion'?'<button class="b" type="button" id="stAgain">Lektion neu starten</button> ':'')+
+    (nx&&(pass||R.kind==='wdh')?'<button class="b primary" type="button" id="stNext">Weiter: '+nx.id+' '+nx.title+'</button> ':'')+'<button class="b" type="button" id="stHome">Zur Übersicht</button></div></div>';
+  const id0=R.id;stRun=null;
+  if($('stWdh'))$('stWdh').addEventListener('click',()=>stStart(id0,wrong));
+  if($('stAgain'))$('stAgain').addEventListener('click',()=>stStart(id0));
+  if($('stNext'))$('stNext').addEventListener('click',()=>stStart(nx.id));
+  $('stHome').addEventListener('click',renderStappen);
+}
 
 /* Abfrage des Tages */
 const QBANK={
@@ -668,7 +857,7 @@ function renderHeute(){
 }
 
 /* Gestaltung: Reiter, Farben, Schrift, Seitenleisten. Gespeichert im Konto (Dokument einstellungen/ui) und lokal als Rückfall. */
-const TABS=[['heute','Heute'],['wp','Woodpecker'],['sm','Smirnov'],['sp','Spielen'],['fs','Fortschritt'],['an','Anpassen'],['log','Eintragen']];
+const TABS=[['heute','Heute'],['wp','Woodpecker'],['sm','Smirnov'],['st','Stappen'],['sp','Spielen'],['fs','Fortschritt'],['an','Anpassen'],['log','Eintragen']];
 const VIEWS=TABS.map(t=>t[0]);
 const FONTS={'':{n:'Standard (IBM Plex)',v:''},read:{n:'Gut lesbar (Atkinson)',v:'"Atkinson Hyperlegible",system-ui,sans-serif'},serif:{n:'Buchschrift (Literata)',v:'"Literata",Georgia,serif'},mono:{n:'Schreibmaschine',v:'ui-monospace,Menlo,Consolas,monospace'}};
 const SIZES={'':{n:'Standard',px:''},s:{n:'Klein',px:'14px'},l:{n:'Groß',px:'17px'},xl:{n:'Sehr groß',px:'19px'}};
@@ -715,7 +904,7 @@ function show(v){
   curView=v;drawTabs();
   VIEWS.forEach(k=>$('v-'+k).hidden=k!==v);
   try{localStorage.setItem('tab',v)}catch(e){}
-  if(v==='fs')renderProgress();if(v==='sm')renderLessons();if(v==='heute')renderHeute();if(v==='an')renderCustomize();
+  if(v==='fs')renderProgress();if(v==='sm')renderLessons();if(v==='st')renderStappen();if(v==='heute')renderHeute();if(v==='an')renderCustomize();
   const sel=document.querySelector('#tabs [aria-selected="true"]');if(sel&&sel.scrollIntoView)try{sel.scrollIntoView({block:'nearest',inline:'nearest'})}catch(e){}
 }
 $('tabs').addEventListener('click',e=>{const b=e.target.closest('button[data-v]');if(b)show(b.dataset.v)});
@@ -773,7 +962,7 @@ $('tabs').addEventListener('click',e=>{const b=e.target.closest('button[data-v]'
   [['v-heute','heute'],['v-an','an'],['sideL','sideL'],['sideR','sideR']].forEach(([id,key])=>{const c=document.getElementById(id);if(!c)return;
     new MutationObserver(()=>enhance(c,key)).observe(c,{childList:true,subtree:true});enhance(c,key)});
 })();
-const hashV={heute:'heute',spielen:'sp',woodpecker:'wp',eintragen:'log',fortschritt:'fs',anpassen:'an'}[location.hash.slice(1)];
+const hashV={heute:'heute',spielen:'sp',woodpecker:'wp',stappen:'st',eintragen:'log',fortschritt:'fs',anpassen:'an'}[location.hash.slice(1)];
 let startTab=hashV;try{startTab=startTab||localStorage.getItem('tab')}catch(e){}
 
 /* Anpassen */
@@ -1303,8 +1492,8 @@ $('fRate').addEventListener('submit',e=>{e.preventDefault();addEntry({typ:'wertu
 const svgNS='http://www.w3.org/2000/svg';
 function el(t,a,parent){const e=document.createElementNS(svgNS,t);for(const k in a)e.setAttribute(k,a[k]);if(parent)parent.appendChild(e);return e}
 function txt(parent,x,y,s,anchor){const t=el('text',{x,y,'text-anchor':anchor||'start'},parent);t.textContent=s;return t}
-const COL={woodpecker:'var(--c-wp)',partie:'var(--c-partie)',smirnov:'var(--c-smirnov)',abfrage:'var(--c-abfrage)',puzzles:'var(--c-puzzle)',analyse:'var(--c-abfrage)'};
-const NAME={woodpecker:'Woodpecker',partie:'Partie',smirnov:'Smirnov',abfrage:'Abfrage',puzzles:'Puzzles',analyse:'Auswertung'};
+const COL={woodpecker:'var(--c-wp)',partie:'var(--c-partie)',smirnov:'var(--c-smirnov)',abfrage:'var(--c-abfrage)',puzzles:'var(--c-puzzle)',analyse:'var(--c-abfrage)',stappen:'var(--c-stappen)'};
+const NAME={woodpecker:'Woodpecker',partie:'Partie',smirnov:'Smirnov',abfrage:'Abfrage',puzzles:'Puzzles',analyse:'Auswertung',stappen:'Stappen'};
 function emptyChart(id,msg){$(id).innerHTML='<div class="empty">'+msg+'</div>'}
 function chartMinutes(){
   const W=320,H=160,L=28,B=22,T=8;const days=[];for(let i=27;i>=0;i--)days.push(addDays(today(),-i));
@@ -1316,7 +1505,7 @@ function chartMinutes(){
   const ph=H-B-T, bw=(W-L-4)/28;
   [0,yMax/2,yMax].forEach(v=>{const y=T+ph-ph*v/yMax;el('line',{x1:L,x2:W-2,y1:y,y2:y,stroke:'var(--line)','stroke-width':1},svg);txt(svg,L-4,y+3,String(v),'end')});
   const y30=T+ph-ph*30/yMax;el('line',{x1:L,x2:W-2,y1:y30,y2:y30,stroke:'var(--accent)','stroke-dasharray':'3 3','stroke-width':1},svg);txt(svg,W-2,y30-3,'Ziel 30','end');
-  days.forEach((d,i)=>{let y=T+ph;['woodpecker','partie','smirnov','abfrage','puzzles','analyse'].forEach(k=>{const m=per[d][k];if(!m)return;const h=ph*m/yMax;y-=h;el('rect',{x:L+i*bw+1,y,width:Math.max(1,bw-2),height:h,fill:COL[k]},svg)});
+  days.forEach((d,i)=>{let y=T+ph;['woodpecker','partie','smirnov','abfrage','puzzles','analyse','stappen'].forEach(k=>{const m=per[d][k];if(!m)return;const h=ph*m/yMax;y-=h;el('rect',{x:L+i*bw+1,y,width:Math.max(1,bw-2),height:h,fill:COL[k]},svg)});
     if(i%7===0||i===27)txt(svg,i===27?W-2:L+i*bw+bw/2,H-6,deDate(d).slice(0,5),i===27?'end':'middle')});
   $('chMin').innerHTML='';$('chMin').appendChild(svg);
 }
@@ -1384,6 +1573,7 @@ function renderProgress(){
     else if(s.typ==='smirnov'){was='Smirnov: '+(s.kurs||'')+(s.lektion?', '+s.lektion:'');fe=s.notiz||''}
     else if(s.typ==='abfrage'){was='Abfrage';erg=(s.richtig!=null?s.richtig+' von '+(s.gesamt||3)+' richtig':'');fe=s.notiz||''}
     else if(s.typ==='wertung'){was='Rapid-Wertung';erg='Rapid '+s.rapid}
+    else if(s.typ==='stappen'){was='Stappen: '+(s.lektion||'');erg=s.richtig!=null?s.richtig+' von '+s.gesamt+' richtig':'';fe=s.notiz||''}
     else {was=NAME[s.typ]||s.typ;erg=s.ergebnis||'';fe=s.notiz||''}
     const cells=[deDate(s.datum),was,s.minuten?String(s.minuten):'',erg,fe];
     cells.forEach((c,i)=>{const td=document.createElement('td');if(i===1){td.className='typ';td.style.setProperty('--c',COL[s.typ]||'var(--muted)');td.appendChild(document.createElement('b'))}td.appendChild(document.createTextNode(c));if(i===2)td.className='num';tr.appendChild(td)});
@@ -1403,6 +1593,7 @@ show(startTab||'heute');renderSide();
   db.doc('stand/woodpecker').onSnapshot(s=>{if(s.exists&&!sess){stand=Object.assign({zyklus:1,naechste:1},s.data());renderStand();showPuzzle(Math.min(SET,stand.naechste||1),'idle')}},()=>{});
   db.collection('sitzungen').onSnapshot(q=>{const live=sess?sitzungen.find(s=>s.id===sess.id):null;sitzungen=q.docs.map(d=>({id:d.id,...d.data()}));if(live&&!sitzungen.find(s=>s.id===live.id))sitzungen.push(live);renderStand();checkWpTask();renderSide();if(!$('v-heute').hidden){renderHeute()}if(!$('v-sm').hidden)renderLessons();if(!$('v-fs').hidden)renderProgress()},()=>{});
   db.doc('stand/heute').onSnapshot(s=>{if(s.exists&&s.data().plan){heute=JSON.parse(JSON.stringify(s.data()));if(heute.idx>=heute.plan.length){heute=makePlan(heute.rot||0);saveHeute();return}renderHeute()}else{heute=makePlan(0);saveHeute()}},()=>{});
+  db.doc('stappen/stand').onSnapshot(s=>{if(s.exists&&!stRun){stStand=Object.assign({l:{},t:{}},JSON.parse(JSON.stringify(s.data())));if(curView==='st')renderStappen()}},()=>{});
   db.collection('wertungen').onSnapshot(q=>{wertungen=q.docs.map(d=>({id:d.id,...d.data()}));renderSide();if(!$('v-fs').hidden)renderProgress()},()=>{});
 })();
 })();
