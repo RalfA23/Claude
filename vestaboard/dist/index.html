@@ -428,16 +428,17 @@ body.saver.moved { cursor: default; }
   const anrede = String(meta.anrede || eintrag?.anrede || '').toUpperCase().trim().slice(0, 22);
 
   // Farbwelten: wer sie hat (Tabelle oder user_metadata.farbwelten), bekommt jede neue Nachricht in einer anderen
-  // Farbgebung von Kacheln, Schrift und Rahmen. Ohne bleibt das Board wie gewohnt dunkel mit heller Schrift.
+  // Farbgebung: Kacheln und Rahmen wechseln, die Buchstaben leuchten zeilenweise in mehreren kräftigen Farben.
+  // Ohne bleibt das Board wie gewohnt dunkel mit heller Schrift.
   const FARBWELTEN = [
-    { tile: '#14324f', glyph: '#f6e7b0', frame: '#071522' }, // Nachtblau, Sand
-    { tile: '#3b1d4f', glyph: '#f9c6e8', frame: '#160a1f' }, // Aubergine, Rosa
-    { tile: '#123f2c', glyph: '#d9f5c4', frame: '#061810' }, // Tannengrün, Lindgrün
-    { tile: '#5a1e1a', glyph: '#ffd9a8', frame: '#200907' }, // Weinrot, Aprikose
-    { tile: '#0f4246', glyph: '#bff3ef', frame: '#041819' }, // Petrol, Eisblau
-    { tile: '#4a3510', glyph: '#ffe27a', frame: '#1b1205' }, // Bernstein, Gold
-    { tile: '#e9e4d8', glyph: '#1f2a5a', frame: '#bdb6a6' }, // Papierweiß, Tinte
-    { tile: '#22264a', glyph: '#ffb36b', frame: '#0b0d1d' }, // Indigo, Orange
+    { tile: '#14324f', frame: '#071522', glyphs: ['#ffd23f', '#ff7aa2', '#7ee8fa'] }, // Nachtblau: Gelb, Pink, Türkis
+    { tile: '#3b1d4f', frame: '#160a1f', glyphs: ['#ff9de2', '#ffe066', '#8cf5c0'] }, // Aubergine: Rosa, Gelb, Mint
+    { tile: '#123f2c', frame: '#061810', glyphs: ['#c6ff5e', '#ffb347', '#f2f2f2'] }, // Tannengrün: Lime, Orange, Weiß
+    { tile: '#5a1e1a', frame: '#200907', glyphs: ['#ffd27a', '#7fdbff', '#ff9f80'] }, // Weinrot: Gold, Himmelblau, Lachs
+    { tile: '#0f4246', frame: '#041819', glyphs: ['#bff3ef', '#ffcf5c', '#ff8fab'] }, // Petrol: Eisblau, Gelb, Rosa
+    { tile: '#4a3510', frame: '#1b1205', glyphs: ['#ffe27a', '#9ae6ff', '#ff8a5c'] }, // Bernstein: Gold, Hellblau, Koralle
+    { tile: '#e9e4d8', frame: '#bdb6a6', glyphs: ['#1f2a5a', '#b3261e', '#1d6b3a'] }, // Papierweiß: Tinte, Rot, Grün
+    { tile: '#22264a', frame: '#0b0d1d', glyphs: ['#ffb36b', '#a5f28a', '#e6a8ff'] }, // Indigo: Orange, Grün, Flieder
   ];
   const mitFarbwelten = !!(meta.farbwelten ?? eintrag?.farbwelten);
   let weltIdx = Math.floor(Math.random() * FARBWELTEN.length);
@@ -445,8 +446,9 @@ body.saver.moved { cursor: default; }
     if (!mitFarbwelten) return;
     const w = FARBWELTEN[weltIdx++ % FARBWELTEN.length];
     board.style.setProperty('--tile', w.tile);
-    board.style.setProperty('--glyph', w.glyph);
     board.style.setProperty('--frame', w.frame);
+    // Buchstabenfarbe je Zeile, damit jede Zeile anders leuchtet
+    cells.forEach((c, i) => c.el.style.setProperty('--glyph', w.glyphs[Math.floor(i / COLS) % w.glyphs.length]));
   }
   function grussText(d = new Date()) {
     const h = d.getHours();
