@@ -105,15 +105,67 @@ details[open] summary .ti{color:var(--day)}
 .body li{margin:3px 0}
 .care{background:var(--warn-bg);color:var(--warn-fg);border-radius:10px;padding:10px 14px;font-size:.92rem;margin-top:16px}
 footer{margin-top:40px;color:var(--muted);font-size:.85rem;max-width:70ch}
+/* Krafttraining: Planwahl, Einheit, Übungskarten mit Sätzen */
+.setup{background:var(--surface);border:1px solid var(--line);border-radius:12px;margin-bottom:16px}
+.setup > summary{display:flex;justify-content:space-between;gap:10px;padding:12px 14px;grid-template-columns:none}
+.setup > summary b{font-weight:700}
+.setup > summary span{color:var(--muted);font-size:.9rem}
+.setup .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;padding:0 14px 14px}
+.field{display:flex;flex-direction:column;gap:6px;font-weight:700;font-size:.92rem;min-width:0}
+.seg{display:flex;gap:4px;flex-wrap:wrap}
+.seg button{font:700 .85rem var(--body);padding:7px 12px;border-radius:999px;border:1px solid var(--line);background:var(--bg);color:var(--fg);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.field input[type=date]{font:1rem var(--body);padding:5px 8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--fg)}
+.phase{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:14px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.stat span{font-size:.78rem;color:var(--muted)}
+.stat b{font-family:var(--display);font-size:1.2rem;font-variant-numeric:tabular-nums}
+.phasetxt{margin:-4px 0 16px;color:var(--muted);font-size:.92rem}
+.sessbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.sessbar label{font-weight:700;display:flex;gap:8px;align-items:center}
+.sessbar input{font:1rem var(--body);padding:5px 8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--fg)}
+.exlist{display:flex;flex-direction:column;gap:12px}
+.ex{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.ex header{display:flex;justify-content:space-between;gap:10px;align-items:baseline;flex-wrap:wrap}
+.ex header h3{min-width:0}
+.ex header span{color:var(--muted);font-size:.88rem;font-variant-numeric:tabular-nums}
+.ex .hint{color:var(--muted);font-size:.9rem}
+.ex .last{font-size:.9rem}
+.ex .sugg{font-size:.9rem;font-weight:700;color:var(--ok)}
+.ex .inputs{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
+.ex .inputs label{display:flex;flex-direction:column;gap:3px;font-size:.78rem;color:var(--muted);font-weight:700}
+.ex .inputs input{width:76px;font:1rem var(--body);padding:7px 8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--fg);font-variant-numeric:tabular-nums}
+.ex .inputs input.kg{width:92px}
+.ex .mode{display:flex;gap:4px}
+.ex .mode button{font:700 .78rem var(--body);padding:5px 9px;border-radius:999px;border:1px solid var(--line);background:var(--bg);color:var(--muted);cursor:pointer}
+.ex .mode button[aria-pressed="true"]{background:var(--chip);color:var(--fg);border-color:var(--muted)}
+.ex details{border:0}
+.ex details summary{display:inline;padding:0;font-size:.85rem;font-weight:700;color:var(--day)}
+.ex details p{font-size:.9rem;color:var(--muted);margin-top:4px}
+.savebar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:14px}
+.saved{color:var(--ok);font-weight:700;font-size:.92rem}
+.prog{width:100%;border-collapse:collapse;font-size:.92rem}
+.prog th{text-align:left;color:var(--muted);font-weight:700;padding:6px 8px 6px 0;border-bottom:1px solid var(--line);font-size:.8rem}
+.prog td{padding:8px 8px 8px 0;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums;vertical-align:top}
+.prog td.up{color:var(--ok);font-weight:700}
+.tablewrap{overflow-x:auto}
 </style>
 <div class="wrap">
   <a class="back" href="../">← Portal</a>
   <p class="eyebrow">Lebensplattform · Gesundheit</p>
   <h1>Gesundheit</h1>
-  <p class="lede">Alles zu deiner Gesundheit an einer Stelle: die Huberman-Checkliste, deine Trainingswoche und dein Wissen zu Schlaf, Bewegung, Ernährung und Stress.</p>
+  <p class="lede">Alles zu deiner Gesundheit an einer Stelle: Krafttraining mit Gewichten und Wiederholungen, die Huberman-Checkliste, deine Trainingswoche und dein Wissen zu Schlaf, Bewegung, Ernährung und Stress.</p>
   <div class="gate" id="gate" hidden><p>Melde dich im <a href="../">Portal</a> an, dann siehst du hier deinen Stand. Jedes Konto hat seine eigenen Daten.</p></div>
 
   <div class="today" id="todayCards">
+    <section class="card" aria-labelledby="tTitle">
+      <div class="ic" aria-hidden="true">🏋️</div>
+      <h2 id="tTitle">Training heute</h2>
+      <p class="big" id="tWhat">–</p>
+      <p class="muted" id="tDesc"></p>
+      <p class="muted" id="tWeek"></p>
+      <div class="row"><button type="button" class="btn primary" id="tGo">Training eintragen</button><button type="button" class="btn" id="tDone" aria-pressed="false">Erledigt</button></div>
+    </section>
     <section class="card" aria-labelledby="hTitle">
       <div class="ic" aria-hidden="true">🌅</div>
       <h2 id="hTitle">Huberman-Checkliste</h2>
@@ -124,27 +176,38 @@ footer{margin-top:40px;color:var(--muted);font-size:.85rem;max-width:70ch}
       <div class="sparkd" id="hSparkD" aria-hidden="true"></div>
       <div class="row"><a class="btn primary" href="../huberman/">Checkliste öffnen</a><a class="btn" href="../huberman/#jahr">Jahresüberblick</a></div>
     </section>
-    <section class="card" aria-labelledby="tTitle">
-      <div class="ic" aria-hidden="true">🏋️</div>
-      <h2 id="tTitle">Training heute</h2>
-      <p class="big" id="tWhat">–</p>
-      <p class="muted" id="tDesc"></p>
-      <p class="muted" id="tWeek"></p>
-      <div class="row"><button type="button" class="btn" id="tDone" aria-pressed="false">Erledigt</button></div>
-    </section>
   </div>
   <p class="store" id="store"></p>
 
   <div class="tabs" role="tablist">
-    <button role="tab" id="tab-woche" aria-selected="true" aria-controls="view-woche">Trainingswoche</button>
+    <button role="tab" id="tab-kraft" aria-selected="true" aria-controls="view-kraft">Krafttraining</button>
+    <button role="tab" id="tab-woche" aria-selected="false" aria-controls="view-woche">Woche</button>
+    <button role="tab" id="tab-fortschritt" aria-selected="false" aria-controls="view-fortschritt">Fortschritt</button>
     <button role="tab" id="tab-wissen" aria-selected="false" aria-controls="view-wissen">Wissen</button>
   </div>
 
-  <section id="view-woche" role="tabpanel" aria-labelledby="tab-woche">
-    <div class="plan">
-      <label>Start des 12-Wochen-Plans <input type="date" id="start"></label>
-      <span class="muted" id="planInfo">Trag den ersten Trainingstag ein, dann zählt die Seite die Wochen mit.</span>
+  <section id="view-kraft" role="tabpanel" aria-labelledby="tab-kraft">
+    <details class="setup" id="setup">
+      <summary><b>Dein Plan</b><span id="setupSum"></span></summary>
+      <div class="grid">
+        <div class="field">Start (erster Trainingstag)<input type="date" id="start"></div>
+        <div class="field">Krafttraining pro Woche<div class="seg" data-k="freq"><button type="button" data-v="2">2 Tage</button><button type="button" data-v="3">3 Tage</button></div></div>
+        <div class="field">Art<div class="seg" data-k="art"><button type="button" data-v="gk">Ganzkörper</button><button type="button" data-v="split">Split</button></div></div>
+        <div class="field">Wo<div class="seg" data-k="ort"><button type="button" data-v="studio">Studio mit Geräten</button><button type="button" data-v="kg">Körpergewicht</button></div></div>
+        <div class="field">Übungswechsel nach<div class="seg" data-k="wechsel"><button type="button" data-v="6">6 Wochen</button><button type="button" data-v="8">8 Wochen</button></div></div>
+      </div>
+    </details>
+    <div class="phase" id="phase"></div>
+    <p class="phasetxt" id="phasetxt"></p>
+    <div class="sessbar">
+      <div class="seg" id="sessPick" aria-label="Einheit"></div>
+      <label>Datum <input type="date" id="logDate"></label>
     </div>
+    <div class="exlist" id="exlist"></div>
+    <div class="savebar"><button type="button" class="btn primary" id="saveLog">Training speichern</button><span class="saved" id="savedMsg" aria-live="polite"></span></div>
+  </section>
+
+  <section id="view-woche" role="tabpanel" aria-labelledby="tab-woche" hidden>
     <div class="weekhead">
       <button type="button" class="nav" id="prev" aria-label="Vorherige Woche">‹</button>
       <h2 id="weekTitle"></h2>
@@ -154,44 +217,92 @@ footer{margin-top:40px;color:var(--muted);font-size:.85rem;max-width:70ch}
     <div class="daily">
       <h3>Jeden Tag</h3>
       <ul>
-        <li>Viel gehen: 7.000 bis 10.000 Schritte, gern 10 bis 20 Minuten nach den Mahlzeiten.</li>
-        <li>2 bis 4 Mal pro Woche 10 Minuten Beweglichkeit.</li>
+        <li>Alltagsbewegung: 7.000 bis 8.000 Schritte, ab dem Übungswechsel 8.000 bis 10.000. Nach der größten Mahlzeit 10 bis 15 Minuten gehen.</li>
+        <li>2 bis 4 Mal pro Woche 10 Minuten Beweglichkeit, nicht vor dem Krafttraining.</li>
         <li>Kälte nicht direkt nach dem Krafttraining.</li>
       </ul>
     </div>
   </section>
 
+  <section id="view-fortschritt" role="tabpanel" aria-labelledby="tab-fortschritt" hidden>
+    <p class="muted" style="margin-bottom:10px">Pro Übung: erstes und letztes eingetragenes Gewicht, bei Körpergewicht die besten Wiederholungen.</p>
+    <div class="tablewrap"><table class="prog"><thead><tr><th>Übung</th><th>Start</th><th>Zuletzt</th><th>Zuwachs</th><th>Einheiten</th></tr></thead><tbody id="progBody"></tbody></table></div>
+  </section>
+
   <section id="view-wissen" role="tabpanel" aria-labelledby="tab-wissen" hidden>
-    <p class="muted" style="margin-bottom:10px">Aus deinem Brainiac (Einträge zu Hubermans „Protocols“ und zum Gesundheitsprojekt). Die Checkliste setzt das täglich um.</p>
+    <p class="muted" style="margin-bottom:10px">Aus deinem Brainiac und deinem Trainingsplan im Gesundheitsordner. Die Huberman-Checkliste setzt das täglich um.</p>
     <div class="know" id="know"></div>
     <p class="care">Kein Ersatz für ärztlichen Rat. Supplements nur nach ärztlicher Rücksprache. Befunde und Rohdaten (Apple Health, Oura) bleiben in deinem iCloud-Ordner Claude/Gesundheit und kommen nicht auf diese Seite.</p>
   </section>
 
-  <footer>Gespeichert in deinem Konto: Trainingshäkchen unter gesundheit/training.&lt;Datum&gt;, der Planstart unter gesundheit/einstellungen. Die Huberman-Häkchen bleiben, wo sie sind (huberman/tag.&lt;Datum&gt;).</footer>
+  <footer>Gespeichert in deinem Konto: Krafttraining unter gesundheit/kraft.&lt;Datum&gt;, Häkchen unter gesundheit/training.&lt;Datum&gt;, dein Plan unter gesundheit/einstellungen. Die Huberman-Häkchen bleiben, wo sie sind (huberman/tag.&lt;Datum&gt;).</footer>
 </div>
 <script>
 "use strict";
-// Wochenplan nach Hubermans Sport-Protokoll und Ralfs 12-Wochen-Ganzkörperplan (A+B+A bei FitX Mo/Mi/Fr). Index 0 = Montag.
-const WEEK = [
-  {kind: "kraft", k: "Kraft", t: "Ganzkörper A", d: "FitX, rückenschonend, ohne Kreuzheben."},
-  {kind: "ausdauer", k: "Ausdauer", t: "Zone 2", d: "Locker, du kannst dabei noch sprechen."},
-  {kind: "kraft", k: "Kraft", t: "Ganzkörper B", d: "FitX, rückenschonend, ohne Kreuzheben."},
-  {kind: "intervall", k: "Intervalle", t: "4 × 4 Minuten", d: "Hart, dazwischen locker erholen."},
-  {kind: "kraft", k: "Kraft", t: "Ganzkörper A", d: "FitX, rückenschonend, ohne Kreuzheben."},
-  {kind: "ausdauer", k: "Ausdauer", t: "Lange lockere Einheit", d: "Lang und ruhig, etwa Rad, Laufen oder Wandern."},
-  {kind: "ruhe", k: "Ruhe", t: "Ruhetag", d: "Gehen und Beweglichkeit sind trotzdem gut."}
-];
+// Übungen aus Ralfs Trainingsplan (Studio) und gelenkschonende Varianten mit Körpergewicht. r: Wiederholungsspanne, u: Zusatz zur Spanne, bw: Körpergewicht-Übung, up: so wird sie schwerer.
+const EX = {
+  beinpresse: {n: "Beinpresse", r: [10, 12], d: "Füße eher hoch und schulterbreit, Becken bleibt am Polster, Knie nicht tiefer als etwa 90° und nicht ganz durchdrücken. Ausatmen beim Drücken.", alt: "Glute Bridge am Boden oder kleinerer Radius"},
+  brustpresse: {n: "Brustpresse Maschine", r: [10, 12], d: "Rücken fest am Polster, Schulterblätter hinten unten.", alt: "Butterfly Maschine"},
+  brustschraeg: {n: "Brustpresse schräg Maschine", r: [10, 12], d: "Rücken fest am Polster.", alt: "Brustpresse Maschine"},
+  latzug: {n: "Latzug eng zur Brust", r: [10, 12], d: "Aufrecht sitzen, nicht nach hinten schwingen.", alt: "Latzug einarmig am Kabel"},
+  latzug1: {n: "Latzug einarmig am Kabel", r: [10, 12], u: "je Seite", d: "Aufrecht, Ellenbogen zur Hüfte.", alt: "Latzug eng zur Brust"},
+  beinbeuger: {n: "Beinbeuger sitzend", r: [12, 15], d: "Langsam ablassen (3 Sekunden).", alt: "Beinbeuger liegend, leichter"},
+  seitheben: {n: "Seitheben am Kabel", r: [12, 15], d: "Leichtes Gewicht, kein Schwung.", alt: "Seitheben sitzend mit Kurzhanteln"},
+  pallof: {n: "Pallof Press am Kabel", r: [10, 10], u: "je Seite", d: "Rumpf stabil, nichts dreht sich.", alt: "Pallof Press kniend"},
+  hipthrust: {n: "Hip Thrust Maschine / Glute Bridge", r: [10, 12], d: "Kraft aus dem Po, oben kein Hohlkreuz.", alt: "Glute Bridge am Boden"},
+  rudern: {n: "Rudern Maschine mit Brustauflage", r: [10, 12], d: "Brust bleibt am Polster, so ist der untere Rücken entlastet.", alt: "Rudern am Kabel sitzend, aufrecht"},
+  ruderkabel: {n: "Rudern am Kabel sitzend", r: [10, 12], d: "Aufrecht sitzen, Schulterblätter zusammen, nicht mit dem Oberkörper schwingen.", alt: "Rudern Maschine mit Brustauflage"},
+  abduktoren: {n: "Abduktoren Maschine", r: [15, 20], d: "Stärkt die Hüfte und entlastet die Knie.", alt: "Seitlich liegend Bein heben"},
+  facepulls: {n: "Facepulls am Kabel", r: [12, 15], d: "Seil zur Stirn, Ellenbogen hoch.", alt: "Reverse Butterfly Maschine"},
+  revfly: {n: "Reverse Butterfly Maschine", r: [12, 15], d: "Leicht, Schulterblätter zusammenführen.", alt: "Facepulls am Kabel"},
+  butterfly: {n: "Butterfly Maschine", r: [12, 15], d: "Tempo 4-1-4-1: 4 Sekunden hin, 1 halten, 4 zurück, 1 Pause.", alt: "Brustpresse Maschine, leicht"},
+  schulterpresse: {n: "Schulterpresse Maschine", r: [10, 12], d: "Rücken am Polster, kein Hohlkreuz, ausatmen beim Drücken.", alt: "Seitheben am Kabel"},
+  deadbug: {n: "Dead Bug / Bird Dog", r: [8, 8], u: "je Seite", bw: true, d: "Ohne Gewicht, langsam, der untere Rücken bleibt ruhig.", alt: "Nur Dead Bug, Beine angewinkelt", up: "Langsamer, 3 Sekunden halten"},
+  birddog: {n: "Bird Dog", r: [8, 10], u: "je Seite", bw: true, d: "Vierfüßlerstand, Arm und Gegenbein lang machen, Rücken bleibt gerade.", alt: "Nur Arm oder nur Bein", up: "3 Sekunden halten"},
+  seitstuetz: {n: "Seitstütz (Knie am Boden)", r: [20, 30], u: "Sek. je Seite", bw: true, d: "Rumpf gerade, ruhig atmen. Statt Wiederholungen die Sekunden eintragen.", alt: "Pallof Press am Kabel", up: "Mit gestreckten Beinen"},
+  glutebridge: {n: "Glute Bridge", r: [12, 15], bw: true, d: "Rückenlage, Füße nah am Po, Becken hoch, oben kurz halten. Kein Hohlkreuz.", alt: "Kleinerer Radius", up: "Einbeinig oder Gewicht auf das Becken"},
+  glutebridge1: {n: "Glute Bridge einbeinig", r: [8, 12], u: "je Seite", bw: true, d: "Ein Bein gestreckt, Becken bleibt gerade.", alt: "Glute Bridge beidbeinig", up: "Schultern erhöht (Sofa)"},
+  boxsquat: {n: "Kniebeuge auf Stuhl", r: [10, 15], bw: true, d: "Hinsetzen, bis der Po den Stuhl berührt, wieder aufstehen. Knie im schmerzfreien Bereich.", alt: "Höherer Sitz, kleinerer Radius", up: "4 Sekunden runter oder Rucksack mit Gewicht"},
+  ausfall: {n: "Ausfallschritt rückwärts mit Halt", r: [8, 10], u: "je Seite", bw: true, d: "Kleiner Schritt, an Wand oder Stuhl festhalten. Nur wenn das Knie schmerzfrei ist.", alt: "Kniebeuge auf Stuhl", up: "Ohne Halt"},
+  legcurl: {n: "Beinbeuger am Boden mit Handtuch", r: [8, 12], bw: true, d: "Rückenlage, Fersen auf Handtuch (glatter Boden), Becken hoch und Fersen heranziehen.", alt: "Glute Bridge", up: "Einbeinig"},
+  seitbein: {n: "Seitlich liegend Bein heben", r: [15, 20], u: "je Seite", bw: true, d: "Für Hüfte und Knie, Fußspitze leicht nach unten.", alt: "Kleinerer Radius", up: "Oben 2 Sekunden halten"},
+  liegeErh: {n: "Liegestütz erhöht", r: [8, 15], bw: true, d: "Hände auf Tisch oder Bank, Körper gerade wie ein Brett.", alt: "Liegestütz an der Wand", up: "Niedriger abstützen, bis zum Boden"},
+  liegeBoden: {n: "Liegestütz", r: [6, 12], bw: true, d: "Körper gerade, Ellenbogen etwa 45° zum Körper.", alt: "Liegestütz erhöht", up: "Langsamer runter (3 Sekunden)"},
+  pike: {n: "Pike-Liegestütz, Hände erhöht", r: [6, 10], bw: true, d: "Po hoch, Kopf Richtung Hände senken. Für die Schultern, kein Hohlkreuz.", alt: "Liegestütz erhöht", up: "Füße erhöht"},
+  tischrudern: {n: "Rudern unter dem Tisch", r: [8, 12], bw: true, d: "Unter einen stabilen Tisch legen, Tischkante greifen, Brust zur Kante ziehen, Körper gerade.", alt: "Knie angewinkelt", up: "Beine gestreckt, Füße weiter vorn"},
+  ytw: {n: "Y-T-W in Bauchlage", r: [8, 8], u: "je Buchstabe", bw: true, d: "Arme in Y-, T- und W-Form leicht anheben, Blick zum Boden.", alt: "Nur T", up: "Kleine Wasserflaschen in den Händen"},
+  plank: {n: "Unterarmstütz", r: [20, 40], u: "Sek.", bw: true, d: "Körper gerade, Po nicht zu hoch, ruhig atmen.", alt: "Auf den Knien", up: "Länger halten"}
+};
+// Einheiten je Plan. Index 0 = Phase 1, 1 = Phase 2 (nach dem Übungswechsel).
+const UNITS = {
+  studio: {
+    A: {n: "Ganzkörper A", e: [["beinpresse", "brustpresse", "latzug", "beinbeuger", "seitheben", "pallof"], ["beinpresse", "brustschraeg", "latzug", "beinbeuger", "schulterpresse", "seitstuetz"]]},
+    B: {n: "Ganzkörper B", e: [["hipthrust", "rudern", "brustschraeg", "abduktoren", "facepulls", "deadbug"], ["hipthrust", "rudern", "butterfly", "latzug1", "abduktoren", "facepulls"]]},
+    O: {n: "Oberkörper", e: [["brustpresse", "latzug", "rudern", "seitheben", "facepulls", "pallof"], ["brustschraeg", "latzug1", "ruderkabel", "schulterpresse", "butterfly", "revfly"]]},
+    U: {n: "Unterkörper und Rumpf", e: [["beinpresse", "hipthrust", "beinbeuger", "abduktoren", "deadbug"], ["beinpresse", "hipthrust", "beinbeuger", "abduktoren", "seitstuetz"]]},
+    D: {n: "Drücken", e: [["brustpresse", "brustschraeg", "seitheben", "pallof"], ["brustschraeg", "schulterpresse", "butterfly", "seitheben", "seitstuetz"]]},
+    Z: {n: "Ziehen", e: [["latzug", "rudern", "facepulls", "deadbug"], ["latzug1", "ruderkabel", "revfly", "facepulls", "birddog"]]},
+    L: {n: "Beine", e: [["beinpresse", "hipthrust", "beinbeuger", "abduktoren"], ["beinpresse", "hipthrust", "beinbeuger", "abduktoren", "glutebridge1"]]}
+  },
+  kg: {
+    A: {n: "Ganzkörper A", e: [["boxsquat", "liegeErh", "tischrudern", "seitbein", "deadbug"], ["boxsquat", "liegeBoden", "tischrudern", "legcurl", "pike", "seitstuetz"]]},
+    B: {n: "Ganzkörper B", e: [["glutebridge", "tischrudern", "liegeErh", "legcurl", "ytw", "birddog"], ["glutebridge1", "tischrudern", "liegeBoden", "ausfall", "ytw", "plank"]]},
+    O: {n: "Oberkörper", e: [["liegeErh", "tischrudern", "ytw", "plank"], ["liegeBoden", "tischrudern", "pike", "ytw", "seitstuetz"]]},
+    U: {n: "Unterkörper und Rumpf", e: [["boxsquat", "glutebridge", "legcurl", "seitbein", "deadbug"], ["boxsquat", "glutebridge1", "legcurl", "ausfall", "birddog"]]}
+  }
+};
 const WD = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
 const KNOW = [
   {i: "🛏️", t: "Schlaf", s: "Feste Zeiten, Licht und Koffein steuern", p: ["Feste Aufstehzeit, am Wochenende höchstens 1 Stunde Abweichung.", "Morgens 5 bis 30 Minuten Tageslicht, spätnachmittags 10 bis 20 Minuten tiefe Sonne.", "Abends Licht dimmen, 1 Stunde vor dem Bett keine Bildschirme.", "Kaffee erst 60 bis 90 Minuten nach dem Aufstehen und 8 bis 10 Stunden vor dem Schlaf nicht mehr.", "Kein Alkohol 8 Stunden vorher, Schlafzimmer 16 bis 19 °C.", "Gegen Schlafdefizit NSDR oder ein Nap bis 20 Minuten."]},
   {i: "☀️", t: "Licht", s: "Morgens hell, abends warm", p: ["In der ersten Stunde helles Licht, am besten draußen.", "Wenn es noch dunkel ist: Tageslichtlampe mit etwa 10.000 Lux.", "Tagsüber Haut ans Sonnenlicht, ohne Sonnenbrand.", "Abends nur warmes oder rotes Licht, nachts kein helles Licht. Rotlicht für die Augen nur schwach und mit Vorsicht."]},
   {i: "🏃", t: "Bewegung", s: "Kraft, Ausdauer, viel Gehen", p: ["Täglich 7.000 bis 10.000 Schritte, 10 bis 20 Minuten nach Mahlzeiten.", "Dreimal pro Woche Kraft, dreimal Ausdauer, davon einmal Intervalle 4 × 4 Minuten.", "2 bis 4 Mal 10 Minuten Beweglichkeit.", "Wochenplan: Mo/Mi/Fr Kraft, Di Zone 2, Do Intervalle, Sa lange lockere Ausdauer, So Ruhetag.", "Kälte nicht direkt nach dem Krafttraining."]},
-  {i: "🏋️", t: "Dein Trainingsplan", s: "12 Wochen Ganzkörper bei FitX", p: ["12-Wochen-Ganzkörperplan A+B+A, Montag, Mittwoch und Freitag bei FitX.", "Grundlage ist der Sjard-Plan von 2023, rückenschonend umgebaut, ohne Kreuzheben.", "Die Übungen stehen in deinem Excel-Plan im Gesundheitsordner."]},
+  {i: "🏋️", t: "Dein Trainingsplan", s: "Gewicht finden, steigern, wechseln", p: ["Aufwärmen: 5 bis 10 Minuten locker auf Rad oder Crosstrainer, Arme kreisen, Beine schwingen. Vor der ersten Bein- und Drückübung 2 Aufwärmsätze (etwa 12 × mit 50 %, 6 × mit 70 %). Kein statisches Dehnen vorher.", "Tempo: 3 Sekunden ablassen, kurz halten, 1 bis 2 Sekunden kontrolliert hoch und dabei ausatmen. Kein Schwung, keine Pressatmung.", "RIR heißt Wiederholungen in Reserve: Bei RIR 3 könntest du noch 3 saubere Wiederholungen machen.", "Woche 1 und 2 bleiben gleich und bewusst leicht. Ab Woche 3 doppelte Progression: Schaffst du in allen Sätzen das obere Ende der Spanne, nimmst du beim nächsten Mal die nächste Stufe (meist +2,5 kg), sonst gleiches Gewicht und mehr Wiederholungen.", "Nach 6 oder 8 Wochen wechseln die Übungen, die Wechselwoche ist leicht (Deload, etwa 70 % Gewicht).", "Pausen: 90 bis 120 Sekunden bei Beinpresse, Hip Thrust, Pressen und Rudern, sonst etwa 60 Sekunden.", "Schmerzregel: Schmerz bis 3 von 10 ist okay, wenn es am nächsten Tag nicht schlimmer ist. Darüber oder stechend: abbrechen und beim nächsten Mal leichter, kleinerer Bewegungsradius oder die Alternative.", "Mit Körpergewicht steigerst du über die schwerere Variante, langsameres Tempo oder mehr Wiederholungen."]},
   {i: "🥗", t: "Ernährung", s: "Unverarbeitet, viel Protein", p: ["Mindestens 90 % unverarbeitete Lebensmittel, bei jeder Mahlzeit viel Protein.", "Kohlenhydrate vor allem aus Gemüse, Hülsenfrüchten und Obst, dazu gesunde Fette.", "Täglich 2 bis 4 kleine Portionen Fermentiertes ohne Zucker, 2 bis 3 Mal pro Woche fetter Fisch.", "Viel trinken, vor allem in den ersten 10 Stunden nach dem Aufstehen.", "Dein Plan: Roscher 90-Tage-Challenge mit Abgleich in Yazio. Die Kalorien sind ein vorläufiger Richtwert, feste Werte erst nach den Arztwerten."]},
   {i: "🌬️", t: "Stress", s: "Seufzer, Meditation, NSDR, Kälte", p: ["Akut 1 bis 3 physiologische Seufzer: zweimal durch die Nase ein, lang durch den Mund aus.", "Morgens 3 bis 10 Minuten Mini-Meditation, nachmittags 10 bis 20 Minuten NSDR.", "Kälte insgesamt etwa 11 Minuten pro Woche, am besten morgens.", "Supplements wie Ashwagandha oder L-Theanin nur nach ärztlicher Rücksprache."]},
   {i: "🎯", t: "Fokus und Lernen", s: "Blöcke bis 90 Minuten", p: ["Vor Arbeitsblöcken 30 bis 60 Sekunden auf einen Punkt schauen.", "Fokusblöcke bis 90 Minuten, Handy in einen anderen Raum.", "Morgens 2 Minuten mentales Kontrastieren: Ziel, Hindernis, Wenn-dann-Plan.", "Beim Lernen 10-Sekunden-Minipausen, abends 2 bis 5 Minuten Gelerntes im Kopf wiederholen, danach gut schlafen."]},
   {i: "🌱", t: "Persönliches Wachstum", s: "Gegenwart und gute Entscheidungen", p: ["Mehrmals täglich bewusst in der Gegenwart ankommen.", "Entscheidungen nach James Hollis prüfen: „Macht mich das größer oder kleiner?“", "Bei Bedarf expressives Schreiben an 4 Tagen je 15 bis 30 Minuten über ein belastendes Erlebnis.", "Trauer als Lernprozess verstehen."]}
 ];
+
 
 const $ = id => document.getElementById(id);
 const pad = n => String(n).padStart(2, "0");
@@ -200,15 +311,19 @@ const parse = s => { const [y, m, d] = s.split("-").map(Number); return new Date
 const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
 const monday = d => addDays(new Date(d.getFullYear(), d.getMonth(), d.getDate()), -((d.getDay() + 6) % 7));
 const wdIndex = d => (d.getDay() + 6) % 7;
+const fmtKg = x => String(Math.round(x * 100) / 100).replace(".", ",");
+const range = e => e.r[0] === e.r[1] ? String(e.r[0]) : e.r[0] + "–" + e.r[1];
 
-let sb = null, user = null, offset = 0;
-let train = {}, settings = {};
-const TRAIN = "gesundheit/training.", SET = "gesundheit/einstellungen";
+let sb = null, user = null, offset = 0, unitPick = null;
+let train = {}, kraft = {}, settings = {};
+const TRAIN = "gesundheit/training.", KRAFT = "gesundheit/kraft.", SET = "gesundheit/einstellungen";
+const DEF = {freq: "3", art: "gk", ort: "studio", wechsel: "6"};
+const cfg = k => settings[k] || DEF[k];
 const lkey = k => "gesundheit-" + (user ? user.id : "anon") + "-" + k;
-function saveLocal() { try { localStorage.setItem(lkey("train"), JSON.stringify(train)); localStorage.setItem(lkey("set"), JSON.stringify(settings)); } catch (e) {} }
+function saveLocal() { try { localStorage.setItem(lkey("train"), JSON.stringify(train)); localStorage.setItem(lkey("kraft"), JSON.stringify(kraft)); localStorage.setItem(lkey("set"), JSON.stringify(settings)); } catch (e) {} }
 function loadLocal() {
-  try { train = JSON.parse(localStorage.getItem(lkey("train")) || "{}") || {}; } catch (e) { train = {}; }
-  try { settings = JSON.parse(localStorage.getItem(lkey("set")) || "{}") || {}; } catch (e) { settings = {}; }
+  const rd = k => { try { return JSON.parse(localStorage.getItem(lkey(k)) || "{}") || {}; } catch (e) { return {}; } };
+  train = rd("train"); kraft = rd("kraft"); settings = rd("set");
 }
 function setStore(s) {
   const el = $("store"); el.dataset.state = s;
@@ -219,47 +334,189 @@ async function put(path, data) {
   if (!sb || !user) return;
   try { const r = await sb.from("schach_docs").upsert({user_id: user.id, path, data, updated_at: new Date().toISOString()}); if (r.error) throw r.error; setStore("db"); } catch (e) { setStore("error"); }
 }
-async function toggle(date) {
-  const on = !(train[date] && train[date].done);
-  train[date] = {done: on};
-  render();
+
+/* ---------- Plan: Woche, Phase, Einheiten ---------- */
+function planWeek(d) {
+  if (!settings.start || !/^\d{4}-\d\d-\d\d$/.test(settings.start)) return null;
+  return Math.floor((monday(d) - monday(parse(settings.start))) / (7 * 864e5)) + 1;
+}
+// Woche 1–2 gleich und leicht, ab Woche 3 steigern, nach 6 oder 8 Wochen Übungswechsel mit leichter Lernwoche.
+function weekParams(n) {
+  const S = +cfg("wechsel");
+  if (n === null || n < 1) return {n, ph: 0, sets: 2, rir: "4", txt: "Woche 1 und 2: Gewicht finden und gleich lassen, bewusst leicht.", steigern: false};
+  if (n <= 2) return {n, ph: 0, sets: 2, rir: n === 1 ? "4" : "3–4", txt: "Einstieg: Gewicht finden und in beiden Wochen gleich lassen. Technik vor Gewicht.", steigern: false};
+  if (n <= S) return {n, ph: 0, sets: 3, rir: n <= 4 ? "3" : "2–3", txt: "Aufbau: Schaffst du in allen Sätzen das obere Ende der Spanne, nimm beim nächsten Mal die nächste Stufe (meist +2,5 kg).", steigern: true};
+  if (n === S + 1) return {n, ph: 1, sets: 2, rir: "4", txt: "Übungswechsel: neue Übungen für andere Reize. Diese Woche leicht (etwa 70 %), Bewegung lernen und Gewicht finden.", steigern: false};
+  const k = n - S - 1;
+  return {n, ph: 1, sets: 3, rir: k === 1 ? "2–3" : k <= 3 ? "2" : "1–2", txt: n > 12 ? "Die 12 Wochen sind geschafft. Für einen neuen Block setz im Plan ein neues Startdatum." : "Steigern mit den neuen Übungen, doppelte Progression wie vorher.", steigern: true};
+}
+function strengthDays() { return cfg("freq") === "2" ? [0, 3] : [0, 2, 4]; }
+// Einheitenfolge der Woche n (A-B-A / B-A-B im Wechsel wie in deinem Plan)
+function unitsOfWeek(n) {
+  const odd = n === null || n < 1 || n % 2 === 1, f = cfg("freq"), art = cfg("art");
+  if (art === "gk") return f === "2" ? ["A", "B"] : odd ? ["A", "B", "A"] : ["B", "A", "B"];
+  if (f === "2") return ["O", "U"];
+  if (cfg("ort") === "studio") return ["D", "Z", "L"];
+  return odd ? ["O", "U", "O"] : ["U", "O", "U"];
+}
+function unitDef(key) { return UNITS[cfg("ort")][key]; }
+function unitChoices() { return cfg("art") === "gk" ? ["A", "B"] : cfg("freq") === "3" && cfg("ort") === "studio" ? ["D", "Z", "L"] : ["O", "U"]; }
+function cardioOf(i, n) {
+  const S = +cfg("wechsel"), f = cfg("freq");
+  const iv = n === null || n < 4 ? null : n <= S ? "Intervalle auf dem Rad: 10 Min locker, 6 × (1 Min zügig / 2 Min locker), 5 Min aus." : n === S + 1 ? null : "Intervalle auf dem Rad: 10 Min locker, 4 × (3 Min zügig / 3 Min locker), 5 Min aus.";
+  const z2 = {k: "ausdauer", t: "Zone 2", d: "30 bis 45 Min Rad oder Crosstrainer, Sprechen in ganzen Sätzen geht noch."};
+  const ivDay = {k: iv ? "intervall" : "ausdauer", t: iv ? "Intervalle" : "Zone 2", d: iv || z2.d};
+  const vt = {k: "ausdauer", t: "Ving Tsun oder Zone 2", d: "Ving Tsun zählt als Training. Ohne Ving Tsun: Zone 2, 30 bis 45 Min."};
+  const sa = {k: "ausdauer", t: "Ving Tsun oder lange lockere Einheit", d: "Ohne Ving Tsun 45 bis 60 Min zügig gehen oder Rad. Mit Ving Tsun keine zusätzliche Einheit."};
+  const so = {k: "ruhe", t: "Ruhetag", d: "Spaziergang und 10 Min Beweglichkeit."};
+  if (f === "2") return [null, vt, ivDay, null, z2, sa, so][i];
+  return [null, vt, null, ivDay, null, sa, so][i];
+}
+function dayPlan(d) {
+  const n = planWeek(d), i = wdIndex(d), sd = strengthDays(), j = sd.indexOf(i);
+  if (j >= 0) { const key = unitsOfWeek(n)[j]; return {k: "kraft", unit: key, t: unitDef(key).n, d: cfg("ort") === "studio" ? "Krafttraining im Studio, etwa 60 Min mit Aufwärmen." : "Krafttraining mit Körpergewicht, etwa 40 Min mit Aufwärmen."}; }
+  return cardioOf(i, n);
+}
+
+/* ---------- Verlauf ---------- */
+function lastOf(id, before) {
+  const ds = Object.keys(kraft).filter(d => d < before && kraft[d] && kraft[d].ex && kraft[d].ex[id]).sort();
+  return ds.length ? Object.assign({date: ds[ds.length - 1]}, kraft[ds[ds.length - 1]].ex[id]) : null;
+}
+function descr(x, e) {
+  const reps = (x.reps || []).filter(r => r !== null && r !== "").join(" / ");
+  const w = x.m === "bw" ? "Körpergewicht" + (x.kg ? " + " + fmtKg(x.kg) + " kg" : "") : (x.kg !== null && x.kg !== undefined ? fmtKg(x.kg) + " kg" : "–");
+  return w + (reps ? " × " + reps + (e.u && e.u.indexOf("Sek") === 0 ? " Sek." : "") : "");
+}
+function suggest(e, last, wp) {
+  if (!last) return e.bw ? "Erstes Mal: Wiederholungen eintragen, Ziel " + range(e) + (e.u ? " " + e.u : "") + "." : "Erstes Mal: Gewicht so wählen, dass noch " + wp.rir + " saubere Wiederholungen übrig wären.";
+  const reps = (last.reps || []).map(Number).filter(x => x > 0), top = reps.length && reps.every(r => r >= e.r[1]);
+  const base = last.m === "bw" ? "Körpergewicht" + (last.kg ? " + " + fmtKg(last.kg) + " kg" : "") : fmtKg(+last.kg || 0) + " kg";
+  if (!wp.steigern) return wp.ph === 1 && wp.sets === 2 ? "Leichte Woche: etwa 70 % vom letzten Gewicht." : "Gleich lassen: " + base + ".";
+  if (!top) return "Gleiches Gewicht (" + base + "), mehr Wiederholungen bis " + e.r[1] + ".";
+  if (last.m === "bw") return "Steigern: " + (e.up || "schwerere Variante") + ".";
+  return "Steigern: " + fmtKg((+last.kg || 0) + 2.5) + " kg.";
+}
+
+/* ---------- Krafttraining ---------- */
+function curUnit() {
+  const d = parse($("logDate").value || iso(new Date())), p = dayPlan(d);
+  if (unitPick) return unitPick;
+  if (kraft[iso(d)] && unitChoices().includes(kraft[iso(d)].u)) return kraft[iso(d)].u;
+  if (p && p.k === "kraft") return p.unit;
+  // kein Krafttag: nächste Einheit dieser Woche
+  const n = planWeek(d), us = unitsOfWeek(n), sd = strengthDays(), i = wdIndex(d);
+  const j = sd.findIndex(x => x > i);
+  return us[j >= 0 ? j : 0];
+}
+function renderSetup() {
+  document.querySelectorAll(".seg[data-k]").forEach(s => s.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", b.dataset.v === cfg(s.dataset.k) ? "true" : "false")));
+  $("start").value = settings.start || "";
+  $("setupSum").textContent = cfg("freq") + " Tage · " + (cfg("art") === "gk" ? "Ganzkörper" : "Split") + " · " + (cfg("ort") === "studio" ? "Studio" : "Körpergewicht") + " · Wechsel nach " + cfg("wechsel") + " Wochen";
+  if (!settings.start) $("setup").open = true;
+}
+function renderPhase(d) {
+  const n = planWeek(d), wp = weekParams(n);
+  const st = (lbl, v) => { const s = document.createElement("div"); s.className = "stat"; s.innerHTML = "<span></span><b></b>"; s.firstChild.textContent = lbl; s.lastChild.textContent = v; return s; };
+  const box = $("phase"); box.textContent = "";
+  box.appendChild(st("Woche", n === null ? "–" : n < 1 ? "noch nicht" : n + (n <= 12 ? " von 12" : "")));
+  box.appendChild(st("Übungen", wp.ph ? "Nach dem Wechsel" : "Erster Block"));
+  box.appendChild(st("Sätze", String(wp.sets)));
+  box.appendChild(st("Ziel-RIR", wp.rir));
+  $("phasetxt").textContent = (n === null ? "Trag im Plan deinen ersten Trainingstag ein, dann zählt die Seite die Wochen. " : "") + wp.txt;
+}
+function renderKraft() {
+  const date = $("logDate").value || iso(new Date()), d = parse(date), wp = weekParams(planWeek(d)), key = curUnit();
+  renderSetup(); renderPhase(d);
+  const pick = $("sessPick"); pick.textContent = "";
+  unitChoices().forEach(k => {
+    const b = document.createElement("button"); b.type = "button"; b.textContent = unitDef(k).n; b.setAttribute("aria-pressed", k === key ? "true" : "false");
+    b.addEventListener("click", () => { unitPick = k; renderKraft(); }); pick.appendChild(b);
+  });
+  const saved = kraft[date] && kraft[date].u === key ? kraft[date].ex || {} : {};
+  const list = $("exlist"); list.textContent = "";
+  unitDef(key).e[wp.ph].forEach(id => {
+    const e = EX[id], last = lastOf(id, date), cur = saved[id];
+    let mode = cur ? cur.m : last ? last.m : e.bw ? "bw" : "kg";
+    const card = document.createElement("article"); card.className = "ex"; card.dataset.id = id;
+    card.innerHTML = '<header><h3></h3><span></span></header><p class="hint"></p><p class="last"></p><p class="sugg"></p><div class="mode"><button type="button" data-m="kg">Gewicht</button><button type="button" data-m="bw">Körpergewicht</button></div><div class="inputs"></div><details><summary>Alternative bei Schmerz über 3/10</summary><p></p></details>';
+    card.querySelector("h3").textContent = e.n;
+    card.querySelector("header span").textContent = wp.sets + " × " + range(e) + (e.u ? " " + e.u : "") + " · RIR " + wp.rir;
+    card.querySelector(".hint").textContent = e.d;
+    card.querySelector(".last").textContent = last ? "Letztes Mal (" + parse(last.date).getDate() + "." + (parse(last.date).getMonth() + 1) + "."  + "): " + descr(last, e) : "Noch kein Eintrag.";
+    card.querySelector(".sugg").textContent = suggest(e, last, wp);
+    card.querySelector("details p").textContent = e.alt;
+    const inp = card.querySelector(".inputs");
+    const drawInputs = () => {
+      card.querySelectorAll(".mode button").forEach(b => b.setAttribute("aria-pressed", b.dataset.m === mode ? "true" : "false"));
+      const keepKg = inp.querySelector("input.kg"), keepReps = [...inp.querySelectorAll("input.rep")].map(x => x.value);
+      inp.textContent = "";
+      const kl = document.createElement("label"); kl.textContent = mode === "bw" ? "Zusatz kg" : "Gewicht kg";
+      const ki = document.createElement("input"); ki.className = "kg"; ki.type = "number"; ki.inputMode = "decimal"; ki.step = "0.5"; ki.min = "0";
+      ki.value = keepKg ? keepKg.value : cur && cur.kg != null ? cur.kg : last && last.m === mode && last.kg != null && mode === "kg" ? (wp.steigern && (last.reps || []).map(Number).every(r => r >= e.r[1]) && (last.reps || []).length ? +last.kg + 2.5 : last.kg) : "";
+      ki.placeholder = mode === "bw" ? "0" : "kg"; kl.appendChild(ki); inp.appendChild(kl);
+      for (let s = 0; s < Math.max(wp.sets, cur && cur.reps ? cur.reps.length : 0); s++) {
+        const l = document.createElement("label"); l.textContent = "Satz " + (s + 1) + (e.u && e.u.indexOf("Sek") === 0 ? " (Sek.)" : "");
+        const r = document.createElement("input"); r.className = "rep"; r.type = "number"; r.inputMode = "numeric"; r.min = "0"; r.placeholder = String(e.r[1]);
+        r.value = keepReps[s] !== undefined ? keepReps[s] : cur && cur.reps && cur.reps[s] != null ? cur.reps[s] : "";
+        l.appendChild(r); inp.appendChild(l);
+      }
+    };
+    card.querySelectorAll(".mode button").forEach(b => b.addEventListener("click", () => { mode = b.dataset.m; card.dataset.mode = mode; drawInputs(); }));
+    card.dataset.mode = mode; drawInputs();
+    list.appendChild(card);
+  });
+  $("savedMsg").textContent = kraft[date] && kraft[date].u === key ? "Für diesen Tag gespeichert." : "";
+}
+async function saveKraft() {
+  const date = $("logDate").value || iso(new Date()), key = curUnit(), ex = {};
+  document.querySelectorAll("#exlist .ex").forEach(c => {
+    const kg = c.querySelector("input.kg").value, reps = [...c.querySelectorAll("input.rep")].map(x => x.value === "" ? null : +x.value);
+    if (kg === "" && reps.every(r => r === null)) return;
+    ex[c.dataset.id] = {m: c.dataset.mode, kg: kg === "" ? null : +String(kg).replace(",", "."), reps};
+  });
+  if (!Object.keys(ex).length) { $("savedMsg").textContent = "Trag zuerst Gewicht oder Wiederholungen ein."; return; }
+  kraft[date] = {u: key, w: planWeek(parse(date)), ort: cfg("ort"), ex};
+  train[date] = {done: true};
+  $("savedMsg").textContent = "Gespeichert.";
+  renderToday(); renderWeek(); renderProg();
+  await put(KRAFT + date, kraft[date]);
   await put(TRAIN + date, train[date]);
 }
 
-function planWeek(d) {
-  if (!settings.start || !/^\d{4}-\d\d-\d\d$/.test(settings.start)) return null;
-  const n = Math.floor((monday(d) - monday(parse(settings.start))) / (7 * 864e5)) + 1;
-  return n;
+/* ---------- Heute, Woche, Fortschritt ---------- */
+async function toggle(date) {
+  const on = !(train[date] && train[date].done);
+  train[date] = {done: on};
+  renderToday(); renderWeek();
+  await put(TRAIN + date, train[date]);
 }
 function weekLabel(n) { return n === null ? "" : n < 1 ? "Der Plan beginnt in " + (1 - n) + (1 - n === 1 ? " Woche." : " Wochen.") : n > 12 ? "Die 12 Wochen sind geschafft (Woche " + n + ")." : "Woche " + n + " von 12"; }
-
 function renderToday() {
-  const now = new Date(), w = WEEK[wdIndex(now)], key = iso(now), done = !!(train[key] && train[key].done);
-  $("tWhat").textContent = w.t;
-  $("tDesc").textContent = w.d;
+  const now = new Date(), p = dayPlan(now), key = iso(now), done = !!(train[key] && train[key].done);
+  $("tWhat").textContent = p.t;
+  $("tDesc").textContent = p.d;
   $("tWeek").textContent = weekLabel(planWeek(now));
+  $("tGo").hidden = p.k !== "kraft";
   const b = $("tDone");
-  b.hidden = w.kind === "ruhe";
+  b.hidden = p.k === "ruhe";
   b.setAttribute("aria-pressed", done ? "true" : "false");
   b.textContent = done ? "✓ Erledigt" : "Als erledigt markieren";
 }
 function renderWeek() {
-  const m = addDays(monday(new Date()), offset * 7), today = iso(new Date());
-  const n = planWeek(m);
-  $("weekTitle").textContent = (offset === 0 ? "Diese Woche" : "KW ab " + m.getDate() + "." + (m.getMonth() + 1) + ".") + (n !== null && n >= 1 && n <= 12 ? " · Woche " + n + " von 12" : "");
+  const m = addDays(monday(new Date()), offset * 7), today = iso(new Date()), n = planWeek(m);
+  $("weekTitle").textContent = (offset === 0 ? "Diese Woche" : "Woche ab " + m.getDate() + "." + (m.getMonth() + 1) + ".") + (n !== null && n >= 1 && n <= 12 ? " · Woche " + n + " von 12" : "");
   const box = $("days"); box.textContent = "";
-  let done = 0, due = 0;
-  WEEK.forEach((w, i) => {
-    const d = addDays(m, i), key = iso(d), on = !!(train[key] && train[key].done);
-    if (w.kind !== "ruhe") { due++; if (on) done++; }
+  for (let i = 0; i < 7; i++) {
+    const d = addDays(m, i), key = iso(d), on = !!(train[key] && train[key].done), w = dayPlan(d);
     const row = document.createElement("div");
     row.className = "dayrow" + (key === today ? " is-today" : "");
     row.innerHTML = '<div class="wd"></div><div class="what"><b></b><span class="ds"></span></div>';
     row.querySelector(".wd").innerHTML = WD[i] + "<span>" + d.getDate() + "." + (d.getMonth() + 1) + ".</span>";
-    const tag = document.createElement("span"); tag.className = "kind k-" + w.kind; tag.textContent = w.k;
+    const tag = document.createElement("span"); tag.className = "kind k-" + w.k; tag.textContent = {kraft: "Kraft", ausdauer: "Ausdauer", intervall: "Intervalle", ruhe: "Ruhe"}[w.k];
     const bt = row.querySelector(".what b"); bt.appendChild(tag); bt.appendChild(document.createTextNode(w.t));
-    row.querySelector(".ds").textContent = w.d;
-    if (w.kind !== "ruhe") {
+    row.querySelector(".ds").textContent = w.k === "kraft" ? unitDef(w.unit).e[weekParams(n).ph].map(id => EX[id].n).join(", ") : w.d;
+    if (w.k !== "ruhe") {
       const btn = document.createElement("button");
       btn.type = "button"; btn.className = "btn"; btn.setAttribute("aria-pressed", on ? "true" : "false");
       btn.textContent = on ? "✓" : "Erledigt"; btn.setAttribute("aria-label", WD[i] + " " + w.t + (on ? " erledigt" : " als erledigt markieren"));
@@ -267,10 +524,25 @@ function renderWeek() {
       row.appendChild(btn);
     } else row.appendChild(document.createElement("span"));
     box.appendChild(row);
-  });
-  $("planInfo").textContent = settings.start ? weekLabel(planWeek(new Date())) + " · Diese Ansicht: " + done + " von " + due + " Einheiten." : "Trag den ersten Trainingstag ein, dann zählt die Seite die Wochen mit.";
+  }
 }
-function render() { renderToday(); renderWeek(); }
+function renderProg() {
+  const by = {};
+  Object.keys(kraft).sort().forEach(d => Object.entries((kraft[d] && kraft[d].ex) || {}).forEach(([id, x]) => { (by[id] = by[id] || []).push(x); }));
+  const body = $("progBody"); body.textContent = "";
+  const ids = Object.keys(by).filter(id => EX[id]);
+  if (!ids.length) { const tr = document.createElement("tr"); tr.innerHTML = '<td colspan="5" class="muted">Noch keine Einträge. Trag dein erstes Training im Reiter Krafttraining ein.</td>'; body.appendChild(tr); return; }
+  ids.forEach(id => {
+    const xs = by[id], e = EX[id], f = xs[0], l = xs[xs.length - 1];
+    const val = x => x.m === "bw" ? Math.max(0, ...(x.reps || []).map(Number).filter(r => r > 0)) : +x.kg || 0;
+    const unit = x => x.m === "bw" ? (e.u && e.u.indexOf("Sek") === 0 ? " Sek." : " Wdh.") + (x.kg ? " +" + fmtKg(x.kg) + " kg" : "") : " kg";
+    const diff = val(l) - val(f), same = f.m === l.m;
+    const tr = document.createElement("tr");
+    [e.n, fmtKg(val(f)) + unit(f), fmtKg(val(l)) + unit(l), same ? (diff > 0 ? "+" : "") + fmtKg(diff) : "–", String(xs.length)].forEach((t, i) => { const td = document.createElement("td"); td.textContent = t; if (i === 3 && same && diff > 0) td.className = "up"; tr.appendChild(td); });
+    body.appendChild(tr);
+  });
+}
+function render() { renderToday(); renderWeek(); renderKraft(); renderProg(); }
 
 function renderKnow() {
   const box = $("know");
@@ -305,26 +577,34 @@ async function loadHuberman() {
   } catch (e) { $("hTxt").textContent = "Stand gerade nicht abrufbar."; }
 }
 
-const VIEWS = ["woche", "wissen"];
-for (const v of VIEWS) $("tab-" + v).addEventListener("click", () => {
-  for (const x of VIEWS) { $("tab-" + x).setAttribute("aria-selected", x === v ? "true" : "false"); $("view-" + x).hidden = x !== v; }
-});
+const VIEWS = ["kraft", "woche", "fortschritt", "wissen"];
+function show(v) { for (const x of VIEWS) { $("tab-" + x).setAttribute("aria-selected", x === v ? "true" : "false"); $("view-" + x).hidden = x !== v; } }
+for (const v of VIEWS) $("tab-" + v).addEventListener("click", () => show(v));
 $("prev").addEventListener("click", () => { offset--; renderWeek(); });
 $("next").addEventListener("click", () => { offset++; renderWeek(); });
 $("tDone").addEventListener("click", () => toggle(iso(new Date())));
+$("tGo").addEventListener("click", () => { $("logDate").value = iso(new Date()); unitPick = null; renderKraft(); show("kraft"); $("view-kraft").scrollIntoView({behavior: "smooth"}); });
 $("start").addEventListener("change", e => { settings.start = e.target.value || ""; render(); put(SET, settings); });
+document.querySelectorAll(".seg[data-k]").forEach(s => s.addEventListener("click", ev => {
+  const b = ev.target.closest("button"); if (!b) return;
+  settings[s.dataset.k] = b.dataset.v; unitPick = null; render(); put(SET, settings);
+}));
+$("logDate").addEventListener("change", () => { unitPick = null; renderKraft(); });
+$("saveLog").addEventListener("click", saveKraft);
+$("logDate").value = iso(new Date());
+if (location.hash === "#training") show("kraft");
 renderKnow();
 
 (async () => {
-  const cfg = window.SR_CONFIG || {};
+  const c = window.SR_CONFIG || {};
   try {
-    if (!cfg.supabaseUrl || !window.supabase) throw new Error("ohne Konfiguration");
-    sb = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+    if (!c.supabaseUrl || !window.supabase) throw new Error("ohne Konfiguration");
+    sb = window.supabase.createClient(c.supabaseUrl, c.supabaseAnonKey);
     const s = await sb.auth.getSession();
     user = s.data.session ? s.data.session.user : null;
   } catch (e) { user = null; }
   if (!user) { $("gate").hidden = false; $("todayCards").hidden = true; render(); return; }
-  loadLocal(); $("start").value = settings.start || ""; render();
+  loadLocal(); render();
   loadHuberman();
   try {
     const r = await sb.from("schach_docs").select("path,data").eq("user_id", user.id).like("path", "gesundheit/%");
@@ -332,8 +612,8 @@ renderKnow();
     for (const row of r.data || []) {
       if (row.path === SET) { settings = Object.assign({}, row.data || {}); continue; }
       if (row.path.startsWith(TRAIN)) train[row.path.slice(TRAIN.length)] = {done: !!(row.data && row.data.done)};
+      if (row.path.startsWith(KRAFT) && row.data) kraft[row.path.slice(KRAFT.length)] = row.data;
     }
-    $("start").value = settings.start || "";
     saveLocal(); render(); setStore("db");
   } catch (e) { setStore("error"); }
 })();
