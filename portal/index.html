@@ -165,8 +165,9 @@ var COURSES = [
   {id: "wortwuerfel", icon: "🎲", title: "Wortwürfel", text: "Buchstabenwürfel-Wortspiel nach dem Vorbild von Boggle: 16 Würfel, drei Minuten, so viele deutsche Wörter wie möglich. Allein oder zu zweit.", href: "wortwuerfel/"},
   {id: "murmelbahn", icon: "🔮", title: "Murmelbahn", text: "Zum Abschalten: Bei jedem Start eine neue, zufällig gebaute Bahn mit Rampen, Stiften, Schaufelrädern und Pilzen. Murmeln setzen und zuschauen.", href: "murmelbahn/"},
   {id: "vestaboard", icon: "🪧", title: "Vestaboard", text: "Fallblatt-Anzeige wie dein Bildschirmschoner: Uhr, Wetter für Hamburg, Tagesschau, Zitat der Stunde und Sprüche im Wechsel, dazu eigene Texte und Vollbild.", href: "vestaboard/"},
-  // Jedes Konto hat seine eigene Checkliste (huberman/, gespeichert im eigenen Konto). Die Kachel zeigt den heutigen Stand.
-  {id: "huberman", icon: "🌅", title: "Huberman-Protokolle", text: "Deine Tages-Checkliste nach Hubermans „Protocols“: 31 Punkte von morgens bis nachts, ab 80 % ist der Tag geschafft, mit Jahresübersicht und Nachschlagewerk.", href: "huberman/"},
+  // Gesundheit (gesundheit/) bündelt die Huberman-Checkliste (huberman/, Häkchen weiter unter huberman/tag.<datum>), die Trainingswoche und das Wissen.
+  // Die Kachel zeigt den heutigen Huberman-Stand. Früher hieß die Kachel „huberman“, alte Freigaben und Dashboard-Kacheln werden übernommen.
+  {id: "gesundheit", icon: "🫀", title: "Gesundheit", text: "Huberman-Checkliste, Trainingswoche mit dem 12-Wochen-Plan und dein Wissen zu Schlaf, Licht, Bewegung, Ernährung und Stress an einer Stelle.", href: "gesundheit/"},
   // Jedes Konto hat seine eigene Karte (weltkarte/, Orte in schach_docs unter weltkarte/ort.<id>). Die Kachel zeigt, wie viele Orte besucht und geplant sind.
   {id: "weltkarte", icon: "🗺️", title: "Weltkarte", text: "Alle Orte, an denen du warst und wo du noch hin willst, als Pins auf einer großen Weltkarte. Mit Datum, Notizen und Bildern als Andenken.", href: "weltkarte/"},
   // Sprachen (sprachen/): Niederländisch, Japanisch, Thai, Koreanisch, Englisch, Türkisch. Die Kachel zeigt die Punkte aller Sprachen (schach_docs, Pfade sprachen/<sprache>.fortschritt).
@@ -206,7 +207,7 @@ var GEVT = {id: "gevt", icon: "🥋", title: "Ving Tsun Wissen", text: "Frag dei
   // neue Konten bekommen beim Registrieren die Standardmodule. Admins sehen immer alles. GEVT hat seine eigene Freigabe.
   var access = null;
   // „sprachen:niederlaendisch“ gibt nur diese Sprache frei, die Kachel Sprachen erscheint trotzdem.
-  function allowed(id) { return isAdmin || access === null || id === "gevt" || access.some(function (x) { return x === id || x.indexOf(id + ":") === 0; }); }
+  function allowed(id) { return isAdmin || access === null || id === "gevt" || access.some(function (x) { if (x === "huberman") x = "gesundheit"; return x === id || x.indexOf(id + ":") === 0; }); }
   async function loadAccess() {
     var ak = "portal-access-" + user.id;
     try { var ad = await sb.from("app_admins").select("user_id").eq("user_id", user.id).maybeSingle(); isAdmin = !ad.error && !!ad.data; } catch (e) {}
@@ -267,7 +268,7 @@ var GEVT = {id: "gevt", icon: "🥋", title: "Ving Tsun Wissen", text: "Frag dei
     return {v: 1, ts: 0, tiles: t.map(newTile)};
   }
   function newTile(t) { var ty = typeOf(t.type) || {w: 1, h: 1}; return {id: uid(), type: t.type, w: ty.w, h: ty.h, cfg: {}}; }
-  function valid(l) { if (!l || !Array.isArray(l.tiles)) return false; l.tiles = l.tiles.filter(function (t) { return t && typeof t.type === "string"; }); return true; }
+  function valid(l) { if (!l || !Array.isArray(l.tiles)) return false; l.tiles = l.tiles.filter(function (t) { return t && typeof t.type === "string"; }); l.tiles.forEach(function (t) { if (t.type === "kurs:huberman") t.type = "kurs:gesundheit"; }); return true; }
   function readLocal() { try { var x = JSON.parse(localStorage.getItem(lkey()) || "null"); return valid(x) ? x : null; } catch (e) { return null; } }
   function writeLocal() { try { localStorage.setItem(lkey(), JSON.stringify(layout)); return true; } catch (e) { return false; } }
   async function loadLayout() {
@@ -471,7 +472,7 @@ var GEVT = {id: "gevt", icon: "🥋", title: "Ving Tsun Wissen", text: "Frag dei
       b.appendChild(el("p", {style: "font-size:.85rem", text: lessonsDone === null ? "Ich prüfe, wie weit du im Lesetraining bist." : "Schließe zuerst alle 48 Lektionen des Lesetrainings ab. Du bist bei " + lessonsDone + " von 48."}));
       return;
     }
-    if (c.id === "huberman") hubermanToday(b, row);
+    if (c.id === "gesundheit") hubermanToday(b, row);
     if (c.id === "sprachen") sprachenStand(b, row);
     if (c.id === "weltkarte") weltkarteStand(b, row);
     row.appendChild(el("a", {class: "btn primary", href: c.href, text: "Öffnen", onclick: function () { if (isNew(c)) setSeen((seen() || []).concat([c.id])); }}));
@@ -485,7 +486,7 @@ var GEVT = {id: "gevt", icon: "🥋", title: "Ving Tsun Wissen", text: "Frag dei
       if (r.error) { txt.textContent = "Stand gerade nicht abrufbar."; return; }
       var d = (r.data && r.data.data) || {}, k = d.done ? Object.keys(d.done).filter(function (x) { return d.done[x]; }).length : 0, tot = d.total || 31;
       bar.style.width = Math.round(k / tot * 100) + "%";
-      txt.textContent = "Heute " + k + " von " + tot + " erledigt";
+      txt.textContent = "Huberman heute " + k + " von " + tot + " erledigt";
     });
   }
 
