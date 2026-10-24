@@ -1,0 +1,501 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0E2A1F">
+<meta name="description" content="Texas Hold'em: gegen den Computer oder mit allen auf der Lebensplattform.">
+<title>Poker</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<script src="../config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<style>
+:root{--bg:#0E2A1F;--panel:rgba(0,0,0,.32);--ink:#F2EEE3;--muted:#B9C7BC;--accent:#E8C26A;--line:rgba(255,255,255,.16);--felt:#17603F;--felt2:#0F4A30;--rail:#5A3A22;--red:#D8463B;--good:#7BD88F;--cw:44px}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font:15px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif}
+body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+header{display:flex;align-items:center;gap:10px;padding:8px 14px;background:var(--panel);border-bottom:1px solid var(--line);flex-wrap:wrap}
+header a.back{color:var(--muted);text-decoration:none;font-size:.9rem;white-space:nowrap}
+header h1{margin:0;font-size:1.15rem;color:var(--accent)}
+header .sp{flex:1}
+button,.btn{font:inherit;color:var(--ink);background:transparent;border:1px solid var(--line);border-radius:10px;min-height:40px;padding:6px 12px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+button:hover{border-color:var(--muted)}
+button:disabled{opacity:.45;cursor:default}
+button.primary{background:var(--accent);color:#1d1606;border-color:var(--accent);font-weight:700}
+button.danger{border-color:#8a3a32}
+button.sm{min-height:32px;padding:3px 9px;font-size:.88rem}
+main{max-width:1100px;margin:0 auto;padding:14px 16px 40px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px}
+.box h2{margin:0 0 6px;font-size:1.15rem;color:var(--accent)}
+.box p{margin:6px 0;color:var(--muted)}
+label.f{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:8px 0;font-size:.95rem}
+select,input[type=text],input[type=number]{font:inherit;color:var(--ink);background:rgba(0,0,0,.35);border:1px solid var(--line);border-radius:8px;padding:6px 8px;min-height:36px}
+input[type=text]{width:100%}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
+.muted{color:var(--muted)}
+.list{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+.item{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:12px;padding:8px 10px}
+.item .t{flex:1;min-width:0}
+.item b{display:block}
+.item small{color:var(--muted)}
+.hidden{display:none!important}
+/* Tisch */
+#tableWrap{max-width:1100px;margin:0 auto;padding:8px 10px 10px}
+#felt{position:relative;width:100%;height:min(62vh,560px);min-height:380px;margin-top:6px}
+#felt .oval{position:absolute;inset:7% 4%;border-radius:50%/50%;background:radial-gradient(ellipse at center,var(--felt) 0%,var(--felt2) 75%);border:12px solid var(--rail);box-shadow:inset 0 0 40px rgba(0,0,0,.45),0 8px 30px rgba(0,0,0,.4)}
+#center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);text-align:center;width:min(70%,420px)}
+#board{display:flex;gap:6px;justify-content:center;min-height:calc(var(--cw)*1.4)}
+#pot{margin-top:6px;font-weight:700;color:var(--accent)}
+#msg{margin-top:4px;font-size:.9rem;min-height:1.3em}
+.card{width:var(--cw);height:calc(var(--cw)*1.4);border-radius:6px;background:#FBF8F1;color:#16161a;display:inline-flex;flex-direction:column;align-items:center;justify-content:center;font-weight:800;line-height:1;box-shadow:0 2px 5px rgba(0,0,0,.35);font-size:calc(var(--cw)*.42);user-select:none;transition:transform .2s}
+.card .s{font-size:1.05em}
+.card.red{color:var(--red)}
+.card.back{background:repeating-linear-gradient(45deg,#7d2a2a 0 6px,#932f2f 6px 12px);border:3px solid #FBF8F1}
+.card.slot{background:rgba(255,255,255,.07);box-shadow:none;border:1px dashed rgba(255,255,255,.18)}
+.card.hi{transform:translateY(-6px);box-shadow:0 0 0 3px var(--accent),0 4px 10px rgba(0,0,0,.4)}
+.card.dim{opacity:.55}
+.seat{position:absolute;transform:translate(-50%,-50%);width:118px;text-align:center;transition:opacity .3s}
+.seat .plate{background:rgba(0,0,0,.6);border:1px solid var(--line);border-radius:12px;padding:4px 6px;position:relative}
+.seat .nm{font-weight:700;font-size:.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.seat .st{font-size:.85rem;color:var(--accent);font-variant-numeric:tabular-nums}
+.seat .la{font-size:.75rem;color:var(--muted);min-height:1.1em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.seat .hc{display:flex;gap:3px;justify-content:center;margin-bottom:3px;min-height:calc(var(--cw)*1.4);--cw:34px}
+.seat.me .hc{--cw:50px}
+.seat.turn .plate{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent),0 0 18px rgba(232,194,106,.5)}
+.seat.fold{opacity:.45}
+.seat.win .plate{border-color:var(--good);box-shadow:0 0 0 2px var(--good),0 0 18px rgba(123,216,143,.6)}
+.seat.away .nm::after{content:" (weg)";font-weight:400;color:var(--muted)}
+.seat .timer{position:absolute;left:6px;right:6px;bottom:2px;height:3px;border-radius:2px;background:var(--accent);transform-origin:left}
+.dealer{position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;background:#fff;color:#111;font-weight:800;font-size:.75rem;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,.5)}
+.bet{position:absolute;transform:translate(-50%,-50%);background:rgba(0,0,0,.55);border-radius:20px;padding:2px 8px 2px 4px;font-size:.8rem;font-weight:700;display:flex;align-items:center;gap:4px;white-space:nowrap}
+.bet::before{content:"";width:14px;height:14px;border-radius:50%;background:radial-gradient(circle,#fff 0 25%,var(--red) 26% 60%,#fff 61% 70%,var(--red) 71%)}
+#bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center;margin-top:8px;min-height:56px}
+#bar .raise{display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:center}
+#bar input[type=range]{width:min(220px,50vw);accent-color:var(--accent)}
+#bar input[type=number]{width:90px}
+#info{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:space-between;font-size:.88rem;color:var(--muted)}
+#log{max-height:150px;overflow:auto;font-size:.82rem;color:var(--muted);margin-top:8px;border-top:1px solid var(--line);padding-top:6px}
+#log div{padding:1px 0}
+dialog{background:#13261d;color:var(--ink);border:1px solid var(--line);border-radius:16px;max-width:min(560px,92vw);padding:18px}
+dialog::backdrop{background:rgba(0,0,0,.6)}
+.rank{display:flex;align-items:center;gap:10px;margin:7px 0;--cw:30px}
+.rank .ex{display:flex;gap:2px}
+.rank b{min-width:9.5em;display:inline-block}
+#toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:#000c;border:1px solid var(--line);border-radius:12px;padding:10px 14px;font-size:.9rem;transition:opacity .4s;z-index:9;max-width:90vw;text-align:center}
+#toast.off{opacity:0;pointer-events:none}
+@media (max-width:640px){
+  :root{--cw:34px}
+  #felt{height:66vh;min-height:430px}
+  #felt .oval{inset:5% 9%;border-width:9px}
+  .seat{width:86px}
+  .seat .hc{--cw:26px}
+  .seat.me .hc{--cw:42px}
+  .seat .nm,.seat .st{font-size:.76rem}
+  .seat .la{font-size:.68rem}
+  #center{width:78%}
+}
+</style>
+</head>
+<body>
+<header>
+  <a class="back" href="../">← Portal</a>
+  <h1>♠ Poker</h1>
+  <span class="sp"></span>
+  <button class="sm" id="helpBtn" type="button">Handrangliste</button>
+  <button class="sm hidden" id="menuBtn" type="button">Menü</button>
+</header>
+
+<main id="menu">
+  <p class="muted" style="margin-top:0">Texas Hold'em No Limit. Spiel gegen Computergegner oder setz dich mit anderen von der Plattform an einen Tisch.</p>
+  <div class="cards">
+    <section class="box">
+      <h2>🤖 Gegen den Computer</h2>
+      <p>Bots mit eigenem Stil: vorsichtig, solide oder wild.</p>
+      <label class="f">Gegner <select id="optBots"><option>1</option><option>2</option><option>3</option><option>4</option><option selected>5</option><option>6</option><option>7</option><option>8</option></select></label>
+      <label class="f">Startchips <select id="optChips"><option>500</option><option selected>1000</option><option>2000</option><option>5000</option></select></label>
+      <label class="f">Blinds <select id="optBlinds"><option value="5">5 / 10</option><option value="10" selected>10 / 20</option><option value="25">25 / 50</option></select></label>
+      <label class="f">Stärke <select id="optLevel"><option value="0">Leicht</option><option value="1" selected>Mittel</option><option value="2">Schwer</option></select></label>
+      <label class="f">Blinds verdoppeln alle 10 Hände <input type="checkbox" id="optRise" checked></label>
+      <div class="row"><button class="primary" id="localStart" type="button">Neues Spiel</button><button id="localResume" class="hidden" type="button">Weiterspielen</button></div>
+      <p id="stats" style="font-size:.88rem"></p>
+    </section>
+    <section class="box">
+      <h2>👥 Mit anderen spielen</h2>
+      <div id="online"><p>Verbinde …</p></div>
+    </section>
+  </div>
+</main>
+
+<div id="tableWrap" class="hidden">
+  <div id="info"><span id="infoL"></span><span id="infoR"></span></div>
+  <div id="felt"><div class="oval"></div><div id="center"><div id="board"></div><div id="pot"></div><div id="msg"></div></div></div>
+  <div id="bar"></div>
+  <div id="log"></div>
+</div>
+
+<dialog id="help">
+  <h2 style="margin-top:0;color:var(--accent)">Handrangliste</h2>
+  <p class="muted" style="margin-top:0">Von oben nach unten: die stärkste zuerst. Es zählen die besten fünf aus deinen zwei Karten und den fünf auf dem Tisch.</p>
+  <div id="ranks"></div>
+  <p class="muted" style="font-size:.88rem">Ablauf: Small und Big Blind setzen Pflichteinsätze, jeder bekommt zwei verdeckte Karten. Dann Setzrunden vor dem Flop, nach dem Flop (3 Karten), Turn und River. Wer am Ende noch dabei ist, zeigt. Wer all-in ist, kann nur den Teil gewinnen, den er selbst gedeckt hat (Side Pots).</p>
+  <div class="row"><button class="primary" type="button" onclick="this.closest('dialog').close()">Schließen</button></div>
+</dialog>
+<div id="toast" class="off"></div>
+
+<script>
+/*__ENGINE__*/
+</script>
+<script>
+/*__NET__*/
+</script>
+<script>
+(function () {
+  "use strict";
+  var $ = function (id) { return document.getElementById(id); };
+  function h(tag, attrs, kids) {
+    var d = document.createElement(tag);
+    if (attrs) for (var k in attrs) { var v = attrs[k]; if (v == null || v === false) continue; if (k === "text") d.textContent = v; else if (k === "class") d.className = v; else if (k.slice(0, 2) === "on") d.addEventListener(k.slice(2), v); else d.setAttribute(k, v); }
+    (kids || []).forEach(function (c) { if (c != null) d.appendChild(typeof c === "string" || typeof c === "number" ? document.createTextNode(String(c)) : c); });
+    return d;
+  }
+  var toastT = 0;
+  function toast(t) { var e = $("toast"); e.textContent = t; e.classList.remove("off"); clearTimeout(toastT); toastT = setTimeout(function () { e.classList.add("off"); }, 2800); }
+  function store(k, v) { try { if (v === undefined) return JSON.parse(localStorage.getItem(k) || "null"); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, JSON.stringify(v)); } catch (e) { return null; } }
+
+  /* ---------- Karten ---------- */
+  function cardEl(c, cls) {
+    if (c === undefined || c === null) return h("div", {class: "card slot"});
+    if (c < 0) return h("div", {class: "card back"});
+    var r = Poker.RANKS[Poker.rank(c)], s = Poker.suit(c);
+    return h("div", {class: "card" + (s === 1 || s === 2 ? " red" : "") + (cls ? " " + cls : ""), title: Poker.cardText(c)}, [h("span", {text: r === "T" ? "10" : r}), h("span", {class: "s", text: Poker.SUITS[s]})]);
+  }
+  (function ranks() {
+    var ex = [["As Ks Qs Js Ts"], ["9h 9c 9d 9s 4c"], ["Kd Kc Kh 7s 7d"], ["Ah Jh 8h 5h 2h"], ["9c 8d 7s 6h 5c"], ["Qs Qd Qc 9h 3s"], ["Jc Jd 4s 4h Ac"], ["Th Tc Ks 6d 2c"], ["Ad Js 8c 5h 3d"]];
+    var names = ["Royal / Straight Flush", "Vierling", "Full House", "Flush", "Straße", "Drilling", "Zwei Paare", "Ein Paar", "Höchste Karte"];
+    ex.forEach(function (e, i) { $("ranks").appendChild(h("div", {class: "rank"}, [h("b", {text: names[i]}), h("span", {class: "ex"}, e[0].split(" ").map(function (x) { return cardEl(Poker.parse(x)); }))])); });
+  })();
+  $("helpBtn").onclick = function () { $("help").showModal(); };
+
+  /* ---------- Tisch zeichnen (für beide Modi) ---------- */
+  // ctl: {me, act(action, amount), extra(bar, view)} – view hat die Form von Poker.publicView.
+  var ctl = null, view = null, deadlineAt = 0, raiseTo = 0, tick = 0;
+  function show(which) {
+    $("menu").classList.toggle("hidden", which !== "menu");
+    $("tableWrap").classList.toggle("hidden", which !== "table");
+    $("menuBtn").classList.toggle("hidden", which === "menu");
+  }
+  function seatPos(i, n, meIdx, r) {
+    var k = (i - meIdx + n) % n, a = Math.PI / 2 + k * 2 * Math.PI / n;
+    return {x: 50 + r[0] * Math.cos(a), y: 50 + r[1] * Math.sin(a)};
+  }
+  function render(v) {
+    view = v; deadlineAt = v && v.left ? Date.now() + v.left : 0;
+    var felt = $("felt");
+    felt.querySelectorAll(".seat,.bet").forEach(function (e) { e.remove(); });
+    if (!v) return;
+    var n = v.players.length, meIdx = Math.max(0, v.players.findIndex(function (p) { return p.id === ctl.me; }));
+    var mobile = innerWidth <= 640, R = mobile ? [41, 43] : [45, 42], RB = mobile ? [26, 27] : [29, 26];
+    var res = v.result, winners = {}, best = {};
+    if (res && v.street === "done") res.pots.forEach(function (p) { p.winners.forEach(function (id) { winners[id] = 1; }); });
+    if (res && res.showdown && v.board.length === 5) v.players.forEach(function (p) { if (winners[p.id] && p.hole[0] >= 0) Poker.bestFive(p.hole.concat(v.board)).forEach(function (c) { best[c] = 1; }); });
+    v.players.forEach(function (p, i) {
+      var pos = seatPos(i, n, meIdx, R), me = p.id === ctl.me, turn = v.toAct === i && v.street !== "done" && v.street !== "idle";
+      var cls = "seat" + (me ? " me" : "") + (turn ? " turn" : "") + (p.folded || (!p.inHand && v.street !== "idle") ? " fold" : "") + (winners[p.id] ? " win" : "") + (p.away ? " away" : "");
+      var hc = h("div", {class: "hc"}, p.inHand && p.hole.length && (!p.folded || me) ? p.hole.map(function (c) { return cardEl(c, best[c] ? "hi" : (res && res.showdown && v.street === "done" && !winners[p.id] && c >= 0 ? "dim" : "")); }) : []);
+      var la = p.last || (p.stack === 0 && !p.inHand ? "Keine Chips" : (!p.inHand && v.street !== "idle" ? "Wartet" : ""));
+      if (res && v.street === "done" && res.hands[p.id]) la = res.hands[p.id];
+      if (res && v.street === "done" && res.won[p.id]) la = "+" + res.won[p.id] + (res.hands[p.id] ? " · " + res.hands[p.id] : "");
+      var plate = h("div", {class: "plate"}, [h("div", {class: "nm", text: p.name}), h("div", {class: "st", text: p.stack + (p.allIn && v.street !== "done" ? " · all-in" : "")}), h("div", {class: "la", text: la})]);
+      if (i === v.button && v.street !== "idle") plate.appendChild(h("span", {class: "dealer", text: "D"}));
+      if (turn && deadlineAt) plate.appendChild(h("i", {class: "timer", id: "timer"}));
+      felt.appendChild(h("div", {class: cls, style: "left:" + pos.x + "%;top:" + pos.y + "%"}, [hc, plate]));
+      if (p.bet > 0) { var b = seatPos(i, n, meIdx, RB); felt.appendChild(h("div", {class: "bet", style: "left:" + b.x + "%;top:" + b.y + "%", text: p.bet})); }
+    });
+    var bd = $("board"); bd.replaceChildren();
+    for (var i = 0; i < 5; i++) bd.appendChild(cardEl(v.board[i], best[v.board[i]] ? "hi" : ""));
+    var pot = Poker.potTotal(v);
+    $("pot").textContent = v.street === "done" && res ? res.pots.map(function (p) { return p.name + " " + p.amount; }).join(" · ") : pot ? "Pot " + pot : "";
+    var msg = "";
+    if (v.street === "done" && res) msg = res.pots.map(function (p) { return p.winners.map(name).join(" und ") + (p.winners.length > 1 ? " teilen" : " gewinnt") + (res.pots.length > 1 ? " den " + p.name : "") + (p.hand ? " mit " + p.hand : ""); }).join(". ");
+    else if (v.street === "idle") msg = "Warte auf Spieler …";
+    else if (v.toAct >= 0) msg = v.players[v.toAct].id === ctl.me ? "Du bist dran." : v.players[v.toAct].name + " überlegt …";
+    $("msg").textContent = msg;
+    $("infoL").textContent = (ctl.title || "") + (v.hand ? " · Hand " + v.hand : "") + " · Blinds " + v.sb + "/" + v.bb;
+    var lg = $("log"); lg.replaceChildren.apply(lg, (v.log || []).slice(-14).reverse().map(function (t) { return h("div", {text: t}); }));
+    bar(v);
+  }
+  function name(id) { var p = view && view.players.find(function (q) { return q.id === id; }); return p ? (p.id === ctl.me ? "Du" : p.name) : "?"; }
+  function bar(v) {
+    var b = $("bar"); b.replaceChildren();
+    var L = v.street !== "done" && v.street !== "idle" ? Poker.legal(v) : null;
+    if (L && L.id === ctl.me) {
+      var pot = L.pot, clamp = function (x) { return Math.max(L.minTo, Math.min(L.maxTo, Math.round(x))); };
+      raiseTo = clamp(raiseTo && raiseTo >= L.minTo ? raiseTo : L.minTo);
+      if (!L.canCheck) b.appendChild(h("button", {type: "button", class: "danger", text: "Fold", onclick: function () { ctl.act("fold"); }, title: "Taste F"}));
+      b.appendChild(h("button", {type: "button", class: "primary", text: L.canCheck ? "Check" : "Call " + L.toCall + (L.toCall >= v.players[L.seat].stack ? " (all-in)" : ""), onclick: function () { ctl.act(L.canCheck ? "check" : "call"); }, title: "Taste C"}));
+      if (L.canRaise) {
+        var rng = h("input", {type: "range", min: L.minTo, max: L.maxTo, step: Math.max(1, v.sb), value: raiseTo});
+        var num = h("input", {type: "number", min: L.minTo, max: L.maxTo, value: raiseTo});
+        var go = h("button", {type: "button", class: "primary", onclick: function () { ctl.act("raise", raiseTo); }, title: "Taste R"});
+        var set = function (x) { raiseTo = clamp(x); rng.value = raiseTo; num.value = raiseTo; go.textContent = (raiseTo >= L.maxTo ? "All-in " : (L.isBet ? "Bet " : "Raise auf ")) + raiseTo; };
+        rng.oninput = function () { set(+rng.value); }; num.onchange = function () { set(+num.value); };
+        var toCall = L.toCall, cb = v.currentBet;
+        var pre = [["Min", L.minTo], ["½ Pot", cb + (pot + toCall) / 2], ["Pot", cb + pot + toCall], ["All-in", L.maxTo]];
+        b.appendChild(h("div", {class: "raise"}, [rng, num].concat(pre.map(function (x) { return h("button", {type: "button", class: "sm", text: x[0], onclick: function () { set(x[1]); }}); })).concat([go])));
+        set(raiseTo);
+      }
+    } else if (ctl.extra) ctl.extra(b, v);
+  }
+  addEventListener("keydown", function (e) {
+    if (!view || $("tableWrap").classList.contains("hidden") || e.target.tagName === "INPUT") return;
+    var L = view.street !== "done" ? Poker.legal(view) : null;
+    if (!L || L.id !== ctl.me) return;
+    var k = e.key.toLowerCase();
+    if (k === "f" && !L.canCheck) ctl.act("fold");
+    else if (k === "c") ctl.act(L.canCheck ? "check" : "call");
+    else if (k === "r" && L.canRaise) ctl.act("raise", raiseTo);
+  });
+  addEventListener("resize", function () { if (view) render(Object.assign({}, view, {left: deadlineAt ? deadlineAt - Date.now() : 0})); });
+  setInterval(function () {
+    var t = $("timer");
+    if (!t || !deadlineAt || !ctl) return;
+    var tot = (ctl.turnMs && ctl.turnMs()) || 30000, left = Math.max(0, deadlineAt - Date.now());
+    t.style.transform = "scaleX(" + Math.min(1, left / tot) + ")";
+  }, 200);
+
+  /* ---------- Statistik ---------- */
+  var STATS_KEY = "poker-stats";
+  function stats() { return store(STATS_KEY) || {hands: 0, won: 0, biggest: 0, best: -1, online: 0}; }
+  function addStats(g, me, online) {
+    var s = stats(), r = g.result;
+    if (!r || !g.players.some(function (p) { return p.id === me && p.inHand; })) return;
+    s.hands++; if (online) s.online = (s.online || 0) + 1;
+    if (r.won[me]) { s.won++; s.biggest = Math.max(s.biggest, r.won[me]); }
+    var p = g.players.find(function (q) { return q.id === me; });
+    if (r.showdown && p && !p.folded && p.hole[0] >= 0) s.best = Math.max(s.best, Poker.evaluate(p.hole.concat(g.board)));
+    store(STATS_KEY, s); showStats(); Acc.save(s);
+  }
+  function showStats() {
+    var s = stats();
+    $("stats").textContent = s.hands ? s.hands + " Hände gespielt, " + s.won + " gewonnen, größter Gewinn " + s.biggest + (s.best >= 0 ? ", beste Hand: " + Poker.handName(s.best) : "") + "." : "";
+  }
+
+  /* ---------- Gegen den Computer ---------- */
+  var LKEY = "poker-lokal";
+  var Local = {
+    g: null, o: null, timer: 0,
+    start: function (o) {
+      var names = ["Ada", "Bruno", "Carla", "Dieter", "Edda", "Fiete", "Grete", "Hinnerk"], styles = ["solide", "wild", "vorsichtig"];
+      var ps = [{id: "ich", name: "Du", stack: o.chips}];
+      for (var i = 0; i < o.bots; i++) ps.push({id: "bot" + i, name: names[i], stack: o.chips, bot: {style: styles[(i + Math.floor(Math.random() * 3)) % 3]}});
+      Local.o = o; Local.g = Poker.createGame({players: ps, sb: o.sb, bb: o.sb * 2});
+      Local.open(); Local.next();
+    },
+    open: function () {
+      ctl = {me: "ich", title: "Gegen den Computer", act: Local.human, extra: Local.extra};
+      show("table");
+    },
+    resume: function () {
+      var s = store(LKEY);
+      if (!s) return;
+      Local.g = s.g; Local.o = s.o; Local.open();
+      if (Local.g.street === "idle") Local.next(); else Local.step();
+    },
+    save: function () { store(LKEY, {g: Local.g, o: Local.o}); },
+    next: function () {
+      var g = Local.g, o = Local.o;
+      clearTimeout(Local.timer);
+      if (o.rise && g.hand > 0 && g.hand % 10 === 0 && g.lastRise !== g.hand) { g.sb *= 2; g.bb *= 2; g.lastRise = g.hand; g.log.push("Die Blinds steigen auf " + g.sb + "/" + g.bb + "."); toast("Blinds steigen auf " + g.sb + "/" + g.bb); }
+      Poker.startHand(g);
+      Local.step();
+    },
+    step: function () {
+      var g = Local.g;
+      clearTimeout(Local.timer);
+      Local.save();
+      render(Poker.publicView(g, "ich"));
+      if (g.street === "done") { if (!g.counted) { g.counted = true; addStats(g, "ich"); Local.save(); } return; }
+      var p = g.players[g.toAct];
+      if (p && p.bot) Local.timer = setTimeout(function () { var d = Poker.botDecide(g, null, Local.o.level); Poker.act(g, d.action, d.amount); Local.step(); }, 650 + Math.random() * 650);
+    },
+    human: function (a, amt) {
+      var L = Poker.legal(Local.g);
+      if (!L || L.id !== "ich") return;
+      Poker.act(Local.g, a, amt); raiseTo = 0; Local.g.counted = false; Local.step();
+    },
+    extra: function (b, v) {
+      if (v.street !== "done") return;
+      var me = Local.g.players.find(function (p) { return p.id === "ich"; }), rivals = Local.g.players.filter(function (p) { return p.bot && p.stack > 0; });
+      if (me.stack <= 0) { b.appendChild(h("span", {text: "Du bist raus. "})); b.appendChild(h("button", {type: "button", class: "primary", text: "Neues Spiel", onclick: function () { Local.start(Local.o); }})); return; }
+      if (!rivals.length) { b.appendChild(h("span", {text: "🏆 Gewonnen! Alle Gegner sind pleite. "})); b.appendChild(h("button", {type: "button", class: "primary", text: "Neues Spiel", onclick: function () { Local.start(Local.o); }})); return; }
+      var go = h("button", {type: "button", class: "primary", text: "Nächste Hand", onclick: function () { Local.next(); }});
+      b.appendChild(go);
+      if (me.folded || !me.inHand) Local.timer = setTimeout(function () { if (Local.g.street === "done" && ctl && ctl.me === "ich") Local.next(); }, 2600);
+      setTimeout(function () { go.focus(); }, 0);
+    },
+    stop: function () { clearTimeout(Local.timer); }
+  };
+  $("localStart").onclick = function () {
+    Local.start({bots: +$("optBots").value, chips: +$("optChips").value, sb: +$("optBlinds").value, level: +$("optLevel").value, rise: $("optRise").checked});
+  };
+  $("localResume").onclick = Local.resume;
+  function refreshResume() { var s = store(LKEY); $("localResume").classList.toggle("hidden", !(s && s.g && s.g.players.some(function (p) { return p.id === "ich" && p.stack + p.total > 0; }))); }
+
+  $("menuBtn").onclick = function () {
+    if (Online.table) { if (!confirm("Tisch verlassen? Deine Chips an diesem Tisch verfallen.")) return; Online.leaveTable(); }
+    Local.stop(); ctl = null; view = null; show("menu"); refreshResume(); Online.renderLobby();
+  };
+
+  /* ---------- Konto (Statistik in schach_docs, Pfad poker/stand) ---------- */
+  var Acc = {
+    sb: null, user: null, t: 0,
+    save: function (s) {
+      if (!Acc.sb || !Acc.user) return;
+      clearTimeout(Acc.t);
+      Acc.t = setTimeout(function () { Acc.sb.from("schach_docs").upsert({user_id: Acc.user.id, path: "poker/stand", data: s, updated_at: new Date().toISOString()}).then(function () {}, function () {}); }, 1500);
+    },
+    load: async function () {
+      try {
+        var r = await Acc.sb.from("schach_docs").select("data").eq("user_id", Acc.user.id).eq("path", "poker/stand").maybeSingle();
+        var d = r && !r.error && r.data && r.data.data;
+        if (d && d.hands > stats().hands) { store(STATS_KEY, d); showStats(); }
+      } catch (e) {}
+    }
+  };
+
+  /* ---------- Mit anderen spielen (Supabase Realtime) ---------- */
+  function supaTransport(sb, chName, key) {
+    var msgCb = null, presCb = null, ok = false, track = null, queue = [];
+    var ch = sb.channel(chName, {config: {presence: {key: key}, broadcast: {self: false}}});
+    PokerNet.EVENTS.concat(["table"]).forEach(function (ev) { ch.on("broadcast", {event: ev}, function (x) { if (msgCb) msgCb(ev, x.payload); }); });
+    ch.on("presence", {event: "sync"}, function () { var st = ch.presenceState(), m = {}; Object.keys(st).forEach(function (k) { m[k] = st[k][0]; }); if (presCb) presCb(m); });
+    ch.subscribe(function (status) {
+      if (status !== "SUBSCRIBED") return;
+      ok = true; if (track) ch.track(track);
+      queue.splice(0).forEach(function (x) { ch.send(x); });
+    });
+    return {
+      send: function (ev, p) { var x = {type: "broadcast", event: ev, payload: p}; if (ok) ch.send(x); else queue.push(x); },
+      onMessage: function (cb) { msgCb = cb; }, onPresence: function (cb) { presCb = cb; },
+      track: function (m) { track = m; if (ok) ch.track(m); },
+      close: function () { try { sb.removeChannel(ch); } catch (e) {} }
+    };
+  }
+  var Online = {
+    sb: null, user: null, lobby: null, people: {}, table: null, tableId: null, adT: 0,
+    init: async function () {
+      var cfg = window.SR_CONFIG || {};
+      if (!cfg.supabaseUrl || !window.supabase) { $("online").replaceChildren(h("p", {text: "Online-Spiel ist hier nicht eingerichtet."})); return; }
+      Online.sb = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+      var r = await Online.sb.auth.getSession();
+      Online.user = r.data && r.data.session ? r.data.session.user : null;
+      if (!Online.user) { $("online").replaceChildren(h("p", {text: "Melde dich im Portal an, dann kannst du mit allen auf der Plattform spielen."}), h("div", {class: "row"}, [h("a", {class: "btn primary", href: "../", text: "Zum Portal"})])); return; }
+      Acc.sb = Online.sb; Acc.user = Online.user; Acc.load();
+      Online.lobby = supaTransport(Online.sb, "poker-lobby", Online.user.id);
+      Online.lobby.onPresence(function (m) { Online.people = m; Online.renderLobby(); });
+      Online.lobby.onMessage(function () {});
+      Online.adv(null);
+      Online.renderLobby();
+      var m = /tisch=([a-z0-9]+)/.exec(location.hash);
+      if (m) setTimeout(function () { Online.joinTable(m[1], null); }, 600);
+    },
+    name: function () { var m = Online.user.user_metadata || {}; return String(m.poker_name || m.gq_name || (Online.user.email || "Gast").split("@")[0]).slice(0, 20); },
+    adv: function (table) { Online.lobby.track({name: Online.name(), table: table, at: Date.now()}); },
+    tables: function () {
+      var t = [];
+      Object.keys(Online.people).forEach(function (k) { var m = Online.people[k]; if (m && m.table && m.table.id) t.push(Object.assign({host: m.name, hostId: k}, m.table)); });
+      return t.sort(function (a, b) { return a.at - b.at; });
+    },
+    renderLobby: function () {
+      if (!Online.user || !$("tableWrap").classList.contains("hidden")) return;
+      var box = $("online"), ts = Online.tables(), n = Object.keys(Online.people).length;
+      var nm = h("input", {type: "text", value: Online.name(), maxlength: "20"});
+      var list = h("div", {class: "list"}, ts.length ? ts.map(function (t) {
+        return h("div", {class: "item"}, [h("div", {class: "t"}, [h("b", {text: t.name}), h("small", {text: t.host + " · " + t.n + "/" + t.seats + " Plätze · Blinds " + t.sb + "/" + t.bb + " · " + t.chips + " Chips" + (t.playing ? " · läuft" : "")})]),
+          h("button", {type: "button", class: "primary sm", text: t.n >= t.seats ? "Voll" : "Beitreten", disabled: t.n >= t.seats ? "" : null, onclick: function () { Online.joinTable(t.id, t); }})]);
+      }) : [h("p", {text: "Gerade ist kein Tisch offen. Eröffne einen, die anderen sehen ihn sofort."})]);
+      var f = {name: h("input", {type: "text", value: Online.name() + "s Tisch", maxlength: "30"}),
+        chips: h("select", {}, ["500", "1000", "2000", "5000"].map(function (x) { return h("option", {selected: x === "1000" ? "" : null, text: x}); })),
+        blinds: h("select", {}, [["5", "5 / 10"], ["10", "10 / 20"], ["25", "25 / 50"]].map(function (x) { return h("option", {value: x[0], selected: x[0] === "10" ? "" : null, text: x[1]}); })),
+        seats: h("select", {}, ["2", "3", "4", "5", "6", "7", "8", "9"].map(function (x) { return h("option", {selected: x === "6" ? "" : null, text: x}); })),
+        bots: h("select", {}, ["0", "1", "2", "3", "4", "5"].map(function (x) { return h("option", {selected: x === "0" ? "" : null, text: x}); })),
+        turn: h("select", {}, [["20", "20 s"], ["30", "30 s"], ["60", "60 s"]].map(function (x) { return h("option", {value: x[0], selected: x[0] === "30" ? "" : null, text: x[1]}); }))};
+      box.replaceChildren(
+        h("p", {text: n <= 1 ? "Du bist gerade allein in der Lobby." : n + " Leute sind gerade in der Lobby."}),
+        h("label", {class: "f"}, ["Dein Name", h("span", {style: "display:flex;gap:6px;flex:1;max-width:240px"}, [nm, h("button", {type: "button", class: "sm", text: "OK", onclick: async function () { var v = nm.value.trim().slice(0, 20); if (!v) return; var r = await Online.sb.auth.updateUser({data: {poker_name: v}}); if (!r.error) { Online.user = r.data.user; Online.adv(null); toast("Name gespeichert."); } }})])]),
+        h("h3", {text: "Offene Tische", style: "margin:12px 0 0;font-size:1rem"}), list,
+        h("details", {style: "margin-top:12px"}, [h("summary", {text: "Tisch eröffnen", style: "cursor:pointer;font-weight:700"}),
+          h("label", {class: "f"}, ["Name", h("span", {style: "flex:1;max-width:240px"}, [f.name])]),
+          h("label", {class: "f"}, ["Startchips", f.chips]), h("label", {class: "f"}, ["Blinds", f.blinds]), h("label", {class: "f"}, ["Plätze", f.seats]),
+          h("label", {class: "f"}, ["Bots dazu", f.bots]), h("label", {class: "f"}, ["Bedenkzeit", f.turn]),
+          h("div", {class: "row"}, [h("button", {type: "button", class: "primary", text: "Tisch eröffnen", onclick: function () {
+            Online.createTable({name: f.name.value.trim().slice(0, 30) || "Tisch", chips: +f.chips.value, sb: +f.blinds.value, bb: 2 * f.blinds.value, seats: +f.seats.value, bots: +f.bots.value, turn: +f.turn.value, level: 1});
+          }})])]),
+        h("p", {style: "font-size:.82rem", text: "Gemischt wird im Browser des Gastgebers. Deine Karten gehen verschlüsselt nur an dich, die anderen sehen sie erst beim Showdown. Gespielt wird um Spielchips."}));
+    },
+    createTable: function (s) {
+      var id = Math.random().toString(36).slice(2, 10);
+      Online.openTable(id, true, s);
+    },
+    joinTable: function (id, t) { Online.openTable(id, false, null); },
+    openTable: async function (id, host, s) {
+      Online.leaveTable();
+      Online.tableId = id;
+      var tr = supaTransport(Online.sb, "poker-tisch-" + id, Online.user.id);
+      var T = Online.table = PokerNet.Table({transport: tr, me: {id: Online.user.id, name: Online.name()}, host: host, settings: s, onChange: Online.changed});
+      ctl = {me: Online.user.id, title: "Tisch", act: function (a, x) { raiseTo = 0; T.act(a, x); }, extra: Online.extra, turnMs: function () { return ((T.settings && T.settings.turn) || 30) * 1000; }};
+      show("table");
+      render(null);
+      $("msg").textContent = host ? "Tisch wird eröffnet …" : "Setze mich an den Tisch …";
+      history.replaceState(null, "", "#tisch=" + id);
+      if (host) await T.hostStart();
+      await T.join();
+      if (!host) setTimeout(function () { if (Online.table === T && !T.view) { $("msg").textContent = "Der Tisch antwortet nicht. Vielleicht ist er schon geschlossen."; } }, 9000);
+    },
+    lastHand: -1,
+    changed: function (v) {
+      if (!Online.table || !v) return;
+      ctl.title = (Online.table.settings && Online.table.settings.name) || "Tisch";
+      render(v);
+      if (v.street === "done" && v.hand !== Online.lastHand) { Online.lastHand = v.hand; addStats(v, Online.user.id, true); }
+      clearTimeout(Online.adT);
+      if (Online.table.isHost) Online.adT = setTimeout(function () {
+        var s = Online.table.settings;
+        Online.adv({id: Online.tableId, name: s.name, n: v.players.filter(function (p) { return !p.left; }).length, seats: s.seats, sb: s.sb, bb: s.bb, chips: s.chips, playing: v.street !== "idle", at: Date.now()});
+      }, 400);
+    },
+    extra: function (b, v) {
+      var T = Online.table; if (!T) return;
+      var me = v.players.find(function (p) { return p.id === Online.user.id; });
+      if (T.isHost && v.street === "idle") {
+        var n = v.players.filter(function (p) { return p.stack > 0; }).length;
+        b.appendChild(h("button", {type: "button", class: "primary", text: n >= 2 ? "Spiel starten" : "Warte auf Mitspieler …", disabled: n >= 2 ? null : "", onclick: function () { T.deal(); }}));
+      }
+      if (me && me.stack <= 0 && !me.inHand) b.appendChild(h("button", {type: "button", text: me.rebuy ? "Nachkauf angemeldet" : "Nachkaufen (" + T.settings.chips + ")", disabled: me.rebuy ? "" : null, onclick: function () { T.rebuy(); }}));
+      if (!me && v.players.length >= (T.settings && T.settings.seats)) b.appendChild(h("span", {class: "muted", text: "Der Tisch ist voll, du schaust zu."}));
+      b.appendChild(h("button", {type: "button", class: "sm", text: "🔗 Link", onclick: function () { var u = location.href.split("#")[0] + "#tisch=" + Online.tableId; (navigator.clipboard ? navigator.clipboard.writeText(u) : Promise.reject()).then(function () { toast("Link kopiert. Wer ihn öffnet, setzt sich an den Tisch."); }, function () { prompt("Link zum Tisch", u); }); }}));
+      b.appendChild(h("button", {type: "button", class: "sm", text: "Aufstehen", onclick: function () { $("menuBtn").click(); }}));
+      $("infoR").textContent = T.isHost ? "Du bist Gastgeber" : "";
+    },
+    leaveTable: function () {
+      if (!Online.table) return;
+      try { Online.table.leave(); } catch (e) {}
+      Online.table = null; Online.tableId = null; Online.lastHand = -1;
+      clearTimeout(Online.adT);
+      if (Online.lobby) Online.adv(null);
+      $("infoR").textContent = "";
+      history.replaceState(null, "", location.pathname + location.search);
+    }
+  };
+  addEventListener("pagehide", function () { if (Online.table) Online.table.leave(); });
+
+  showStats(); refreshResume();
+  Online.init().catch(function () { $("online").replaceChildren(h("p", {text: "Online-Spiel gerade nicht erreichbar."})); });
+  window.__poker = {Local: Local, Online: Online};
+})();
+</script>
+</body>
+</html>

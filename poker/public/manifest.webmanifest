@@ -1,0 +1,14 @@
+{
+  "name": "Poker",
+  "short_name": "Poker",
+  "description": "Texas Hold'em gegen den Computer oder mit allen auf der Lebensplattform.",
+  "lang": "de",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0E2A1F",
+  "theme_color": "#0E2A1F",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}
