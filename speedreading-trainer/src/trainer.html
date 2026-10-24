@@ -1463,14 +1463,19 @@ async function measureStep(box,next,testId){
       try{ t=await generateText(); }catch(e){ t=repeatText(); repeat=true; }
       box.replaceChildren(); } }
   const words=wordsOf(t);
+  // Pacer beim Lesen mit Fragen: Standard an, Wahl wird gemerkt. Tests messen immer das eigene Tempo.
+  const pc=h("input",{type:"checkbox",id:"comp-pacer",checked:(S.prefs||{}).compPacer!==false});
+  pc.addEventListener("change",()=>setPref("compPacer",pc.checked,false));
+  const pac=testId?null:h("label",{class:"row",for:"comp-pacer"},pc,`Mit Pacer lesen (${nf(Math.round(tgt()))} WpM)`);
   box.append(h("p",{class:"eyebrow"},testId?(Run.n===1?"Einstiegstest":Run.n===TOTAL?"Abschlusstest":"Zwischentest"):STEP_NAMES.comp, t.kind==="ai"?" · ":"", t.kind==="ai"?h("span",{class:"tag"},"KI-Text"):null),
     h("h2",{text:t.title}),
-    h("p",{class:"prose"},testId?`Lies den Text in deinem natürlichen Tempo, so wie du sonst liest. ${words} Wörter. Die Zeit läuft ab Start, danach kommen ${t.qs.length} Fragen ohne Text.`:`Lies den Text in deinem eigenen Tempo, gern etwas zügiger als gewohnt. ${words} Wörter. Danach kommen ${t.qs.length} Fragen.`),
+    h("p",{class:"prose"},testId?`Lies den Text in deinem natürlichen Tempo, so wie du sonst liest. ${words} Wörter. Die Zeit läuft ab Start, danach kommen ${t.qs.length} Fragen ohne Text.`:`Lies den Text mit dem Pacer oder in deinem eigenen Tempo, gern etwas zügiger als gewohnt. ${words} Wörter. Danach kommen ${t.qs.length} Fragen.`),
     repeat?h("p",{class:"notice"},"Alle Übungstexte sind schon gelesen und ein neuer KI-Text war nicht möglich. Dieser Text ist eine Wiederholung und zählt nicht für das Pacer-Ziel."):null,
-    h("div",{class:"row"},h("button",{class:"btn primary",onclick:()=>openReader({text:t,mode:"self",title:t.title,onDone:r=>{
-      const wpm=Math.min(1500,words/(Math.max(1000,r.ms)/60000)); markRead(t);
+    pac,
+    h("div",{class:"row"},h("button",{class:"btn primary",onclick:()=>{ const usePac=!testId&&pc.checked; openReader({text:t,mode:usePac?"line":"self",wpm:usePac?Math.round(tgt()):undefined,auto:usePac,title:t.title,onDone:r=>{
+      const wpm=usePac?r.wpm:Math.min(1500,words/(Math.max(1000,r.ms)/60000)); markRead(t);
       Quiz.open(t,c=>{
-        const eff=wpm*c, rec={date:today(),type:testId?"test":"comp",textId:t.id,wpm:Math.round(wpm),comp:c,eff:Math.round(eff),lesson:Run.n,repeat};
+        const eff=wpm*c, rec={date:today(),type:testId?"test":"comp",textId:t.id,wpm:Math.round(wpm),comp:c,eff:Math.round(eff),lesson:Run.n,repeat,mode:usePac?"line":"self"};
         S.sessions.push(rec);
         let note="";
         if(Run.n===1&&testId){ S.baseline={wpm:Math.round(wpm),comp:c,eff:Math.round(eff),date:today()}; S.target=Math.round(Math.max(150,Math.min(450,wpm))/5)*5; note=`Dein Startwert für den Pacer ist ${nf(S.target)} WpM.`; }
@@ -1479,7 +1484,7 @@ async function measureStep(box,next,testId){
         save();
         resultScreen(box,rec,note,()=>next({t:"comp",...rec}));
       },box);
-    }})},"Start")));
+    }}); }},"Start")));
 }
 function resultScreen(box,rec,note,go){
   box.replaceChildren(h("p",{class:"eyebrow"},"Ergebnis"),
