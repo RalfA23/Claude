@@ -1,0 +1,9 @@
+{
+  "name": "poker",
+  "private": true,
+  "scripts": {
+    "build": "node build.mjs",
+    "test": "node --test test/*.test.mjs",
+    "serve": "node build.mjs && npx --yes serve@14.2.4 dist"
+  }
+}
