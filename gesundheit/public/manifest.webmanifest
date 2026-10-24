@@ -1,0 +1,14 @@
+{
+  "name": "Gesundheit",
+  "short_name": "Gesundheit",
+  "description": "Gesundheit an einer Stelle: Huberman-Checkliste, Trainingswoche und Wissen.",
+  "lang": "de",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f3f6f7",
+  "theme_color": "#14232b",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}

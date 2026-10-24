@@ -3,9 +3,9 @@ name: Trainer veröffentlichen (Lesetraining und Schachtraining)
 on:
   push:
     branches: [main]
-    paths: ["speedreading-trainer/**", "schach-trainer/**", "gevt-wissen/**", "goetterquiz/**", "wortwuerfel/**", "murmelbahn/**", "vestaboard/**", "huberman/**", "weltkarte/**", "sprachen/**", "portal/**", ".github/workflows/speedreading-pages.yml"]
+    paths: ["speedreading-trainer/**", "schach-trainer/**", "gevt-wissen/**", "goetterquiz/**", "wortwuerfel/**", "murmelbahn/**", "vestaboard/**", "huberman/**", "gesundheit/**", "weltkarte/**", "sprachen/**", "portal/**", ".github/workflows/speedreading-pages.yml"]
   pull_request:
-    paths: ["speedreading-trainer/**", "schach-trainer/**", "gevt-wissen/**", "goetterquiz/**", "wortwuerfel/**", "murmelbahn/**", "vestaboard/**", "huberman/**", "weltkarte/**", "sprachen/**", "portal/**", ".github/workflows/speedreading-pages.yml"]
+    paths: ["speedreading-trainer/**", "schach-trainer/**", "gevt-wissen/**", "goetterquiz/**", "wortwuerfel/**", "murmelbahn/**", "vestaboard/**", "huberman/**", "gesundheit/**", "weltkarte/**", "sprachen/**", "portal/**", ".github/workflows/speedreading-pages.yml"]
   workflow_dispatch:
 
 permissions:
@@ -61,6 +61,9 @@ jobs:
       - name: Build Huberman-Protokolle
         working-directory: huberman
         run: node build.mjs && node -e "const s=require('fs').readFileSync('dist/index.html','utf8');const m=s.match(/<script>([\s\S]*?)<\/script>/g);for(const b of m){new Function(b.replace(/<\/?script>/g,''))}console.log('ok',m.length)"
+      - name: Build Gesundheit
+        working-directory: gesundheit
+        run: node build.mjs && node -e "const s=require('fs').readFileSync('dist/index.html','utf8');const m=s.match(/<script>([\s\S]*?)<\/script>/g);for(const b of m){new Function(b.replace(/<\/?script>/g,''))}console.log('ok',m.length)"
       - name: Build Weltkarte
         working-directory: weltkarte
         run: node build.mjs && node -e "const s=require('fs').readFileSync('dist/index.html','utf8');const m=s.match(/<script>([\s\S]*?)<\/script>/g);for(const b of m){new Function(b.replace(/<\/?script>/g,''))}console.log('ok',m.length)"
@@ -79,6 +82,7 @@ jobs:
           cp -r murmelbahn/dist site/murmelbahn
           cp -r vestaboard/dist site/vestaboard
           cp -r huberman/dist site/huberman
+          cp -r gesundheit/dist site/gesundheit
           cp -r weltkarte/dist site/weltkarte
           cp -r sprachen/dist site/sprachen
           cp site/lesen/config.js site/schach/config.js
