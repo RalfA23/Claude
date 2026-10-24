@@ -366,8 +366,8 @@ function cardioOf(i, n) {
   const iv = n === null || n < 4 ? null : n <= S ? "Intervalle auf dem Rad: 10 Min locker, 6 × (1 Min zügig / 2 Min locker), 5 Min aus." : n === S + 1 ? null : "Intervalle auf dem Rad: 10 Min locker, 4 × (3 Min zügig / 3 Min locker), 5 Min aus.";
   const z2 = {k: "ausdauer", t: "Zone 2", d: "30 bis 45 Min Rad oder Crosstrainer, Sprechen in ganzen Sätzen geht noch."};
   const ivDay = {k: iv ? "intervall" : "ausdauer", t: iv ? "Intervalle" : "Zone 2", d: iv || z2.d};
-  const vt = {k: "ausdauer", t: "Ving Tsun oder Zone 2", d: "Ving Tsun zählt als Training. Ohne Ving Tsun: Zone 2, 30 bis 45 Min."};
-  const sa = {k: "ausdauer", t: "Ving Tsun oder lange lockere Einheit", d: "Ohne Ving Tsun 45 bis 60 Min zügig gehen oder Rad. Mit Ving Tsun keine zusätzliche Einheit."};
+  const vt = z2;
+  const sa = {k: "ausdauer", t: "Lange lockere Einheit", d: "45 bis 60 Min zügig gehen oder Rad."};
   const so = {k: "ruhe", t: "Ruhetag", d: "Spaziergang und 10 Min Beweglichkeit."};
   if (f === "2") return [null, vt, ivDay, null, z2, sa, so][i];
   return [null, vt, null, ivDay, null, sa, so][i];
