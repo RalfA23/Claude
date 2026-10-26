@@ -170,6 +170,8 @@ var COURSES = [
   // Gesundheit (gesundheit/) bündelt die Huberman-Checkliste (huberman/, Häkchen weiter unter huberman/tag.<datum>), die Trainingswoche und das Wissen.
   // Die Kachel zeigt den heutigen Huberman-Stand. Früher hieß die Kachel „huberman“, alte Freigaben und Dashboard-Kacheln werden übernommen.
   {id: "gesundheit", icon: "🫀", title: "Gesundheit", text: "Huberman-Checkliste, Trainingswoche mit dem 12-Wochen-Plan und dein Wissen zu Schlaf, Licht, Bewegung, Ernährung und Stress an einer Stelle.", href: "gesundheit/"},
+  // Entspannung (entspannung/): Boxatmung und gesprochene Meditationen. Die Kachel zeigt die Meditation des Tages und den heutigen Stand (schach_docs, Pfade entspannung/tag.<datum>).
+  {id: "entspannung", icon: "🧘", title: "Entspannung", text: "Boxatmung im Quadrat und gesprochene Meditationen von 3 bis 10 Minuten: Body-Scan, Atem, Dankbarkeit, Schlaf, Fokus, Stress lösen. Jeden Tag eine Meditation des Tages.", href: "entspannung/"},
   // Jedes Konto hat seine eigene Karte (weltkarte/, Orte in schach_docs unter weltkarte/ort.<id>). Die Kachel zeigt, wie viele Orte besucht und geplant sind.
   {id: "weltkarte", icon: "🗺️", title: "Weltkarte", text: "Alle Orte, an denen du warst und wo du noch hin willst, als Pins auf einer großen Weltkarte. Mit Datum, Notizen und Bildern als Andenken.", href: "weltkarte/"},
   // Bücher (buecher/): eigene Bücherliste mit Kurzzusammenfassung von Claude, Learnings, Sternen und Schlagwörtern (schach_docs, Pfade buecher/buch.<id>).
@@ -481,6 +483,7 @@ var GEVT = {id: "gevt", icon: "🥋", title: "Ving Tsun Wissen", text: "Frag dei
     if (c.id === "sprachen") sprachenStand(b, row);
     if (c.id === "weltkarte") weltkarteStand(b, row);
     if (c.id === "buecher") buecherStand(b, row);
+    if (c.id === "entspannung") entspannungStand(b, row);
     row.appendChild(el("a", {class: "btn primary", href: c.href, text: "Öffnen", onclick: function () { if (isNew(c)) setSeen((seen() || []).concat([c.id])); }}));
   }
   // Heutiger Stand der Huberman-Checkliste (schach_docs, Pfad huberman/tag.JJJJ-MM-TT)
@@ -524,6 +527,23 @@ var GEVT = {id: "gevt", icon: "🥋", title: "Ving Tsun Wissen", text: "Frag dei
       if (r.error || !r.data || !r.data.length) return;
       var last = r.data.slice().sort(function (x, y) { return String(y.created || "").localeCompare(String(x.created || "")); })[0];
       txt.textContent = r.data.length + (r.data.length === 1 ? " Buch" : " Bücher") + (last && last.title ? " · zuletzt „" + last.title + "“" : "");
+    });
+  }
+
+  // Meditation des Tages und heutiger Stand der Entspannung (schach_docs, Pfade entspannung/tag.JJJJ-MM-TT).
+  // Reihenfolge wie MEDITATIONEN in entspannung/src/meditationen.js, damit Kachel und Seite dieselbe Meditation nennen.
+  var MEDITATION_REIHE = ["Body-Scan", "Atem", "Dankbarkeit", "Schlaf", "Fokus", "Stress lösen"];
+  function entspannungStand(b, row) {
+    var n = new Date(), day = function (d) { return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
+    var heute = MEDITATION_REIHE[Math.floor(Date.UTC(n.getFullYear(), n.getMonth(), n.getDate()) / 864e5) % MEDITATION_REIHE.length];
+    var txt = el("p", {text: "Heute: " + heute}); b.insertBefore(txt, row);
+    sb.from("schach_docs").select("path,done:data->done,minuten:data->minuten").eq("user_id", user.id).like("path", "entspannung/tag.%").then(function (r) {
+      if (r.error || !r.data) return;
+      var done = {}, min = 0, t = day(n);
+      r.data.forEach(function (x) { var d = x.path.slice(16); if (x.done === true) done[d] = true; if (d === t) min = +x.minuten || 0; });
+      var c = new Date(n); if (!done[t]) c.setDate(c.getDate() - 1);
+      var s = 0; while (done[day(c)]) { s++; c.setDate(c.getDate() - 1); }
+      txt.textContent = (done[t] ? "✓ Heute " + min + " Min" : "Heute: " + heute + (min ? " · " + min + " Min" : "")) + (s ? " · Serie " + s + (s === 1 ? " Tag" : " Tage") : "");
     });
   }
 

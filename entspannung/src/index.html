@@ -1,0 +1,614 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0b1220">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<script src="../config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="../sprachen/ton.js"></script>
+<style>:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}*,*::before,*::after{box-sizing:inherit}body{margin:0}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>Entspannung</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap">
+<style>
+/* Immer dunkel und ruhig: oben die Meditation des Tages, darunter Reiter für Boxatmung, Meditation und Verlauf. Große Knöpfe, damit es auch nebenbei geht. */
+:root{
+  --bg:#0b1220; --surface:#121b2c; --surface2:#18243a; --fg:#e6edf5; --muted:#8fa0b6; --line:#24324a;
+  --accent:#7fd1c1; --accent2:#b3a6f0; --warm:#f2c38b; --ok:#7fd1c1;
+  --display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  color-scheme:dark;
+}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:17px;line-height:1.55;-webkit-tap-highlight-color:transparent}
+.wrap{max-width:820px;margin:0 auto;padding-block:24px 64px;padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px))}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;line-height:1.2}
+h1{font-size:clamp(1.8rem,5vw,2.5rem);font-weight:700}
+h2{font-size:1.3rem;font-weight:700}
+h3{font-size:1.05rem;font-weight:700}
+p{margin:0}
+a{color:var(--accent)}
+.back{display:inline-block;color:var(--muted);text-decoration:none;font-size:.9rem;margin-bottom:14px}
+.back:hover{color:var(--fg)}
+.eyebrow{font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.lede{color:var(--muted);max-width:60ch;margin-top:8px}
+.gate{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin-top:16px;color:var(--muted);font-size:.95rem}
+.store{font-size:.8rem;color:var(--muted);margin-top:10px;min-height:1.2em}
+.muted{color:var(--muted);font-size:.93rem}
+button,select,input{font:inherit;color:inherit}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.btn{font:700 1rem var(--body);min-height:48px;padding:10px 20px;border-radius:14px;border:1px solid var(--line);background:var(--surface2);color:var(--fg);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn.primary{background:var(--accent);color:#0b1220;border-color:var(--accent)}
+.btn.big{min-height:60px;font-size:1.15rem;padding:12px 28px;border-radius:18px}
+
+/* Heute */
+.hero{margin-top:20px;display:grid;grid-template-columns:1.6fr 1fr;gap:14px}
+@media (max-width:640px){.hero{grid-template-columns:1fr}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:18px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.mdt{background:linear-gradient(150deg,#1a2a44 0%,#121b2c 70%)}
+.mdt .ic{font-size:2.2rem;line-height:1}
+.mdt h2{font-size:1.6rem}
+.mdt .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:auto;padding-top:8px}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat{display:flex;flex-direction:column;gap:2px}
+.stat b{font-family:var(--display);font-size:1.7rem;font-variant-numeric:tabular-nums;line-height:1.1}
+.stat span{font-size:.8rem;color:var(--muted)}
+.todayline{font-size:.9rem;color:var(--muted);grid-column:1/-1}
+.todayline.done{color:var(--accent)}
+
+.tabs{display:flex;gap:6px;margin:28px 0 18px;flex-wrap:wrap}
+.tabs button{font:700 1rem var(--body);min-height:46px;padding:9px 18px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+
+/* Boxatmung */
+.boxwrap{display:flex;flex-direction:column;align-items:center;gap:16px}
+.square{width:min(78vw,360px);aspect-ratio:1;position:relative}
+.square svg{width:100%;height:100%;display:block;overflow:visible}
+.square .edge{stroke:var(--line);stroke-width:4;stroke-linecap:round}
+.square .edge.past{stroke:color-mix(in srgb,var(--accent) 40%,var(--line))}
+.square .trail{stroke:var(--accent);stroke-width:6;stroke-linecap:round}
+.square .fill{fill:color-mix(in srgb,var(--accent) 14%,transparent);stroke:color-mix(in srgb,var(--accent) 35%,transparent);stroke-width:1.5}
+.square .dot{fill:var(--warm);filter:drop-shadow(0 0 8px var(--warm))}
+.square .lbl{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;text-align:center}
+.square .lbl b{font-family:var(--display);font-size:clamp(1.4rem,6vw,2rem)}
+.square .lbl span{font-family:var(--display);font-size:clamp(2.2rem,10vw,3.4rem);font-variant-numeric:tabular-nums;color:var(--accent);line-height:1.1}
+.square .side{position:absolute;font-size:.75rem;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+.boxctl{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.counter{display:flex;gap:26px;justify-content:center;font-variant-numeric:tabular-nums}
+.counter div{text-align:center}
+.counter b{display:block;font-family:var(--display);font-size:1.6rem}
+.counter span{font-size:.8rem;color:var(--muted)}
+.boxmsg{color:var(--accent);font-weight:700;min-height:1.4em;text-align:center}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px 16px;display:flex;flex-direction:column;gap:14px;margin-top:20px;width:100%}
+.field{display:flex;flex-direction:column;gap:8px;font-weight:700;font-size:.93rem;min-width:0}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg button{font:700 .92rem var(--body);min-height:42px;padding:7px 14px;border-radius:999px;border:1px solid var(--line);background:var(--bg);color:var(--fg);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--accent);color:#0b1220;border-color:var(--accent)}
+.steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+@media (max-width:480px){.steps{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.step{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:8px;display:flex;flex-direction:column;align-items:center;gap:4px;font-weight:400}
+.step small{color:var(--muted);font-size:.78rem}
+.step .sv{display:flex;align-items:center;gap:6px}
+.step .sv b{font-family:var(--display);font-size:1.3rem;min-width:2ch;text-align:center;font-variant-numeric:tabular-nums}
+.step button{width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:var(--surface2);cursor:pointer;font-size:1.1rem;line-height:1}
+.toggles{display:flex;gap:16px;flex-wrap:wrap}
+.toggles label{display:flex;align-items:center;gap:8px;font-weight:400;cursor:pointer;min-height:40px}
+.toggles input{width:22px;height:22px;accent-color:var(--accent)}
+
+/* Meditation */
+.dur{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.dur input[type=range]{flex:1;min-width:180px;accent-color:var(--accent);height:32px}
+.dur output{font-family:var(--display);font-size:1.5rem;font-weight:700;min-width:5ch;font-variant-numeric:tabular-nums}
+.medlist{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin-top:16px}
+.med{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:6px;text-align:left;cursor:pointer;min-height:150px;position:relative;color:var(--fg)}
+.med:hover{border-color:var(--accent)}
+.med .ic{font-size:1.8rem;line-height:1}
+.med .tag{position:absolute;top:12px;right:12px;font-size:.7rem;font-weight:700;color:#0b1220;background:var(--warm);border-radius:6px;padding:2px 7px}
+.med .done{font-size:.8rem;color:var(--accent)}
+.med p{color:var(--muted);font-size:.9rem}
+details.more{margin-top:18px;background:var(--surface);border:1px solid var(--line);border-radius:14px}
+details.more summary{cursor:pointer;padding:12px 16px;font-weight:700;list-style:none}
+details.more summary::-webkit-details-marker{display:none}
+details.more .in{padding:0 16px 16px;display:flex;flex-direction:column;gap:14px}
+details.more select{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px 10px;max-width:100%}
+.note{font-size:.88rem;color:var(--muted);margin-top:16px}
+
+/* Spieler */
+.player{position:fixed;inset:0;z-index:50;background:radial-gradient(120% 90% at 50% 0%,#1b2b47 0%,#0b1220 65%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:max(24px,env(safe-area-inset-top,0px)) 20px max(24px,env(safe-area-inset-bottom,0px));text-align:center}
+.player .ic{font-size:2.6rem}
+.player h2{font-size:1.7rem}
+.player .time{font-family:var(--display);font-size:clamp(3rem,16vw,5rem);font-variant-numeric:tabular-nums;line-height:1}
+.orb{width:min(46vw,190px);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 40% 35%,color-mix(in srgb,var(--accent2) 70%,#fff) 0%,var(--accent2) 30%,#3c3470 75%);box-shadow:0 0 60px color-mix(in srgb,var(--accent2) 45%,transparent);animation:breathe 11s ease-in-out infinite}
+.player.paused .orb{animation-play-state:paused;opacity:.6}
+@keyframes breathe{0%,100%{transform:scale(.82)}45%{transform:scale(1)}55%{transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){.orb{animation:none}}
+.bar{width:min(90vw,420px);height:6px;border-radius:3px;background:var(--line);overflow:hidden}
+.bar div{height:100%;width:0;background:var(--accent2);transition:width .5s linear}
+.say{max-width:34ch;min-height:4.8em;font-size:1.15rem;color:var(--fg);opacity:.92}
+.player .ctl{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+
+/* Verlauf */
+.vstats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.vstats .card{padding:14px}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:18px;max-width:440px}
+.cal .h{font-size:.75rem;color:var(--muted);text-align:center}
+.cal .d{aspect-ratio:1;border-radius:10px;background:var(--surface);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:.85rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.cal .d.some{background:color-mix(in srgb,var(--accent) 22%,var(--surface));color:var(--fg)}
+.cal .d.done{background:var(--accent);color:#0b1220;font-weight:700;border-color:var(--accent)}
+.cal .d.today{outline:2px solid var(--warm);outline-offset:1px}
+.cal .d.fut{opacity:.35}
+.log{margin-top:20px;display:flex;flex-direction:column}
+.log div{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-top:1px solid var(--line);font-size:.95rem}
+.log div span:last-child{color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+footer{margin-top:40px;color:var(--muted);font-size:.85rem;max-width:70ch}
+</style>
+<div class="wrap">
+  <a class="back" href="../">← Portal</a>
+  <p class="eyebrow">Lebensplattform · Entspannung</p>
+  <h1>Entspannung</h1>
+  <p class="lede">Boxatmung im Quadrat und gesprochene Meditationen von 3 bis 10 Minuten. Jeden Tag gibt es eine Meditation des Tages.</p>
+  <div class="gate" id="gate" hidden>Du bist nicht angemeldet. Alles funktioniert, dein Verlauf bleibt aber nur auf diesem Gerät. Melde dich im <a href="../">Portal</a> an, um ihn im Konto zu speichern.</div>
+
+  <div class="hero">
+    <section class="card mdt" aria-labelledby="mdtTitle">
+      <p class="eyebrow">Meditation des Tages</p>
+      <div class="ic" id="mdtIc" aria-hidden="true"></div>
+      <h2 id="mdtTitle"></h2>
+      <p class="muted" id="mdtDesc"></p>
+      <div class="row"><button type="button" class="btn primary big" id="mdtGo">▶ Starten</button><span class="muted" id="mdtLen"></span></div>
+    </section>
+    <section class="card" aria-label="Dein Stand">
+      <div class="stats">
+        <div class="stat"><b id="sStreak">0</b><span>Tage in Serie</span></div>
+        <div class="stat"><b id="sToday">0</b><span>Minuten heute</span></div>
+        <p class="todayline" id="sLine">Heute noch nichts gemacht.</p>
+      </div>
+    </section>
+  </div>
+  <p class="store" id="store"></p>
+
+  <div class="tabs" role="tablist">
+    <button role="tab" id="tab-box" aria-selected="true" aria-controls="view-box">Boxatmung</button>
+    <button role="tab" id="tab-med" aria-selected="false" aria-controls="view-med">Meditation</button>
+    <button role="tab" id="tab-verlauf" aria-selected="false" aria-controls="view-verlauf">Verlauf</button>
+  </div>
+
+  <section id="view-box" role="tabpanel" aria-labelledby="tab-box">
+    <div class="boxwrap">
+      <div class="square">
+        <svg viewBox="0 0 200 200" aria-hidden="true">
+          <rect class="fill" id="bFill" x="40" y="40" width="120" height="120" rx="10"/>
+          <line class="edge" id="e0" x1="20" y1="180" x2="20" y2="20"/>
+          <line class="edge" id="e1" x1="20" y1="20" x2="180" y2="20"/>
+          <line class="edge" id="e2" x1="180" y1="20" x2="180" y2="180"/>
+          <line class="edge" id="e3" x1="180" y1="180" x2="20" y2="180"/>
+          <line class="trail" id="bTrail" x1="20" y1="180" x2="20" y2="180"/>
+          <circle class="dot" id="bDot" cx="20" cy="180" r="8"/>
+        </svg>
+        <div class="lbl" aria-live="polite"><b id="bPhase">Bereit</b><span id="bSec"></span></div>
+      </div>
+      <div class="counter"><div><b id="bRounds">0</b><span>Runden</span></div><div><b id="bTime">0:00</b><span id="bTimeLbl">Zeit</span></div></div>
+      <div class="boxctl"><button type="button" class="btn primary big" id="bGo">▶ Start</button><button type="button" class="btn big" id="bStop" hidden>■ Beenden</button></div>
+      <p class="boxmsg" id="bMsg" aria-live="polite"></p>
+      <div class="panel">
+        <div class="field">Rhythmus<div class="seg" id="bPresets"></div></div>
+        <div class="steps" id="bSteps"></div>
+        <div class="field">Dauer<div class="seg" id="bDur"></div></div>
+        <div class="toggles">
+          <label><input type="checkbox" id="optTon"> Sanfte Töne</label>
+          <label><input type="checkbox" id="optSay"> Ansage (Einatmen, Halten …)</label>
+          <label><input type="checkbox" id="optVib"> Vibration</label>
+        </div>
+        <p class="muted">Einatmen, halten, ausatmen, halten, jeweils so lange, wie der Punkt für eine Kante braucht. Durch die Nase atmen, ruhig, ohne zu pressen. Wird dir schwindelig, normal weiteratmen. Vibration geht nur auf Android.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="view-med" role="tabpanel" aria-labelledby="tab-med" hidden>
+    <div class="dur"><label for="medDur" class="field" style="flex:0 0 auto">Länge</label><input type="range" id="medDur" min="3" max="10" step="1"><output id="medDurOut" for="medDur"></output></div>
+    <div class="medlist" id="medList"></div>
+    <details class="more">
+      <summary>Stimme und Tempo</summary>
+      <div class="in">
+        <label class="field">Stimme<select id="medVoice"></select></label>
+        <label class="field">Tempo <input type="range" id="medRate" min="0.7" max="1.05" step="0.05" style="accent-color:var(--accent)"></label>
+        <div class="toggles"><label><input type="checkbox" id="optText"> Text beim Hören mitlesen</label></div>
+        <div class="boxctl" style="justify-content:flex-start"><button type="button" class="btn" id="medTest">🔊 Stimme testen</button></div>
+        <p class="muted">Die Qualität hängt von der Stimme deines Geräts ab. Am besten klingen meist Stimmen mit „Siri“, „Premium“, „Natural“ oder „Google“ im Namen. <a id="helpLink" href="../sprachen/hilfe/">Kein Ton?</a></p>
+      </div>
+    </details>
+    <p class="note">Bildschirm bleibt beim Hören an. Nicht beim Autofahren meditieren: Augen schließen und Schlaf nur, wenn du nicht fährst.</p>
+  </section>
+
+  <section id="view-verlauf" role="tabpanel" aria-labelledby="tab-verlauf" hidden>
+    <div class="vstats">
+      <div class="card"><div class="stat"><b id="vStreak">0</b><span>Tage in Serie</span></div></div>
+      <div class="card"><div class="stat"><b id="vBest">0</b><span>Längste Serie</span></div></div>
+      <div class="card"><div class="stat"><b id="vMonth">0</b><span>Tage diesen Monat</span></div></div>
+      <div class="card"><div class="stat"><b id="vMin">0</b><span>Minuten gesamt</span></div></div>
+    </div>
+    <div class="cal" id="cal"></div>
+    <p class="muted" style="margin-top:8px">Voll: Tag geschafft (eine Meditation zu Ende gehört oder mindestens 4 Runden Boxatmung). Hell: angefangen.</p>
+    <div class="log" id="log"></div>
+  </section>
+
+  <footer>Gespeichert in deinem Konto: jeder Tag unter entspannung/tag.&lt;Datum&gt;, deine Einstellungen unter entspannung/einstellungen. Die Meditationstexte sind selbst geschrieben und ersetzen keine Therapie.</footer>
+</div>
+
+<section class="player" id="player" hidden aria-live="polite">
+  <div class="ic" id="pIc" aria-hidden="true"></div>
+  <h2 id="pTitle"></h2>
+  <div class="orb" aria-hidden="true"></div>
+  <div class="time" id="pTime">0:00</div>
+  <div class="bar"><div id="pBar"></div></div>
+  <p class="say" id="pSay"></p>
+  <div class="ctl"><button type="button" class="btn big" id="pPause">❚❚ Pause</button><button type="button" class="btn big" id="pStop">Beenden</button></div>
+</section>
+
+<script>
+/*MEDITATIONEN*/
+</script>
+<script>
+"use strict";
+const $ = id => document.getElementById(id);
+const pad = n => String(n).padStart(2, "0");
+const iso = d => d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
+const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
+const mmss = s => { s = Math.max(0, Math.round(s)); return Math.floor(s / 60) + ":" + pad(s % 60); };
+
+let sb = null, user = null;
+let settings = {}, days = {};
+const TAG = "entspannung/tag.", SET = "entspannung/einstellungen";
+const DEF = {dauer: 5, rate: 0.9, stimme: "", text: true, box: [4, 4, 4, 4], boxMin: 4, ton: true, ansage: false, vib: true};
+const cfg = k => settings[k] !== undefined ? settings[k] : DEF[k];
+const lkey = k => "entspannung-" + (user ? user.id : "anon") + "-" + k;
+
+/* ---------- Speichern: im Konto (schach_docs), sonst nur auf dem Gerät ---------- */
+function saveLocal() { try { localStorage.setItem(lkey("days"), JSON.stringify(days)); localStorage.setItem(lkey("set"), JSON.stringify(settings)); } catch (e) {} }
+function loadLocal() {
+  const rd = k => { try { return JSON.parse(localStorage.getItem(lkey(k)) || "{}") || {}; } catch (e) { return {}; } };
+  days = rd("days"); settings = rd("set");
+}
+function setStore(s) { $("store").textContent = s === "db" ? "Im Konto gespeichert" : s === "error" ? "Gerade nur auf diesem Gerät gespeichert" : ""; }
+async function put(path, data) {
+  saveLocal();
+  if (!sb || !user) return;
+  try { const r = await sb.from("schach_docs").upsert({user_id: user.id, path, data, updated_at: new Date().toISOString()}); if (r.error) throw r.error; setStore("db"); } catch (e) { setStore("error"); }
+}
+let setTimer = 0;
+function setSetting(k, v) { settings[k] = v; saveLocal(); clearTimeout(setTimer); setTimer = setTimeout(() => put(SET, settings), 800); }
+
+// Ein Tag: Meditationen (id, Minuten, gehörte Sekunden, fertig), Boxatmung (Runden, Sekunden), Minuten, geschafft
+function logDay(fn) {
+  const d = iso(new Date());
+  const doc = Object.assign({meditationen: [], box: {runden: 0, sek: 0}}, days[d] || {});
+  doc.meditationen = (doc.meditationen || []).slice(); doc.box = Object.assign({runden: 0, sek: 0}, doc.box);
+  fn(doc);
+  const sek = doc.meditationen.reduce((a, m) => a + (m.sek || 0), 0) + (doc.box.sek || 0);
+  doc.minuten = Math.round(sek / 60);
+  doc.done = doc.meditationen.some(m => m.fertig) || doc.box.runden >= 4;
+  days[d] = doc; put(TAG + d, doc); renderStand();
+}
+const isDone = d => !!(days[d] && days[d].done);
+function streakAt(d) { let n = 0; while (isDone(iso(d))) { n++; d = addDays(d, -1); } return n; }
+function streak() { const t = new Date(); return isDone(iso(t)) ? streakAt(t) : streakAt(addDays(t, -1)); }
+
+/* ---------- Klang: sanfte Töne und eine Klangschale, alles im Browser erzeugt ---------- */
+let ac = null;
+function audio() {
+  try { if (!ac) ac = new (window.AudioContext || window.webkitAudioContext)(); if (ac.state === "suspended") ac.resume(); } catch (e) { ac = null; }
+  return ac;
+}
+function tone(freq, dur, vol) {
+  const a = audio(); if (!a) return;
+  const t = a.currentTime, o = a.createOscillator(), g = a.createGain();
+  o.type = "sine"; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol || 0.12, t + 0.08); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  o.connect(g).connect(a.destination); o.start(t); o.stop(t + dur + 0.05);
+}
+function bell(leise) {
+  const v = leise ? 0.05 : 0.14;
+  [[220, 1], [528, 0.45], [880, 0.2], [1188, 0.1]].forEach(([f, m]) => tone(f, leise ? 5 : 7, v * m));
+}
+
+// Bildschirm anlassen, solange etwas läuft
+let lock = null;
+async function wake(on) {
+  try {
+    if (on && "wakeLock" in navigator && !lock) { lock = await navigator.wakeLock.request("screen"); lock.addEventListener("release", () => { lock = null; }); }
+    if (!on && lock) { await lock.release(); lock = null; }
+  } catch (e) { lock = null; }
+}
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && (B.run || P.on)) wake(true); });
+
+/* ---------- Boxatmung ---------- */
+const PH = ["Einatmen", "Halten", "Ausatmen", "Halten"];
+const CORNER = [[20, 180], [20, 20], [180, 20], [180, 180]];
+const PRESETS = [{n: "4-4-4-4", v: [4, 4, 4, 4]}, {n: "Einstieg 3-3-3-3", v: [3, 3, 3, 3]}, {n: "5-5-5-5", v: [5, 5, 5, 5]}, {n: "Abends 4-4-6-2", v: [4, 4, 6, 2]}];
+const BMIN = [{n: "2 Min", v: 2}, {n: "4 Min", v: 4}, {n: "6 Min", v: 6}, {n: "10 Min", v: 10}, {n: "Offen", v: 0}];
+const B = {run: false, paused: false, t: 0, last: 0, phase: -1, rounds: 0};
+const durs = () => { const b = cfg("box"); return Array.isArray(b) && b.length === 4 ? b.map(Number) : DEF.box.slice(); };
+const ease = x => 0.5 - Math.cos(Math.PI * x) / 2;
+
+function renderBoxSettings() {
+  const d = durs();
+  $("bPresets").innerHTML = "";
+  PRESETS.forEach(p => {
+    const b = document.createElement("button"); b.type = "button"; b.textContent = p.n;
+    b.setAttribute("aria-pressed", String(p.v.join() === d.join()));
+    b.onclick = () => { setSetting("box", p.v.slice()); renderBoxSettings(); boxDraw(); };
+    $("bPresets").appendChild(b);
+  });
+  $("bSteps").innerHTML = "";
+  d.forEach((v, i) => {
+    const w = document.createElement("div"); w.className = "step";
+    const lo = i % 2 ? 0 : 2;
+    w.innerHTML = "<small>" + (i === 1 ? "Halten (voll)" : i === 3 ? "Halten (leer)" : PH[i]) + "</small><div class=\"sv\"><button type=\"button\" aria-label=\"kürzer\">−</button><b>" + v + "</b><button type=\"button\" aria-label=\"länger\">+</button></div><small>Sekunden</small>";
+    const [minus, plus] = w.querySelectorAll("button");
+    const set = n => { const x = durs(); x[i] = Math.max(lo, Math.min(12, n)); setSetting("box", x); renderBoxSettings(); boxDraw(); };
+    minus.onclick = () => set(v - 1); plus.onclick = () => set(v + 1);
+    $("bSteps").appendChild(w);
+  });
+  $("bDur").innerHTML = "";
+  BMIN.forEach(o => {
+    const b = document.createElement("button"); b.type = "button"; b.textContent = o.n;
+    b.setAttribute("aria-pressed", String(+cfg("boxMin") === o.v));
+    b.onclick = () => { setSetting("boxMin", o.v); renderBoxSettings(); boxDraw(); };
+    $("bDur").appendChild(b);
+  });
+  $("optTon").checked = !!cfg("ton"); $("optSay").checked = !!cfg("ansage"); $("optVib").checked = !!cfg("vib");
+}
+function boxTarget() { const m = +cfg("boxMin"), c = durs().reduce((a, b) => a + b, 0); return m ? Math.max(1, Math.ceil(m * 60 / c)) : 0; }
+function boxState() {
+  const d = durs(), c = d.reduce((a, b) => a + b, 0), r = Math.floor(B.t / c);
+  let w = B.t - r * c, k = 0;
+  while (k < 3 && w >= d[k]) { w -= d[k]; k++; }
+  return {r, k, frac: d[k] ? Math.min(1, w / d[k]) : 1, left: d[k] - w};
+}
+function boxDraw() {
+  const s = B.run ? boxState() : {r: 0, k: 0, frac: 0, left: durs()[0]};
+  const [x1, y1] = CORNER[s.k], [x2, y2] = CORNER[(s.k + 1) % 4];
+  const x = x1 + (x2 - x1) * s.frac, y = y1 + (y2 - y1) * s.frac;
+  $("bDot").setAttribute("cx", x); $("bDot").setAttribute("cy", y);
+  const tr = $("bTrail"); tr.setAttribute("x1", x1); tr.setAttribute("y1", y1); tr.setAttribute("x2", x); tr.setAttribute("y2", y);
+  for (let i = 0; i < 4; i++) $("e" + i).classList.toggle("past", B.run && i < s.k);
+  const sc = s.k === 0 ? 0.45 + 0.55 * ease(s.frac) : s.k === 1 ? 1 : s.k === 2 ? 1 - 0.55 * ease(s.frac) : 0.45;
+  const size = 120 * sc, o = 100 - size / 2;
+  const f = $("bFill"); f.setAttribute("x", o); f.setAttribute("y", o); f.setAttribute("width", size); f.setAttribute("height", size);
+  $("bPhase").textContent = B.run ? (B.paused ? "Pause" : PH[s.k]) : "Bereit";
+  $("bSec").textContent = B.run ? Math.max(1, Math.ceil(s.left - 1e-6)) : "";
+  $("bRounds").textContent = B.run ? s.r : B.rounds;
+  const tgt = +cfg("boxMin");
+  $("bTime").textContent = tgt && B.run ? mmss(boxTarget() * durs().reduce((a, b) => a + b, 0) - B.t) : mmss(B.t);
+  $("bTimeLbl").textContent = tgt && B.run ? "noch" : "Zeit";
+}
+function cue(k) {
+  if (cfg("ansage") && window.Ton) Ton.speak(PH[k], {lang: "de-DE", rate: 0.95, voice: chosenVoice()});
+  else if (cfg("ton")) tone([396, 528, 330, 528][k], k % 2 ? 0.5 : 1.1, k % 2 ? 0.07 : 0.12);
+  if (cfg("vib") && navigator.vibrate) try { navigator.vibrate(k === 0 ? [60, 60, 60] : k === 2 ? [180] : [30]); } catch (e) {}
+}
+function boxFrame(now) {
+  if (!B.run) return;
+  const dt = Math.min(0.25, (now - B.last) / 1000); B.last = now;
+  if (!B.paused) B.t += dt;
+  const s = boxState(), tgt = boxTarget();
+  if (tgt && s.r >= tgt) { boxEnd(true); return; }
+  if (!B.paused && (s.k !== B.phase || s.r !== B.lastR)) { B.phase = s.k; B.lastR = s.r; cue(s.k); }
+  boxDraw();
+  requestAnimationFrame(boxFrame);
+}
+function boxStart() {
+  if (B.run) { B.paused = !B.paused; if (!B.paused) B.phase = -1; else if (window.Ton) Ton.stop(); $("bGo").textContent = B.paused ? "▶ Weiter" : "❚❚ Pause"; boxDraw(); return; }
+  audio(); wake(true);
+  Object.assign(B, {run: true, paused: false, t: 0, phase: -1, lastR: -1, rounds: 0, last: performance.now()});
+  $("bGo").textContent = "❚❚ Pause"; $("bStop").hidden = false; $("bMsg").textContent = "";
+  requestAnimationFrame(boxFrame);
+}
+function boxEnd(fertig) {
+  const s = boxState(), sek = Math.round(B.t);
+  B.run = false; B.rounds = fertig ? s.r : s.r; wake(false);
+  $("bGo").textContent = "▶ Start"; $("bStop").hidden = true;
+  if (fertig) { bell(); if (cfg("ansage") && window.Ton) Ton.speak("Fertig. Gut gemacht.", {lang: "de-DE", rate: 0.95, voice: chosenVoice()}); }
+  else if (window.Ton) Ton.stop();
+  $("bMsg").textContent = B.rounds ? (fertig ? "Geschafft: " : "Beendet: ") + B.rounds + (B.rounds === 1 ? " Runde" : " Runden") + " in " + mmss(sek) + "." : "";
+  if (B.rounds) logDay(doc => { doc.box.runden += B.rounds; doc.box.sek += sek; });
+  B.t = sek; boxDraw();
+}
+
+/* ---------- Meditation ---------- */
+const P = {on: false, tok: 0, paused: false, pauses: 0, acc: 0, since: 0, m: null, target: 0, cps: 13};
+const elapsed = () => P.acc + (P.paused ? 0 : (performance.now() - P.since) / 1000);
+const rate = () => +cfg("rate") || 0.9;
+function chosenVoice() {
+  if (!window.Ton) return null;
+  const n = cfg("stimme"), vs = Ton.voices("de");
+  return (n && vs.filter(v => v.name === n)[0]) || Ton.voice("de-DE") || null;
+}
+const todaysMed = () => meditationDesTages(iso(new Date()));
+
+function renderVoices() {
+  if (!window.Ton) return;
+  const sel = $("medVoice"), vs = Ton.voices("de"), best = Ton.voice("de-DE");
+  sel.innerHTML = "";
+  const o0 = document.createElement("option"); o0.value = ""; o0.textContent = "Automatisch" + (best ? " (" + best.name + ")" : ""); sel.appendChild(o0);
+  vs.forEach(v => { const o = document.createElement("option"); o.value = v.name; o.textContent = v.name + " · " + v.lang; sel.appendChild(o); });
+  sel.value = vs.some(v => v.name === cfg("stimme")) ? cfg("stimme") : "";
+}
+function renderMedList() {
+  const heute = todaysMed().id, doc = days[iso(new Date())] || {}, gehoert = (doc.meditationen || []).filter(m => m.fertig).map(m => m.id);
+  $("medList").innerHTML = "";
+  MEDITATIONEN.forEach(m => {
+    const b = document.createElement("button"); b.type = "button"; b.className = "med";
+    b.innerHTML = (m.id === heute ? "<span class=\"tag\">Heute</span>" : "") + "<span class=\"ic\" aria-hidden=\"true\">" + m.i + "</span><h3></h3><p></p>" + (gehoert.includes(m.id) ? "<span class=\"done\">✓ heute gehört</span>" : "");
+    b.querySelector("h3").textContent = m.t; b.querySelector("p").textContent = m.s;
+    b.onclick = () => medStart(m);
+    $("medList").appendChild(b);
+  });
+  $("medDur").value = cfg("dauer"); $("medDurOut").textContent = cfg("dauer") + " Min";
+  $("medRate").value = rate(); $("optText").checked = !!cfg("text");
+}
+function waitUntil(cond, tok) {
+  return new Promise(res => { const f = () => { if (tok !== P.tok) return res(false); if (cond()) return res(true); setTimeout(f, 200); }; f(); });
+}
+async function medRun(m, tok) {
+  const plan = planMeditation(m, P.target / 60, P.cps), it = plan.items, R = rate(), V = chosenVoice();
+  bell(m.leise);
+  if (!await waitUntil(() => elapsed() >= 4, tok)) return;
+  for (let i = 0; i < it.length; i++) {
+    $("pSay").textContent = cfg("text") ? it[i].text : "";
+    for (;;) {
+      if (!await waitUntil(() => !P.paused, tok)) return;
+      const pc = P.pauses, t0 = performance.now();
+      await Ton.speak(it[i].text, {lang: "de-DE", rate: R, voice: V});
+      if (tok !== P.tok) return;
+      if (P.pauses === pc) { const s = (performance.now() - t0) / 1000; if (s > 0.6) P.cps = P.cps * 0.7 + (it[i].text.length / s) * 0.3; break; }
+    }
+    if (i === it.length - 1) break;
+    // Pause aus der Restzeit: was nach Abzug der restlichen Sätze übrig ist, nach Gewicht verteilen
+    let chars = 0, w = 0;
+    for (let j = i + 1; j < it.length; j++) chars += it[j].text.length;
+    for (let j = i; j < it.length - 1; j++) w += it[j].w;
+    const budget = P.target - elapsed() - chars / P.cps - 6;
+    const p = Math.min(60, Math.max(it[i].min, w ? budget * it[i].w / w : 0));
+    const until = elapsed() + p;
+    if (!await waitUntil(() => elapsed() >= until, tok)) return;
+  }
+  $("pSay").textContent = "";
+  const endAt = Math.max(elapsed() + 2, Math.min(P.target, elapsed() + 20));
+  await waitUntil(() => elapsed() >= endAt, tok);
+  if (tok !== P.tok) return;
+  medEnd(true);
+}
+function medStart(m) {
+  if (!window.Ton || !Ton.supported) { alertBox("Dieser Browser kann nicht vorlesen. Öffne die Seite in Safari oder Chrome."); return; }
+  audio(); wake(true);
+  P.tok++; P.on = true; P.m = m; P.paused = false; P.pauses = 0; P.acc = 0; P.since = performance.now();
+  P.target = (+cfg("dauer") || 5) * 60; P.cps = +settings.cps || 13 * rate();
+  $("pIc").textContent = m.i; $("pTitle").textContent = m.t; $("pSay").textContent = "";
+  $("pPause").textContent = "❚❚ Pause"; $("player").classList.remove("paused"); $("player").hidden = false;
+  document.body.style.overflow = "hidden";
+  medTick(); medRun(m, P.tok);
+}
+function medTick() {
+  if (!P.on) return;
+  $("pTime").textContent = mmss(P.target - elapsed());
+  $("pBar").style.width = Math.min(100, elapsed() / P.target * 100) + "%";
+  setTimeout(medTick, 500);
+}
+function medPause() {
+  if (!P.on) return;
+  if (!P.paused) { P.acc = elapsed(); P.paused = true; P.pauses++; Ton.stop(); $("pPause").textContent = "▶ Weiter"; $("player").classList.add("paused"); }
+  else { P.since = performance.now(); P.paused = false; $("pPause").textContent = "❚❚ Pause"; $("player").classList.remove("paused"); }
+}
+function medEnd(fertig) {
+  if (!P.on) return;
+  const sek = Math.round(elapsed()), m = P.m;
+  P.on = false; P.tok++; Ton.stop(); wake(false);
+  if (fertig) bell(m.leise);
+  $("player").hidden = true; document.body.style.overflow = "";
+  // Gemessenes Sprechtempo merken, dann passt die Länge beim nächsten Mal schon von Anfang an
+  if (P.cps > 6 && P.cps < 30) settings.cps = Math.round(P.cps * 10) / 10;
+  if (sek >= 60 || fertig) logDay(doc => { doc.meditationen.push({id: m.id, min: P.target / 60, sek, fertig: fertig || sek >= P.target * 0.9, at: new Date().toISOString().slice(11, 16)}); });
+  setSetting("cps", settings.cps);
+  renderMedList();
+}
+function alertBox(t) { $("store").textContent = t; }
+
+/* ---------- Anzeige: heute, Verlauf ---------- */
+const NAME = id => (MEDITATIONEN.filter(m => m.id === id)[0] || {t: id}).t;
+function renderStand() {
+  const m = todaysMed(), d = iso(new Date()), doc = days[d] || {};
+  $("mdtIc").textContent = m.i; $("mdtTitle").textContent = m.t; $("mdtDesc").textContent = m.s;
+  $("mdtLen").textContent = cfg("dauer") + " Minuten · Länge unter Meditation einstellbar";
+  $("sStreak").textContent = streak(); $("sToday").textContent = doc.minuten || 0;
+  const parts = [], meds = (doc.meditationen || []).filter(x => x.fertig);
+  if (meds.length) parts.push(meds.map(x => NAME(x.id)).join(", "));
+  if (doc.box && doc.box.runden) parts.push(doc.box.runden + " Runden Boxatmung");
+  $("sLine").textContent = parts.length ? (doc.done ? "✓ Heute: " : "Heute: ") + parts.join(" · ") : "Heute noch nichts gemacht.";
+  $("sLine").classList.toggle("done", !!doc.done);
+  renderVerlauf();
+}
+function renderVerlauf() {
+  const t = new Date(), keys = Object.keys(days).sort();
+  $("vStreak").textContent = streak();
+  let best = 0; keys.forEach(k => { if (isDone(k)) { const p = k.split("-").map(Number); best = Math.max(best, streakAt(new Date(p[0], p[1] - 1, p[2]))); } });
+  $("vBest").textContent = best;
+  const ym = iso(t).slice(0, 7);
+  $("vMonth").textContent = keys.filter(k => k.startsWith(ym) && isDone(k)).length;
+  $("vMin").textContent = keys.reduce((a, k) => a + (days[k].minuten || 0), 0);
+  const cal = $("cal"); cal.innerHTML = "";
+  ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"].forEach(h => { const e = document.createElement("div"); e.className = "h"; e.textContent = h; cal.appendChild(e); });
+  const mon = addDays(t, -((t.getDay() + 6) % 7) - 28);
+  for (let i = 0; i < 35; i++) {
+    const d = addDays(mon, i), k = iso(d), e = document.createElement("div"), doc = days[k];
+    e.className = "d" + (isDone(k) ? " done" : doc && doc.minuten ? " some" : "") + (k === iso(t) ? " today" : "") + (d > t ? " fut" : "");
+    e.textContent = d.getDate(); e.title = k + (doc && doc.minuten ? " · " + doc.minuten + " Min" : "");
+    cal.appendChild(e);
+  }
+  const log = $("log"); log.innerHTML = "";
+  keys.slice().reverse().slice(0, 14).forEach(k => {
+    const doc = days[k], parts = [];
+    (doc.meditationen || []).forEach(m => parts.push(NAME(m.id) + (m.fertig ? "" : " (abgebrochen)")));
+    if (doc.box && doc.box.runden) parts.push("Boxatmung " + doc.box.runden + " Runden");
+    if (!parts.length) return;
+    const p = k.split("-").map(Number), row = document.createElement("div");
+    row.innerHTML = "<span></span><span></span>";
+    row.firstChild.textContent = new Date(p[0], p[1] - 1, p[2]).toLocaleDateString("de-DE", {weekday: "short", day: "numeric", month: "short"}) + " · " + parts.join(", ");
+    row.lastChild.textContent = (doc.minuten || 0) + " Min";
+    log.appendChild(row);
+  });
+}
+
+/* ---------- Reiter und Bedienung ---------- */
+function show(id) {
+  ["box", "med", "verlauf"].forEach(v => { $("tab-" + v).setAttribute("aria-selected", String(v === id)); $("view-" + v).hidden = v !== id; });
+}
+["box", "med", "verlauf"].forEach(v => $("tab-" + v).addEventListener("click", () => { show(v); history.replaceState(null, "", "#" + v); }));
+$("bGo").addEventListener("click", boxStart);
+$("bStop").addEventListener("click", () => boxEnd(false));
+$("optTon").addEventListener("change", e => setSetting("ton", e.target.checked));
+$("optSay").addEventListener("change", e => setSetting("ansage", e.target.checked));
+$("optVib").addEventListener("change", e => setSetting("vib", e.target.checked));
+$("medDur").addEventListener("input", e => { $("medDurOut").textContent = e.target.value + " Min"; });
+$("medDur").addEventListener("change", e => { setSetting("dauer", +e.target.value); renderStand(); });
+$("medRate").addEventListener("change", e => setSetting("rate", +e.target.value));
+$("medVoice").addEventListener("change", e => setSetting("stimme", e.target.value));
+$("optText").addEventListener("change", e => setSetting("text", e.target.checked));
+$("medTest").addEventListener("click", () => Ton.speak("Atme ruhig ein. Und lang wieder aus.", {lang: "de-DE", rate: rate(), voice: chosenVoice()}));
+$("mdtGo").addEventListener("click", () => medStart(todaysMed()));
+$("pPause").addEventListener("click", medPause);
+$("pStop").addEventListener("click", () => medEnd(false));
+if (window.Ton) { $("helpLink").href = Ton.helpUrl; if (window.speechSynthesis) speechSynthesis.addEventListener("voiceschanged", renderVoices); }
+
+function render() { renderBoxSettings(); boxDraw(); renderMedList(); renderVoices(); renderStand(); }
+const h = location.hash.slice(1);
+show(h === "med" || h === "heute" ? "med" : h === "verlauf" ? "verlauf" : "box");
+
+(async () => {
+  const c = window.SR_CONFIG || {};
+  try {
+    if (!c.supabaseUrl || !window.supabase) throw new Error("ohne Konfiguration");
+    sb = window.supabase.createClient(c.supabaseUrl, c.supabaseAnonKey);
+    const s = await sb.auth.getSession();
+    user = s.data.session ? s.data.session.user : null;
+  } catch (e) { user = null; }
+  loadLocal(); render();
+  if (!user) { $("gate").hidden = false; return; }
+  try {
+    const r = await sb.from("schach_docs").select("path,data").eq("user_id", user.id).like("path", "entspannung/%");
+    if (r.error) throw r.error;
+    for (const row of r.data || []) {
+      if (row.path === SET) { settings = Object.assign({}, row.data || {}); continue; }
+      if (row.path.startsWith(TAG) && row.data) days[row.path.slice(TAG.length)] = row.data;
+    }
+    saveLocal(); if (!B.run) render(); else renderStand(); setStore("db");
+  } catch (e) { setStore("error"); }
+})();
+</script>
+</body>
+</html>
