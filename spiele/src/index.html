@@ -74,7 +74,9 @@ footer{margin-top:40px;color:var(--muted);font-size:.85rem}
   "use strict";
   // id = Freigabe-Kennung (module_access), gleich wie früher die eigene Portal-Kachel. Wer „spiele“ hat, sieht alle.
   var GAMES = [
-    {id: "flipper", sec: "play", icon: "🕹️", title: "Flipper", isNew: true, g: "linear-gradient(135deg,#ff3df2,#7a5cff 50%,#21d4fd)",
+    {id: "hund", sec: "play", icon: "🐕", title: "Hundeleben", isNew: true, g: "linear-gradient(135deg,#a8582a,#151110 55%,#2c4a2f)",
+      text: "Ein Tag mit deinem Pinscher wie bei den Sims: Wohnung, Garten und Stadtpark in 3D. Füttern, Gassi gehen, Haufen einsammeln, Stock werfen, Sitz, Platz, Pfote. Allein oder zu zweit.", href: "../hund/"},
+    {id: "flipper", sec: "play", icon: "🕹️", title: "Flipper", g: "linear-gradient(135deg,#ff3df2,#7a5cff 50%,#21d4fd)",
       text: "Vier Tische mit eigener Physik, Kunst und Klang: Retro-Klassiker, Comic-Superhelden, ein Huberman-Tag und ein Weltraum-Tisch mit Schwerkraft. Multiball, Missionen, Rekorde.", href: "../flipper/",
       tables: [["🎰", "Goldene Ära", "klassik"], ["💥", "Kapow City", "comic"], ["🌅", "Protokoll", "huberman"], ["🪐", "Orbit 9", "weltraum"]]},
     {id: "quiz", sec: "play", icon: "⚡", title: "Götterquiz", g: "linear-gradient(135deg,#f7b733,#fc4a1a)",
@@ -100,11 +102,11 @@ footer{margin-top:40px;color:var(--muted);font-size:.85rem}
     $("play").replaceChildren(); $("calm").replaceChildren(); cards = {};
     var shown = GAMES.filter(function (g) { return !mods || mods.indexOf("spiele") >= 0 || mods.indexOf(g.id) >= 0; });
     shown.forEach(function (g) {
-      var row = el("div", {class: "row"}, [el("a", {class: "btn primary", href: g.href, text: g.id === "flipper" ? "Flippern" : "Spielen"})]);
+      var row = el("div", {class: "row"}, [el("a", {class: "btn primary", href: g.href, text: g.id === "flipper" ? "Flippern" : g.id === "hund" ? "Loslegen" : "Spielen"})]);
       var body = el("div", {class: "body"}, [el("h3", {text: g.title}), el("p", {text: g.text})]);
       if (g.tables) body.appendChild(el("div", {class: "tables"}, g.tables.map(function (t) { return el("a", {href: g.href + "#" + t[2], text: t[0] + " " + t[1]}); })));
       var stat = el("span", {class: "stat"}); row.appendChild(stat); body.appendChild(row);
-      var card = el("article", {class: "game" + (g.id === "flipper" ? " feature" : "")}, [g.isNew ? el("span", {class: "badge", text: "NEU"}) : null, el("div", {class: "art", style: "--g:" + g.g, "aria-hidden": "true", text: g.icon}), body]);
+      var card = el("article", {class: "game" + (g.id === "hund" ? " feature" : "")}, [g.isNew ? el("span", {class: "badge", text: "NEU"}) : null, el("div", {class: "art", style: "--g:" + g.g, "aria-hidden": "true", text: g.icon}), body]);
       cards[g.id] = {card: card, stat: stat};
       $(g.sec).appendChild(card);
     });
@@ -118,7 +120,12 @@ footer{margin-top:40px;color:var(--muted);font-size:.85rem}
     Object.keys(list).forEach(function (id) { var d = list[id] || {}; games += d.spiele || 0; if ((d.best || 0) > best) { best = d.best; name = names[id] || id; } });
     if (best) cards.flipper.stat.textContent = "Rekord " + fmt(best) + " auf " + name + " · " + games + (games === 1 ? " Spiel" : " Spiele");
   }
+  function hundStat() {
+    if (!cards.hund) return;
+    try { var h = JSON.parse(localStorage.getItem("hund-stand-v1") || "null"); if (h && h.sim) { var last = (h.sim.history || []).slice(-1)[0]; cards.hund.stat.textContent = (h.name || "Hund") + " · Tag " + h.sim.day + (last ? " · gestern " + "★★★★★".slice(0, last.stars) : ""); } } catch (e) {}
+  }
   render(null);
+  hundStat();
   try { flipperStat(JSON.parse(localStorage.getItem("flipper-scores") || "{}") || {}); } catch (e) {}
 
   (async function () {
@@ -132,7 +139,7 @@ footer{margin-top:40px;color:var(--muted);font-size:.85rem}
       var ad = await sb.from("app_admins").select("user_id").eq("user_id", user.id).maybeSingle();
       var ma = await sb.from("module_access").select("modules").eq("user_id", user.id).maybeSingle();
       var mods = !ma.error && ma.data && Array.isArray(ma.data.modules) && !(ad.data && !ad.error) ? ma.data.modules : null;
-      render(mods);
+      render(mods); hundStat();
       var local = {}; try { local = JSON.parse(localStorage.getItem("flipper-scores") || "{}") || {}; } catch (e) {}
       flipperStat(local);
       var r = await sb.from("schach_docs").select("path,data").eq("user_id", user.id).like("path", "flipper/score.%");

@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#151320">
+<meta name="description" content="Hundeleben: ein Tag mit deinem Pinscher wie bei den Sims. Füttern, Gassi gehen, spielen, Tricks üben, zu zweit spazieren.">
+<title>Hundeleben</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<script src="../config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<style>
+:root{--bg:#151320;--panel:rgba(22,20,34,.82);--solid:#1d1a2b;--ink:#f4f1ff;--muted:#aaa4c6;--line:rgba(255,255,255,.14);--accent:#ffcf4a;--good:#4cd964;--bad:#ff5a4f;
+  --display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;--body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font:15px/1.4 var(--body);overflow:hidden;overscroll-behavior:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+[hidden]{display:none!important}
+#cv{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
+button{font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:12px;min-height:40px;padding:6px 12px;cursor:pointer;touch-action:manipulation;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+button:hover{border-color:var(--muted)}
+button.on{background:var(--accent);color:#1a1400;border-color:var(--accent)}
+button.primary,.btn.primary{background:var(--accent);color:#1a1400;border-color:var(--accent);font-weight:700}
+button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.btn{display:inline-block;padding:9px 16px;border-radius:12px;border:1px solid var(--line);color:var(--ink);text-decoration:none;font-weight:700}
+input[type=text]{font:inherit;color:var(--ink);background:#0f0d18;border:1px solid var(--line);border-radius:10px;padding:9px 12px;min-height:42px;width:100%}
+/* Kopfzeile */
+#top{position:fixed;top:0;left:0;right:0;display:flex;align-items:center;gap:6px;padding:calc(6px + env(safe-area-inset-top)) max(8px,env(safe-area-inset-right)) 6px max(8px,env(safe-area-inset-left));z-index:5;pointer-events:none}
+#top>*{pointer-events:auto}
+#top a.back{color:var(--ink);text-decoration:none;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 10px;white-space:nowrap;font-size:.9rem}
+#clock{font:700 1rem var(--display);background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 12px;font-variant-numeric:tabular-nums;white-space:nowrap}
+#speed{display:flex;gap:3px}
+#speed button{min-width:40px;padding:6px 8px}
+.sp{flex:1}
+/* Bedürfnisse links, Aufgaben rechts */
+.panel{position:fixed;z-index:4;background:var(--panel);border:1px solid var(--line);border-radius:16px;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);width:250px;max-width:calc(50vw - 14px)}
+.panel .head{display:flex;align-items:center;gap:8px;width:100%;border:0;background:transparent;min-height:44px;padding:8px 12px;font-weight:700;text-align:left;border-radius:16px}
+.panel .body{display:none;padding:0 12px 12px}
+.panel.open .body{display:block}
+#needs{left:max(8px,env(safe-area-inset-left));top:calc(62px + env(safe-area-inset-top))}
+#tasks{right:max(8px,env(safe-area-inset-right));top:calc(62px + env(safe-area-inset-top));width:300px}
+#moodDot{width:14px;height:22px;clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);background:var(--good);flex:none}
+#needChip{margin-left:auto;display:flex;gap:2px;font-size:1rem}
+#needChip span{filter:drop-shadow(0 0 3px var(--c))}
+.panel.open #needChip{display:none}
+.need{display:grid;grid-template-columns:22px 1fr 90px;align-items:center;gap:6px;font-size:.86rem;margin:4px 0}
+.need b{font-weight:400;color:var(--muted)}
+.need em{display:block;height:8px;background:rgba(255,255,255,.1);border-radius:6px;overflow:hidden}
+.need i{display:block;height:100%;border-radius:6px;transition:width .4s}
+.sub{margin:10px 0 2px;font-size:.75rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+#taskCount{margin-left:auto;color:var(--accent);font-variant-numeric:tabular-nums}
+#taskList{list-style:none;margin:0;padding:0;max-height:calc(100vh - 230px);overflow:auto}
+#taskList li{display:grid;grid-template-columns:20px 1fr;gap:2px 6px;padding:6px 0;border-top:1px solid var(--line);font-size:.88rem}
+#taskList li small{grid-column:2;color:var(--muted);font-size:.76rem}
+#taskList li.done{color:var(--muted)}
+#taskList li.done .ck{color:var(--good)}
+#taskList li.failed{color:var(--muted);text-decoration:line-through}
+#taskList li.failed .ck{color:var(--bad)}
+/* Befehlsleiste */
+#bar{position:fixed;left:8px;right:8px;bottom:calc(10px + env(safe-area-inset-bottom));display:flex;gap:6px;z-index:4;flex-wrap:wrap;justify-content:center;pointer-events:none}
+#bar>*{pointer-events:auto}
+#bar button{display:flex;align-items:center;gap:6px;min-height:46px;font-weight:700}
+#bar button span{font-size:1.1rem}
+#bags{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-weight:700}
+@media (max-width:640px){#bNet,#bSound,#bHelp,#speed button[data-s="8"]{display:none}#toasts{top:calc(118px + env(safe-area-inset-top))}#bar button b{display:none}#bar button{min-width:46px;justify-content:center;padding:6px 8px}#clock{font-size:.9rem;padding:8px}#top a.back span{display:none}.panel{width:auto;max-width:calc(100vw - 16px)}#tasks{top:calc(112px + env(safe-area-inset-top))}#needs.open,#tasks.open{left:8px;right:8px;max-width:none;width:auto;z-index:6}#speed button{min-width:34px;padding:6px 5px}}
+/* Joystick */
+#joy{position:fixed;left:max(18px,env(safe-area-inset-left));bottom:calc(80px + env(safe-area-inset-bottom));width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.08);border:1px solid var(--line);z-index:4;touch-action:none}
+#knob{position:absolute;left:35px;top:35px;width:50px;height:50px;border-radius:50%;background:rgba(255,255,255,.35);pointer-events:none}
+/* Menü, Sprechblasen, Hinweise */
+#menu{position:fixed;z-index:8;background:var(--solid);border:1px solid var(--line);border-radius:16px;padding:8px;display:flex;flex-direction:column;gap:6px;min-width:200px;box-shadow:0 10px 40px rgba(0,0,0,.5)}
+#menu h3{margin:2px 6px 2px;font:700 1rem var(--display);color:var(--accent)}
+#menu button{text-align:left;background:#26223a;-webkit-backdrop-filter:none;backdrop-filter:none}
+#menu button.off{opacity:.45}
+#bubble{position:fixed;left:0;top:0;z-index:3;background:#fff;color:#000;border-radius:18px;padding:4px 10px;font-size:1.3rem;pointer-events:none;box-shadow:0 4px 12px rgba(0,0,0,.3)}
+#bubble::after{content:"";position:absolute;left:14px;bottom:-8px;width:12px;height:12px;background:#fff;border-radius:50%}
+#actLabel{position:fixed;left:0;top:0;z-index:3;background:var(--solid);border:1px solid var(--line);border-radius:12px;padding:5px 6px 5px 10px;display:flex;align-items:center;gap:8px;font-size:.85rem;white-space:nowrap}
+#actLabel .pb{width:60px;height:6px;background:rgba(255,255,255,.12);border-radius:4px;overflow:hidden}
+#actBar{height:100%;background:var(--accent)}
+#actCancel{min-height:28px;min-width:28px;padding:0 6px;border-radius:8px}
+.tag{position:fixed;left:0;top:0;z-index:3;background:rgba(0,0,0,.55);border-radius:10px;padding:2px 8px;font-size:.8rem;pointer-events:none;white-space:nowrap}
+#toasts{position:fixed;left:50%;transform:translateX(-50%);top:calc(64px + env(safe-area-inset-top));z-index:7;display:flex;flex-direction:column;gap:6px;align-items:center;pointer-events:none;width:min(520px,calc(100vw - 20px))}
+.toast{background:var(--solid);border:1px solid var(--line);border-radius:14px;padding:9px 14px;box-shadow:0 6px 24px rgba(0,0,0,.4);text-align:center;transition:opacity .5s,transform .5s}
+.toast.good{border-color:var(--good)}
+.toast.bad{border-color:var(--bad)}
+.toast.out{opacity:0;transform:translateY(-8px)}
+#sleepShade{position:fixed;inset:0;background:rgba(5,8,25,.55);z-index:2;pointer-events:none;display:flex;align-items:center;justify-content:center;font:800 2rem var(--display);color:#cfd8ff}
+/* Überlagerungen */
+.overlay{position:fixed;inset:0;z-index:10;background:rgba(10,8,20,.78);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);overflow:auto;padding:calc(20px + env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) 40px max(16px,env(safe-area-inset-left));display:flex;align-items:flex-start;justify-content:center}
+.card{background:var(--solid);border:1px solid var(--line);border-radius:22px;padding:22px;max-width:620px;width:100%;margin:auto 0}
+.card h1,.card h2{font-family:var(--display);margin:0 0 6px;line-height:1.1}
+.card h1{font-size:clamp(2rem,7vw,2.8rem)}
+.card p{color:var(--muted);margin:0 0 12px}
+.card label{display:block;font-weight:700;margin:14px 0 6px}
+.looks{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px}
+.look{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px;background:#26223a;-webkit-backdrop-filter:none;backdrop-filter:none}
+.look span{width:44px;height:44px;border-radius:50%;border:2px solid var(--line)}
+.look small{font-size:.75rem;color:var(--muted);text-align:center}
+.look.on{outline:3px solid var(--accent)}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:12px}
+.row.item{justify-content:space-between;border-top:1px solid var(--line);padding-top:10px}
+.row input{flex:1;min-width:180px}
+.help{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;margin-top:10px}
+.help div{background:#26223a;border-radius:12px;padding:12px;color:var(--muted);font-size:.9rem}
+.help b{display:block;color:var(--ink);margin-bottom:4px}
+kbd{border:1px solid var(--line);border-radius:5px;padding:0 5px;font-size:.85em;color:var(--ink)}
+.hero{display:flex;gap:14px;align-items:center}
+.hero .pic{font-size:3.4rem}
+#deStars{font-size:2.2rem;color:var(--accent);letter-spacing:4px;margin:8px 0}
+#net{z-index:11}
+</style>
+</head>
+<body>
+<canvas id="cv" aria-label="Hundeleben, 3D-Ansicht"></canvas>
+
+<header id="top">
+  <a class="back" href="../spiele/">← <span>Spiele</span></a>
+  <div id="clock">Tag 1 · Mo 07:00</div>
+  <div id="speed" role="group" aria-label="Zeit">
+    <button type="button" data-s="0" title="Pause (P)" aria-label="Pause">⏸</button>
+    <button type="button" data-s="1" title="Normal" aria-label="Normale Zeit">▶</button>
+    <button type="button" data-s="3" title="Schneller" aria-label="Schneller">⏩</button>
+    <button type="button" data-s="8" title="Sehr schnell" aria-label="Sehr schnell">⏭</button>
+  </div>
+  <span class="sp"></span>
+  <button type="button" id="bNet" title="Zu zweit spazieren" aria-label="Zu zweit">👥</button>
+  <button type="button" id="bSound" title="Ton an oder aus" aria-label="Ton">🔊</button>
+  <button type="button" id="bHelp" title="Hilfe" aria-label="Hilfe">?</button>
+  <button type="button" id="bMenu" title="Menü" aria-label="Menü">☰</button>
+</header>
+
+<section class="panel" id="needs">
+  <button type="button" class="head" id="needHead"><span id="moodDot"></span><span id="dogName">Hund</span><span id="needChip"></span></button>
+  <div class="body"><div id="needList"></div><p class="sub">Du</p><div id="meList"></div></div>
+</section>
+<section class="panel" id="tasks">
+  <button type="button" class="head" id="taskHead">📋 Aufgaben heute <span id="taskCount">0/0</span></button>
+  <div class="body"><ul id="taskList"></ul></div>
+</section>
+
+<div id="bar">
+  <button type="button" id="bKomm" title="Komm! (1)"><span>📣</span><b>Komm</b></button>
+  <button type="button" id="bSitz" title="Sitz (2)"><span>🪑</span><b>Sitz</b></button>
+  <button type="button" id="bPlatz" title="Platz (3)"><span>⬇️</span><b>Platz</b></button>
+  <button type="button" id="bPfote" title="Pfote (4)"><span>🐾</span><b>Pfote</b></button>
+  <button type="button" id="bLeash" title="Leine (L)"><span>🦮</span><b>Anleinen</b></button>
+  <button type="button" id="bThrow" title="Werfen (Leertaste)" hidden><span>🎾</span><b>Werfen</b></button>
+  <span id="bags" hidden></span>
+  <button type="button" id="bJoy" title="Joystick ein oder aus" aria-label="Joystick">🕹️</button>
+</div>
+<div id="joy" hidden><div id="knob"></div></div>
+
+<div id="menu" hidden></div>
+<div id="bubble" hidden></div>
+<div id="actLabel" hidden><span id="actText"></span><span class="pb"><span id="actBar" style="display:block"></span></span><button type="button" id="actCancel" aria-label="Abbrechen">✕</button></div>
+<div id="tags"></div>
+<div id="toasts" aria-live="polite"></div>
+<div id="sleepShade" hidden>Zzz …</div>
+
+<div class="overlay" id="start">
+  <div class="card">
+    <div class="hero"><div class="pic">🐕</div><div><h1>Hundeleben</h1><p>Ein Tag mit deinem Pinscher, wie bei den Sims: Wohnung, Garten und Stadtpark. Füttern, Gassi gehen, spielen, Tricks üben, baden und abends müde ins Bett.</p></div></div>
+    <label for="nameIn">Wie heißt dein Hund?</label>
+    <input type="text" id="nameIn" maxlength="20" placeholder="Name" autocomplete="off">
+    <label>Fell</label>
+    <div class="looks" id="looks"></div>
+    <div class="row">
+      <button type="button" class="primary" id="resume" hidden>Weiterspielen</button>
+      <button type="button" class="primary" id="newGame">Los geht's</button>
+      <span class="sp"></span>
+      <button type="button" id="sNet">👥 Zu zweit</button>
+      <button type="button" id="sHelp">? Hilfe</button>
+      <button type="button" id="sSound">🔊 Ton</button>
+    </div>
+    <div class="help">
+      <div><b>Antippen</b>Tipp auf Napf, Sofa, Bett, Regal, Badewanne oder den Hund und wähle, was du tun willst. Tipp auf den Boden, um hinzugehen.</div>
+      <div><b>Bedürfnisse</b>Hunger, Durst, Gassi, Energie, Spaß, Zuneigung, Sauberkeit. Die Raute über dem Hund zeigt die Laune.</div>
+      <div><b>Aufgaben</b>Jeden Tag neue: Morgen- und Abendrunde, füttern, Haufen einsammeln, Stock werfen, Sitz, Platz, Pfote.</div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="help" hidden>
+  <div class="card">
+    <h2>So geht's</h2>
+    <div class="help">
+      <div><b>Bewegen</b>Auf den Boden tippen oder klicken. Mit <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> oder den Pfeiltasten direkt laufen, <kbd>Shift</kbd> rennt. Auf dem Handy gibt es den Joystick 🕹️.</div>
+      <div><b>Kamera</b>Ziehen dreht die Ansicht, Mausrad oder zwei Finger zoomen, <kbd>Q</kbd> und <kbd>E</kbd> drehen. Drinnen werden die Wände zur Kamera hin abgesenkt.</div>
+      <div><b>Hund</b>Kommandos unten: Komm <kbd>1</kbd>, Sitz <kbd>2</kbd>, Platz <kbd>3</kbd>, Pfote <kbd>4</kbd>, Leine <kbd>L</kbd>. Den Hund antippen zum Streicheln.</div>
+      <div><b>Spielen</b>Ball oder Stock antippen und aufheben, dann Werfen (<kbd>Leertaste</kbd>) oder auf eine Stelle tippen. Ohne Leine holt der Hund ihn zurück.</div>
+      <div><b>Gassi</b>Anleinen, durch die Haustür und den Garten zum Park. Der Hund macht sein Geschäft an Bäumen und Laternen. Haufen antippen, einpacken, in einen Mülleimer werfen.</div>
+      <div><b>Tag und Nacht</b>Eine Minute im Spiel dauert eine Sekunde. Oben kannst du pausieren oder vorspulen. Ab 20 Uhr ins Bett, dann beginnt der nächste Tag mit neuen Aufgaben.</div>
+    </div>
+    <div class="row"><button type="button" class="primary" id="helpClose">Verstanden</button></div>
+  </div>
+</div>
+
+<div class="overlay" id="dayEnd" hidden>
+  <div class="card" style="text-align:center">
+    <h2 id="deTitle">Tag 1 ist vorbei</h2>
+    <div id="deStars">★★★☆☆</div>
+    <p id="deText"></p>
+    <div class="row" style="justify-content:center"><button type="button" class="primary" id="deClose">Guten Morgen!</button></div>
+  </div>
+</div>
+
+<div class="overlay" id="net" hidden>
+  <div class="card">
+    <h2>👥 Zu zweit spazieren</h2>
+    <p>Ihr geht mit euren Hunden gemeinsam durch den Park. Jeder hat seine eigenen Aufgaben, dazu kommt eine gemeinsame: die Hunde sollen sich beschnuppern.</p>
+    <div id="netBody"></div>
+    <div class="row"><button type="button" id="netClose">Schließen</button></div>
+  </div>
+</div>
+
+<script>/*__LOGIC__*/</script>
+<script type="module">
+import * as THREE from "./three.module.min.js";
+/*__DOG__*/
+/*__WORLD__*/
+/*__APP__*/
+</script>
+</body>
+</html>

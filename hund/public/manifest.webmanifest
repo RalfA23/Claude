@@ -1,0 +1,15 @@
+{
+  "name": "Hundeleben",
+  "short_name": "Hundeleben",
+  "description": "Ein Tag mit deinem Pinscher: Wohnung, Garten, Stadtpark, Bedürfnisse und Aufgaben.",
+  "lang": "de",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#151320",
+  "theme_color": "#151320",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}
