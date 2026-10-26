@@ -111,6 +111,7 @@ label.f small,.f small{font-weight:400;color:var(--muted)}
 .hint{font-size:.88rem;color:var(--muted)}
 .scan{position:relative;border-radius:14px;overflow:hidden;background:#000;aspect-ratio:4/3}
 .scan video{width:100%;height:100%;object-fit:cover;display:block}
+.scanstat{position:absolute;left:8px;right:8px;bottom:8px;margin:0;color:#fff;font-size:.8rem;background:rgba(0,0,0,.55);border-radius:8px;padding:4px 8px;z-index:1}
 .scan::after{content:"";position:absolute;left:12%;right:12%;top:42%;height:16%;border:3px solid rgba(255,255,255,.85);border-radius:10px}
 
 /* Buch-Ansicht */
@@ -182,7 +183,7 @@ label.f small,.f small{font-weight:400;color:var(--muted)}
         <label class="btn" id="photobtn">🖼️ Foto vom Strichcode<input type="file" id="photo" accept="image/*" capture="environment" hidden></label>
       </div>
       <p class="hint" id="scanhint">Scannen: Strichcode hinten auf dem Buch quer ins Kamerabild halten, etwa eine Handbreit Abstand. Klappt es nicht, mach ein Foto vom Strichcode. Oder Titel eintippen.</p>
-      <div class="scan" id="scanbox" hidden><video id="video" playsinline muted autoplay></video></div>
+      <div class="scan" id="scanbox" hidden><video id="video" playsinline muted autoplay></video><p class="scanstat" id="scanstat"></p></div>
       <label class="f">Titel
         <div class="searchrow" style="margin:0">
           <input type="text" id="ftitle" maxlength="160" placeholder="z. B. Atomic Habits" autocomplete="off" enterkeyhint="search">
@@ -379,37 +380,34 @@ document.addEventListener("click", function (e) {
   dictate(b, $(b.dataset.mic), b.dataset.mic === "ftitle" ? function () { if ($("ftitle").value.trim()) lookupTitle(); } : null);
 });
 
-/* ---------- Buch suchen (Google Books, Open Library; ohne Schlüssel) ---------- */
+/* ---------- Buch suchen ---------- */
+// Über die Supabase-Funktion buch-suche (Open Library, lobid für deutsche Bücher, Google Books). Geht die nicht, direkt Open Library.
 function cleanIsbn(s) { return String(s || "").replace(/[^0-9Xx]/g, "").toUpperCase(); }
-function gbItem(v) {
-  var i = v.volumeInfo || {}, ids = i.industryIdentifiers || [], isbn = "";
-  ids.forEach(function (x) { if (x.type === "ISBN_13" || (!isbn && x.type === "ISBN_10")) isbn = x.identifier; });
-  var img = i.imageLinks && (i.imageLinks.thumbnail || i.imageLinks.smallThumbnail) || "";
-  return {title: (i.title || "") + (i.subtitle && i.title && i.title.length < 40 ? ": " + i.subtitle : ""), author: (i.authors || []).join(", "), isbn: isbn,
-    cover: img.replace(/^http:/, "https:"), genre: (i.categories || [])[0] || "", year: (i.publishedDate || "").slice(0, 4)};
+function bookSearch(body) {
+  return sb.functions.invoke("buch-suche", {body: body}).then(function (r) { if (r.error || !r.data) throw r.error || 0; return r.data.items || []; });
+}
+function olDirect(isbn) {
+  return fetch("https://openlibrary.org/api/books?format=json&jscmd=data&bibkeys=ISBN:" + isbn).then(function (r) { return r.json(); }).then(function (j) {
+    var d = j["ISBN:" + isbn]; if (!d) return [];
+    return [{title: d.title || "", author: (d.authors || []).map(function (a) { return a.name; }).join(", "), isbn: isbn, cover: d.cover ? (d.cover.medium || "") : "", genre: ""}];
+  });
 }
 function lookupIsbn(isbn) {
   isbn = cleanIsbn(isbn);
   if (isbn.length !== 10 && isbn.length !== 13) return Promise.resolve(null);
-  return fetch("https://www.googleapis.com/books/v1/volumes?q=isbn:" + isbn).then(function (r) { return r.json(); })
-    .then(function (j) { if (j.items && j.items.length) { var x = gbItem(j.items[0]); x.isbn = isbn; return x; } throw 0; })
-    .catch(function () {
-      return fetch("https://openlibrary.org/api/books?format=json&jscmd=data&bibkeys=ISBN:" + isbn).then(function (r) { return r.json(); }).then(function (j) {
-        var d = j["ISBN:" + isbn]; if (!d) return null;
-        return {title: d.title || "", author: (d.authors || []).map(function (a) { return a.name; }).join(", "), isbn: isbn, cover: d.cover ? (d.cover.medium || "") : "", genre: ""};
-      });
-    }).catch(function () { return null; });
+  return bookSearch({isbn: isbn}).catch(function () { return olDirect(isbn); })
+    .then(function (l) { return l && l.length ? l[0] : null; }).catch(function () { return null; });
 }
 var lastResults = [];
 function lookupTitle() {
   var q = $("ftitle").value.trim(), box = $("results"); if (q.length < 2) return;
   box.innerHTML = '<p class="hint">Suche …</p>';
   var a = $("fauthor").value.trim();
-  fetch("https://www.googleapis.com/books/v1/volumes?maxResults=6&printType=books&q=" + encodeURIComponent("intitle:" + q + (a ? " inauthor:" + a : "")))
-    .then(function (r) { return r.json(); })
-    .then(function (j) {
-      lastResults = (j.items || []).map(gbItem).filter(function (x) { return x.title; });
-      if (!lastResults.length) { box.innerHTML = '<p class="hint">Nichts gefunden. Du kannst Titel und Autor auch einfach selbst eintragen.</p>'; return; }
+  bookSearch({q: q, author: a})
+    .then(function (items) {
+      if ($("ftitle").value.trim() !== q) return;
+      lastResults = items.filter(function (x) { return x.title; });
+      if (!lastResults.length) { box.innerHTML = '<p class="hint">Nichts gefunden. Trag Titel und Autor einfach selbst ein, das reicht.</p>'; return; }
       box.innerHTML = lastResults.map(function (x, i) {
         return '<button type="button" data-r="' + i + '">' + (x.cover ? '<img src="' + esc(x.cover) + '" alt="">' : '<span class="ph"></span>') +
           '<div><b>' + esc(x.title) + '</b><span>' + esc(x.author) + (x.year ? " · " + x.year : "") + '</span></div></button>';
@@ -433,15 +431,17 @@ $("fisbn").addEventListener("change", function () {
   lookupIsbn($("fisbn").value).then(function (x) { if (x) { fillFrom(x); toast("Buch gefunden: " + x.title); } });
 });
 
-/* ---------- ISBN scannen (BarcodeDetector, sonst ZXing) ---------- */
-// Live-Scan mit der Kamera; als Ausweg ein Foto vom Strichcode (iPhone-Fotos sind scharf gestellt und lesen sich viel sicherer).
-var stream = null, scanning = false, zx = null, scanStart = 0;
-var CAM = {video: {facingMode: {ideal: "environment"}, width: {ideal: 1920}, height: {ideal: 1080}, advanced: [{focusMode: "continuous"}]}, audio: false};
+/* ---------- ISBN scannen ---------- */
+// Live-Scan: ein Bild pro Durchgang aus dem Video auf ein Canvas, dort den Streifen in der Mitte lesen.
+// Lesen mit BarcodeDetector, wenn der Browser EAN-13 wirklich kann (getSupportedFormats), sonst mit ZXing (liegt bei der Seite).
+// Als Ausweg ein Foto vom Strichcode. Unten im Kamerabild steht, was der Scanner gerade tut.
+var stream = null, scanning = false, scanStart = 0, scanRun = 0, zxReader = null, detector = undefined;
+var CAM = {video: {facingMode: {ideal: "environment"}, width: {ideal: 1920}, height: {ideal: 1080}}, audio: false};
+function scanStat(t) { $("scanstat").textContent = t; }
 function stopScan() {
-  scanning = false; $("scanbox").hidden = true; $("scanbtn").textContent = "📷 ISBN scannen";
-  if (zx) { try { zx.stop(); } catch (e) {} zx = null; }
+  scanning = false; scanRun++; $("scanbox").hidden = true; $("scanbtn").textContent = "📷 ISBN scannen";
   if (stream) { stream.getTracks().forEach(function (t) { t.stop(); }); stream = null; }
-  var v = $("video"); if (v.srcObject) { try { v.srcObject.getTracks().forEach(function (t) { t.stop(); }); } catch (e) {} v.srcObject = null; }
+  $("video").srcObject = null;
 }
 function gotCode(code) {
   var isbn = cleanIsbn(code);
@@ -457,76 +457,101 @@ function camError(e) {
   var n = e && e.name;
   toast(n === "NotAllowedError" ? "Kamera nicht erlaubt. In den Einstellungen für diese Seite die Kamera erlauben, oder „Foto vom Strichcode“ nehmen."
     : n === "NotFoundError" || n === "OverconstrainedError" ? "Keine Kamera gefunden. Nimm „Foto vom Strichcode“ oder tipp die ISBN ein."
-    : "Scanner ließ sich nicht starten. Nimm „Foto vom Strichcode“ oder tipp die ISBN ein.", 6000);
+    : "Scanner ließ sich nicht starten (" + (n || "Fehler") + "). Nimm „Foto vom Strichcode“ oder tipp die ISBN ein.", 6000);
 }
 function loadZxing() {
   if (window.ZXingBrowser) return Promise.resolve();
   return new Promise(function (res, rej) {
-    var s = document.createElement("script"); s.src = "https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.5/umd/zxing-browser.min.js";
+    var s = document.createElement("script"); s.src = "zxing-browser.min.js";
     s.onload = res; s.onerror = function () { rej({name: "LoadError"}); }; document.head.appendChild(s);
   });
 }
-function scanTimeout() {
-  // Nach 20 Sekunden ohne Treffer auf das Foto hinweisen
-  var t0 = scanStart;
-  setTimeout(function () { if (scanning && scanStart === t0) toast("Noch nichts erkannt. Etwas weiter weg halten, mehr Licht, oder „Foto vom Strichcode“ nehmen.", 6000); }, 20000);
+// BarcodeDetector nur, wenn er EAN-13 wirklich unterstützt (Android ohne Play-Dienste meldet sonst nie etwas)
+function getDetector() {
+  if (detector !== undefined) return Promise.resolve(detector);
+  if (!("BarcodeDetector" in window) || !BarcodeDetector.getSupportedFormats) { detector = null; return Promise.resolve(null); }
+  return BarcodeDetector.getSupportedFormats().then(function (f) {
+    var want = ["ean_13", "ean_8", "upc_a"].filter(function (x) { return f.indexOf(x) >= 0; });
+    detector = want.indexOf("ean_13") >= 0 ? new BarcodeDetector({formats: want}) : null; return detector;
+  }).catch(function () { detector = null; return null; });
+}
+// Ein Canvas lesen: erst BarcodeDetector, dann ZXing
+function readCanvas(c) {
+  return getDetector().then(function (det) {
+    var viaDet = det ? det.detect(c).then(function (r) { return r.length ? r[0].rawValue : null; }).catch(function () { return null; }) : Promise.resolve(null);
+    return viaDet.then(function (code) {
+      if (code) return code;
+      return loadZxing().then(function () {
+        if (!zxReader) zxReader = new ZXingBrowser.BrowserMultiFormatOneDReader();
+        try { return zxReader.decodeFromCanvas(c).getText(); } catch (e) { return null; }
+      });
+    });
+  });
+}
+// Ausschnitt aus Bild oder Video aufs Canvas: sx/sy/sw/sh in Quellpixeln, auf höchstens maxW Breite verkleinert, optional um 90° gedreht
+function cut(src, sw0, sh0, box, maxW, rot) {
+  var sx = box[0] * sw0, sy = box[1] * sh0, sw = box[2] * sw0, sh = box[3] * sh0, k = Math.min(1, maxW / sw);
+  var w = Math.max(1, Math.round(sw * k)), h = Math.max(1, Math.round(sh * k)), c = document.createElement("canvas");
+  c.width = rot ? h : w; c.height = rot ? w : h; var g = c.getContext("2d");
+  if (rot) { g.translate(h, 0); g.rotate(Math.PI / 2); }
+  g.drawImage(src, sx, sy, sw, sh, 0, 0, w, h); return c;
 }
 $("scanbtn").addEventListener("click", function () {
   if (scanning) { stopScan(); return; }
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { toast("Die Kamera geht hier nicht. Nimm „Foto vom Strichcode“ oder tipp die ISBN ein.", 5000); return; }
-  scanning = true; scanStart = Date.now(); $("scanbox").hidden = false; $("scanbtn").textContent = "Scannen beenden";
+  scanning = true; scanStart = Date.now(); var run = ++scanRun;
+  $("scanbox").hidden = false; $("scanbtn").textContent = "Scannen beenden"; scanStat("Starte Kamera …");
   var video = $("video");
-  // Kamera direkt im Klick anfordern (Safari verlangt die Nutzergeste)
+  // Kamera direkt im Klick anfordern (Safari verlangt die Nutzergeste); Scanner parallel vorladen
+  loadZxing().catch(function () {}); getDetector();
   navigator.mediaDevices.getUserMedia(CAM).catch(function () { return navigator.mediaDevices.getUserMedia({video: {facingMode: "environment"}, audio: false}); })
     .then(function (s) {
-      if (!scanning) { s.getTracks().forEach(function (t) { t.stop(); }); return; }
+      if (run !== scanRun) { s.getTracks().forEach(function (t) { t.stop(); }); return; }
       stream = s; video.srcObject = s; video.setAttribute("playsinline", ""); video.muted = true;
+      var tr = s.getVideoTracks()[0];
+      try { if (tr.getCapabilities && (tr.getCapabilities().focusMode || []).indexOf("continuous") >= 0) tr.applyConstraints({advanced: [{focusMode: "continuous"}]}).catch(function () {}); } catch (e) {}
       return video.play().catch(function () {}).then(function () {
-        scanTimeout();
-        if ("BarcodeDetector" in window) {
-          var det = new BarcodeDetector({formats: ["ean_13", "ean_8", "upc_a"]});
-          (function loop() {
-            if (!scanning) return;
-            det.detect(video).then(function (codes) { if (!codes.some(function (c) { return gotCode(c.rawValue); })) setTimeout(loop, 200); }).catch(function () { setTimeout(loop, 400); });
-          })();
-          return;
-        }
-        return loadZxing().then(function () {
-          if (!scanning) return;
-          var r = new ZXingBrowser.BrowserMultiFormatOneDReader(undefined, {delayBetweenScanAttempts: 150});
-          return r.decodeFromStream(stream, video, function (res) { if (res && scanning) gotCode(res.getText()); })
-            .then(function (ctrl) { if (scanning) zx = ctrl; else ctrl.stop(); });
-        });
+        var n = 0, warned = false;
+        (function loop() {
+          if (run !== scanRun) return;
+          var vw = video.videoWidth, vh = video.videoHeight;
+          if (!vw) { scanStat("Warte auf Kamerabild …"); setTimeout(loop, 200); return; }
+          n++;
+          // abwechselnd: mittlerer Streifen quer, ganzes Bild, ganzes Bild gedreht (Buch hochkant gehalten)
+          var kind = n % 3, c = kind === 1 ? cut(video, vw, vh, [0, .3, 1, .4], 1280) : kind === 2 ? cut(video, vw, vh, [0, 0, 1, 1], 1280) : cut(video, vw, vh, [.3, 0, .4, 1], 1280, true);
+          readCanvas(c).then(function (code) {
+            if (run !== scanRun) return;
+            if (code && gotCode(code)) return;
+            scanStat("Suche Strichcode … " + vw + "×" + vh + " · " + (detector ? "Detector" : "ZXing") + " · " + n + " Bilder");
+            if (!warned && Date.now() - scanStart > 20000) { warned = true; toast("Noch nichts erkannt. Etwas weiter weg halten, mehr Licht, oder „Foto vom Strichcode“ nehmen.", 6000); }
+            setTimeout(loop, 120);
+          }).catch(function (e) { scanStat("Scanner-Fehler: " + (e && (e.name || e.message) || e)); setTimeout(loop, 800); });
+        })();
       });
     }).catch(camError);
 });
-// Foto vom Strichcode: BarcodeDetector auf dem Bild, sonst ZXing; bei Misserfolg auch gedreht probieren
+// Foto vom Strichcode: mehrere Größen, Ausschnitte und Drehungen probieren
 function decodeImage(img) {
-  if ("BarcodeDetector" in window) {
-    return new BarcodeDetector({formats: ["ean_13", "ean_8", "upc_a"]}).detect(img).then(function (c) { return c.length ? c[0].rawValue : null; }).catch(function () { return null; });
+  var W = img.naturalWidth, H = img.naturalHeight;
+  var tries = [[[0, 0, 1, 1], 1600, false], [[0, 0, 1, 1], 1600, true], [[0, .25, 1, .5], 1600, false], [[.25, 0, .5, 1], 1600, true],
+    [[.15, .3, .7, .4], 1200, false], [[.3, .15, .4, .7], 1200, true], [[0, 0, 1, 1], 900, false], [[0, 0, 1, 1], 900, true], [[0, 0, 1, 1], 2400, false]];
+  var i = 0;
+  function next() {
+    if (i >= tries.length) return Promise.resolve(null);
+    var t = tries[i++];
+    return readCanvas(cut(img, W, H, t[0], t[1], t[2])).then(function (code) { return code && /^\d{10,13}X?$/i.test(cleanIsbn(code)) ? code : next(); });
   }
-  return loadZxing().then(function () {
-    var r = new ZXingBrowser.BrowserMultiFormatOneDReader();
-    var tries = [0, 90].map(function (deg) {
-      var max = 1600, sc = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
-      var w = Math.round(img.naturalWidth * sc), h = Math.round(img.naturalHeight * sc), c = document.createElement("canvas");
-      c.width = deg ? h : w; c.height = deg ? w : h; var g = c.getContext("2d");
-      if (deg) { g.translate(h, 0); g.rotate(Math.PI / 2); }
-      g.drawImage(img, 0, 0, w, h); return c;
-    });
-    for (var i = 0; i < tries.length; i++) { try { return r.decodeFromCanvas(tries[i]).getText(); } catch (e) {} }
-    return null;
-  });
+  return next();
 }
 $("photo").addEventListener("change", function () {
   var f = this.files && this.files[0]; this.value = ""; if (!f) return;
-  stopScan(); toast("Lese den Strichcode …");
+  stopScan(); toast("Lese den Strichcode …", 8000);
   var url = URL.createObjectURL(f), img = new Image();
   img.onload = function () {
     decodeImage(img).then(function (code) {
       URL.revokeObjectURL(url);
-      if (!code || !gotCode(code)) toast("Auf dem Foto habe ich keinen ISBN-Strichcode gefunden. Näher ran und scharf, oder ISBN eintippen.", 6000);
-    }).catch(function () { toast("Der Scanner ließ sich nicht laden. Tipp die ISBN ein.", 5000); });
+      if (!code || !gotCode(code)) toast("Auf dem Foto habe ich keinen ISBN-Strichcode gefunden. Näher ran, scharf und gerade, oder ISBN eintippen.", 6000);
+    }).catch(function (e) { toast("Der Scanner ließ sich nicht laden (" + (e && e.name || "Fehler") + "). Tipp die ISBN ein.", 5000); });
   };
   img.onerror = function () { toast("Das Foto ließ sich nicht lesen.", 4000); };
   img.src = url;
