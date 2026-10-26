@@ -1,0 +1,14 @@
+{
+  "name": "Bücher",
+  "short_name": "Bücher",
+  "description": "Deine Bücher mit Kurzzusammenfassung, eigenen Learnings, Sternen und Schlagwörtern.",
+  "lang": "de",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f5f1ea",
+  "theme_color": "#2c2a26",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}
