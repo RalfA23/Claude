@@ -4,6 +4,8 @@
 - [speedreading-trainer](speedreading-trainer/) – 8-Wochen-Speedreading-Kurs als Web-App für Handy und Rechner.
 - [schach-trainer](schach-trainer/) – Schachtraining auf dem Weg zu 1500 Elo: Woodpecker-Aufgaben am Brett, Smirnov-Lektionen, tägliche Abfrage und Fortschrittskontrolle. Läuft unter `/schach/` auf derselben Seite wie das Lesetraining.
 - [gevt-wissen](gevt-wissen/) – Fragen an die eigene GE-Ving-Tsun-Wissensdatenbank, nur mit privatem Link und Freigabe; die Inhalte liegen verschlüsselt in Supabase, nicht hier.
+- [spiele](spiele/) – Sammelkachel „Spiele“ unter `/spiele/`: Flipper, Götterquiz, Wortwürfel und Poker zum Spielen, Murmelbahn und Vestaboard zum Abschalten. Die Spiele behalten ihre Adressen, alte Freigaben und Dashboard-Kacheln der Einzelspiele zählen jetzt als `spiele`.
+- [flipper](flipper/) – Flipper als Canvas-Spiel mit eigener Physik und vier Tischen (Retro, Comic, Huberman-Protokoll, Weltraum), Klänge per WebAudio, Rekorde in `schach_docs` unter `flipper/score.<tisch>`. Läuft unter `/flipper/`.
 - [goetterquiz](goetterquiz/) – Wissensspiel nach dem Vorbild von „Powerplay: The Game of the Gods“: vier Götter, Duelle, Mutationen, Fragen aus allen Bereichen und aus dem Lesetraining. Läuft unter `/quiz/`.
 - [wortwuerfel](wortwuerfel/) – Buchstabenwürfel-Wortspiel nach dem Vorbild von Boggle: 4×4-Würfelfeld, drei Minuten, deutsches Wörterbuch mit rund 617.000 Wortformen, allein oder zu zweit. Läuft unter `/wortwuerfel/`.
 - [huberman](huberman/) – Huberman-Protokolle als Tages-Checkliste mit Jahresüberblick, jedes Konto mit eigenen Häkchen. Läuft unter `/huberman/`.

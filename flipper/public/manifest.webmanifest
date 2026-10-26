@@ -1,0 +1,15 @@
+{
+  "name": "Flipper",
+  "short_name": "Flipper",
+  "description": "Flipper mit vier Tischen: Retro, Comic, Huberman-Protokoll und Weltraum.",
+  "lang": "de",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0d0b14",
+  "theme_color": "#0d0b14",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}

@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0d0b14">
+<meta name="description" content="Flipper mit vier Tischen: Retro-Klassiker, Comic-Superhelden, Huberman-Protokoll und Weltraum. Mit Multiball, Missionen und Highscore.">
+<title>Flipper</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bangers&family=Orbitron:wght@600;900&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&display=swap">
+<script src="../config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<style>
+:root{--bg:#0d0b14;--panel:rgba(20,18,30,.92);--ink:#f3f0ff;--muted:#a9a3c4;--accent:#ffcf4a;--line:rgba(255,255,255,.16)}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font:15px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif;overflow:hidden;overscroll-behavior:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+body{display:flex;flex-direction:column;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+[hidden]{display:none!important}
+header{display:flex;align-items:center;gap:8px;padding:6px 10px;background:rgba(0,0,0,.4);border-bottom:1px solid var(--line);z-index:3}
+header a.back{color:var(--muted);text-decoration:none;font-size:.9rem;white-space:nowrap}
+header h1{margin:0;font-size:1.05rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0}
+header h1 small{color:var(--muted);font-weight:400;font-size:.8rem;margin-left:6px}
+.btns{display:flex;gap:6px}
+button{font:inherit;color:var(--ink);background:transparent;border:1px solid var(--line);border-radius:10px;min-height:38px;min-width:40px;padding:6px 10px;cursor:pointer;white-space:nowrap;touch-action:manipulation}
+button:hover{border-color:var(--muted)}
+button.on{background:var(--accent);color:#1a1400;border-color:var(--accent)}
+button.primary{background:var(--accent);color:#1a1400;border-color:var(--accent);font-weight:700}
+button:focus-visible,a:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+#stage{flex:1;position:relative;min-height:0;touch-action:none}
+#cv{position:absolute;inset:0;width:100%;height:100%;display:block}
+.overlay{position:absolute;inset:0;background:rgba(8,6,16,.86);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);overflow:auto;z-index:2;padding:18px max(14px,env(safe-area-inset-left)) 40px}
+.inner{max-width:980px;margin:0 auto}
+.overlay h2{font-size:1.6rem;margin:0 0 4px}
+.overlay p.lede{color:var(--muted);margin:0 0 16px}
+.tables{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px}
+.tcard{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:12px;display:flex;flex-direction:column;gap:8px;cursor:pointer;text-align:left;color:inherit;font:inherit}
+.tcard:hover,.tcard:focus-visible{border-color:var(--accent);transform:translateY(-2px)}
+.tcard canvas{width:100%;aspect-ratio:600/1220;border-radius:10px;background:#000}
+.tcard b{font-size:1.1rem}
+.tcard .tag{color:var(--accent);font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.tcard .bl{color:var(--muted);font-size:.86rem}
+.tcard .hs{font-variant-numeric:tabular-nums;font-size:.86rem}
+.help{margin-top:20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.help div{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;color:var(--muted);font-size:.9rem}
+.help b{color:var(--ink);display:block;margin-bottom:4px}
+kbd{border:1px solid var(--line);border-radius:5px;padding:0 5px;font-size:.85em;color:var(--ink)}
+.over{display:flex;align-items:center;justify-content:center;text-align:center}
+.over .box{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:24px;max-width:380px;width:100%}
+.over .score{font-size:2.4rem;font-weight:800;font-variant-numeric:tabular-nums;margin:6px 0}
+.over ol{text-align:left;margin:12px auto;max-width:260px;padding-left:24px;font-variant-numeric:tabular-nums;color:var(--muted)}
+.over ol li.me{color:var(--accent);font-weight:700}
+.over .row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:12px}
+#store{font-size:.8rem;color:var(--muted);margin-top:6px}
+#touchHint{position:absolute;left:0;right:0;bottom:10px;text-align:center;color:rgba(255,255,255,.55);font-size:.8rem;pointer-events:none;transition:opacity 1s}
+@media (max-width:520px){header h1 small{display:none}.btns button{padding:6px 8px;min-width:36px}}
+</style>
+</head>
+<body>
+<header>
+  <a class="back" href="../spiele/">← Spiele</a>
+  <h1>Flipper<small id="tname"></small></h1>
+  <div class="btns">
+    <button id="bNudge" type="button" title="Rütteln (Pfeil hoch)" aria-label="Rütteln">⇡</button>
+    <button id="bSound" type="button" title="Ton an oder aus" aria-label="Ton">🔊</button>
+    <button id="bMusic" type="button" title="Musik an oder aus" aria-label="Musik">🎵</button>
+    <button id="bPause" type="button" title="Pause (P)" aria-label="Pause">⏸</button>
+    <button id="bMenu" type="button" title="Tisch wählen" aria-label="Tisch wählen">☰</button>
+  </div>
+</header>
+<div id="stage">
+  <canvas id="cv" aria-label="Flippertisch"></canvas>
+  <div id="touchHint">Links tippen: linker Flipper · rechts tippen: rechter Flipper · rechts halten und loslassen: Abschuss</div>
+
+  <div class="overlay" id="menu">
+    <div class="inner">
+      <h2>Welcher Tisch?</h2>
+      <p class="lede">Vier Tische mit eigener Kunst, eigenen Klängen und eigenen Missionen. Drei Kugeln pro Spiel, Rekorde werden in deinem Konto gespeichert.</p>
+      <div class="tables" id="tables"></div>
+      <div class="help">
+        <div><b>Am Handy</b>Linke Bildschirmhälfte tippen bewegt den linken Flipper, rechte Hälfte den rechten. Zum Abschießen rechts halten und loslassen: je länger, desto kräftiger. ⇡ oben rüttelt den Tisch.</div>
+        <div><b>Mit Tastatur</b><kbd>←</kbd> oder <kbd>Shift</kbd> links, <kbd>→</kbd> oder <kbd>Shift</kbd> rechts. <kbd>Leertaste</kbd> halten zum Abschuss. <kbd>↑</kbd> rüttelt, <kbd>P</kbd> pausiert.</div>
+        <div><b>So punktest du</b>Der blinkende Pfeil zeigt deine Mission. Rampen schalten Locks frei, zwei Kugeln im Loch starten den Multiball, dann gibt jede Rampe einen Jackpot. Alle Missionen geschafft: Wizard-Modus mit dreifachen Punkten.</div>
+        <div><b>Vorsicht</b>Zu viel rütteln gibt <i>Tilt</i>: Flipper tot, Bonus weg. Die Lanes oben drehst du mit den Flippertasten, die blinkende Lane direkt nach dem Abschuss ist der Skillshot.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay over" id="over" hidden>
+    <div class="box">
+      <div id="ovTitle">Game over</div>
+      <div class="score" id="ovScore">0</div>
+      <div id="ovNote"></div>
+      <ol id="ovTop"></ol>
+      <div class="row"><button class="primary" id="ovAgain" type="button">Nochmal</button><button id="ovMenu" type="button">Anderer Tisch</button></div>
+      <div id="store"></div>
+    </div>
+  </div>
+
+  <div class="overlay over" id="paused" hidden>
+    <div class="box"><h2>Pause</h2><div class="row"><button class="primary" id="resume" type="button">Weiter</button><button id="pMenu" type="button">Anderer Tisch</button></div></div>
+  </div>
+</div>
+<script>
+/*__ENGINE__*/
+</script>
+<script>
+/*__TABLES__*/
+</script>
+<script>
+/*__SOUND__*/
+</script>
+<script>
+/*__RENDER__*/
+</script>
+<script>
+(function () {
+  "use strict";
+  var F = window.Flipper, S = window.FlipperSound, Rd = window.FlipperRenderer;
+  var $ = function (id) { return document.getElementById(id); };
+  var cv = $("cv"), stage = $("stage");
+  var game = null, rend = new Rd(cv), tableId = null, running = false, paused = false, lastT = 0;
+  var prefs = {};
+  try { prefs = JSON.parse(localStorage.getItem("flipper-prefs") || "{}") || {}; } catch (e) { prefs = {}; }
+  if (prefs.sound === undefined) prefs.sound = true;
+  function savePrefs() { try { localStorage.setItem("flipper-prefs", JSON.stringify(prefs)); } catch (e) {} }
+  function fmt(n) { return Math.round(n).toLocaleString("de-DE"); }
+
+  /* ---------- Rekorde: localStorage und schach_docs (Pfad flipper/score.<tisch>, nur ein Schrägstrich) ---------- */
+  var sb = null, user = null, scores = {};
+  try { scores = JSON.parse(localStorage.getItem("flipper-scores") || "{}") || {}; } catch (e) { scores = {}; }
+  function rec(id) { return scores[id] || (scores[id] = {best: 0, top: [], spiele: 0}); }
+  function saveLocal() { try { localStorage.setItem("flipper-scores", JSON.stringify(scores)); } catch (e) {} }
+  function merge(a, b) {
+    var top = (a.top || []).concat(b.top || []), seen = {};
+    top = top.filter(function (x) { var k = x.s + "|" + x.d; if (seen[k]) return false; seen[k] = 1; return true; }).sort(function (x, y) { return y.s - x.s; }).slice(0, 5);
+    return {best: Math.max(a.best || 0, b.best || 0), top: top, spiele: Math.max(a.spiele || 0, b.spiele || 0)};
+  }
+  async function initStore() {
+    var c = window.SR_CONFIG || {};
+    try {
+      if (!c.supabaseUrl || !window.supabase) throw new Error("ohne Konfiguration");
+      sb = window.supabase.createClient(c.supabaseUrl, c.supabaseAnonKey);
+      var s = await sb.auth.getSession(); user = s.data.session ? s.data.session.user : null;
+      if (!user) return;
+      var r = await sb.from("schach_docs").select("path,data").eq("user_id", user.id).like("path", "flipper/score.%");
+      if (r.error) throw r.error;
+      (r.data || []).forEach(function (row) { var id = row.path.slice("flipper/score.".length); if (row.data) scores[id] = merge(rec(id), row.data); });
+      saveLocal(); drawMenu();
+    } catch (e) { user = null; }
+  }
+  async function storeScore(id) {
+    var el = $("store");
+    if (!sb || !user) { el.textContent = "Rekord nur in diesem Browser gespeichert. Im Portal anmelden, dann landet er in deinem Konto."; return; }
+    el.textContent = "Speichere …";
+    try {
+      var path = "flipper/score." + id;
+      var r = await sb.from("schach_docs").select("data").eq("user_id", user.id).eq("path", path).maybeSingle();
+      var data = merge(rec(id), (r.data && r.data.data) || {});
+      scores[id] = data; saveLocal();
+      var u = await sb.from("schach_docs").upsert({user_id: user.id, path: path, data: data, updated_at: new Date().toISOString()});
+      if (u.error) throw u.error;
+      el.textContent = "In deinem Konto gespeichert.";
+    } catch (e) { el.textContent = "Gerade nicht gespeichert, liegt aber in diesem Browser."; }
+  }
+
+  /* ---------- Menü ---------- */
+  function drawMenu() {
+    var box = $("tables"); box.replaceChildren();
+    F.TABLE_ORDER.forEach(function (id) {
+      var t = F.TABLES[id], card = document.createElement("button"); card.type = "button"; card.className = "tcard"; card.dataset.id = id;
+      var pv = document.createElement("canvas"); pv.width = 300; pv.height = 610;
+      card.appendChild(pv);
+      var tag = document.createElement("span"); tag.className = "tag"; tag.textContent = t.icon + " " + t.tag; card.appendChild(tag);
+      var b = document.createElement("b"); b.textContent = t.name; card.appendChild(b);
+      var bl = document.createElement("span"); bl.className = "bl"; bl.textContent = t.blurb; card.appendChild(bl);
+      var hs = document.createElement("span"); hs.className = "hs"; var r = rec(id); hs.textContent = r.best ? "Rekord " + fmt(r.best) + " · " + r.spiele + (r.spiele === 1 ? " Spiel" : " Spiele") : "Noch kein Rekord";
+      card.appendChild(hs);
+      card.addEventListener("click", function () { start(id); });
+      box.appendChild(card);
+      try { Rd.preview(t, pv); } catch (e) {}
+    });
+  }
+  function showMenu() {
+    running = false; paused = false; $("over").hidden = true; $("paused").hidden = true; $("menu").hidden = false;
+    S.pauseMusic(); drawMenu();
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { if (!$("menu").hidden) drawMenu(); });
+  }
+
+  /* ---------- Spiel ---------- */
+  function start(id) {
+    S.unlock();
+    tableId = id; prefs.table = id; savePrefs();
+    game = new F.Game(F.TABLES[id]);
+    S.setTable(F.TABLES[id].theme); S.setMusic(!!prefs.music);
+    $("tname").textContent = F.TABLES[id].name;
+    $("menu").hidden = true; $("over").hidden = true; $("paused").hidden = true;
+    rend.setGame(game);
+    rend.message("KUGEL 1", "ABZUG HALTEN UND LOSLASSEN", 2.2);
+    running = true; paused = false; lastT = performance.now();
+    if (location.hash !== "#" + id) history.replaceState(null, "", "#" + id);
+  }
+  function gameOver() {
+    var r = rec(tableId), sc = game.score, d = new Date().toISOString().slice(0, 10), isBest = sc > (r.best || 0);
+    r.spiele = (r.spiele || 0) + 1; r.best = Math.max(r.best || 0, sc);
+    r.top = (r.top || []).concat([{s: sc, d: d}]).sort(function (a, b) { return b.s - a.s; }).slice(0, 5);
+    saveLocal();
+    $("ovTitle").textContent = F.TABLES[tableId].name + " · Game over";
+    $("ovScore").textContent = fmt(sc);
+    $("ovNote").textContent = isBest && sc > 0 ? "🏆 Neuer Rekord!" : "Rekord " + fmt(r.best);
+    var ol = $("ovTop"); ol.replaceChildren();
+    var marked = false;
+    r.top.forEach(function (x) { var li = document.createElement("li"); li.textContent = fmt(x.s) + " · " + x.d.split("-").reverse().join("."); if (!marked && x.s === sc && x.d === d) { li.className = "me"; marked = true; } ol.appendChild(li); });
+    $("over").hidden = false; running = false;
+    storeScore(tableId);
+  }
+  function setPaused(v) {
+    if (!game || game.over || !$("menu").hidden) return;
+    paused = v; $("paused").hidden = !v;
+    if (v) S.pauseMusic(); else { S.resumeMusic(); lastT = performance.now(); }
+    clearInput();
+  }
+
+  function frame(now) {
+    requestAnimationFrame(frame);
+    if (!game) return;
+    var dt = Math.min(0.05, (now - lastT) / 1000); lastT = now;
+    if (running && !paused) {
+      game.update(dt);
+      game.drainEvents().forEach(function (e) { rend.handle(e); S.play(e); if (e.type === "gameover") setTimeout(gameOver, 1600); });
+    }
+    rend.draw(running && !paused ? dt : 0);
+  }
+
+  /* ---------- Eingabe: Touch mit mehreren Fingern, Maus, Tastatur ---------- */
+  var ptrs = {};
+  function syncTouch() {
+    if (!game) return;
+    var l = false, r = false;
+    for (var k in ptrs) { if (ptrs[k] === "L") l = true; else r = true; }
+    game.input.left = l || keys.left; game.input.right = r || keys.right;
+    game.input.plunger = keys.plunger || (r && game.waiting()) || (r && game.pull > 0);
+  }
+  stage.addEventListener("pointerdown", function (e) {
+    if (!running || paused || e.target !== cv) return;
+    S.unlock();
+    var rect = cv.getBoundingClientRect(), x = rend.toWorld(e.clientX - rect.left);
+    ptrs[e.pointerId] = x < 280 ? "L" : "R";
+    try { cv.setPointerCapture(e.pointerId); } catch (err) {}
+    syncTouch(); e.preventDefault();
+    var h = $("touchHint"); if (h.style.opacity !== "0") setTimeout(function () { h.style.opacity = "0"; }, 2500);
+  });
+  function up(e) { delete ptrs[e.pointerId]; syncTouch(); }
+  stage.addEventListener("pointerup", up); stage.addEventListener("pointercancel", up); stage.addEventListener("lostpointercapture", up);
+  stage.addEventListener("contextmenu", function (e) { e.preventDefault(); });
+  var keys = {left: false, right: false, plunger: false};
+  function key(e, down) {
+    if (!game || !running) return;
+    var k = e.code, handled = true;
+    if (k === "ArrowLeft" || k === "ShiftLeft" || k === "KeyA" || k === "KeyZ") keys.left = down;
+    else if (k === "ArrowRight" || k === "ShiftRight" || k === "KeyL" || k === "Slash" || k === "KeyM") keys.right = down;
+    else if (k === "Space" || k === "Enter" || k === "ArrowDown") keys.plunger = down;
+    else if ((k === "ArrowUp" || k === "KeyN") && down && !e.repeat) { if (!paused) game.nudge(); }
+    else if (k === "KeyP" && down && !e.repeat) setPaused(!paused);
+    else if (k === "Escape" && down) setPaused(true);
+    else handled = false;
+    if (handled) { e.preventDefault(); S.unlock(); syncTouch(); }
+  }
+  addEventListener("keydown", function (e) { key(e, true); });
+  addEventListener("keyup", function (e) { key(e, false); });
+  function clearInput() { ptrs = {}; keys = {left: false, right: false, plunger: false}; syncTouch(); }
+  addEventListener("blur", clearInput);
+  document.addEventListener("visibilitychange", function () { if (document.hidden && running) setPaused(true); });
+
+  /* ---------- Knöpfe ---------- */
+  function syncBtns() {
+    $("bSound").textContent = prefs.sound ? "🔊" : "🔇"; $("bSound").classList.toggle("on", !!prefs.sound);
+    $("bMusic").classList.toggle("on", !!prefs.music); $("bMusic").setAttribute("aria-pressed", prefs.music ? "true" : "false");
+    $("bSound").setAttribute("aria-pressed", prefs.sound ? "true" : "false");
+  }
+  $("bSound").addEventListener("click", function () { prefs.sound = !prefs.sound; savePrefs(); S.setOn(prefs.sound); syncBtns(); });
+  $("bMusic").addEventListener("click", function () { prefs.music = !prefs.music; if (prefs.music && !prefs.sound) { prefs.sound = true; S.setOn(true); } savePrefs(); S.setMusic(prefs.music && running); syncBtns(); });
+  $("bNudge").addEventListener("click", function () { if (game && running && !paused) game.nudge(); });
+  $("bPause").addEventListener("click", function () { if (running) setPaused(!paused); });
+  $("bMenu").addEventListener("click", showMenu);
+  $("resume").addEventListener("click", function () { setPaused(false); });
+  $("pMenu").addEventListener("click", showMenu);
+  $("ovAgain").addEventListener("click", function () { start(tableId); });
+  $("ovMenu").addEventListener("click", showMenu);
+  addEventListener("resize", function () { if (game) rend.resize(); });
+
+  S.setOn(!!prefs.sound); S.setMusic(false); syncBtns();
+  window.flipperDebug = function () { return game; };
+
+  var hashId = location.hash.slice(1);
+  showMenu();
+  if (F.TABLES[hashId]) start(hashId);
+  requestAnimationFrame(function (t) { lastT = t; frame(t); });
+  initStore();
+})();
+</script>
+</body>
+</html>
