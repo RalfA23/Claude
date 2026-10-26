@@ -110,6 +110,17 @@ jobs:
           cp site/lesen/config.js site/config.js
           cp speedreading-trainer/public/impressum.html speedreading-trainer/public/datenschutz.html site/
           cp portal/redirect.html site/portal/index.html
+      - name: Fehler-Knopf in alle Kursseiten einhängen
+        # portal/fehler.js liegt neben dem Portal; jede index.html darunter bekommt das Skript mit passendem relativen Pfad.
+        run: |
+          cp portal/fehler.js site/fehler.js
+          sed -i "s|src=\"fehler.js\"|src=\"fehler.js?v=${GITHUB_SHA::7}\"|" site/index.html
+          find site -mindepth 2 -name index.html ! -path site/portal/index.html | while read -r f; do
+            d=$(dirname "${f#site/}"); up=$(echo "$d" | sed 's|[^/]*|..|g')
+            tag="<script src=\"$up/fehler.js?v=${GITHUB_SHA::7}\" charset=\"utf-8\" defer></script>"
+            if grep -q '</body>' "$f"; then TAG="$tag" perl -0pi -e 's|</body>(?![\s\S]*</body>)|$ENV{TAG}\n</body>|' "$f"; else echo "$tag" >> "$f"; fi
+          done
+          grep -l 'fehler.js' -r site --include=index.html | wc -l
       - uses: actions/upload-pages-artifact@v3
         if: github.event_name != 'pull_request'
         with:

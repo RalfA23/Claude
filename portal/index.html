@@ -8,6 +8,7 @@
 <title>Lebensplattform</title>
 <script src="config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="fehler.js" defer></script>
 <style>
 :root{--bg:#F3F4EF;--surface:#fff;--ink:#1E241F;--muted:#5E6A61;--line:#D9DDD3;--accent:#B3261E;--accent-ink:#fff;--soft:#E9ECE4;--good:#2E7D4F;--rowh:118px;--gap:12px;--cols:4}
 @media (prefers-color-scheme:dark){:root{--bg:#151916;--surface:#1E2420;--ink:#E7EBE4;--muted:#9AA69C;--line:#323A34;--accent:#E0574C;--accent-ink:#1A0E0D;--soft:#262D28;--good:#5FBF85}}
@@ -110,6 +111,11 @@ dialog::backdrop{background:rgba(0,0,0,.45)}
 .acc .who small{color:var(--muted)}
 .acc .mods{display:flex;flex-wrap:wrap;gap:6px 14px}
 .acc label.chk{font-size:.88rem}
+.fm .acc p{margin:6px 0;white-space:pre-wrap}
+.fm .acc img{max-width:100%;max-height:220px;border-radius:8px;border:1px solid var(--line);cursor:zoom-in;display:block;margin:6px 0}
+.fm .acc.done{opacity:.7}
+.fm .acc small{color:var(--muted);word-break:break-word}
+.fm .acc textarea{width:100%;padding:6px 8px;font-size:.9rem;min-height:40px}
 .out{white-space:pre-wrap;font-size:.85rem;background:var(--soft);border-radius:8px;padding:8px}
 </style>
 </head>
@@ -125,13 +131,14 @@ dialog::backdrop{background:rgba(0,0,0,.45)}
     <button type="button" id="addTile" class="primary">＋ Kachel</button>
     <button type="button" id="reset" class="sm" hidden>Zurücksetzen</button>
     <button type="button" id="admin" class="sm" hidden>👥 Freigaben</button>
+    <button type="button" id="fmAdmin" class="sm" hidden>🐞 Meldungen</button>
     <span class="grow"></span>
     <span class="st" id="saveSt"></span>
   </div>
   <p class="hintedit" id="hintEdit" hidden>Kachel am Griff ⠿ ziehen zum Verschieben (mit der Maus geht die ganze Kachel), an der Ecke unten rechts ziehen für die Größe. 👁 blendet aus, ✕ entfernt.</p>
   <div class="dash" id="dash"></div>
   <div class="hidden-list" id="hiddenList" hidden><h2>Ausgeblendet</h2><div class="chips" id="hiddenChips"></div></div>
-  <footer><a href="sprachen/hilfe/">Kein Ton in den Sprachen?</a> · <a href="impressum.html">Impressum</a> · <a href="datenschutz.html">Datenschutz</a></footer>
+  <footer><a href="#" id="fmLink">🐞 Fehler melden</a> · <a href="sprachen/hilfe/">Kein Ton in den Sprachen?</a> · <a href="impressum.html">Impressum</a> · <a href="datenschutz.html">Datenschutz</a></footer>
 </div>
 <dialog id="gallery">
   <div class="gal-head"><h2>Kachel-Galerie</h2><button type="button" class="sm" id="galClose">Schließen</button></div>
@@ -140,6 +147,10 @@ dialog::backdrop{background:rgba(0,0,0,.45)}
 <dialog id="adminDlg">
   <div class="gal-head"><h2>Freigaben</h2><button type="button" class="sm" id="admClose">Schließen</button></div>
   <div class="gal-body" id="admBody"></div>
+</dialog>
+<dialog id="fmDlg">
+  <div class="gal-head"><h2>🐞 Meldungen</h2><button type="button" class="sm" id="fmClose">Schließen</button></div>
+  <div class="gal-body fm" id="fmBody"></div>
 </dialog>
 <div id="login" hidden>
   <form id="lf">
@@ -188,6 +199,7 @@ var GEVT = {id: "gevt", icon: "🥋", title: "Ving Tsun Wissen", text: "Frag dei
   var cfg = window.SR_CONFIG || {};
   if (!cfg.supabaseUrl || !cfg.supabaseAnonKey || !window.supabase) { $("login").hidden = false; $("lf").innerHTML = "<h2>Nicht eingerichtet</h2><p>Das Portal ist ohne Anmeldung nicht verfügbar.</p>"; return; }
   var sb = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+  window.FEHLER_SB = sb; // fehler.js nutzt denselben Client
   var user = null;
   function el(tag, attrs, kids) {
     var d = document.createElement(tag);
@@ -206,7 +218,7 @@ var GEVT = {id: "gevt", icon: "🥋", title: "Ving Tsun Wissen", text: "Frag dei
       lessonKeys = !r.error && r.data && r.data.lessons ? Object.keys(r.data.lessons) : (r.error ? null : []);
       lessonsDone = lessonKeys ? lessonKeys.length : null;
     } catch (e) {}
-    $("admin").hidden = !isAdmin;
+    $("admin").hidden = !isAdmin; $("fmAdmin").hidden = !isAdmin;
     if (isAdmin && layout) renderDash(); else { refreshType(/^kurs:/); refreshType(/^lektion$/); }
   }
 
@@ -847,6 +859,54 @@ var GEVT = {id: "gevt", icon: "🥋", title: "Ving Tsun Wissen", text: "Frag dei
   $("admin").addEventListener("click", function () { renderAdmin(); $("adminDlg").showModal(); });
   $("admClose").addEventListener("click", function () { $("adminDlg").close(); });
   $("adminDlg").addEventListener("click", function (e) { if (e.target === $("adminDlg")) $("adminDlg").close(); });
+
+  /* ---------- Meldungen (nur Admins): Fehlermeldungen aus fehler.js, Tabelle fehlermeldungen (portal/supabase/0002_fehlermeldungen.sql) ---------- */
+  var fmFilter = "offen";
+  async function renderMeldungen() {
+    var body = $("fmBody"); body.replaceChildren(el("p", {class: "empty", text: "Lade die Meldungen …"}));
+    var q = sb.from("fehlermeldungen").select("*").order("created_at", {ascending: false}).limit(200);
+    if (fmFilter !== "alle") q = q.eq("status", fmFilter);
+    var r = await q;
+    body.replaceChildren();
+    if (r.error) { body.appendChild(el("p", {text: "Die Meldungen sind noch nicht eingerichtet. Einmal das SQL aus portal/supabase/0002_fehlermeldungen.sql im Supabase-SQL-Editor ausführen. (" + r.error.message + ")"})); return; }
+    var bar = el("div", {class: "row", style: "display:flex;gap:6px;flex-wrap:wrap;margin:12px 0"});
+    [["offen", "Offen"], ["erledigt", "Erledigt"], ["alle", "Alle"]].forEach(function (f) {
+      bar.appendChild(el("button", {type: "button", class: "sm" + (fmFilter === f[0] ? " primary" : ""), text: f[1], onclick: function () { fmFilter = f[0]; renderMeldungen(); }}));
+    });
+    body.appendChild(bar);
+    if (!r.data.length) body.appendChild(el("p", {class: "empty", text: fmFilter === "offen" ? "Keine offenen Meldungen." : "Keine Meldungen."}));
+    r.data.forEach(function (m) {
+      var done = m.status === "erledigt", card = el("div", {class: "acc" + (done ? " done" : "")});
+      var st = el("small", {"aria-live": "polite"});
+      card.appendChild(el("div", {class: "who"}, [
+        el("b", {text: "#" + m.id + " · " + (done ? "✅ " : "⏳ ") + m.bereich}),
+        el("small", {text: new Date(m.created_at).toLocaleString("de-DE", {dateStyle: "short", timeStyle: "short"}) + " · " + (m.email || m.user_id)})
+      ]));
+      card.appendChild(el("p", {text: m.beschreibung}));
+      if (/^data:image\/(jpeg|png|webp);base64,/.test(m.screenshot || "")) card.appendChild(el("img", {src: m.screenshot, alt: "Screenshot", onclick: function () {
+        var w = window.open(); if (!w) return; var im = w.document.createElement("img"); im.src = m.screenshot; im.style.maxWidth = "100%"; w.document.body.appendChild(im);
+      }}));
+      if (m.seite) card.appendChild(el("small", {}, [/^https?:\/\//.test(m.seite) ? el("a", {href: m.seite, target: "_blank", rel: "noopener", text: m.seite}) : m.seite]));
+      if (m.geraet) card.appendChild(el("div", {}, [el("small", {text: m.geraet})]));
+      var note = el("textarea", {placeholder: "Notiz oder Antwort (sieht der Meldende)", "aria-label": "Notiz"}); note.value = m.notiz || "";
+      function upd(patch, again) {
+        st.textContent = "Speichere …";
+        sb.from("fehlermeldungen").update(patch).eq("id", m.id).then(function (x) { st.textContent = x.error ? "Nicht gespeichert: " + x.error.message : "Gespeichert"; if (!x.error && again) renderMeldungen(); });
+      }
+      note.addEventListener("change", function () { upd({notiz: note.value.trim() || null}); });
+      card.appendChild(note);
+      card.appendChild(el("div", {class: "row", style: "display:flex;gap:8px;align-items:center;margin-top:6px"}, [
+        el("button", {type: "button", class: "sm" + (done ? "" : " primary"), text: done ? "Wieder öffnen" : "✓ Erledigt", onclick: function () {
+          upd(done ? {status: "offen", erledigt_at: null} : {status: "erledigt", erledigt_at: new Date().toISOString(), notiz: note.value.trim() || null}, true);
+        }}), st
+      ]));
+      body.appendChild(card);
+    });
+  }
+  $("fmAdmin").addEventListener("click", function () { renderMeldungen(); $("fmDlg").showModal(); });
+  $("fmClose").addEventListener("click", function () { $("fmDlg").close(); });
+  $("fmDlg").addEventListener("click", function (e) { if (e.target === $("fmDlg")) $("fmDlg").close(); });
+  $("fmLink").addEventListener("click", function (e) { e.preventDefault(); if (window.Fehler) window.Fehler.open(); });
 
   /* ---------- Start ---------- */
   window.addEventListener("resize", measure);
