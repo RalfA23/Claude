@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#120f1d">
+<title>Spiele</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<script src="../config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<style>
+/* Übersicht aller Spiele. Jede Karte führt zur bestehenden Adresse des Spiels, die Spiele selbst bleiben unverändert. */
+:root{
+  --bg:#120f1d; --surface:#1c182b; --fg:#f3f0ff; --muted:#a9a3c4; --line:#2e2843; --accent:#ffcf4a; --hot:#e6007e;
+  --display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif; --body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--fg);font:16px/1.55 var(--body);padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+[hidden]{display:none!important}
+.wrap{max-width:1000px;margin:0 auto;padding-block:26px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.back{display:inline-block;color:var(--muted);text-decoration:none;font-size:.9rem;margin-bottom:14px}
+.back:hover{color:var(--fg)}
+.eyebrow{font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700;margin:0}
+h1,h2,h3{font-family:var(--display);margin:0;line-height:1.15;text-wrap:balance}
+h1{font-size:clamp(2rem,6vw,3rem);font-weight:800}
+h2{font-size:1.25rem;font-weight:800;margin:34px 0 12px}
+p{margin:0}
+.lede{color:var(--muted);max-width:62ch;margin-top:8px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+.game{background:var(--surface);border:1px solid var(--line);border-radius:18px;overflow:hidden;display:flex;flex-direction:column;min-width:0;position:relative}
+.game .art{height:110px;display:flex;align-items:center;justify-content:center;font-size:3.2rem;background:var(--g);position:relative;overflow:hidden}
+.game .art::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 30% 20%,rgba(255,255,255,.25),transparent 55%)}
+.game .body{padding:14px 16px 16px;display:flex;flex-direction:column;gap:8px;flex:1}
+.game p{color:var(--muted);font-size:.93rem}
+.game .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:auto;padding-top:6px;align-items:center}
+.game .stat{font-size:.88rem;font-variant-numeric:tabular-nums;color:var(--accent)}
+.btn{font:700 .92rem var(--body);padding:9px 16px;border-radius:12px;border:1px solid var(--line);background:transparent;color:var(--fg);text-decoration:none;display:inline-block}
+.btn.primary{background:var(--accent);color:#1a1400;border-color:var(--accent)}
+.btn:hover{border-color:var(--muted)}
+.btn.primary:hover{filter:brightness(1.08)}
+a:focus-visible,.btn:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.badge{position:absolute;top:10px;right:10px;background:var(--hot);color:#fff;font-size:.72rem;font-weight:700;border-radius:999px;padding:2px 10px;letter-spacing:.04em;z-index:1}
+.tables{display:flex;gap:6px;flex-wrap:wrap}
+.tables a{font-size:.82rem;padding:4px 10px;border-radius:999px;border:1px solid var(--line);color:var(--fg);text-decoration:none;white-space:nowrap}
+.tables a:hover{border-color:var(--accent)}
+.feature{grid-column:1/-1}
+@media (min-width:700px){.feature{display:grid;grid-template-columns:300px 1fr}.feature .art{height:auto;min-height:200px;font-size:5rem}}
+.empty{color:var(--muted);background:var(--surface);border:1px dashed var(--line);border-radius:14px;padding:16px}
+footer{margin-top:40px;color:var(--muted);font-size:.85rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="../">← Portal</a>
+  <p class="eyebrow">Lebensplattform · Spiele</p>
+  <h1>Spiele</h1>
+  <p class="lede">Zum Spielen, Gegeneinander-Antreten und Abschalten. Alle Spiele an einer Stelle, deine Rekorde und Duelle bleiben, wo sie waren.</p>
+
+  <h2 id="hPlay">Spielen</h2>
+  <div class="grid" id="play"></div>
+  <h2 id="hCalm">Zum Abschalten</h2>
+  <div class="grid" id="calm"></div>
+  <p class="empty" id="none" hidden>Für dein Konto ist noch kein Spiel freigeschaltet.</p>
+  <footer>Neue Spiele kommen hier dazu. Einzelne Spiele lassen sich im Portal unter „👥 Freigaben“ pro Konto freischalten.</footer>
+</div>
+<script>
+(function () {
+  "use strict";
+  // id = Freigabe-Kennung (module_access), gleich wie früher die eigene Portal-Kachel. Wer „spiele“ hat, sieht alle.
+  var GAMES = [
+    {id: "flipper", sec: "play", icon: "🕹️", title: "Flipper", isNew: true, g: "linear-gradient(135deg,#ff3df2,#7a5cff 50%,#21d4fd)",
+      text: "Vier Tische mit eigener Physik, Kunst und Klang: Retro-Klassiker, Comic-Superhelden, ein Huberman-Tag und ein Weltraum-Tisch mit Schwerkraft. Multiball, Missionen, Rekorde.", href: "../flipper/",
+      tables: [["🎰", "Goldene Ära", "klassik"], ["💥", "Kapow City", "comic"], ["🌅", "Protokoll", "huberman"], ["🪐", "Orbit 9", "weltraum"]]},
+    {id: "quiz", sec: "play", icon: "⚡", title: "Götterquiz", g: "linear-gradient(135deg,#f7b733,#fc4a1a)",
+      text: "Wissensspiel nach dem Vorbild von Powerplay: vier Götter, je vier Krieger, Duelle und Mutationen. Fragen aus allen Bereichen und aus dem Lesetraining.", href: "../quiz/"},
+    {id: "wortwuerfel", sec: "play", icon: "🎲", title: "Wortwürfel", g: "linear-gradient(135deg,#43cea2,#185a9d)",
+      text: "Buchstabenwürfel nach dem Vorbild von Boggle: 16 Würfel, drei Minuten, so viele deutsche Wörter wie möglich. Allein oder zu zweit.", href: "../wortwuerfel/"},
+    {id: "poker", sec: "play", icon: "♠️", title: "Poker", g: "linear-gradient(135deg,#0f9b0f,#000000)",
+      text: "Texas Hold'em gegen Computergegner mit eigenem Stil oder online mit allen auf der Plattform. Tisch eröffnen, Link teilen, losspielen.", href: "../poker/"},
+    {id: "murmelbahn", sec: "calm", icon: "🔮", title: "Murmelbahn", g: "linear-gradient(135deg,#8e6e53,#2c1e14)",
+      text: "Bei jedem Start eine neue, zufällig gebaute Bahn mit Rampen, Stiften, Schaufelrädern und Pilzen. Murmeln setzen und zuschauen.", href: "../murmelbahn/"},
+    {id: "vestaboard", sec: "calm", icon: "🪧", title: "Vestaboard", g: "linear-gradient(135deg,#3a3a3a,#0d0d0d)",
+      text: "Fallblatt-Anzeige wie dein Bildschirmschoner: Uhr, Wetter für Hamburg, Tagesschau, Zitat der Stunde und Sprüche im Wechsel.", href: "../vestaboard/"}
+  ];
+  var $ = function (id) { return document.getElementById(id); };
+  function el(tag, attrs, kids) {
+    var d = document.createElement(tag);
+    for (var k in attrs || {}) { if (k === "text") d.textContent = attrs[k]; else if (k === "class") d.className = attrs[k]; else d.setAttribute(k, attrs[k]); }
+    (kids || []).forEach(function (c) { if (c != null) d.appendChild(typeof c === "string" ? document.createTextNode(c) : c); });
+    return d;
+  }
+  var cards = {};
+  function render(mods) {
+    $("play").replaceChildren(); $("calm").replaceChildren(); cards = {};
+    var shown = GAMES.filter(function (g) { return !mods || mods.indexOf("spiele") >= 0 || mods.indexOf(g.id) >= 0; });
+    shown.forEach(function (g) {
+      var row = el("div", {class: "row"}, [el("a", {class: "btn primary", href: g.href, text: g.id === "flipper" ? "Flippern" : "Spielen"})]);
+      var body = el("div", {class: "body"}, [el("h3", {text: g.title}), el("p", {text: g.text})]);
+      if (g.tables) body.appendChild(el("div", {class: "tables"}, g.tables.map(function (t) { return el("a", {href: g.href + "#" + t[2], text: t[0] + " " + t[1]}); })));
+      var stat = el("span", {class: "stat"}); row.appendChild(stat); body.appendChild(row);
+      var card = el("article", {class: "game" + (g.id === "flipper" ? " feature" : "")}, [g.isNew ? el("span", {class: "badge", text: "NEU"}) : null, el("div", {class: "art", style: "--g:" + g.g, "aria-hidden": "true", text: g.icon}), body]);
+      cards[g.id] = {card: card, stat: stat};
+      $(g.sec).appendChild(card);
+    });
+    $("hPlay").hidden = !$("play").children.length; $("hCalm").hidden = !$("calm").children.length;
+    $("none").hidden = shown.length > 0;
+  }
+  function fmt(n) { return Math.round(n).toLocaleString("de-DE"); }
+  function flipperStat(list) {
+    if (!cards.flipper) return;
+    var best = 0, name = "", games = 0, names = {klassik: "Goldene Ära", comic: "Kapow City", huberman: "Protokoll", weltraum: "Orbit 9"};
+    Object.keys(list).forEach(function (id) { var d = list[id] || {}; games += d.spiele || 0; if ((d.best || 0) > best) { best = d.best; name = names[id] || id; } });
+    if (best) cards.flipper.stat.textContent = "Rekord " + fmt(best) + " auf " + name + " · " + games + (games === 1 ? " Spiel" : " Spiele");
+  }
+  render(null);
+  try { flipperStat(JSON.parse(localStorage.getItem("flipper-scores") || "{}") || {}); } catch (e) {}
+
+  (async function () {
+    var cfg = window.SR_CONFIG || {};
+    try {
+      if (!cfg.supabaseUrl || !window.supabase) return;
+      var sb = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+      var s = await sb.auth.getSession(), user = s.data.session ? s.data.session.user : null;
+      if (!user) return;
+      // Freigaben aus dem Portal: ohne Zeile oder als Admin alles, mit „spiele“ alle Spiele, sonst nur die einzeln freigegebenen.
+      var ad = await sb.from("app_admins").select("user_id").eq("user_id", user.id).maybeSingle();
+      var ma = await sb.from("module_access").select("modules").eq("user_id", user.id).maybeSingle();
+      var mods = !ma.error && ma.data && Array.isArray(ma.data.modules) && !(ad.data && !ad.error) ? ma.data.modules : null;
+      render(mods);
+      var local = {}; try { local = JSON.parse(localStorage.getItem("flipper-scores") || "{}") || {}; } catch (e) {}
+      flipperStat(local);
+      var r = await sb.from("schach_docs").select("path,data").eq("user_id", user.id).like("path", "flipper/score.%");
+      if (r.error || !r.data) return;
+      r.data.forEach(function (row) {
+        var id = row.path.slice("flipper/score.".length), d = row.data || {}, l = local[id] || {};
+        local[id] = {best: Math.max(l.best || 0, d.best || 0), spiele: Math.max(l.spiele || 0, d.spiele || 0)};
+      });
+      flipperStat(local);
+    } catch (e) {}
+  })();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+{
+  "name": "Spiele",
+  "short_name": "Spiele",
+  "description": "Alle Spiele der Lebensplattform: Flipper, Götterquiz, Wortwürfel, Poker, Murmelbahn und Vestaboard.",
+  "lang": "de",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#120f1d",
+  "theme_color": "#120f1d",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}
