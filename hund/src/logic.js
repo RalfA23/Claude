@@ -104,6 +104,8 @@
     furn("schrank", "schrank", -1.4, 0.85, -136.9, -136.3, 2.1);
     furn("nachttisch", "nachttisch", -6.7, -6.2, -136.9, -136.4, 0.5);
     obj("bett", "bett", "Bett", -7.85, -135.7, -6.2, -135.2, {lie: {x: -7.85, z: -135.9, yaw: 0}});
+    furn("schreibtisch", "schreibtisch", -4.6, -3.0, -136.9, -136.25, 0.75);
+    obj("schreibtisch", "schreibtisch", "Schreibtisch", -3.8, -136.55, -3.8, -135.5, {seat: {x: -3.8, z: -135.75, yaw: Math.PI}});
     // Bad
     furn("wanne", "wanne", 7.0, 8.9, -136.9, -136.0, 0.58);
     furn("klo", "klo", 1.6, 2.1, -136.95, -136.3, 0.45);
@@ -128,10 +130,17 @@
     var cross = [];
     for (i = 0; i <= 30; i++) { t = i / 30; cross.push({x: lerp(-108, 108, t), z: 14 - 18 * t + 6 * Math.sin(t * Math.PI * 3)}); }
     var garden = [{x: -0.4, z: -121}, {x: -0.2, z: -116}, {x: 0, z: -110}];
-    W.paths.push({id: "rund", pts: loop, w: 2.6}, {id: "tor", pts: entry, w: 2.4}, {id: "quer", pts: cross, w: 2.2}, {id: "garten", pts: garden, w: 1.4, garden: true});
+    // Übungsplatz der Hundeschule auf der Westwiese: frei von Bäumen, mit Startkegel, zwei Hürden und Slalomstangen.
+    var F = W.field = {x0: -41, x1: -21, z0: -93, z1: -79, cx: -31, cz: -86};
+    W.course = {start: {x: -38.5, z: -86}, hurdles: [{x: -35, z: -86}, {x: -32, z: -86}], poles: [], end: {x: -22.6, z: -86}, cone: {x: -31, z: -90.5}};
+    for (var pi = 0; pi < 6; pi++) W.course.poles.push({x: -29.5 + pi * 0.9, z: -86});
+    W.trainerSpot = {x: -31, z: -80.4};
+    var platz = [{x: 0.4, z: -86}, {x: -10, z: -85}, {x: -20.5, z: -86}];
+    W.paths.push({id: "rund", pts: loop, w: 2.6}, {id: "tor", pts: entry, w: 2.4}, {id: "quer", pts: cross, w: 2.2}, {id: "garten", pts: garden, w: 1.4, garden: true}, {id: "platz", pts: platz, w: 1.6});
     W.loop = loop;
     function free(x, z, r) {
       if (Math.abs(x) > W.half - 2 || z > W.half - 2 || z < -107) return false;
+      if (x > F.x0 - 3 - r && x < F.x1 + 3 + r && z > F.z0 - 3 - r && z < F.z1 + 3 + r) return false;
       if (Math.hypot(x - W.pond.x, z - W.pond.z) < W.pond.r + r) return false;
       for (var k = 0; k < W.colliders.length; k++) { var c = W.colliders[k]; if (Math.hypot(x - c.x, z - c.z) < c.r + r) return false; }
       return true;
@@ -176,7 +185,7 @@
     for (i = 0; i < 80 && W.sticks.length < 18; i++) { var tr = W.trees[Math.floor(R() * W.trees.length)]; if (tr.edge || tr.garden) continue; var a = R() * TAU; stick(tr.x + Math.sin(a) * 2, tr.z + Math.cos(a) * 2); }
     for (i = 0; i < 900; i++) {
       var fx = (R() * 2 - 1) * 104, fz = (R() * 2 - 1) * 104;
-      if (fz > -105 && pathDist(W, fx, fz) > 2 && Math.hypot(fx - W.pond.x, fz - W.pond.z) > W.pond.r + 1) W.flowers.push({x: fx, z: fz, c: Math.floor(R() * 4)});
+      if (fz > -105 && pathDist(W, fx, fz) > 2 && Math.hypot(fx - W.pond.x, fz - W.pond.z) > W.pond.r + 1 && !(fx > F.x0 && fx < F.x1 && fz > F.z0 && fz < F.z1)) W.flowers.push({x: fx, z: fz, c: Math.floor(R() * 4)});
     }
     W.start = {x: -6.2, z: -134.2, yaw: Math.PI / 2};
     W.door = {x: -0.4, z: -122.0};
@@ -316,7 +325,8 @@
   var ME_NEEDS = [
     {id: "hunger", name: "Hunger", icon: "🍽️", decay: 0.08},
     {id: "energie", name: "Energie", icon: "⚡", decay: 0.06},
-    {id: "spass", name: "Spaß", icon: "😊", decay: 0.06}
+    {id: "spass", name: "Spaß", icon: "😊", decay: 0.06},
+    {id: "sozial", name: "Kontakte", icon: "💬", decay: 0.045}
   ];
   function mood(n) { return (n.hunger * 1.2 + n.durst + n.blase * 1.2 + n.energie * 0.8 + n.spass + n.liebe * 1.2 + n.sauber * 0.6) / 7; }
 
@@ -341,21 +351,104 @@
     streicheln: {text: "Streichle {name} dreimal", need: 3},
     baden: {text: "Bade {name}"},
     lesen: {text: "Lies ein Buch aus dem Regal"},
-    gruss: {text: "Lass die beiden Hunde sich beschnuppern"}
+    gruss: {text: "Lass die beiden Hunde sich beschnuppern"},
+    arbeit: {text: "Homeoffice: 4 Stunden am Schreibtisch arbeiten", need: 240, unit: "Min."},
+    mittagsrunde: {text: "Mittagsrunde: {name} macht draußen sein Geschäft", from: 690, until: 870},
+    hundeschule: {text: "Hundeschule: bis 10:30 auf dem Übungsplatz (Park, Westwiese) die Trainerin ansprechen", from: 540, until: 750},
+    hundewiese: {text: "Hundewiese am Teich (14 bis 17 Uhr): {name} spielt mit 2 Hunden", need: 2, from: 840, until: 1020},
+    bleib: {text: "Bleib: Sitz, Bleib, 6 m weggehen und 5 Sekunden warten"},
+    fuss: {text: "Geh 30 m mit {name} bei Fuß, ohne Leine", need: 30, unit: "m"},
+    lob: {text: "Belohne {name} 3× mit einem Leckerli gleich nach einem Kommando", need: 3},
+    trick: {text: "Übe einen Trick mit {name} (Hund antippen)"},
+    plaudern: {text: "Sprich mit 2 Leuten im Park", need: 2},
+    hundefreund: {text: "Lass {name} mit einem anderen Hund spielen"},
+    buersten: {text: "Bürste {name}"},
+    dreh: {text: "Lass {name} sich drehen"},
+    rolle: {text: "Lass {name} eine Rolle machen"},
+    vorrat: {text: "Bestell am Schreibtisch Futter nach (fast leer)"}
   };
+  function weekday(day) { return (day - 1) % 7; }
   function makeTasks(day, seed, opts) {
     opts = opts || {};
-    var R = rng((seed || 1) * 31 + day * 977), pool = ["haufen", "stock", "spielen", "sitz", "platz", "pfote", "kombi", "komm", "teich", "bank", "streicheln", "baden", "lesen"], pick = [];
+    var wd = weekday(day), weekend = wd >= 5, sk = opts.skills || SKILL0;
+    var R = rng((seed || 1) * 31 + day * 977), pick = [];
+    var pool = ["haufen", "stock", "spielen", "sitz", "platz", "pfote", "kombi", "komm", "teich", "bank", "streicheln", "baden", "lesen", "bleib", "fuss", "lob", "trick", "plaudern", "hundefreund", "buersten"];
+    if (sk.dreh >= 25) pool.push("dreh");
+    if (sk.rolle >= 25) pool.push("rolle");
+    if (wd === 6) pool.splice(pool.indexOf("hundefreund"), 1);
     if (day === 1) pick.push("leine");
-    while (pick.length < (day === 1 ? 4 : 3)) {
+    if (opts.lowFood) pick.push("vorrat");
+    while (pick.length < (day === 1 ? 4 : weekend ? 5 : 4)) {
       var id = pool.splice(Math.floor(R() * pool.length), 1)[0];
       if (id === "kombi" && pick.some(function (x) { return x === "sitz" || x === "platz" || x === "pfote"; })) continue;
       if ((id === "sitz" || id === "platz" || id === "pfote") && pick.indexOf("kombi") >= 0) continue;
       pick.push(id);
     }
-    var ids = ["morgenrunde", "fruehstueck", "wasser"].concat(pick, opts.multi ? ["gruss"] : [], ["abendrunde", "abendessen"]);
+    var ids = ["morgenrunde", "fruehstueck", "wasser"];
+    if (!weekend) ids.push("arbeit", "mittagsrunde");
+    if (wd === 5) ids.push("hundeschule");
+    if (wd === 6) ids.push("hundewiese");
+    ids = ids.concat(pick, opts.multi ? ["gruss"] : [], ["abendrunde", "abendessen"]);
     return ids.map(function (k) { var d = TASKS[k]; return {id: k, text: d.text, need: d.need || 1, unit: d.unit || "", from: d.from, until: d.until, have: 0, done: false, failed: false}; });
   }
+
+  /* ---------- Können, Leute, Tagesplan ---------- */
+  var TRICKS = [
+    {id: "sitz", name: "Sitz", icon: "🪑"}, {id: "platz", name: "Platz", icon: "⬇️"}, {id: "pfote", name: "Pfote", icon: "🐾"}, {id: "komm", name: "Komm", icon: "📣"},
+    {id: "bleib", name: "Bleib", icon: "✋"}, {id: "fuss", name: "Fuß", icon: "👣"}, {id: "aus", name: "Aus", icon: "🫳"},
+    {id: "dreh", name: "Dreh dich", icon: "🌀"}, {id: "rolle", name: "Rolle", icon: "🔄"}, {id: "parcours", name: "Parcours", icon: "🏁"}
+  ];
+  var SKILL0 = {sitz: 70, platz: 60, pfote: 62, komm: 60, bleib: 20, fuss: 22, aus: 25, dreh: 0, rolle: 0, parcours: 0};
+  var BADGES = [{n: 1, name: "Welpenkurs"}, {n: 3, name: "Grundkurs"}, {n: 6, name: "Begleithund"}, {n: 10, name: "Agility-Profi"}];
+  function badgeFor(n) { var b = null; BADGES.forEach(function (x) { if (n >= x.n) b = x.name; }); return b; }
+  var PRICES = {futter: 18, leckerli: 6, schule: 15}, WAGE = 0.35;
+  var BREED_IDS = ["pinscher", "dackel", "labrador", "schaefer", "collie"];
+  var NAMES = {w: ["Frau Petersen", "Frau Yilmaz", "Frau Schulz", "Lena", "Mia", "Frau Nowak", "Anna", "Frau Krüger", "Sophie", "Frau Hansen"],
+    m: ["Herr Jansen", "Herr Becker", "Jonas", "Herr Demir", "Paul", "Herr Wagner", "Ole", "Herr Hoffmann", "Ben", "Herr Lindner"]};
+  var KIDS = ["Emil", "Lotta", "Finn", "Ida", "Mats", "Clara"];
+  var DOG_NAMES = ["Bello", "Luna", "Balu", "Nala", "Rocky", "Emma", "Sammy", "Paula", "Charly", "Kira", "Oskar", "Frieda", "Benny", "Maja"];
+  var CHAT = ["Schönes Wetter heute, oder?", "Was für ein hübscher Hund!", "Wie alt ist {name} denn?", "Wir drehen hier jeden Morgen unsere Runde.",
+    "Kennen Sie die Hundeschule auf der Westwiese? Samstags um zehn.", "Sonntagnachmittag ist am Teich immer Hundewiese.", "{dog} liebt Stöckchen über alles.",
+    "Passen Sie auf, die Jogger hier mögen keine Hunde, die hinterherrennen.", "Am Teich gibt es neuerdings Enten.", "{name} hört ja richtig gut!"];
+  // Ereignisse des Tages: Post, Besuch, geklaute Socke, Regen; am Wochenende Hundeschule und Hundewiese.
+  function makePlan(day, seed) {
+    var R = rng((seed || 1) * 131 + day * 7919), wd = weekday(day), out = [];
+    function at(a, b) { return Math.round(a + R() * (b - a)); }
+    if (R() < 0.55) out.push({at: at(600, 900), type: "post"});
+    var pool = ["socke", "besuch", "regen"], k = wd >= 5 ? 1 : 2, slots = [[780, 900], [960, 1110]];
+    for (var i = 0; i < k; i++) out.push({at: at(slots[i][0], slots[i][1]), type: pool.splice(Math.floor(R() * pool.length), 1)[0]});
+    if (R() < 0.35 && out.every(function (e) { return e.type !== "regen"; })) out.push({at: at(480, 700), type: "regen"});
+    if (wd === 5) out.push({at: 570, type: "schule"});
+    if (wd === 6) out.push({at: 830, type: "wiese"});
+    out.forEach(function (e) { e.done = false; });
+    return out;
+  }
+  function moveTo(e, tx, tz, maxSp, stop, dt) {
+    var dx = tx - e.x, dz = tz - e.z, dd = Math.hypot(dx, dz), want = 0;
+    if (dd > stop) { var ty = Math.atan2(dx, dz), df = angDiff(e.yaw, ty); e.yaw += clamp(df, -1, 1) * Math.min(1, 6 * dt); want = Math.min(maxSp, (dd - stop) * 2) * clamp(Math.cos(df), 0.2, 1); }
+    e.speed = approach(e.speed || 0, want, 6 * dt);
+    e.x += Math.sin(e.yaw) * e.speed * dt; e.z += Math.cos(e.yaw) * e.speed * dt;
+    return dd;
+  }
+  function faceTo(e, tx, tz, dt) { e.yaw += clamp(angDiff(e.yaw, Math.atan2(tx - e.x, tz - e.z)), -1, 1) * Math.min(1, 5 * dt); }
+  function newPose() { return {sit: 0, down: 0, paw: 0, sniff: 0, squat: 0, pee: 0, sleep: 0, shake: 0, beg: 0}; }
+  // Gangart und Haltung eines Hundes aus seiner Bewegung ableiten (für fremde Hunde).
+  function animDog(nd, ox, oz, dt, poseT, wagT) {
+    var moved = Math.hypot(nd.x - ox, nd.z - oz); if (moved > 1.5) moved = 0;
+    nd.vel = lerp(nd.vel || 0, moved / Math.max(dt, 1e-4), Math.min(1, dt * 10)); nd.gait = pickGait(nd.vel);
+    nd.phase = (nd.phase + moved / GAITS[nd.gait === "stand" ? "walk" : nd.gait].stride) % 1;
+    nd.gaitBlend = approach(nd.gaitBlend, nd.vel > 0.08 ? 1 : 0, dt * 5);
+    for (var k in nd.pose) nd.pose[k] = approach(nd.pose[k], poseT[k] || 0, dt * 3.5);
+    nd.wag = approach(nd.wag, wagT, dt * 1.5); nd.wagPhase = (nd.wagPhase + dt * (2 + nd.wag * 9)) % TAU;
+  }
+  function inField(W, e) { var F = W.field; return e.x > F.x0 && e.x < F.x1 && e.z > F.z0 && e.z < F.z1; }
+  var SCHOOL_STEPS = [
+    {id: "fuss", text: "Fuß an der Leine: Geh mit {name} angeleint 20 m über den Platz, ohne dass die Leine spannt.", need: 20, unit: "m"},
+    {id: "bleib", text: "Sitz und Bleib: Leine ab, Sitz, dann Bleib. Geh 6 m weg und warte 5 Sekunden.", need: 1},
+    {id: "komm", text: "Rückruf: Ruf {name} aus mindestens 8 m mit Komm zu dir.", need: 1},
+    {id: "neu", text: "Neuer Trick: {trick}. Gib das Kommando und belohne jeden Erfolg sofort mit einem Leckerli.", need: 3},
+    {id: "parcours", text: "Parcours: Leine ab, mit {name} auf den Platz und das Kommando Parcours geben.", need: 1}
+  ];
 
   /* ---------- Simulation ---------- */
   function Sim(opts) {
@@ -373,14 +466,18 @@
       outMeters: 0, path: null, pathT: 0, pending: null, delay: 0, comeFrom: 0, mudCool: 0, bubble: null, think: 0};
     this.t = 7 * 60; this.day = 1; this.speed = 1; this.sleeping = false;
     this.need = {hunger: 75, durst: 70, blase: 45, energie: 95, spass: 70, liebe: 80, sauber: 90};
-    this.me = {hunger: 65, energie: 95, spass: 70};
+    this.me = {hunger: 65, energie: 95, spass: 70, sozial: 70};
+    this.money = 120; this.vorrat = {futter: 6, leckerli: 20};
+    this.skills = Object.assign({}, SKILL0); this.schoolN = 0; this.schoolDay = 0;
+    this.npcs = []; this.npcT = 0; this.rt = 0; this.weather = null; this.school = null; this.orders = [];
+    this.plan = makePlan(1, this.seed);
     this.bowl = {food: 0, water: 0.35};
     this.items = this.W.sticks.map(function (x) { return Object.assign({}, x, {state: "ground"}); });
     this.items.push({id: "ball", kind: "ball", x: -1.2, y: 0.06, z: -126.3, state: "ground", yaw: 0});
     this.poops = []; this.puddles = []; this.uid = 0;
-    this.tasks = makeTasks(1, this.seed, {multi: this.multi});
+    this.tasks = makeTasks(1, this.seed, {multi: this.multi, skills: this.skills});
     this.events = []; this.moodSum = 0; this.moodN = 0; this.history = [];
-    this.stats = {meters: 0, walks: 0, fetched: 0, days: 0};
+    this.stats = {meters: 0, walks: 0, fetched: 0, days: 0, played: 0, talks: 0, earned: 0};
     if (opts.save) this.load(opts.save);
   }
   var S = Sim.prototype;
@@ -459,7 +556,24 @@
     nehmen: {label: "Aufheben", dur: 0.3},
     streicheln: {label: "Streicheln", dur: 3},
     anleinen: {label: "Anleinen", dur: 0.3},
-    bank: {label: "Hinsetzen", dur: 15, me: {energie: 0.3, spass: 0.3}, pose: "sit"}
+    bank: {label: "Hinsetzen", dur: 15, me: {energie: 0.3, spass: 0.3}, pose: "sit"},
+    arbeiten: {label: "Arbeiten (2 Std.)", dur: 120, me: {spass: -0.1}, pose: "sit"},
+    bestellen_futter: {label: "Futter bestellen", dur: 2, pose: "sit"},
+    bestellen_leckerli: {label: "Leckerli bestellen", dur: 2, pose: "sit"},
+    buersten: {label: "{name} bürsten", dur: 6},
+    abtrocknen: {label: "{name} abtrocknen", dur: 4},
+    tauschen: {label: "Gegen ein Leckerli tauschen", dur: 1},
+    ueben: {label: "Trick üben", dur: 10},
+    hallo: {label: "Hallo sagen", dur: 1},
+    plaudern: {label: "Plaudern", dur: 10, me: {spass: 0.4, sozial: 2.5}},
+    winken: {label: "Zuwinken", dur: 0.3},
+    hundegruss: {label: "Die Hunde Hallo sagen lassen", dur: 0.3},
+    erlauben: {label: "Streicheln erlauben", dur: 1},
+    paket: {label: "Post annehmen", dur: 1},
+    training: {label: "Training beginnen", dur: 1},
+    frage: {label: "Was lernen wir heute?", dur: 1},
+    fremd_streicheln: {label: "Streicheln", dur: 2},
+    spielen: {label: "Spielen lassen", dur: 0.3}
   };
   // Mögliche Aktionen für ein angetipptes Ziel: {type: "obj"|"dog"|"item"|"poop"|"puddle", id}.
   S.actionsFor = function (tg) {
@@ -467,9 +581,32 @@
     function a(id, label, ok, why) { out.push({id: id, label: self.text(label || ACTS[id].label), ok: ok !== false, why: why || ""}); }
     if (tg.type === "dog") {
       a("streicheln");
+      if (d.item && this.item(d.item)) a("tauschen", null, this.vorrat.leckerli > 0, "Du hast keine Leckerli mehr.");
+      if (d.wet) a("abtrocknen");
       if (!d.leash) a("anleinen", "Anleinen"); else a("ableinen", "Leine ab");
+      a("sub:train", "Tricks üben …");
+      a("buersten");
       a("cmd:sitz", "Sitz"); a("cmd:platz", "Platz"); a("cmd:pfote", "Pfote geben"); a("cmd:komm", "Komm!");
       if (inHouse(d)) a("koerbchen");
+      return out;
+    }
+    if (tg.type === "train") {
+      TRICKS.forEach(function (t) { if (t.id === "parcours") return; a("ueben:" + t.id, t.icon + " " + t.name + " üben (" + Math.round(self.skills[t.id]) + " %)", self.vorrat.leckerli >= 2, "Zum Üben brauchst du 2 Leckerli."); });
+      return out;
+    }
+    if (tg.type === "npc" || tg.type === "npcdog") {
+      var nn = this.npcById(tg.id); if (!nn) return out;
+      if (tg.type === "npcdog") { a("fremd_streicheln", nn.dog.name + " streicheln"); a("spielen", "Mit " + this.name + " spielen lassen", !d.leash, "Mach erst die Leine ab."); return out; }
+      switch (nn.role) {
+        case "post": a("paket", nn.parcel ? "Paket annehmen" : "Post annehmen"); break;
+        case "trainer":
+          var tm0 = this.t % 1440, ok = tm0 >= 585 && tm0 < 720 && this.schoolDay !== this.day && !this.school;
+          a("training", "Training beginnen (" + PRICES.schule + " €)", ok && this.money >= PRICES.schule && dist(d, nn) < 20, this.school ? "Das Training läuft schon." : this.schoolDay === this.day ? "Für heute seid ihr fertig." : !ok ? "Training ist samstags von 10 bis 12 Uhr." : this.money < PRICES.schule ? "Dafür reicht dein Geld nicht." : "Hol erst " + this.name + " dazu.");
+          a("frage"); break;
+        case "kind": a("erlauben", "Streicheln erlauben"); a("hallo"); break;
+        case "jogger": a("winken"); break;
+        default: a("hallo"); a("plaudern"); if (nn.dog) a("hundegruss", "Die Hunde Hallo sagen lassen", !d.leash || dist(d, nn.dog) < 4, "Mach erst die Leine ab oder geh näher heran.");
+      }
       return out;
     }
     if (tg.type === "item") { var it = this.item(tg.id); if (it && it.state === "ground") a("nehmen", it.kind === "ball" ? "Ball aufheben" : "Stock aufheben", !p.holding, "Du hältst schon etwas."); return out; }
@@ -477,7 +614,12 @@
     if (tg.type === "puddle") { a("aufwischen"); return out; }
     var o = this.obj(tg.id); if (!o) return out;
     switch (o.kind) {
-      case "napf": a("fuettern", null, this.bowl.food < 0.9, "Der Napf ist noch voll."); break;
+      case "napf": a("fuettern", "Futter einfüllen (" + this.vorrat.futter + " übrig)", this.bowl.food < 0.9 && this.vorrat.futter > 0, this.vorrat.futter > 0 ? "Der Napf ist noch voll." : "Kein Futter mehr. Bestell welches am Schreibtisch im Schlafzimmer."); break;
+      case "schreibtisch":
+        a("arbeiten");
+        a("bestellen_futter", "Futter bestellen: 10 Portionen, " + PRICES.futter + " €", this.money >= PRICES.futter, "Dafür reicht dein Geld nicht.");
+        a("bestellen_leckerli", "Leckerli bestellen: 30 Stück, " + PRICES.leckerli + " €", this.money >= PRICES.leckerli, "Dafür reicht dein Geld nicht.");
+        break;
       case "wassernapf": a("wasser"); break;
       case "kuehlschrank": a("essen"); break;
       case "theke": a("kochen"); break;
@@ -502,6 +644,8 @@
     if (tg.type === "item") return this.item(tg.id);
     if (tg.type === "poop") return this.poops.filter(function (q) { return q.id === tg.id; })[0];
     if (tg.type === "puddle") return this.puddles.filter(function (q) { return q.id === tg.id; })[0];
+    if (tg.type === "npc") return this.npcById(tg.id);
+    if (tg.type === "npcdog") { var nn = this.npcById(tg.id); return nn && nn.dog; }
     return this.obj(tg.id);
   };
   // Aktion bestellen: hingehen, dann ausführen. Kommandos wirken sofort.
@@ -509,13 +653,14 @@
     var self = this, p = this.p, d = this.d;
     if (actId.indexOf("cmd:") === 0) return this.command(actId.slice(4));
     if (actId === "ableinen") { this.setLeash(false); return true; }
+    if (tg.type === "train") tg = {type: "dog"};
     var pos = this.targetPos(tg); if (!pos) return false;
     var use, face;
     if (actId === "tuer") { var inside = inHouse(p); use = inside ? {x: -0.4, z: -119.6} : {x: -0.4, z: -122.4}; this.walkTo(use.x, use.z, null); return true; }
     if (tg.type === "obj") { use = pos.use; face = pos.face; }
-    else { var ang = yawTo(pos, p), r = tg.type === "dog" ? 0.75 : 0.55; use = {x: pos.x + Math.sin(ang) * r, z: pos.z + Math.cos(ang) * r}; face = ang + Math.PI; }
-    if (tg.type === "dog" && (actId === "streicheln" || actId === "anleinen")) {
-      if (["sleep", "eat", "drink", "bath"].indexOf(d.mode) < 0) { this.setDog("wait", 8); }
+    else { var ang = yawTo(pos, p), r = tg.type === "dog" || tg.type === "npcdog" ? 0.75 : tg.type === "npc" ? 0.95 : 0.55; use = {x: pos.x + Math.sin(ang) * r, z: pos.z + Math.cos(ang) * r}; face = ang + Math.PI; }
+    if (tg.type === "dog" && (actId === "streicheln" || actId === "anleinen" || actId === "buersten" || actId === "abtrocknen" || actId.indexOf("ueben:") === 0)) {
+      if (["sleep", "eat", "drink", "bath", "keepaway"].indexOf(d.mode) < 0) { this.setDog("wait", actId === "anleinen" || actId === "streicheln" ? 8 : 14); }
     }
     if (actId === "koerbchen") { this.sendToBed(); if (tg.type === "dog") return true; }
     if (actId === "baden") { this.setDog("toBath", 30); }
@@ -526,25 +671,33 @@
   S.arrive = function () {
     var p = this.p, g = p.goal; p.goal = null;
     if (!g) return;
-    var A = ACTS[g.act] || {dur: 0.3}, pos = this.targetPos(g.tg);
+    var A = ACTS[g.act.split(":")[0]] || {dur: 0.3}, pos = this.targetPos(g.tg);
     if (!pos) return;
     if (g.tg.type === "dog" && dist(p, this.d) > 1.6) { this.order(g.act, g.tg); return; }
+    if ((g.tg.type === "npc" || g.tg.type === "npcdog") && dist(p, pos) > 1.9) { this.order(g.act, g.tg); return; }
     var face = g.tg.type === "obj" ? yawTo(p, pos) : yawTo(p, pos);
     var dur = A.dur;
     if (g.act === "schlafen") { var wake = this.t % 1440 < 420 ? this.t - this.t % 1440 + 420 : this.t - this.t % 1440 + 1440 + 420; dur = wake - this.t; this.sleeping = true; this.sendToBed(); }
     if (g.act === "baden" && this.d.mode !== "bath") { this.setDog("toBath", 30); }
     var o = g.tg.type === "obj" ? pos : null;
-    if (o && o.seat && (g.act === "fernsehen" || g.act === "ausruhen")) { p.x = o.seat.x; p.z = o.seat.z; face = o.seat.yaw; }
+    if (o && o.seat && (g.act === "fernsehen" || g.act === "ausruhen" || o.kind === "schreibtisch")) { p.x = o.seat.x; p.z = o.seat.z; face = o.seat.yaw; }
     if (o && o.lie) { p.x = o.lie.x; p.z = o.lie.z; face = o.lie.yaw; }
     if (o && o.kind === "bank") { face = yawTo(o, p); p.x = o.x + Math.sin(face) * 0.15; p.z = o.z + Math.cos(face) * 0.15; }
-    p.act = {id: g.act, tg: g.tg, left: dur, total: dur, face: face, label: this.text(A.label)};
-    p.pose = A.pose || (g.act === "streicheln" || g.act === "aufheben" || g.act === "fuettern" || g.act === "wasser" || g.act === "aufwischen" || g.act === "nehmen" || g.act === "anleinen" ? "bend" : "stand");
+    var label = A.label;
+    if (g.act.indexOf("ueben:") === 0) { var tr = TRICKS.filter(function (x) { return x.id === g.act.slice(6); })[0]; label = (tr ? tr.name : "Trick") + " üben"; }
+    if (g.act === "plaudern" || g.act === "hallo") { var nn = this.npcById(g.tg.id); if (nn) label = (g.act === "hallo" ? "Hallo, " : "Plaudern mit ") + nn.name; }
+    p.act = {id: g.act, tg: g.tg, left: dur, total: dur, face: face, label: this.text(label)};
+    p.pose = A.pose || (["streicheln", "aufheben", "fuettern", "wasser", "aufwischen", "nehmen", "anleinen", "buersten", "abtrocknen", "tauschen", "fremd_streicheln"].indexOf(g.act) >= 0 || g.act.indexOf("ueben:") === 0 ? "bend" : "stand");
   };
   S.finish = function (act) {
     var p = this.p, d = this.d, n = this.need, tg = act.tg, self = this;
     p.act = null; p.pose = "stand";
     switch (act.id) {
-      case "fuettern": this.bowl.food = 1; n.liebe = Math.min(100, n.liebe + 4); this.emit("fed"); this.task("fed"); break;
+      case "fuettern":
+        if (this.vorrat.futter <= 0) { this.say("Kein Futter mehr. Bestell welches am Schreibtisch."); break; }
+        this.vorrat.futter--; this.bowl.food = 1; n.liebe = Math.min(100, n.liebe + 4); this.emit("fed", {left: this.vorrat.futter}); this.task("fed");
+        if (this.vorrat.futter <= 2 && !this.orders.some(function (o) { return o.what === "futter"; })) this.emit("lowFood", {left: this.vorrat.futter});
+        break;
       case "wasser": this.bowl.water = 1; this.emit("watered"); this.task("watered"); break;
       case "lesen": this.task("read"); break;
       case "schlafen": this.wake(); break;
@@ -555,13 +708,34 @@
       case "nehmen": var it = this.item(tg.id); if (it && it.state === "ground" && !p.holding) { it.state = "player"; it.thrown = false; p.holding = it.id; } break;
       case "streicheln": n.liebe = Math.min(100, n.liebe + 18); n.spass = Math.min(100, n.spass + 4); this.emit("pet"); this.task("pet"); if (d.mode === "wait" || d.mode === "petted") this.setDog("sit", 4); break;
       case "anleinen": this.setLeash(true); break;
+      case "bestellen_futter": case "bestellen_leckerli": this.placeOrder(act.id.slice(10)); break;
+      case "buersten": n.sauber = Math.min(100, n.sauber + 15); n.liebe = Math.min(100, n.liebe + 10); this.emit("brushed"); this.task("brushed"); if (d.mode === "wait") this.setDog("sit", 3); break;
+      case "abtrocknen": d.wet = 0; d.wetIn = 0; n.liebe = Math.min(100, n.liebe + 3); this.emit("dried"); this.task("dried"); if (d.mode === "wait") this.setDog("shake", 1.2); break;
+      case "tauschen":
+        if (!d.item || this.vorrat.leckerli <= 0) break;
+        this.vorrat.leckerli--; n.hunger = Math.min(100, n.hunger + 1.5); this.skills.aus = Math.min(100, this.skills.aus + 2);
+        this.dropItem(); this.emit("traded"); this.setDog("sit", 3); break;
+      case "hallo": case "plaudern": case "winken": this.talk(tg.id, act.id); break;
+      case "hundegruss": case "spielen": {
+        var nn = this.npcById(tg.id); if (!nn || !nn.dog) break;
+        if (d.leash && act.id === "spielen") { this.say("Mach erst die Leine ab."); break; }
+        if (d.leash) { d.spot = {x: nn.dog.x, z: nn.dog.z, r: 0.35, greet: true, npc: nn.id}; this.setDog("sniff", 0); d.sniffT = 2.5; nn.pause = Math.max(nn.pause, 6); nn.dog.mode = "greet"; nn.dog.timer = 5; break; }
+        this.startPlay(nn); break;
+      }
+      case "fremd_streicheln": { var n2 = this.npcById(tg.id); if (n2 && n2.dog) { this.me.sozial = Math.min(100, this.me.sozial + 4); n2.dog.wag = 1; this.emit("petOther", {name: n2.dog.name, owner: n2.name}); } break; }
+      case "erlauben": this.allowKid(tg.id); break;
+      case "paket": this.acceptPost(tg.id); break;
+      case "training": this.startSchool(tg.id); break;
+      case "frage": this.say("Trainerin: „" + this.text(["Heute üben wir Fuß, Bleib, Rückruf, einen neuen Trick und den Parcours.", "Belohnen Sie immer sofort, innerhalb von ein paar Sekunden. Dann lernt der Hund am schnellsten.", "Ein Hund, der Spaß hat und satt ist, hört besser."][Math.floor(this.R() * 3)]) + "“"); break;
     }
+    if (act.id.indexOf("ueben:") === 0) this.practice(act.id.slice(6));
     void self;
   };
   S.tickAct = function (gm) {
     var p = this.p, a = p.act; if (!a) return;
-    var A = ACTS[a.id] || {};
+    var A = ACTS[a.id.split(":")[0]] || {};
     if (A.me) for (var k in A.me) this.me[k] = clamp(this.me[k] + A.me[k] * gm, 0, 100);
+    if (a.id === "arbeiten") { var w = Math.min(gm, Math.max(0, a.left)); this.money += WAGE * w; this.stats.earned += WAGE * w; this.bump("arbeit", w); }
     if (a.id === "schlafen") this.me.energie = clamp(this.me.energie + 0.25 * gm, 0, 100);
     if (a.id === "streicheln") { this.d.mode === "wait" && this.setDog("petted", 2); }
     if (a.id === "baden" && this.d.mode !== "bath") { a.left += gm; if (a.waitDog == null) a.waitDog = 0; a.waitDog += gm; if (a.waitDog > 20) { this.say(this.name + " will nicht in die Wanne."); p.act = null; p.pose = "stand"; this.setDog("idle", 2); } return; }
@@ -576,17 +750,83 @@
     if (dd > HEAR) { this.say(this.name + " ist zu weit weg und hört dich nicht."); return false; }
     if (cmd === "pfote" && dd > 1.9) { this.say("Geh näher an " + this.name + " heran, dann gibt es die Pfote."); return false; }
     if (d.mode === "bath" || d.mode === "toBath") return false;
+    if (cmd === "bleib" && d.mode !== "sit" && d.mode !== "down") { this.say("Erst Sitz oder Platz, dann Bleib."); return false; }
+    if (cmd === "aus" && !d.item) { this.say(this.name + " hat nichts im Maul."); return false; }
+    if (cmd === "parcours" && (!inField(this.W, d) || d.leash)) { this.say(d.leash ? "Für den Parcours erst die Leine ab." : "Der Parcours steht auf dem Übungsplatz im Park (Westwiese)."); return false; }
     d.pending = cmd; d.delay = 0.35 + this.R() * 0.25;
     this.emit("cmd", {cmd: cmd});
     return true;
   };
+  // Wie wahrscheinlich folgt der Hund? Hängt vom Können, der Laune, der Leine und von Ablenkung ab.
+  S.obeyChance = function (cmd) {
+    var sk = this.skills[cmd] || 0; if (sk <= 0) return 0;
+    var ch = 0.12 + 0.86 * sk / 100, m = mood(this.need);
+    if (m < 40) ch -= 0.15;
+    if (this.d.leash) ch += 0.06;
+    if (this.school) ch += 0.1;
+    if (this.distraction()) ch -= 0.18;
+    if (this.d.mode === "chase" && cmd === "komm") ch -= 0.1;
+    return clamp(ch, 0.05, 0.98);
+  };
+  S.distraction = function () {
+    var d = this.d;
+    return this.npcs.some(function (n) { return !n.gone && ((n.dog && dist(n.dog, d) < 6) || (n.role === "jogger" && dist(n, d) < 9)); });
+  };
+  S.ok = function (cmd) { this.d.lastOk = {cmd: cmd, rt: this.rt, rewarded: false}; };
   S.doCommand = function (cmd) {
-    var d = this.d, p = this.p, dd = dist(d, p);
-    this.dropItem();
-    if (cmd === "komm") { if (dd < 1.6) { this.setDog("sit", 6); } else { d.comeFrom = dd; this.setDog("come", 30); } return; }
-    if (cmd === "sitz") { this.setDog("sit", 8); d.stayAt = {x: p.x, z: p.z}; return; }
-    if (cmd === "platz") { this.setDog("down", 10); d.stayAt = {x: p.x, z: p.z}; return; }
-    if (cmd === "pfote") { this.setDog("paw", 2.6); d.pawGiven = false; return; }
+    var d = this.d, p = this.p, dd = dist(d, p), R = this.R;
+    if ((this.skills[cmd] || 0) <= 0) { this.setDog("confused", 1.8); this.emit("unknown", {cmd: cmd}); return; }
+    if (R() > this.obeyChance(cmd)) { if (["sit", "down", "paw", "wait", "beg"].indexOf(d.mode) >= 0) this.setDog("idle", 1.5); this.emit("ignored", {cmd: cmd, skill: Math.round(this.skills[cmd])}); return; }
+    if (cmd === "aus") { var had = d.item; this.dropItem(); this.setDog("sit", 3); if (had) this.ok("aus"); return; }
+    if (cmd === "bleib") { d.stay = true; d.stayT = 0; d.stayDone = false; d.timer = 45; d.stayAt = {x: p.x, z: p.z}; this.emit("stay"); return; }
+    if (cmd !== "pfote" && cmd !== "fuss") this.dropItem();
+    if (cmd === "komm") { if (dd < 1.6) { this.setDog("sit", 6); this.ok("komm"); } else { d.comeFrom = dd; d.fromChase = d.mode === "chase"; this.setDog("come", 30); } return; }
+    if (cmd === "sitz") { this.setDog("sit", 8); d.stayAt = {x: p.x, z: p.z}; this.ok("sitz"); return; }
+    if (cmd === "platz") { this.setDog("down", 10); d.stayAt = {x: p.x, z: p.z}; this.ok("platz"); if (p.act && (p.act.id === "essen" || p.act.id === "kochen")) this.task("tisch"); return; }
+    if (cmd === "pfote") { this.dropItem(); this.setDog("paw", 2.6); d.pawGiven = false; return; }
+    if (cmd === "fuss") { this.setDog("heel", 40); d.heelM = 0; this.ok("fuss"); return; }
+    if (cmd === "dreh") { this.setDog("spin", 1.7); return; }
+    if (cmd === "rolle") { this.setDog("roll", 2.6); return; }
+    if (cmd === "parcours") { d.course = this.buildCourse(); this.setDog("course", 45); return; }
+  };
+  // Belohnen: ein Leckerli. Kommt es gleich nach einem befolgten Kommando, lernt der Hund dazu.
+  S.reward = function () {
+    var d = this.d, p = this.p, n = this.need;
+    if (this.vorrat.leckerli <= 0) { this.say("Keine Leckerli mehr. Bestell welche am Schreibtisch."); return false; }
+    if (dist(d, p) > 2.6) { this.say("Geh näher an " + this.name + " heran."); return false; }
+    this.vorrat.leckerli--; n.hunger = Math.min(100, n.hunger + 1.5); n.liebe = Math.min(100, n.liebe + 2);
+    var lo = d.lastOk;
+    if (lo && !lo.rewarded && this.rt - lo.rt < 6) {
+      lo.rewarded = true;
+      var sk = this.skills[lo.cmd] || 0, gain = Math.max(1, Math.round((100 - sk) * 0.07 + 1));
+      this.skills[lo.cmd] = Math.min(100, sk + gain);
+      this.emit("rewarded", {cmd: lo.cmd, gain: gain, skill: Math.round(this.skills[lo.cmd])}); this.task("rewarded", {cmd: lo.cmd});
+    } else this.emit("treat");
+    return true;
+  };
+  S.practice = function (cmd) {
+    var d = this.d, sk = this.skills[cmd] || 0;
+    if (this.vorrat.leckerli < 2) { this.say("Zum Üben brauchst du 2 Leckerli."); return; }
+    this.vorrat.leckerli -= 2;
+    var gain = Math.max(2, Math.round(9 * (1 - sk / 115)));
+    this.skills[cmd] = Math.min(100, sk + gain);
+    this.need.liebe = Math.min(100, this.need.liebe + 4); this.need.spass = Math.min(100, this.need.spass + 4);
+    this.emit("practiced", {cmd: cmd, gain: gain, skill: Math.round(this.skills[cmd])}); this.task("practice");
+    var show = {sitz: ["sit", 3], platz: ["down", 3], pfote: ["paw", 2.6], dreh: ["spin", 1.7], rolle: ["roll", 2.6]}[cmd];
+    if (show) { this.setDog(show[0], show[1]); d.pawGiven = true; d.quiet = true; } else this.setDog("sit", 3);
+  };
+  S.buildCourse = function () {
+    var C = this.W.course, R = this.R, sk = this.skills.parcours, self = this, pts = [], ok = 0;
+    function ch() { return R() < 0.3 + 0.65 * sk / 100 + (self.school ? 0.15 : 0); }
+    pts.push({x: C.start.x, z: C.start.z});
+    C.hurdles.forEach(function (h) {
+      if (ch()) { ok++; pts.push({x: h.x - 0.75, z: h.z, jump: true}, {x: h.x + 0.75, z: h.z}); }
+      else pts.push({x: h.x - 0.7, z: h.z + 1.4, miss: "Hürde"}, {x: h.x + 0.7, z: h.z + 1.4});
+    });
+    if (ch()) { ok++; C.poles.forEach(function (q, i) { pts.push({x: q.x + 0.45, z: q.z + (i % 2 ? 0.55 : -0.55)}); }); }
+    else pts.push({x: C.poles[0].x - 0.5, z: C.poles[0].z + 1.4, miss: "Slalom"}, {x: C.poles[5].x + 0.5, z: C.poles[5].z + 1.4});
+    pts.push({x: C.end.x, z: C.end.z});
+    return {pts: pts, i: 0, ok: ok, total: 3};
   };
   S.setLeash = function (on) {
     var d = this.d, p = this.p;
@@ -599,6 +839,7 @@
   S.dropItem = function () {
     var d = this.d; if (!d.item) return;
     var it = this.item(d.item), f = fwd(d.yaw);
+    if (it && it.kind === "socke") { this.items = this.items.filter(function (x) { return x !== it; }); d.item = null; this.emit("sockBack"); this.task("sock"); return; }
     if (it) { it.state = "ground"; it.x = d.x + f.x * 0.45; it.z = d.z + f.z * 0.45; it.y = it.kind === "ball" ? 0.06 : 0.03; var c = {x: it.x, z: it.z}; collide(c, 0.1, this.W); it.x = c.x; it.z = c.z; }
     d.item = null;
   };
@@ -643,7 +884,7 @@
   };
 
   /* ---------- Hund ---------- */
-  S.setDog = function (mode, timer) { var d = this.d; d.mode = mode; d.timer = timer || 0; d.path = null; if (mode !== "sit" && mode !== "down") d.entered = null; };
+  S.setDog = function (mode, timer) { var d = this.d; d.mode = mode; d.timer = timer || 0; d.path = null; if (mode !== "sit" && mode !== "down") { d.entered = null; d.stay = false; } };
   S.sendToBed = function () { var d = this.d; if (inHouse(d)) { this.dropItem(); this.setDog("toBed", 40); } };
   // Laufen zum Ziel: direkt bei freier Sicht, sonst über den Wegfinder.
   S.goTo = function (tx, tz, maxSpeed, stop, dt, extra) {
@@ -693,9 +934,21 @@
       var toy = this.items.filter(function (it) { return it.state === "ground" && inHouse(it); })[0];
       if (toy) { d.toy = toy.id; this.setDog("getToy", 25); return; }
     }
-    // Ein anderer Hund in der Nähe (zu zweit): hin und beschnuppern.
+    // Ein anderer Hund in der Nähe (zu zweit oder fremd): hin und beschnuppern.
     var od = (this.others || []).filter(function (o) { return o.dog && dist(o.dog, d) < 7; })[0];
     if (od && (this.t - (d.greetT || -999)) > 20) { d.greetT = this.t; d.spot = {x: od.dog.x, z: od.dog.z, r: 0.35, greet: true}; this.setDog("sniff", 0); d.sniffT = 2.5; return; }
+    if (outside) {
+      var nd = this.npcs.filter(function (q) { return q.dog && !q.gone && !q.leaving && dist(q.dog, d) < 7 && self.t - (q.greetT || -999) > 40; })[0];
+      if (nd && (!d.leash || dist(nd.dog, d) < 3.5)) {
+        nd.greetT = this.t; nd.pause = Math.max(nd.pause, 7); nd.dog.mode = "greet"; nd.dog.timer = 6;
+        d.spot = {x: nd.dog.x, z: nd.dog.z, r: 0.35, greet: true, npc: nd.id}; this.setDog("sniff", 0); d.sniffT = 2.5; return;
+      }
+      var jog = !d.leash && this.npcs.filter(function (q) { return q.role === "jogger" && !q.gone && dist(q, d) < 9; })[0];
+      if (jog && this.t - (d.chaseT || -999) > 45 && R() < 0.55 - this.skills.komm / 250) {
+        d.chaseT = this.t; d.partner = jog.id; this.setDog("chase", 9); this.emit("chase", {who: jog.name});
+        this.addTask("jogger", this.name + " jagt einem Jogger hinterher: ruf ihn sofort mit Komm zurück!", 12); return;
+      }
+    }
     // Nichts Dringendes: dabei sein, schnüffeln, herumstromern oder sich hinlegen.
     var urgent = DOG_NEEDS.filter(function (k) { return n[k.id] < 35; }).sort(function (a, b) { return n[a.id] - n[b.id]; })[0];
     if (urgent) d.bubble = urgent.id;
@@ -734,11 +987,12 @@
   S.stepDog = function (dt, gm) {
     var d = this.d, p = this.p, n = this.need, R = this.R, W = this.W, self = this;
     var dp = dist(d, p), pose = {sit: 0, down: 0, paw: 0, sniff: 0, squat: 0, pee: 0, sleep: 0, shake: 0, beg: 0};
-    d.look = null; var wagT = 0.45;
+    d.look = null; var wagT = 0.45; d.roll = 0;
+    if (d.hopT > 0) { d.hopT -= dt; d.hop = Math.max(0, Math.sin(Math.PI * (1 - d.hopT / 0.42))) * 0.42; } else d.hop = 0;
     if (d.pending) { d.delay -= dt; if (d.delay <= 0) { var c = d.pending; d.pending = null; this.doCommand(c); } }
     // Geworfenes: frei laufend rennt der Hund hinterher (außer er schläft, frisst oder badet).
     var flying = null; this.items.forEach(function (s) { if (s.thrown && (s.state === "flying" || s.state === "ground")) flying = s; });
-    if (flying && !d.leash && !d.item && ["follow", "explore", "sniff", "sit", "down", "idle", "rest", "beg", "wait", "whine"].indexOf(d.mode) >= 0 && dist(d, flying) < HEAR + 10) { this.setDog("fetch", 30); d.fetch = flying.id; this.emit("bark"); }
+    if (flying && !d.leash && !d.item && !d.stay && ["follow", "explore", "sniff", "sit", "down", "idle", "rest", "beg", "wait", "whine"].indexOf(d.mode) >= 0 && dist(d, flying) < HEAR + 10) { this.setDog("fetch", 30); d.fetch = flying.id; this.emit("bark"); }
     d.timer -= dt;
     var free = false;
     switch (d.mode) {
@@ -762,15 +1016,16 @@
         if (s && ds < s.r + 0.7) {
           d.sniffT -= dt; pose.sniff = 1; this.face(s.x, s.z, dt); wagT = 0.3;
           if (!inHouse(d)) n.spass = Math.min(100, n.spass + 0.6 * dt);
-          if (s.greet && !s.done) { s.done = true; n.spass = Math.min(100, n.spass + 10); this.emit("greet"); this.task("greet"); }
+          if (s.greet && !s.done) { s.done = true; n.spass = Math.min(100, n.spass + 10); var gn = s.npc && this.npcById(s.npc); this.emit("greet", {name: gn ? gn.dog.name : null}); this.task("greet"); }
           if (d.sniffT <= 0 && d.wantPee && n.blase < 85) { d.wantPee = false; this.setDog("pee", 2.4); break; }
+          if (d.sniffT <= 0 && s.npc && !d.leash) { var pn2 = this.npcById(s.npc); if (pn2 && pn2.dog && R() < 0.6 && n.energie > 25) { d.spot = null; this.startPlay(pn2); break; } }
         }
         if (!s || d.sniffT <= 0 || d.taut > 0.8 || (!d.leash && dp > 13)) { d.spot = null; d.wantPee = false; free = true; }
         break;
       }
       case "pee": {
         d.speed = approach(d.speed, 0, 10 * dt); pose.pee = 1; wagT = 0.1;
-        if (d.timer <= 0) { n.blase = 100; this.emit("pee", {x: d.x, z: d.z, park: inPark(d)}); this.task("pee", {park: inPark(d)}); free = true; }
+        if (d.timer <= 0) { n.blase = 100; this.emit("pee", {x: d.x, z: d.z, park: inPark(d)}); this.task("pee", {park: inPark(d), outside: !inHouse(d)}); free = true; }
         break;
       }
       case "poop": {
@@ -778,7 +1033,7 @@
         if (d.timer <= 0) {
           var b = fwd(d.yaw), q = {id: "h" + (++this.uid), x: d.x - b.x * 0.34, z: d.z - b.z * 0.34, inHouse: inHouse(d)};
           this.poops.push(q); d.darm = Math.max(0, d.darm - 1); d.toPoop = 60 + R() * 80;
-          this.emit("poop", {x: q.x, z: q.z, park: inPark(d)}); this.task("poop", {park: inPark(d)}); free = true;
+          this.emit("poop", {x: q.x, z: q.z, park: inPark(d)}); this.task("poop", {park: inPark(d), outside: !inHouse(d)}); free = true;
         }
         break;
       }
@@ -816,7 +1071,7 @@
       case "come": {
         var fc = this.front(0.85); wagT = 1;
         var dc = this.goTo(fc.x, fc.z, 7, 0.15, dt);
-        if (dc < 0.45) { this.emit("came", {from: d.comeFrom}); this.task("came", {from: d.comeFrom}); this.setDog("sit", 5); d.stayAt = {x: p.x, z: p.z}; }
+        if (dc < 0.45) { this.emit("came", {from: d.comeFrom}); this.task("came", {from: d.comeFrom}); if (d.fromChase) { d.fromChase = false; this.task("recall"); } this.ok("komm"); this.setDog("sit", 5); d.stayAt = {x: p.x, z: p.z}; }
         if (d.timer <= 0) free = true;
         break;
       }
@@ -836,8 +1091,17 @@
           if (d.timer <= 0) { this.setDog("sit", 3); d.stayAt = {x: p.x, z: p.z}; }
           break;
         }
-        if (d.entered !== d.mode) { d.entered = d.mode; this.emit(d.mode === "sit" ? "sit" : "down"); this.task(d.mode === "sit" ? "sit" : "down"); }
+        if (d.entered !== d.mode) { d.entered = d.mode; if (d.quiet) d.quiet = false; else { this.emit(d.mode === "sit" ? "sit" : "down"); this.task(d.mode === "sit" ? "sit" : "down"); } }
         var moved = d.stayAt ? dist(d.stayAt, p) : 0;
+        if (d.stay) {
+          // Bleib: hält, solange der Mensch nicht zu weit weggeht oder zurückkommt.
+          if (dp >= 6) { d.stayT += dt; if (d.stayT >= 5 && !d.stayDone) { d.stayDone = true; this.ok("bleib"); this.emit("stayed"); this.task("stayed"); } }
+          if (d.stayDone && dp < 1.3) { d.stay = false; d.timer = 1.5; }
+          var brk = (1 - this.skills.bleib / 100) * 0.0025 * (this.distraction() ? 4 : 1);
+          if (!d.stayDone && R() < brk * dt * 60) { d.stay = false; this.emit("stayBroke"); this.setDog("follow", 2); break; }
+          if (d.timer <= 0 || moved > 40) { d.stay = false; free = true; }
+          break;
+        }
         if (d.timer <= 0 || moved > (d.leash ? 2.5 : 7) || d.taut > 0.3) { d.stayAt = null; free = true; }
         break;
       }
@@ -884,6 +1148,74 @@
         break;
       }
       case "shake": d.speed = 0; pose.shake = 1; if (d.timer <= 0) free = true; break;
+      case "confused": d.speed = approach(d.speed, 0, 8 * dt); pose.sit = 1; pose.beg = 1; wagT = 0.3; this.face(p.x, p.z, dt); if (d.timer <= 0) free = true; break;
+      case "heel": {
+        var hp = this.heel(), dhe = this.goTo(hp.x, hp.z, 5.8, 0.25, dt, Math.abs(p.speed) * 0.9);
+        if (d.speed < 0.2 && dhe < 1.2) this.face(d.x + Math.sin(p.yaw), d.z + Math.cos(p.yaw), dt);
+        if (p.moving && dhe < 1.3 && !d.leash) { var stepM = Math.abs(p.speed) * dt; d.heelM += stepM; this.task("heel", {m: stepM}); }
+        wagT = 0.7; if (d.timer <= 0) free = true; break;
+      }
+      case "spin": {
+        d.speed = 0; d.yaw += TAU * dt / 1.7; wagT = 1;
+        if (d.timer <= 0) { if (d.quiet) d.quiet = false; else { this.ok("dreh"); this.emit("trick", {cmd: "dreh"}); this.task("trick", {cmd: "dreh"}); } this.setDog("sit", 3); }
+        break;
+      }
+      case "roll": {
+        d.speed = 0; pose.down = 1; wagT = 0.8;
+        var rp = 1 - d.timer / 2.6; d.roll = rp < 0.25 ? 0 : rp > 0.85 ? 1 : (rp - 0.25) / 0.6;
+        if (d.timer <= 0) { d.roll = 0; if (d.quiet) d.quiet = false; else { this.ok("rolle"); this.emit("trick", {cmd: "rolle"}); this.task("trick", {cmd: "rolle"}); } this.setDog("down", 3); }
+        break;
+      }
+      case "course": {
+        var C = d.course; wagT = 1;
+        if (!C) { free = true; break; }
+        var wp2 = C.pts[C.i], dco = this.goTo(wp2.x, wp2.z, 6, 0.2, dt);
+        if (dco < 0.5) {
+          if (wp2.jump) d.hopT = 0.42;
+          if (wp2.miss) this.emit("miss", {what: wp2.miss});
+          C.i++;
+          if (C.i >= C.pts.length) { this.ok("parcours"); this.emit("course", {hits: C.ok, total: C.total}); this.task("course", {hits: C.ok, total: C.total}); d.course = null; this.setDog("sit", 4); }
+        }
+        if (d.timer <= 0) { d.course = null; free = true; }
+        break;
+      }
+      case "play": {
+        var pn = this.npcById(d.partner);
+        if (!pn || !pn.dog || pn.gone) { free = true; break; }
+        d.th += dt * 1.7; wagT = 1;
+        this.goTo(d.playC.x + Math.sin(d.th) * 1.9, d.playC.z + Math.cos(d.th) * 1.9, 5.5, 0.1, dt);
+        n.spass = Math.min(100, n.spass + 1.6 * dt); n.energie = Math.max(0, n.energie - 0.15 * dt);
+        if (d.timer <= 0) { this.stats.played++; this.emit("played", {name: pn.dog.name}); this.task("played", {id: pn.id, role: pn.role}); free = true; }
+        break;
+      }
+      case "chase": {
+        var jg = this.npcById(d.partner); wagT = 0.8;
+        if (!jg || jg.gone) { free = true; break; }
+        var dj = this.goTo(jg.x, jg.z, 7.2, 1.3, dt);
+        if (dj < 2) { d.barkT = (d.barkT || 0) - dt; if (d.barkT <= 0) { d.barkT = 1.2; this.emit("bark"); } }
+        if (d.timer <= 0) { this.me.sozial = Math.max(0, this.me.sozial - 8); this.emit("chaseEnd", {who: jg.name}); free = true; }
+        break;
+      }
+      case "keepaway": {
+        wagT = 1;
+        var caught = dp < 2.6 && p.goal && p.goal.tg && p.goal.tg.type === "dog";
+        if (!d.item) { free = true; break; }
+        if (caught) { d.speed = approach(d.speed, 0, 9 * dt); this.face(p.x, p.z, dt); pose.sniff = 0.4; }
+        else {
+          if (!d.target || dist(d, d.target) < 0.7 || dist(d.target, p) < 2.5) d.target = this.awayPoint();
+          this.goTo(d.target.x, d.target.z, dp < 3 ? 4.2 : 2.2, 0.3, dt);
+        }
+        if (d.timer <= 0 || !inHouse(d)) { d.target = null; this.dropItem(); free = true; }
+        break;
+      }
+      case "alarm": {
+        var vis = this.npcById(d.partner); wagT = 0.6;
+        if (!vis || vis.gone || vis.handled) { free = true; break; }
+        var tgt = inHouse(d) ? {x: W.door.x, z: W.door.z} : vis, da = this.goTo(tgt.x, tgt.z, 4.5, inHouse(d) ? 0.3 : 1.4, dt);
+        if (da < 1.6) { this.face(vis.x, vis.z, dt); d.barkT = (d.barkT || 0) - dt; if (d.barkT <= 0) { d.barkT = 1.4; d.barks = (d.barks || 0) + 1; this.emit("bark"); } }
+        if (d.timer <= 0) free = true;
+        break;
+      }
       default: free = true;
     }
     if (free) { d.think = 0; this.think(); }
@@ -891,7 +1223,7 @@
     if (n.blase <= 0) {
       n.blase = 100;
       if (inHouse(d)) { this.puddles.push({id: "p" + (++this.uid), x: d.x, z: d.z}); this.emit("accident"); }
-      else { this.emit("pee", {x: d.x, z: d.z, park: inPark(d)}); this.task("pee", {park: inPark(d)}); }
+      else { this.emit("pee", {x: d.x, z: d.z, park: inPark(d)}); this.task("pee", {park: inPark(d), outside: !inHouse(d)}); }
     }
     // Bewegung und Kollision. In der Wanne steht er fest.
     var f = fwd(d.yaw), ox = d.x, oz = d.z;
@@ -916,10 +1248,11 @@
     d.gait = pickGait(d.vel);
     d.phase = (d.phase + moved2 / GAITS[d.gait === "stand" ? "walk" : d.gait].stride) % 1;
     d.gaitBlend = approach(d.gaitBlend, d.vel > 0.08 ? 1 : 0, dt * 5);
+    if (d.mode === "spin") { d.gait = "walk"; d.gaitBlend = 1; d.phase = (d.phase + dt * 1.8) % 1; }
     // Matsch macht dreckig.
     d.mudCool -= dt;
     if (d.mudCool <= 0) W.mud.forEach(function (m) { if (Math.hypot(d.x - m.x, d.z - m.z) < m.r) { n.sauber = Math.max(0, n.sauber - 25); d.mudCool = 8; self.emit("dirty"); } });
-    for (var k in d.pose) d.pose[k] = approach(d.pose[k], pose[k], dt * (k === "paw" ? 5 : k === "shake" ? 8 : 3.5));
+    for (var k in d.pose) d.pose[k] = approach(d.pose[k], pose[k] || 0, dt * (k === "paw" ? 5 : k === "shake" ? 8 : 3.5));
     d.wag = approach(d.wag, wagT, dt * 1.5);
     d.wagPhase = (d.wagPhase + dt * (2 + d.wag * 9)) % TAU;
   };
@@ -940,9 +1273,10 @@
   };
   S.task = function (type, ev) {
     ev = ev || {};
+    if (this.school) this.schoolEvent(type, ev);
     switch (type) {
       case "leashOn": return this.bump("leine", 1);
-      case "pee": case "poop": if (ev.park) return this.bump("morgenrunde", 1) || this.bump("abendrunde", 1); return null;
+      case "pee": case "poop": { var r0 = ev.outside ? this.bump("mittagsrunde", 1) : null; if (ev.park) r0 = this.bump("morgenrunde", 1) || this.bump("abendrunde", 1) || r0; return r0; }
       case "fed": return this.bump("fruehstueck", 1) || this.bump("abendessen", 1);
       case "watered": return this.bump("wasser", 1);
       case "binned": return this.bump("haufen", 1);
@@ -955,9 +1289,36 @@
       case "bath": return this.bump("baden", 1);
       case "read": return this.bump("lesen", 1);
       case "greet": return this.bump("gruss", 1);
+      case "stayed": return this.bump("bleib", 1);
+      case "heel": return this.bump("fuss", ev.m || 0);
+      case "rewarded": return this.bump("lob", 1);
+      case "practice": return this.bump("trick", 1);
+      case "talk": return ev.park ? this.bump("plaudern", 1) : null;
+      case "played": { var r1 = this.bump("hundefreund", 1); if (ev.role === "wiese" || inPark(this.d)) r1 = this.bump("hundewiese", 1) || r1; if (ev.role === "besuch") r1 = this.bump("besuchspiel", 1) || r1; return r1; }
+      case "brushed": return this.bump("buersten", 1);
+      case "trick": return this.bump(ev.cmd, 1);
+      case "parcel": return this.bump("post", 1);
+      case "calm": return this.bump("ruhig", 1);
+      case "sock": return this.bump("socke", 1);
+      case "dried": return this.bump("trocken", 1);
+      case "tisch": return this.bump("tisch", 1);
+      case "kid": return this.bump("kind", 1);
+      case "recall": return this.bump("jogger", 1);
+      case "chat": return this.bump("besuch", 1);
+      case "school": return this.bump("hundeschule", 1);
+      case "ordered": return ev.what === "futter" ? this.bump("vorrat", 1) : null;
     }
     return null;
   };
+  // Aufgabe, die durch ein Ereignis entsteht. dur in Spielminuten.
+  S.addTask = function (id, text, dur, need) {
+    var tm = this.t % 1440;
+    if (this.tasks.some(function (t) { return t.id === id && !t.done && !t.failed; })) return null;
+    var t = {id: id, text: text, need: need || 1, unit: "", from: Math.floor(tm), until: Math.min(1439, Math.floor(tm + dur)), have: 0, done: false, failed: false, ev: true};
+    this.tasks.push(t); this.emit("newTask", {task: t, text: this.text(text)});
+    return t;
+  };
+  S.hasTask = function (id) { return this.tasks.some(function (t) { return t.id === id && !t.done && !t.failed; }); };
   S.kombi = function (step) {
     var t = this.tasks.filter(function (x) { return x.id === "kombi" && !x.done; })[0];
     if (!t) return null;
@@ -975,6 +1336,318 @@
     this.tasks.forEach(function (t) { if (!t.done && !t.failed && t.until != null && tm >= t.until && self.t < 1440) { t.failed = true; self.emit("taskFailed", {task: t, text: self.text(t.text)}); } });
   };
 
+  /* ---------- Leute und fremde Hunde ---------- */
+  S.npcById = function (id) { for (var i = 0; i < this.npcs.length; i++) if (this.npcs[i].id === id && !this.npcs[i].gone) return this.npcs[i]; return null; };
+  S.spawnNpc = function (role, o) {
+    var R = this.R, g = R() < 0.5 ? "w" : "m";
+    var n = {id: "n" + (++this.uid), role: role, gender: g, look: Math.floor(R() * 6), name: NAMES[g][Math.floor(R() * NAMES[g].length)], x: 0, z: 0, yaw: 0, speed: 0, phase: 0, pose: "stand",
+      sp: 1.1 + R() * 0.25, route: null, ri: 0, dir: 1, loop: false, targets: null, walk: 0, maxWalk: 0, pause: 0, gone: false, leaveAt: null, leaving: false, dog: null};
+    for (var k in o || {}) n[k] = o[k];
+    if (o && o.withDog) this.giveDog(n, o.dogMode);
+    this.npcs.push(n);
+    return n;
+  };
+  S.giveDog = function (n, mode) {
+    var R = this.R, f = fwd(n.yaw);
+    n.dog = {x: n.x - f.x * 0.8 + 0.4, z: n.z - f.z * 0.8, yaw: n.yaw, speed: 0, vel: 0, phase: 0, gait: "stand", gaitBlend: 0, pose: newPose(), wag: 0.4, wagPhase: 0,
+      breed: BREED_IDS[Math.floor(R() * BREED_IDS.length)], lookIdx: Math.floor(R() * 2), name: DOG_NAMES[Math.floor(R() * DOG_NAMES.length)], mode: mode || "heel", timer: 0, leash: mode !== "roam"};
+  };
+  // Spaziergänger, Jogger und Kinder kommen und gehen, je nach Uhrzeit und Wetter.
+  S.ambient = function () {
+    var h = this.hour(), rain = !!this.weather, p = this.p, R = this.R, W = this.W;
+    var want = h < 6 || h >= 22 ? 0 : h < 9 ? 4 : h < 16 ? 3 : h < 20 ? 6 : 2;
+    if (rain) want = 1;
+    var cur = this.npcs.filter(function (n) { return n.ambient && !n.gone; });
+    if (cur.length >= want) return null;
+    var r = R(), role = rain ? "jogger" : r < 0.55 ? "walker" : r < 0.65 ? "walker0" : r < 0.85 ? "jogger" : (h >= 8 && h < 19 && !cur.some(function (n) { return n.role === "kind"; }) ? "kind" : "walker");
+    if (role === "kind") {
+      var benches = W.benches.filter(function (b) { return dist(b, p) > 30; });
+      if (!benches.length) return null;
+      var b = benches[Math.floor(R() * benches.length)];
+      return this.spawnNpc("kind", {ambient: true, name: KIDS[Math.floor(R() * KIDS.length)], x: b.x + 1.2, z: b.z, sp: 1.2, leaveAt: this.t + 70, kid: true});
+    }
+    var path = R() < 0.7 ? W.loop : W.paths[2].pts, idx = 0;
+    for (var i = 0; i < 25; i++) { idx = Math.floor(R() * path.length); if (dist(path[idx], p) > 35) break; }
+    if (dist(path[idx], p) <= 35 && inPark(p)) return null;
+    var dir = R() < 0.5 ? 1 : -1, q = path[idx], q2 = path[clamp(idx + dir, 0, path.length - 1)];
+    return this.spawnNpc(role === "walker0" ? "walker" : role, {ambient: true, x: q.x, z: q.z, yaw: yawTo(q, q2), route: path, ri: clamp(idx + dir, 0, path.length - 1), dir: dir, loop: path === W.loop,
+      sp: role === "jogger" ? 2.9 + R() * 0.5 : 1.05 + R() * 0.3, maxWalk: role === "jogger" ? 200 + R() * 150 : 90 + R() * 160, withDog: role === "walker" && R() < 0.9});
+  };
+  S.stepNpcs = function (dt) {
+    var self = this, p = this.p;
+    this.npcs.forEach(function (n) { if (!n.gone) self.stepNpc(n, dt); });
+    this.npcs = this.npcs.filter(function (n) { return !n.gone; });
+    void p;
+  };
+  S.stepNpc = function (n, dt) {
+    var p = this.p, ox = n.x, oz = n.z, R = this.R;
+    var engaged = (p.goal && p.goal.tg && p.goal.tg.id === n.id && dist(p, n) < 8) || (p.act && p.act.tg && p.act.tg.id === n.id);
+    if (engaged) n.pause = Math.max(n.pause, 1.5);
+    if (n.leaveAt != null && this.t >= n.leaveAt && !n.leaving) this.leave(n);
+    if (n.kid && !n.asked && !n.leaving && dist(n, p) < 14 && inPark(p) && !this.sleeping) {
+      n.asked = true; var a = yawTo(p, n); n.targets = [{x: p.x + Math.sin(a) * 2.2, z: p.z + Math.cos(a) * 2.2}];
+      this.emit("kid", {who: n.name}); this.addTask("kind", n.name + " möchte " + this.name + " streicheln: Sitz machen lassen und erlauben", 25); n.leaveAt = this.t + 30;
+    }
+    if (n.pause > 0) {
+      n.pause -= dt; n.speed = approach(n.speed, 0, 6 * dt);
+      if (engaged || dist(n, p) < 3.5) faceTo(n, p.x, p.z, dt);
+    } else if (n.targets && n.targets.length) {
+      var t = n.targets[0], dd = moveTo(n, t.x, t.z, n.sp, 0.2, dt);
+      if (dd < 0.5) { n.targets.shift(); if (!n.targets.length) { n.targets = null; if (n.leaving) n.gone = true; else n.arrived = true; } }
+    } else if (n.route) {
+      var wp = n.route[n.ri];
+      if (moveTo(n, wp.x, wp.z, n.sp, 0, dt) < 1.4) {
+        n.ri += n.dir;
+        if (n.loop) n.ri = (n.ri + n.route.length) % n.route.length;
+        else if (n.ri < 0 || n.ri >= n.route.length) { n.dir *= -1; n.ri = clamp(n.ri + 2 * n.dir, 0, n.route.length - 1); }
+      }
+    } else if (n.wander) {
+      n.wT = (n.wT || 0) - dt;
+      if (!n.wTo || n.wT <= 0) { var a2 = R() * TAU, r2 = R() * n.wander.r; n.wTo = {x: n.wander.x + Math.sin(a2) * r2, z: n.wander.z + Math.cos(a2) * r2}; n.wT = 6 + R() * 10; }
+      if (moveTo(n, n.wTo.x, n.wTo.z, 0.9, 0.3, dt) < 0.5) n.speed = approach(n.speed, 0, 6 * dt);
+    } else {
+      n.speed = approach(n.speed, 0, 6 * dt);
+      if (dist(n, p) < 6 && n.role !== "teil") faceTo(n, p.x, p.z, dt);
+      else if (n.faceTo) faceTo(n, n.faceTo.x, n.faceTo.z, dt);
+    }
+    if (!n.noCollide) collide(n, 0.3, this.W);
+    var moved = Math.hypot(n.x - ox, n.z - oz); if (moved > 1.5) moved = 0;
+    n.walk += moved; n.phase = (n.phase + moved / (n.role === "jogger" ? 2.2 : n.kid ? 1.1 : 1.5)) % 1; n.moving = moved > 0.05 * dt;
+    if (n.ambient && n.maxWalk && n.walk > n.maxWalk && dist(n, p) > 32) n.gone = true;
+    if (n.leaving && !n.targets && dist(n, p) > 32) n.gone = true;
+    if (n.dog) this.stepNpcDog(n, dt);
+  };
+  S.leave = function (n) {
+    var p = this.p, W = this.W;
+    n.leaving = true; n.pause = 0; n.wander = null;
+    if (n.exit) { n.targets = n.exit.slice(); return; }
+    // Weg vom Menschen zum nächsten Rundweg und dort weiter, bis er außer Sicht ist.
+    var path = W.loop, best = 0, bd = 1e9;
+    path.forEach(function (q, i) { var dd = dist(q, n); if (dd < bd) { bd = dd; best = i; } });
+    n.route = path; n.loop = true; n.ri = best; n.dir = dist(path[(best + 5) % path.length], p) > dist(path[(best - 5 + path.length) % path.length], p) ? 1 : -1;
+    n.targets = null; n.ambient = true; n.maxWalk = 1; n.walk = 2;
+  };
+  S.stepNpcDog = function (n, dt) {
+    var nd = n.dog, d = this.d, ox = nd.x, oz = nd.z, pose = {}, wagT = 0.4, R = this.R;
+    nd.timer -= dt;
+    switch (nd.mode) {
+      case "greet": moveTo(nd, d.x, d.z, 2.5, 0.8, dt); pose.sniff = 1; wagT = 0.9; if (nd.timer <= 0) nd.mode = n.dogMode || "heel"; break;
+      case "play": nd.th += dt * 1.7; moveTo(nd, nd.c.x - Math.sin(nd.th) * 1.9, nd.c.z - Math.cos(nd.th) * 1.9, 5.5, 0.1, dt); wagT = 1; if (nd.timer <= 0) nd.mode = n.dogMode || "heel"; break;
+      case "roam":
+        if (!nd.to || nd.timer <= 0) { var a = R() * TAU, r = 1.5 + R() * 5; nd.to = {x: n.x + Math.sin(a) * r, z: n.z + Math.cos(a) * r}; nd.timer = 2 + R() * 4; }
+        if (moveTo(nd, nd.to.x, nd.to.z, 3.6, 0.3, dt) < 0.4) { nd.speed = approach(nd.speed, 0, 6 * dt); pose.sniff = 1; }
+        wagT = 0.7; break;
+      case "sit": moveTo(nd, n.x + Math.sin(n.yaw - 1.4) * 0.8, n.z + Math.cos(n.yaw - 1.4) * 0.8, 1.5, 0.2, dt); if (nd.speed < 0.2) { pose.sit = 1; faceTo(nd, n.x + Math.sin(n.yaw) * 5, n.z + Math.cos(n.yaw) * 5, dt); } break;
+      default: {
+        var f = fwd(n.yaw), rt = right(n.yaw), hx = n.x - rt.x * 0.7 + f.x * 0.25, hz = n.z - rt.z * 0.7 + f.z * 0.25;
+        nd.sn = (nd.sn || 0) - dt;
+        if (n.speed < 0.15 && nd.sn <= 0 && R() < 0.01) nd.sn = 2.5;
+        if (nd.sn > 0 && n.speed < 0.2) { nd.speed = approach(nd.speed, 0, 6 * dt); pose.sniff = 1; }
+        else moveTo(nd, hx, hz, Math.max(1.2, n.speed * 1.4 + 0.6), 0.2, dt);
+        if (n.speed < 0.1 && nd.speed < 0.15 && nd.sn <= 0) pose.sit = n.role === "teil" ? 1 : 0;
+        wagT = 0.45;
+      }
+    }
+    nd.leash = nd.mode !== "play" && nd.mode !== "roam";
+    if (nd.leash) { var lx = nd.x - n.x, lz = nd.z - n.z, ll = Math.hypot(lx, lz); if (ll > 2.3) { nd.x = n.x + lx / ll * 2.3; nd.z = n.z + lz / ll * 2.3; } }
+    collide(nd, 0.22, this.W);
+    animDog(nd, ox, oz, dt, pose, wagT);
+  };
+  S.startPlay = function (n) {
+    var d = this.d, nd = n.dog;
+    if (!nd) return;
+    var c = {x: (d.x + nd.x) / 2, z: (d.z + nd.z) / 2}, cc = {x: c.x, z: c.z}; collide(cc, 2.0, this.W);
+    d.playC = cc; d.th = yawTo(cc, d); d.partner = n.id; this.setDog("play", 9);
+    nd.mode = "play"; nd.c = cc; nd.th = d.th; nd.timer = 9; n.pause = Math.max(n.pause, 11);
+    this.emit("playStart", {name: nd.name});
+  };
+  S.talk = function (id, kind) {
+    var n = this.npcById(id); if (!n) return;
+    var line = CHAT[Math.floor(this.R() * CHAT.length)].replace(/\{dog\}/g, n.dog ? n.dog.name : "Unser Hund");
+    if (this.weather) line = "So ein Schietwetter heute!";
+    if (kind === "winken") { this.me.sozial = Math.min(100, this.me.sozial + 2); this.emit("talk", {who: n.name, line: "winkt zurück."}); return; }
+    this.me.sozial = Math.min(100, this.me.sozial + (kind === "plaudern" ? 6 : 8));
+    if (kind === "plaudern") { this.me.spass = Math.min(100, this.me.spass + 3); this.stats.talks++; }
+    if (n.role === "besuch") { line = ["Na, wie geht's? " + (n.dog ? n.dog.name + " wollte unbedingt vorbeischauen." : ""), "Schön, Sie zu sehen!"][kind === "plaudern" ? 0 : 1]; }
+    this.emit("talk", {who: n.name, line: this.text(line)});
+    if (kind === "plaudern" || n.role === "besuch") { this.task("talk", {park: inPark(this.p)}); if (n.role === "besuch") this.task("chat"); }
+    n.talked = true; n.pause = Math.max(n.pause, 3);
+  };
+  S.allowKid = function (id) {
+    var n = this.npcById(id), d = this.d; if (!n) return;
+    if (dist(d, n) > 3.2 || (d.mode !== "sit" && d.mode !== "down")) { this.say("Lass " + this.name + " erst nah bei " + n.name + " Sitz oder Platz machen."); return; }
+    this.need.liebe = Math.min(100, this.need.liebe + 8); this.me.sozial = Math.min(100, this.me.sozial + 6);
+    this.emit("kidPet", {who: n.name}); this.task("kid"); n.leaveAt = this.t + 3;
+  };
+  S.awayPoint = function () {
+    var p = this.p, R = this.R;
+    var pts = [{x: -5, z: -126}, {x: -7.5, z: -123}, {x: 1.5, z: -122.5}, {x: 7, z: -127.5}, {x: -3.8, z: -132}, {x: -7.6, z: -131}, {x: 4.5, z: -132.5}, {x: 2, z: -127}];
+    pts.sort(function (a, b) { return dist(b, p) - dist(a, p); });
+    return pts[Math.floor(R() * 3)];
+  };
+
+  /* ---------- Ereignisse: Post, Besuch, Socke, Regen, Hundeschule, Hundewiese ---------- */
+  S.placeOrder = function (what) {
+    var price = PRICES[what], tm = this.t % 1440, R = this.R;
+    if (this.money < price) { this.say("Dafür reicht dein Geld nicht."); return; }
+    this.money -= price;
+    var at = tm + 120 + R() * 120, day = this.day;
+    if (at > 1140) { day++; at = 600 + R() * 120; }
+    this.orders.push({what: what, day: day, at: Math.round(at)});
+    this.emit("ordered", {what: what, when: day === this.day ? "heute ab " + fmtTime(at) : "morgen Vormittag"}); this.task("ordered", {what: what});
+  };
+  S.trigger = function (type) {
+    var p = this.p, d = this.d, R = this.R, W = this.W, tm = this.t % 1440, self = this;
+    if (this.sleeping) return false;
+    switch (type) {
+      case "post": {
+        if (this.npcs.some(function (n) { return n.role === "post" && !n.gone; })) return false;
+        var due = this.orders.filter(function (o) { return !o.sent && (o.day < self.day || (o.day === self.day && tm >= o.at)); });
+        due.forEach(function (o) { o.sent = true; });
+        var n = this.spawnNpc("post", {name: "Der Postbote", gender: "m", look: 9, x: 0.6, z: -106, sp: 1.6, parcel: due.length ? due : null,
+          targets: [{x: 0.3, z: -109.2}, {x: -0.2, z: -115}, {x: -0.3, z: -119.5}], exit: [{x: -0.2, z: -115}, {x: 0.3, z: -109.2}, {x: 0.6, z: -104}], leaveAt: this.t + 30, noCollide: true});
+        n.onArrive = "bell";
+        this.addTask("post", due.length ? "Es klingelt: Nimm das Paket an der Haustür an" : "Es klingelt: Nimm die Post an der Haustür an", 30);
+        this.addTask("ruhig", "Bonus: " + this.name + " bleibt bei der Übergabe ruhig (Sitz oder Platz)", 30);
+        return true;
+      }
+      case "besuch": {
+        if (this.npcs.some(function (n) { return n.role === "besuch" && !n.gone; })) return false;
+        var nb = this.spawnNpc("besuch", {name: R() < 0.5 ? "Nachbarin Frau Möller" : "Nachbar Herr Brandt", x: 0.8, z: -104, sp: 1.2, withDog: true,
+          targets: [{x: 0.4, z: -109.2}, {x: 1.2, z: -112}], exit: [{x: 0.4, z: -109.2}, {x: 0.8, z: -103}], leaveAt: this.t + 45, noCollide: true});
+        nb.gender = /Frau/.test(nb.name) ? "w" : "m";
+        nb.onArrive = "visit";
+        this.addTask("besuch", nb.name + " steht mit " + nb.dog.name + " im Garten: Hallo sagen oder plaudern", 45);
+        this.addTask("besuchspiel", "Lass " + this.name + " mit " + nb.dog.name + " im Garten spielen", 45);
+        this.emit("visitor", {who: nb.name, dog: nb.dog.name});
+        return true;
+      }
+      case "socke": {
+        if (!inHouse(d) || !inHouse(p) || d.leash || d.item || ["sleep", "eat", "drink", "bath", "toBath"].indexOf(d.mode) >= 0) return false;
+        var it = {id: "socke" + (++this.uid), kind: "socke", x: d.x, y: 0.03, z: d.z, state: "dog", yaw: 0};
+        this.items.push(it); d.item = it.id; this.setDog("keepaway", 80); d.target = null;
+        this.addTask("socke", this.name + " hat eine Socke geklaut: Aus! oder gegen ein Leckerli tauschen", 30);
+        this.emit("sock");
+        return true;
+      }
+      case "regen": {
+        if (this.weather) return false;
+        this.weather = {type: "regen", until: this.t + 50 + R() * 50};
+        this.emit("rain");
+        return true;
+      }
+      case "schule": {
+        var T = W.trainerSpot;
+        var tr = this.spawnNpc("trainer", {name: "Trainerin Svenja", gender: "w", look: 7, x: T.x, z: T.z, yaw: Math.PI, leaveAt: this.t + 165, withDog: true, dogMode: "sit", faceTo: {x: W.field.cx, z: W.field.cz}});
+        tr.dog.breed = "collie"; tr.dog.name = "Juna";
+        [[-38, -91.6], [-34, -91.8], [-27.5, -91.6]].forEach(function (q) { self.spawnNpc("teil", {x: q[0], z: q[1], yaw: 0, leaveAt: self.t + 165, withDog: true, dogMode: "sit", faceTo: {x: q[0], z: -86}}); });
+        this.emit("schoolSoon");
+        return true;
+      }
+      case "wiese": {
+        var pd = W.pond;
+        for (var i = 0; i < 4; i++) { var a = i / 4 * TAU + R(); this.spawnNpc("wiese", {x: pd.x + Math.sin(a) * (pd.r + 6), z: pd.z + Math.cos(a) * (pd.r + 6), wander: {x: pd.x + Math.sin(a) * (pd.r + 6), z: pd.z + Math.cos(a) * (pd.r + 6), r: 5}, leaveAt: this.t + 180, withDog: true, dogMode: "roam"}); }
+        this.emit("wiese");
+        return true;
+      }
+    }
+    return false;
+  };
+  S.acceptPost = function (id) {
+    var n = this.npcById(id), d = this.d, self = this; if (!n || n.handled) return;
+    n.handled = true; n.leaveAt = this.t + 2;
+    this.me.sozial = Math.min(100, this.me.sozial + 5);
+    var got = [];
+    (n.parcel || []).forEach(function (o) { if (o.what === "futter") { self.vorrat.futter += 10; got.push("10 Portionen Futter"); } else { self.vorrat.leckerli += 30; got.push("30 Leckerli"); } self.orders = self.orders.filter(function (x) { return x !== o; }); });
+    this.emit("parcel", {got: got.join(" und ")}); this.task("parcel");
+    if (d.mode === "sit" || d.mode === "down") this.task("calm");
+  };
+  S.npcArrive = function (n) {
+    var d = this.d;
+    if (n.onArrive === "bell") { this.emit("doorbell"); }
+    if (n.onArrive === "visit") { n.pause = 0; }
+    if (!d.leash && ["sleep", "bath", "toBath", "eat", "drink"].indexOf(d.mode) < 0 && !d.stay && d.mode !== "sit" && d.mode !== "down" && (inHouse(d) || dist(d, n) < 12)) { d.partner = n.id; d.barks = 0; this.setDog("alarm", 14); }
+  };
+  // Pro Bild: Tagesplan, Lieferungen, Wetter, Leute, Hundeschule.
+  S.stepWorld = function (dt, gm) {
+    var tm = this.t % 1440, self = this, d = this.d, n = this.need;
+    if (!this.sleeping && this.t < 1440) {
+      this.plan.forEach(function (e) { if (!e.done && tm >= e.at) { if (self.trigger(e.type)) e.done = true; else { e.at += 15; if (e.at > 1290) e.done = true; } } });
+      if (this.orders.some(function (o) { return !o.sent && (o.day < self.day || (o.day === self.day && tm >= o.at)); }) && tm >= 540 && tm < 1200) this.trigger("post");
+      this.npcT -= gm; if (this.npcT <= 0) { this.npcT = 4; this.ambient(); }
+    }
+    if (this.weather && this.t >= this.weather.until) { this.weather = null; this.emit("rainEnd"); }
+    if (this.weather && !inHouse(d)) { d.wet = 1; d.wetIn = 0; n.sauber = Math.max(0, n.sauber - 0.12 * gm); }
+    if (d.wet && inHouse(d)) {
+      d.wetIn = (d.wetIn || 0) + gm;
+      if (!this.hasTask("trocken") && !this.tasks.some(function (t) { return t.id === "trocken" && t.until > tm; })) this.addTask("trocken", this.name + " ist nass vom Regen: abtrocknen (Hund antippen)", 30);
+      if (d.wetIn > 12 && !d.shookWet && ["sleep", "bath"].indexOf(d.mode) < 0) { d.shookWet = true; this.setDog("shake", 1.4); this.puddles.push({id: "p" + (++this.uid), x: d.x, z: d.z, water: true}); this.emit("wetShake"); }
+    }
+    if (!d.wet) d.shookWet = false;
+    this.npcs.forEach(function (q) { if (q.arrived && !q.arrivedDone) { q.arrivedDone = true; self.npcArrive(q); } });
+    // Post geht wieder: nicht angenommene Lieferung kommt morgen noch einmal.
+    this.npcs.forEach(function (q) { if (q.role === "post" && q.leaving && !q.handled && !q.reported) { q.reported = true; (q.parcel || []).forEach(function (o) { o.sent = false; o.day = self.day + 1; o.at = 630; }); if (q.parcel) self.emit("missedParcel"); } });
+    this.stepNpcs(dt);
+    if (this.school) this.schoolTick(dt);
+    if (n.blase < 0) n.blase = 0;
+  };
+
+  /* ---------- Hundeschule ---------- */
+  S.startSchool = function (trainerId) {
+    var tm = this.t % 1440, sk = this.skills;
+    if (this.school || this.schoolDay === this.day || tm < 585 || tm >= 720) return false;
+    if (this.money < PRICES.schule) { this.say("Dafür reicht dein Geld nicht."); return false; }
+    this.money -= PRICES.schule;
+    var trick = ["dreh", "rolle", "aus"].sort(function (a, b) { return sk[a] - sk[b]; })[0];
+    this.school = {step: -1, have: 0, pts: 0, trick: trick, good: 0, all: 0, trainer: trainerId, startT: this.t};
+    this.task("school", {start: true});
+    this.emit("schoolStart");
+    this.schoolNext(0);
+    return true;
+  };
+  S.schoolStep = function () { return this.school ? SCHOOL_STEPS[this.school.step] : null; };
+  S.schoolText = function () {
+    var st = this.schoolStep(), s = this.school; if (!st) return "";
+    var tr = TRICKS.filter(function (x) { return x.id === s.trick; })[0];
+    return this.text(st.text.replace("{trick}", tr ? tr.name : ""));
+  };
+  S.schoolNext = function (pts) {
+    var s = this.school; if (!s) return;
+    s.pts += pts || 0; s.step++; s.have = 0; s.good = 0; s.all = 0;
+    if (s.step >= SCHOOL_STEPS.length) { this.finishSchool(); return; }
+    var st = SCHOOL_STEPS[s.step];
+    if (st.id === "neu" && this.skills[s.trick] < 12) this.skills[s.trick] = 12;
+    this.emit("schoolStep", {n: s.step + 1, of: SCHOOL_STEPS.length, text: this.schoolText()});
+  };
+  S.schoolSkip = function () { if (this.school) this.schoolNext(0); };
+  S.schoolEvent = function (type, ev) {
+    var s = this.school, st = this.schoolStep(); if (!st) return;
+    if (st.id === "bleib" && type === "stayed") this.schoolNext(20);
+    else if (st.id === "komm" && type === "came" && ev.from >= 8) this.schoolNext(20);
+    else if (st.id === "neu" && type === "rewarded" && ev.cmd === s.trick) { s.have++; this.emit("schoolProgress"); if (s.have >= st.need) this.schoolNext(20); }
+    else if (st.id === "parcours" && type === "course") this.schoolNext(Math.round(20 * ev.hits / ev.total));
+  };
+  S.schoolTick = function (dt) {
+    var s = this.school, st = this.schoolStep(), p = this.p, d = this.d, W = this.W, tm = this.t % 1440;
+    if (!st) return;
+    if (st.id === "fuss" && d.leash && inField(W, p) && p.moving) {
+      var m = Math.abs(p.speed) * dt; s.all += m; if (d.taut < 0.3) { s.good += m; s.have = s.good; }
+      if (s.good >= st.need) this.schoolNext(Math.round(20 * s.good / Math.max(s.all, 1e-3)));
+    }
+    if (dist(p, {x: W.field.cx, z: W.field.cz}) > 45) { this.emit("schoolAbort"); this.school = null; return; }
+    if (tm >= 750) this.finishSchool();
+  };
+  S.finishSchool = function () {
+    var s = this.school; if (!s) return;
+    var sk = this.skills, before = badgeFor(this.schoolN);
+    this.school = null; this.schoolDay = this.day; this.schoolN++;
+    sk.fuss = Math.min(100, sk.fuss + 6); sk.bleib = Math.min(100, sk.bleib + 6); sk.komm = Math.min(100, sk.komm + 4); sk.parcours = Math.min(100, sk.parcours + 5);
+    this.need.spass = Math.min(100, this.need.spass + 15); this.me.sozial = Math.min(100, this.me.sozial + 20);
+    var badge = badgeFor(this.schoolN), stars = clamp(Math.round(s.pts / 20), 1, 5);
+    this.emit("schoolDone", {pts: s.pts, stars: stars, badge: badge !== before ? badge : null, n: this.schoolN});
+    this.task("school");
+  };
+
   /* ---------- Uhr, Schlafen, neuer Tag ---------- */
   S.wake = function () {
     var done = this.tasks.filter(function (t) { return t.done; }).length, total = this.tasks.length;
@@ -984,7 +1657,10 @@
     this.history.push(rec); if (this.history.length > 60) this.history.shift();
     this.stats.days++;
     this.day++; this.t = 7 * 60; this.sleeping = false; this.moodSum = 0; this.moodN = 0;
-    this.tasks = makeTasks(this.day, this.seed, {multi: this.multi});
+    var futterBestellt = this.orders.some(function (o) { return o.what === "futter"; });
+    this.tasks = makeTasks(this.day, this.seed, {multi: this.multi, skills: this.skills, lowFood: this.vorrat.futter <= 3 && !futterBestellt});
+    this.plan = makePlan(this.day, this.seed); this.weather = null; this.school = null; this.d.wet = 0;
+    this.npcs = this.npcs.filter(function (q) { return q.ambient && !q.kid; });
     this.p.pose = "stand";
     var bed = this.obj("bett"); this.p.x = bed.use.x; this.p.z = bed.use.z;
     if (this.d.mode === "sleep") this.d.timer = 2;
@@ -995,6 +1671,8 @@
     dt = Math.min(dt, 0.1);
     var mult = this.sleeping ? 90 : this.speed;
     if (!mult) return 0;
+    if (this.school && !this.sleeping) mult = Math.min(mult, 1) * 0.35; // Training in Ruhe, die Uhr läuft langsamer
+    this.rt += dt;
     var gm = dt * mult, n = this.need, me = this.me, d = this.d, self = this;
     var mdt = this.sleeping ? Math.min(dt * 6, 0.1) : dt; // im Schlaf schneller, damit der Hund ins Körbchen findet
     this.t += gm;
@@ -1011,6 +1689,7 @@
     this.stepPlayer(inp || {}, mdt);
     this.tickAct(gm);
     this.stepItems(mdt);
+    this.stepWorld(mdt, gm);
     this.stepDog(mdt, gm);
     this.taskTick(dt);
     if (!this.sleeping) { this.moodSum += mood(n) * gm; this.moodN += gm; }
@@ -1029,6 +1708,8 @@
   S.save = function () {
     var p = this.p, d = this.d;
     return {v: 1, day: this.day, t: Math.round(this.t * 10) / 10, name: this.name, need: this.need, me: this.me, bowl: this.bowl, tasks: this.tasks,
+      money: Math.round(this.money * 100) / 100, vorrat: this.vorrat, skills: this.skills, schoolN: this.schoolN, schoolDay: this.schoolDay, plan: this.plan,
+      orders: this.orders.map(function (o) { return {what: o.what, day: o.day, at: o.at}; }),
       poops: this.poops, puddles: this.puddles, uid: this.uid, history: this.history, stats: this.stats, moodSum: this.moodSum, moodN: this.moodN,
       p: {x: p.x, z: p.z, yaw: p.yaw, bags: p.bags, holding: p.holding}, d: {x: d.x, z: d.z, yaw: d.yaw, leash: d.leash, darm: d.darm, toPoop: d.toPoop},
       items: this.items.filter(function (it) { return it.state === "ground" || it.state === "player"; }).map(function (it) { return {id: it.id, x: it.x, z: it.z, state: it.state}; }), at: Date.now()};
@@ -1036,8 +1717,11 @@
   S.load = function (s) {
     if (!s || s.v !== 1) return;
     var self = this;
-    ["day", "t", "name", "uid", "history", "stats", "moodSum", "moodN"].forEach(function (k) { if (s[k] != null) self[k] = s[k]; });
-    ["need", "me", "bowl"].forEach(function (k) { if (s[k]) Object.assign(self[k], s[k]); });
+    ["day", "t", "name", "uid", "moodSum", "moodN", "money", "schoolN", "schoolDay"].forEach(function (k) { if (s[k] != null) self[k] = s[k]; });
+    ["need", "me", "bowl", "vorrat", "skills", "stats"].forEach(function (k) { if (s[k]) Object.assign(self[k], s[k]); });
+    if (Array.isArray(s.history)) this.history = s.history;
+    this.plan = Array.isArray(s.plan) ? s.plan : makePlan(this.day, this.seed);
+    if (Array.isArray(s.orders)) this.orders = s.orders;
     if (Array.isArray(s.tasks) && s.tasks.length) this.tasks = s.tasks;
     if (Array.isArray(s.poops)) this.poops = s.poops;
     if (Array.isArray(s.puddles)) this.puddles = s.puddles;
@@ -1053,6 +1737,7 @@
     HOUSE: HOUSE, LOT: LOT, ROOMS: ROOMS, inHouse: inHouse, inPark: inPark, roomOf: roomOf,
     buildWorld: buildWorld, pathDist: pathDist, collide: collide, NAV: NAV, buildNav: buildNav, findPath: findPath, los: los, blocked: blocked,
     GAITS: GAITS, pickGait: pickGait, legPose: legPose,
-    DOG_NEEDS: DOG_NEEDS, ME_NEEDS: ME_NEEDS, mood: mood, TASKS: TASKS, makeTasks: makeTasks, ACTS: ACTS, Sim: Sim
+    DOG_NEEDS: DOG_NEEDS, ME_NEEDS: ME_NEEDS, mood: mood, TASKS: TASKS, makeTasks: makeTasks, makePlan: makePlan, ACTS: ACTS, Sim: Sim,
+    TRICKS: TRICKS, SKILL0: SKILL0, BADGES: BADGES, badgeFor: badgeFor, PRICES: PRICES, SCHOOL_STEPS: SCHOOL_STEPS, inField: inField, weekday: weekday
   };
 });

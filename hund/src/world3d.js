@@ -130,6 +130,34 @@ function buildWorld3D(scene, W) {
   W.flowers.forEach(function (f, k) { p3.set(f.x, 0, f.z); q.identity(); s3.set(1, 1, 1); fl.setMatrixAt(k, mm.compose(p3, q, s3)); fl.setColorAt(k, fcols[f.c]); });
   scene.add(fl);
 
+  /* Übungsplatz der Hundeschule: hellere Wiese, weiße Linien, Hürden, Slalom, Kegel, Schild */
+  var F = W.field, C = W.course;
+  if (F) {
+    var fw = F.x1 - F.x0, fd = F.z1 - F.z0, fcx = (F.x0 + F.x1) / 2, fcz = (F.z0 + F.z1) / 2;
+    var lawn = new THREE.Mesh(new THREE.PlaneGeometry(fw, fd), std(0x6fa04a, 1, {polygonOffset: true, polygonOffsetFactor: -1}));
+    lawn.rotation.x = -Math.PI / 2; lawn.position.set(fcx, 0.012, fcz); lawn.receiveShadow = true; scene.add(lawn);
+    var lineMat = std(0xf4f4ee, 0.9);
+    box(fw, 0.01, 0.1, lineMat, fcx, 0.02, F.z0, null, {noShadow: true}); box(fw, 0.01, 0.1, lineMat, fcx, 0.02, F.z1, null, {noShadow: true});
+    box(0.1, 0.01, fd, lineMat, F.x0, 0.02, fcz, null, {noShadow: true}); box(0.1, 0.01, fd, lineMat, F.x1, 0.02, fcz, null, {noShadow: true});
+    var red = std(0xd23b2f, 0.6), wht = std(0xf6f6f2, 0.6);
+    C.hurdles.forEach(function (h) {
+      [-0.65, 0.65].forEach(function (oz) { var post = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.7, 8), wht); post.position.set(h.x, 0.35, h.z + oz); post.castShadow = true; scene.add(post); });
+      var bar = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.022, 1.3, 8), red); bar.rotation.x = Math.PI / 2; bar.position.set(h.x, 0.3, h.z); bar.castShadow = true; scene.add(bar);
+    });
+    C.poles.forEach(function (q2, k) { var pole = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 1.0, 8), k % 2 ? red : wht); pole.position.set(q2.x, 0.5, q2.z); pole.castShadow = true; scene.add(pole); });
+    [C.start, C.end, C.cone].forEach(function (c2) { var cone = new THREE.Mesh(new THREE.ConeGeometry(0.16, 0.38, 14), std(0xff7a1a, 0.6)); cone.position.set(c2.x, 0.19, c2.z); cone.castShadow = true; scene.add(cone); });
+    var sign = new THREE.Group(); sign.position.set(F.x1 + 0.6, 0, F.z1 - 0.4); sign.rotation.y = Math.PI / 2;
+    box(0.08, 1.6, 0.08, std(0x6b4f35, 0.8), -0.7, 0.8, 0, sign); box(0.08, 1.6, 0.08, std(0x6b4f35, 0.8), 0.7, 0.8, 0, sign);
+    var signTex = canvasTex(512, 256, function (g, w, h) {
+      g.fillStyle = "#1f5f3a"; g.fillRect(0, 0, w, h); g.strokeStyle = "#f4f4ee"; g.lineWidth = 8; g.strokeRect(10, 10, w - 20, h - 20);
+      g.fillStyle = "#fff"; g.textAlign = "center"; g.font = "bold 64px sans-serif"; g.fillText("Hundeschule", w / 2, 105);
+      g.font = "38px sans-serif"; g.fillText("Samstag 10 bis 12 Uhr", w / 2, 175);
+    });
+    signTex.wrapS = signTex.wrapT = THREE.ClampToEdgeWrapping;
+    var board = new THREE.Mesh(new THREE.PlaneGeometry(1.6, 0.8), new THREE.MeshStandardMaterial({map: signTex, roughness: 0.8, side: THREE.DoubleSide}));
+    board.position.set(0, 1.35, 0.05); sign.add(board); scene.add(sign);
+  }
+
   /* Matsch */
   var mudMat = std(0x4a3626, 0.35, {polygonOffset: true, polygonOffsetFactor: -3});
   W.mud.forEach(function (m) { var me = new THREE.Mesh(new THREE.CircleGeometry(m.r, 20), mudMat); me.rotation.x = -Math.PI / 2; me.position.set(m.x, 0.018, m.z); me.scale.set(1, 0.75, 1); scene.add(me); });
@@ -279,6 +307,16 @@ function buildWorld3D(scene, W) {
       case "wanne": box(w, f.h, d, white, 0, f.h / 2, 0, g); var wt = box(w - 0.16, 0.02, d - 0.16, std(0x9fd0e6, 0.05, {transparent: true, opacity: 0.8}), 0, f.h - 0.06, 0, g, {noShadow: true}); out.tubWater = wt; wt.visible = false; break;
       case "klo": box(w, 0.42, d * 0.7, white, 0, 0.21, 0.05, g); box(w, 0.5, 0.18, white, 0, 0.6, -d / 2 + 0.09, g); break;
       case "waschbecken": box(w, 0.15, d, white, 0, 0.8, 0, g); box(0.15, 0.7, 0.15, white, 0, 0.4, 0, g); box(0.6, 0.8, 0.03, std(0xcfe3ea, 0.05, {metalness: 0.6}), 0, 1.5, -d / 2 + 0.01, g); break;
+      case "schreibtisch":
+        box(w, 0.04, d, oak, 0, f.h, 0, g);
+        [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(function (s2) { box(0.05, f.h, 0.05, dark, s2[0] * (w / 2 - 0.05), f.h / 2, s2[1] * (d / 2 - 0.05), g); });
+        box(0.36, 0.02, 0.25, dark, 0, f.h + 0.03, 0.05, g);
+        var lap = box(0.36, 0.24, 0.015, dark, 0, f.h + 0.15, -0.08, g); lap.rotation.x = -0.25;
+        var lscr = new THREE.Mesh(new THREE.PlaneGeometry(0.32, 0.2), new THREE.MeshStandardMaterial({color: 0x1a2a3a, emissive: 0x2a4a6a, emissiveIntensity: 0.6})); lscr.position.set(0, f.h + 0.15, -0.07); lscr.rotation.x = -0.25; g.add(lscr);
+        box(0.12, 0.3, 0.12, std(0x4e8a3a, 0.8), -w / 2 + 0.15, f.h + 0.15, -0.1, g); // Topfpflanze
+        // Stuhl
+        box(0.46, 0.05, 0.44, std(0x3b3b44, 0.7), 0, 0.46, 0.85, g); box(0.46, 0.5, 0.05, std(0x3b3b44, 0.7), 0, 0.73, 1.07, g); box(0.05, 0.44, 0.05, dark, 0, 0.22, 0.85, g);
+        break;
       case "eimer": var bin = new THREE.Mesh(new THREE.CylinderGeometry(w / 2, w / 2 * 0.9, f.h, 14), f.id === "eimer_g" ? std(0x2e3a46, 0.6) : std(0xb8bcc0, 0.3, {metalness: 0.5})); bin.position.y = f.h / 2; bin.castShadow = true; g.add(bin); break;
     }
     scene.add(g); built[f.id] = g;
@@ -338,16 +376,34 @@ function buildWorld3D(scene, W) {
 }
 
 /* ---------- Spielfigur ---------- */
+// 0 und 1: Spielfiguren. 2 bis 6: Leute im Park. 7: Trainerin (grüne Jacke). 9: Postbote (blaue Uniform, Mütze).
 var PERSON_LOOKS = [
   {skin: 0xe2b896, hair: 0x6b5a4a, shirt: 0x34495e, pants: 0x2c3e50, shoes: 0x1b1b1b},
-  {skin: 0xd8a47f, hair: 0x2b1d14, shirt: 0xb03a2e, pants: 0x4a4a4a, shoes: 0x3a2a1a}
+  {skin: 0xd8a47f, hair: 0x2b1d14, shirt: 0xb03a2e, pants: 0x4a4a4a, shoes: 0x3a2a1a},
+  {skin: 0xf0c8a8, hair: 0xb8b8b0, shirt: 0x7f8c8d, pants: 0x5a4a3a, shoes: 0x2a2018},
+  {skin: 0x8d5a3c, hair: 0x1a1210, shirt: 0xd68910, pants: 0x2c3e50, shoes: 0xeeeeee},
+  {skin: 0xe2b896, hair: 0xa0622e, shirt: 0x2e86c1, pants: 0x3a3a3a, shoes: 0x1b1b1b},
+  {skin: 0xc68e6a, hair: 0x2b1d14, shirt: 0x27ae60, pants: 0x34495e, shoes: 0x5a3a2a},
+  {skin: 0xf0c8a8, hair: 0xd9b46a, shirt: 0xc0392b, pants: 0x1f2a36, shoes: 0x1b1b1b},
+  {skin: 0xe2b896, hair: 0x3a2a1a, shirt: 0x2d6a3e, pants: 0x2a2a2a, shoes: 0x3a2a1a},
+  {skin: 0xe2b896, hair: 0x6b5a4a, shirt: 0x5d6d7e, pants: 0x2c3e50, shoes: 0x1b1b1b},
+  {skin: 0xe2b896, hair: 0x4a3a2a, shirt: 0x1f3a93, pants: 0x1f2a50, shoes: 0x111111, cap: 0x1f3a93}
 ];
 var PERSON_LOOKS_W = [
   {skin: 0xe8bf9e, hair: 0x7a4a26, shirt: 0x8e4a9e, pants: 0x2c3e50, shoes: 0x3a2030},
-  {skin: 0xd8a47f, hair: 0x231610, shirt: 0x15907a, pants: 0x4a4a4a, shoes: 0x2a2a2a}
+  {skin: 0xd8a47f, hair: 0x231610, shirt: 0x15907a, pants: 0x4a4a4a, shoes: 0x2a2a2a},
+  {skin: 0xf0c8a8, hair: 0xc9c2b8, shirt: 0xa569bd, pants: 0x4a4a5a, shoes: 0x3a2a2a},
+  {skin: 0x8d5a3c, hair: 0x120c08, shirt: 0xf1c40f, pants: 0x2c3e50, shoes: 0xeeeeee},
+  {skin: 0xf0c8a8, hair: 0xe0b060, shirt: 0xe84393, pants: 0x34495e, shoes: 0x1b1b1b},
+  {skin: 0xe2b896, hair: 0x8a4a1e, shirt: 0x16a085, pants: 0x5a4a3a, shoes: 0x2a1a1a},
+  {skin: 0xc68e6a, hair: 0x2b1d14, shirt: 0xe67e22, pants: 0x1f2a36, shoes: 0x1b1b1b},
+  {skin: 0xe8bf9e, hair: 0x5a3a20, shirt: 0x2d6a3e, pants: 0x2a2a2a, shoes: 0x3a2a1a},
+  {skin: 0xe2b896, hair: 0x7a4a26, shirt: 0x5d6d7e, pants: 0x2c3e50, shoes: 0x1b1b1b},
+  {skin: 0xe8bf9e, hair: 0x7a4a26, shirt: 0x1f3a93, pants: 0x1f2a50, shoes: 0x111111, cap: 0x1f3a93}
 ];
 // gender: "m" oder "w". Frau: lange Haare mit Zopf, schmalere Schultern, breitere Hüfte, etwas kleiner.
-function makePerson(lookIdx, gender) {
+function makePerson(lookIdx, gender, opt) {
+  opt = opt || {};
   var fem = gender === "w", LS = fem ? PERSON_LOOKS_W : PERSON_LOOKS;
   var L = LS[lookIdx || 0] || LS[0];
   var m = function (c, r) { return new THREE.MeshStandardMaterial({color: c, roughness: r == null ? 0.8 : r}); };
@@ -357,6 +413,7 @@ function makePerson(lookIdx, gender) {
   function grp(parent, x, y, z) { var g = new THREE.Group(); g.position.set(x, y, z); parent.add(g); return g; }
   var pelvis = grp(root, 0, 0.92, 0);
   if (fem) root.scale.setScalar(0.95);
+  if (opt.kid) root.scale.setScalar(0.62);
   cap(0.15, 0.1, pants, pelvis, 0.02).scale.set(fem ? 1.3 : 1.15, 1, 0.82);
   var spine = grp(pelvis, 0, 0.08, 0);
   var torso = cap(0.17, 0.32, shirt, spine, 0.27); torso.scale.set(fem ? 0.98 : 1.15, 1, 0.75);
@@ -384,12 +441,14 @@ function makePerson(lookIdx, gender) {
   }
   var arms = [-1, 1].map(function (s) { var l = limb(spine, s * (fem ? 0.195 : 0.22), 0.5, 0.3, 0.27, fem ? 0.044 : 0.05, shirt, fem ? skin : shirt); var hand = new THREE.Mesh(new THREE.SphereGeometry(0.045, 10, 8), skin); hand.position.y = -0.03; l.c.add(hand); return l; });
   var legs = [-1, 1].map(function (s) { var l = limb(pelvis, s * 0.1, -0.02, 0.45, 0.43, 0.075, pants, pants); var sh = new THREE.Mesh(new THREE.BoxGeometry(0.11, 0.08, 0.26), shoes); sh.position.set(0, -0.03, 0.06); sh.castShadow = true; l.c.add(sh); return l; });
+  if (L.cap) { var capM = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.125, 0.07, 16), m(L.cap, 0.6)); capM.position.y = 0.1; head.add(capM); var vis = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.015, 0.08), m(0x111111, 0.5)); vis.position.set(0, 0.075, 0.12); head.add(vis); }
+  var parcel = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.24, 0.26), m(0xc19a6b, 0.9)); parcel.visible = false; spine.add(parcel); parcel.position.set(0, 0.25, 0.3); parcel.castShadow = true;
   var book = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.26, 0.04), m(0xc0392b, 0.7)); book.visible = false; spine.add(book); book.position.set(0, 0.32, 0.3); book.rotation.x = -0.5;
   var bag = new THREE.Mesh(new THREE.SphereGeometry(0.06, 8, 6), m(0x2e8b57, 0.6)); bag.visible = false; arms[0].c.add(bag); bag.position.y = -0.1;
   var hit = new THREE.Mesh(new THREE.BoxGeometry(0.6, 1.8, 0.5), new THREE.MeshBasicMaterial({visible: false})); hit.position.y = 0.9; root.add(hit);
   var tmp = new THREE.Vector3();
   return {
-    root: root, hand: arms[0].c, handL: arms[1].c,
+    root: root, hand: arms[0].c, handL: arms[1].c, hit: hit,
     update: function (p, time, dt) {
       root.position.set(p.x, 0, p.z); root.rotation.set(0, p.yaw, 0);
       var pose = p.pose || "stand", sp = Math.min(1, Math.abs(p.speed || 0) / 1.55), run = Math.abs(p.speed || 0) > 2.5;
@@ -399,7 +458,8 @@ function makePerson(lookIdx, gender) {
       legs[0].b.rotation.set(Math.max(0, -Math.sin(ph)) * 0.9 * sp + 0.05, 0, 0); legs[1].b.rotation.set(Math.max(0, Math.sin(ph)) * 0.9 * sp + 0.05, 0, 0);
       arms[0].a.rotation.set(-sw * 0.8, 0, 0.08); arms[1].a.rotation.set(sw * 0.8, 0, -0.08);
       arms[0].b.rotation.set(-0.2 - (run ? 0.9 : 0.1) * sp, 0, 0); arms[1].b.rotation.set(-0.2 - (run ? 0.9 : 0.1) * sp, 0, 0);
-      book.visible = false; bag.visible = !!p.bags;
+      book.visible = false; bag.visible = !!p.bags; parcel.visible = !!p.parcel;
+      if (p.parcel) arms.forEach(function (a) { a.a.rotation.x = -0.9; a.b.rotation.x = -0.6; });
       if (p.leash) { arms[0].a.rotation.x = -0.35; arms[0].b.rotation.x = -0.5; }
       if (pose === "sit") {
         pelvis.position.y = 0.5;

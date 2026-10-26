@@ -287,7 +287,7 @@ function makeDog(lookIdx, breedId) {
     update: function (d, time, dt) {
       var P = d.pose || {}, sit = P.sit || 0, down = P.down || 0, paw = P.paw || 0, sniff = P.sniff || 0, squat = P.squat || 0, pee = P.pee || 0, sleep = P.sleep || 0, shake = P.shake || 0, beg = P.beg || 0;
       root.position.set(d.x, 0, d.z);
-      root.rotation.y = d.yaw;
+      root.rotation.order = "YZX"; root.rotation.y = d.yaw; root.rotation.z = 0;
       var gait = d.gait || "stand", blend = d.gaitBlend || 0, ph = d.phase || 0;
       var amp = gait === "gallop" ? 0.62 : gait === "trot" ? 0.48 : 0.34;
       var lieF = Math.max(0, down - sit * 0.5);
@@ -373,6 +373,15 @@ function makeDog(lookIdx, breedId) {
       if (down > 0.5) { body.getWorldPosition(tmp); bellyY = tmp.y - 0.11; }
       var lift = -Math.min(minY - 0.013, bellyY);
       root.position.y = Math.abs(lift) < 0.4 ? lift : 0;
+      // Rolle: um die Längsachse auf Höhe des Bauchs drehen. Sprung: einfach anheben.
+      var roll = d.roll || 0;
+      if (roll > 0) {
+        var th = roll * Math.PI * 2, hc = 0.13 * B.size * (0.5 + 0.5 * LEG);
+        root.rotation.z = th;
+        root.position.y = hc * (1 - Math.cos(th)) + Math.max(0, root.position.y) * Math.cos(th);
+        root.position.x += Math.cos(d.yaw) * Math.sin(th) * hc; root.position.z -= Math.sin(d.yaw) * Math.sin(th) * hc;
+      }
+      root.position.y += d.hop || 0;
       root.updateMatrixWorld(true);
     }
   };
