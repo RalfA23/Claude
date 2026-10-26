@@ -70,6 +70,9 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
 .stufe header{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
 .stufe header .nr{font-family:var(--display);color:var(--accent);font-size:1.3rem}
 .stufe header p{color:var(--muted);font-size:.92rem;flex-basis:100%}
+.stufe header .fort{margin-left:auto;font-size:.82rem;color:var(--muted)}
+.stufe.spaeter .songs{opacity:.55}
+.stufe.spaeter header .nr{color:var(--muted)}
 .songs{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px;margin-top:12px}
 .song{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:4px;cursor:pointer;text-align:left;min-height:96px}
 .song:hover{border-color:var(--accent)}
@@ -126,7 +129,7 @@ details.hilfe p,details.hilfe li{color:var(--muted);font-size:.93rem;margin-top:
 <main class="wrap" id="home">
   <a class="back" href="../lernen/">← Lernen</a>
   <h1>Klavier</h1>
-  <p class="lede">Stell das Handy neben dein Klavier. Die Noten laufen mit, das Mikrofon hört zu und geht erst weiter, wenn du den richtigen Ton triffst. Von den ersten drei Tönen bis Für Elise.</p>
+  <p class="lede">Stell das Handy neben dein Klavier. Die Noten laufen mit, das Mikrofon hört zu und geht erst weiter, wenn du den richtigen Ton triffst. Von den ersten drei Tönen über Jingle Bells und Stille Nacht bis Für Elise, Schritt für Schritt schwerer.</p>
   <p class="gate" id="gate" hidden>Du bist nicht angemeldet. Dein Fortschritt bleibt nur in diesem Browser. <a href="../">Im Portal anmelden</a>, dann wird er im Konto gespeichert.</p>
 
   <section class="hero">
@@ -287,8 +290,15 @@ function renderHome() {
   $("nextInfo").textContent = "Stufe " + n.stufe + " · " + n.info;
   $("nextGo").onclick = () => openPlayer(n);
   const box = $("stufen"); box.textContent = "";
+  // Die Stufen bauen aufeinander auf: eine Stufe ist dran, wenn in der vorigen die Hälfte der Stücke einen Stern hat.
+  // Spätere Stufen bleiben spielbar, sind aber zurückgenommen.
+  let offen = true;
   for (const st of STUFEN) {
-    const sec = el("section", {class: "stufe"}, [el("header", {}, [el("span", {class: "nr", text: st.nr}), el("h2", {text: st.titel}), el("p", {text: st.text})])]);
+    const stuecke = LIEDER.filter(x => x.stufe === st.nr), geschafft = stuecke.filter(x => sterneVon(x.id) > 0).length;
+    const frei = offen || st.nr === STUFEN[STUFEN.length - 1].nr; // der Notentrainer passt immer
+    const sec = el("section", {class: "stufe" + (frei ? "" : " spaeter")}, [el("header", {}, [el("span", {class: "nr", text: st.nr}), el("h2", {text: st.titel}),
+      el("span", {class: "fort", text: geschafft + " von " + stuecke.length + " geschafft"}), el("p", {text: frei ? st.text : st.text + " Empfohlen, wenn die Stufe davor zur Hälfte geschafft ist."})])]);
+    offen = offen && geschafft >= Math.ceil(stuecke.length / 2);
     const grid = el("div", {class: "songs"});
     for (const l of LIEDER.filter(x => x.stufe === st.nr)) {
       const h = l.trainer ? (l.trainer === "bass" ? "l" : l.trainer === "beide" ? "rl" : "r") : haendeVon(l);
