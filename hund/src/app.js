@@ -1,6 +1,6 @@
 // Hundeleben: Spielschleife, Kamera, Bedienung (antippen wie bei den Sims, Tastatur, Joystick), Anzeige,
 // Ton, Speichern (Browser und Konto) und Spazieren zu zweit über Supabase Realtime.
-// Erwartet THREE, Hund (Logik), makeDog, DOG_LOOKS, buildWorld3D und makePerson im Modul-Scope.
+// Erwartet THREE, Hund (Logik), makeDog, DOG_BREEDS, dogBreed, buildWorld3D und makePerson im Modul-Scope.
 (function () {
   "use strict";
   var $ = function (id) { return document.getElementById(id); };
@@ -12,7 +12,7 @@
     (kids || []).forEach(function (c) { if (c != null) d.appendChild(typeof c === "string" ? document.createTextNode(c) : c); });
     return d;
   }
-  var settings = Object.assign({name: "", look: 0, sound: true, joy: null}, store(SET_KEY) || {});
+  var settings = Object.assign({name: "", look: 0, breed: "pinscher", gender: "m", sound: true, joy: null}, store(SET_KEY) || {});
   function saveSettings() { store(SET_KEY, settings); }
 
   /* ---------- Welt, Szene, Licht ---------- */
@@ -35,9 +35,10 @@
   var world = buildWorld3D(scene, W);
 
   /* ---------- Figuren ---------- */
-  var dog = null, person = makePerson(0); scene.add(person.root);
-  function setDogLook(i) { if (dog) scene.remove(dog.root); dog = makeDog(i); scene.add(dog.root); }
-  setDogLook(settings.look || 0);
+  var dog = null, person = null;
+  function setPerson() { if (person) scene.remove(person.root); person = makePerson(0, settings.gender); scene.add(person.root); }
+  function setDogLook() { if (dog) scene.remove(dog.root); dog = makeDog(settings.look || 0, settings.breed); scene.add(dog.root); }
+  setPerson(); setDogLook();
   var plumbob = new THREE.Mesh(new THREE.OctahedronGeometry(0.07, 0), new THREE.MeshStandardMaterial({color: 0x37d058, emissive: 0x1c8a30, emissiveIntensity: 0.8, roughness: 0.3}));
   plumbob.scale.set(1, 1.7, 1); scene.add(plumbob);
   var leashMat = new THREE.MeshStandardMaterial({color: 0xb3202a, roughness: 0.6}), leash = null;
@@ -76,11 +77,11 @@
     warned = {}; lastTaskKey = "";
     cam.fx = sim.p.x; cam.fz = sim.p.z;
   }
-  function saveLocal() { if (!sim) return; var s = sim.save(); s.seed = sim.seed; store(SAVE_KEY, {sim: s, name: sim.name, look: settings.look}); return s; }
+  function saveLocal() { if (!sim) return; var s = sim.save(); s.seed = sim.seed; store(SAVE_KEY, {sim: s, name: sim.name, look: settings.look, breed: settings.breed, gender: settings.gender}); return s; }
   function saveAll(force) {
     var s = saveLocal(); if (!s || !Acc.user) return;
     var now = Date.now(); if (!force && now - Acc.last < 60000) return; Acc.last = now;
-    Acc.sb.from("schach_docs").upsert({user_id: Acc.user.id, path: "hund/stand", data: {sim: s, name: sim.name, look: settings.look}, updated_at: new Date().toISOString()}).then(function () {}, function () {});
+    Acc.sb.from("schach_docs").upsert({user_id: Acc.user.id, path: "hund/stand", data: {sim: s, name: sim.name, look: settings.look, breed: settings.breed, gender: settings.gender}, updated_at: new Date().toISOString()}).then(function () {}, function () {});
   }
   var Acc = {sb: null, user: null, last: 0};
   setInterval(function () { if (running) saveAll(false); }, 5000);
@@ -468,10 +469,19 @@
     startSave = s && s.sim ? s : null;
     if (accSave && (!startSave || (accSave.sim && accSave.sim.at > (startSave.sim.at || 0)))) startSave = accSave;
     $("nameIn").value = settings.name || (startSave && startSave.name) || "";
+    function pick(on, title, sw, label, fn) { return el("button", {type: "button", class: "look" + (on ? " on" : ""), title: title, onclick: function () { fn(); saveSettings(); renderStart(); }}, [sw, el("small", {text: label})]); }
+    function swatch(L) { return el("span", {style: "background:linear-gradient(135deg," + L.coat + " 55%," + L.tan + " 56%)"}); }
+    var gbox = $("genders"); gbox.replaceChildren();
+    [["m", "👨", "Mann"], ["w", "👩", "Frau"]].forEach(function (g) {
+      gbox.appendChild(pick(settings.gender === g[0], g[2], el("span", {class: "emo", text: g[1]}), g[2], function () { settings.gender = g[0]; setPerson(); }));
+    });
+    var bbox = $("breeds"); bbox.replaceChildren();
+    DOG_BREEDS.forEach(function (B) {
+      bbox.appendChild(pick(settings.breed === B.id, B.name, swatch(B.looks[0]), B.name, function () { if (settings.breed !== B.id) settings.look = 0; settings.breed = B.id; setDogLook(); }));
+    });
     box.replaceChildren();
-    DOG_LOOKS.forEach(function (L, i) {
-      var b = el("button", {type: "button", class: "look" + (i === (settings.look || 0) ? " on" : ""), title: L.name, onclick: function () { settings.look = i; saveSettings(); setDogLook(i); renderStart(); }}, [el("span", {style: "background:linear-gradient(135deg," + L.coat + " 55%," + L.tan + " 56%)"}), el("small", {text: L.name})]);
-      box.appendChild(b);
+    dogBreed(settings.breed).looks.forEach(function (L, i) {
+      box.appendChild(pick(i === (settings.look || 0), L.name, swatch(L), L.name, function () { settings.look = i; setDogLook(); }));
     });
     $("resume").hidden = !startSave && !sim;
     if (sim) $("resume").textContent = "Weiterspielen (Tag " + sim.day + ", " + Hund.fmtTime(sim.t) + ")";
@@ -535,7 +545,7 @@
       Net.sendT -= dt; if (Net.sendT > 0) return; Net.sendT = 0.12;
       var p = sim.p, d = sim.d, held = p.holding ? sim.item(p.holding) : null, fly = sim.items.filter(function (it) { return it.state === "flying" || it.state === "dog"; })[0];
       var r = function (v) { return Math.round(v * 100) / 100; };
-      Net.ch.send({type: "broadcast", event: "st", payload: {id: Net.user.id, n: Net.myName(), dn: sim.name, look: settings.look || 0,
+      Net.ch.send({type: "broadcast", event: "st", payload: {id: Net.user.id, n: Net.myName(), dn: sim.name, look: settings.look || 0, br: settings.breed, g: settings.gender,
         p: {x: r(p.x), z: r(p.z), yaw: r(p.yaw), speed: r(p.speed), phase: r(p.phase), pose: p.pose, holding: held ? held.kind : null, bags: p.bags},
         d: {x: r(d.x), z: r(d.z), yaw: r(d.yaw), vel: r(d.vel || 0), gait: d.gait, phase: r(d.phase), gaitBlend: r(d.gaitBlend), pose: d.pose, wag: r(d.wag), wagPhase: r(d.wagPhase), leash: d.leash, mode: d.mode},
         it: fly ? {k: fly.kind, x: r(fly.x), y: r(fly.y || 0), z: r(fly.z), s: fly.state} : null}});
@@ -546,7 +556,9 @@
         var o = Net.others[id], st = o.st; if (!st) return;
         if (Date.now() - o.at > 15000) { Net.drop(id); return; }
         if (!o.view) {
-          o.view = {person: makePerson(1), dog: makeDog(st.look === settings.look ? (st.look + 1) % DOG_LOOKS.length : st.look), p: Object.assign({}, st.p), d: JSON.parse(JSON.stringify(st.d))};
+          var obr = dogBreed(st.br), olook = st.look || 0;
+          if (obr.id === settings.breed && olook === (settings.look || 0)) olook = (olook + 1) % obr.looks.length;
+          o.view = {person: makePerson(1, st.g), dog: makeDog(olook, obr.id), p: Object.assign({}, st.p), d: JSON.parse(JSON.stringify(st.d))};
           scene.add(o.view.person.root); scene.add(o.view.dog.root);
           Net.tags[id] = el("div", {class: "tag", text: st.n + " & " + st.dn}); $("tags").appendChild(Net.tags[id]);
         }
