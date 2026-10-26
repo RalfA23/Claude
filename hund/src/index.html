@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="robots" content="noindex,nofollow">
 <meta name="theme-color" content="#151320">
-<meta name="description" content="Hundeleben: ein Tag mit deinem Pinscher wie bei den Sims. Füttern, Gassi gehen, spielen, Tricks üben, zu zweit spazieren.">
+<meta name="description" content="Hundeleben: ein Tag mit deinem Hund wie bei den Sims. Füttern, Gassi gehen, spielen, Tricks üben, zu zweit spazieren.">
 <title>Hundeleben</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -99,6 +99,8 @@ input[type=text]{font:inherit;color:var(--ink);background:#0f0d18;border:1px sol
 .look span{width:44px;height:44px;border-radius:50%;border:2px solid var(--line)}
 .look small{font-size:.75rem;color:var(--muted);text-align:center}
 .look.on{outline:3px solid var(--accent)}
+.look.on small{color:inherit;opacity:.85}
+.look span.emo{display:grid;place-items:center;font-size:1.6rem;background:#1b1830}
 .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:12px}
 .row.item{justify-content:space-between;border-top:1px solid var(--line);padding-top:10px}
 .row input{flex:1;min-width:180px}
@@ -161,9 +163,13 @@ kbd{border:1px solid var(--line);border-radius:5px;padding:0 5px;font-size:.85em
 
 <div class="overlay" id="start">
   <div class="card">
-    <div class="hero"><div class="pic">🐕</div><div><h1>Hundeleben</h1><p>Ein Tag mit deinem Pinscher, wie bei den Sims: Wohnung, Garten und Stadtpark. Füttern, Gassi gehen, spielen, Tricks üben, baden und abends müde ins Bett.</p></div></div>
+    <div class="hero"><div class="pic">🐕</div><div><h1>Hundeleben</h1><p>Ein Tag mit deinem Hund, wie bei den Sims: Pinscher, Dackel, Labrador, Schäferhund oder Border Collie, du als Mann oder Frau. Wohnung, Garten und Stadtpark. Füttern, Gassi gehen, spielen, Tricks üben, baden und abends müde ins Bett.</p></div></div>
     <label for="nameIn">Wie heißt dein Hund?</label>
     <input type="text" id="nameIn" maxlength="20" placeholder="Name" autocomplete="off">
+    <label>Du spielst</label>
+    <div class="looks" id="genders"></div>
+    <label>Rasse</label>
+    <div class="looks" id="breeds"></div>
     <label>Fell</label>
     <div class="looks" id="looks"></div>
     <div class="row">

@@ -342,22 +342,38 @@ var PERSON_LOOKS = [
   {skin: 0xe2b896, hair: 0x6b5a4a, shirt: 0x34495e, pants: 0x2c3e50, shoes: 0x1b1b1b},
   {skin: 0xd8a47f, hair: 0x2b1d14, shirt: 0xb03a2e, pants: 0x4a4a4a, shoes: 0x3a2a1a}
 ];
-function makePerson(lookIdx) {
-  var L = PERSON_LOOKS[lookIdx || 0] || PERSON_LOOKS[0];
+var PERSON_LOOKS_W = [
+  {skin: 0xe8bf9e, hair: 0x7a4a26, shirt: 0x8e4a9e, pants: 0x2c3e50, shoes: 0x3a2030},
+  {skin: 0xd8a47f, hair: 0x231610, shirt: 0x15907a, pants: 0x4a4a4a, shoes: 0x2a2a2a}
+];
+// gender: "m" oder "w". Frau: lange Haare mit Zopf, schmalere Schultern, breitere Hüfte, etwas kleiner.
+function makePerson(lookIdx, gender) {
+  var fem = gender === "w", LS = fem ? PERSON_LOOKS_W : PERSON_LOOKS;
+  var L = LS[lookIdx || 0] || LS[0];
   var m = function (c, r) { return new THREE.MeshStandardMaterial({color: c, roughness: r == null ? 0.8 : r}); };
   var skin = m(L.skin, 0.6), shirt = m(L.shirt), pants = m(L.pants), shoes = m(L.shoes, 0.5), hair = m(L.hair, 0.9);
   var root = new THREE.Group();
   function cap(r, len, mat, parent, y) { var me = new THREE.Mesh(new THREE.CapsuleGeometry(r, len, 4, 10), mat); me.position.y = y; me.castShadow = true; parent.add(me); return me; }
   function grp(parent, x, y, z) { var g = new THREE.Group(); g.position.set(x, y, z); parent.add(g); return g; }
   var pelvis = grp(root, 0, 0.92, 0);
-  cap(0.15, 0.1, pants, pelvis, 0.02).scale.set(1.15, 1, 0.8);
+  if (fem) root.scale.setScalar(0.95);
+  cap(0.15, 0.1, pants, pelvis, 0.02).scale.set(fem ? 1.3 : 1.15, 1, 0.82);
   var spine = grp(pelvis, 0, 0.08, 0);
-  var torso = cap(0.17, 0.32, shirt, spine, 0.27); torso.scale.set(1.15, 1, 0.75);
+  var torso = cap(0.17, 0.32, shirt, spine, 0.27); torso.scale.set(fem ? 0.98 : 1.15, 1, 0.75);
+  if (fem) { var waist = cap(0.13, 0.05, shirt, spine, 0.08); waist.scale.set(1.15, 1, 0.8); }
   var neck = grp(spine, 0, 0.56, 0);
   cap(0.05, 0.06, skin, neck, 0.03);
   var head = grp(neck, 0, 0.12, 0);
   var hd = new THREE.Mesh(new THREE.SphereGeometry(0.115, 18, 14), skin); hd.scale.set(0.95, 1.12, 1); hd.castShadow = true; head.add(hd);
   var hr = new THREE.Mesh(new THREE.SphereGeometry(0.122, 18, 10, 0, Math.PI * 2, 0, Math.PI * 0.5), hair); hr.scale.set(0.97, 1.0, 1.02); hr.position.set(0, 0.02, -0.01); hr.rotation.x = -0.25; head.add(hr);
+  if (fem) {
+    // Langes Haar hinten bis auf die Schultern, Zopf und Pony.
+    var back = new THREE.Mesh(new THREE.CapsuleGeometry(0.11, 0.14, 4, 12), hair); back.position.set(0, -0.06, -0.045); back.scale.set(1.08, 1, 0.62); back.castShadow = true; head.add(back);
+    var tail = new THREE.Mesh(new THREE.CapsuleGeometry(0.035, 0.16, 4, 8), hair); tail.position.set(0, -0.08, -0.13); tail.rotation.x = 0.25; tail.castShadow = true; head.add(tail);
+    var tie = new THREE.Mesh(new THREE.TorusGeometry(0.035, 0.01, 6, 12), m(L.shirt, 0.5)); tie.position.set(0, 0.02, -0.125); tie.rotation.x = Math.PI / 2 + 0.25; head.add(tie);
+    var fringe = new THREE.Mesh(new THREE.SphereGeometry(0.1, 14, 8, 0, Math.PI * 2, 0, Math.PI * 0.35), hair); fringe.position.set(0, 0.04, 0.03); fringe.rotation.x = 0.5; fringe.scale.set(1.12, 1, 1); head.add(fringe);
+    var lips = new THREE.Mesh(new THREE.SphereGeometry(0.018, 8, 6), m(0xb5525a, 0.5)); lips.position.set(0, -0.055, 0.1); lips.scale.set(1.5, 0.5, 0.6); head.add(lips);
+  }
   var nose = new THREE.Mesh(new THREE.SphereGeometry(0.02, 8, 6), skin); nose.position.set(0, -0.01, 0.115); head.add(nose);
   [-1, 1].forEach(function (s) { var e = new THREE.Mesh(new THREE.SphereGeometry(0.013, 8, 6), m(0x222222, 0.3)); e.position.set(s * 0.04, 0.025, 0.1); head.add(e); });
   function limb(parent, x, y, l1, l2, r, mat1, mat2, endMat) {
@@ -366,7 +382,7 @@ function makePerson(lookIdx) {
     var c = grp(b, 0, -l2, 0);
     return {a: a, b: b, c: c, end: endMat};
   }
-  var arms = [-1, 1].map(function (s) { var l = limb(spine, s * 0.22, 0.5, 0.3, 0.27, 0.05, shirt, shirt); var hand = new THREE.Mesh(new THREE.SphereGeometry(0.045, 10, 8), skin); hand.position.y = -0.03; l.c.add(hand); return l; });
+  var arms = [-1, 1].map(function (s) { var l = limb(spine, s * (fem ? 0.195 : 0.22), 0.5, 0.3, 0.27, fem ? 0.044 : 0.05, shirt, fem ? skin : shirt); var hand = new THREE.Mesh(new THREE.SphereGeometry(0.045, 10, 8), skin); hand.position.y = -0.03; l.c.add(hand); return l; });
   var legs = [-1, 1].map(function (s) { var l = limb(pelvis, s * 0.1, -0.02, 0.45, 0.43, 0.075, pants, pants); var sh = new THREE.Mesh(new THREE.BoxGeometry(0.11, 0.08, 0.26), shoes); sh.position.set(0, -0.03, 0.06); sh.castShadow = true; l.c.add(sh); return l; });
   var book = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.26, 0.04), m(0xc0392b, 0.7)); book.visible = false; spine.add(book); book.position.set(0, 0.32, 0.3); book.rotation.x = -0.5;
   var bag = new THREE.Mesh(new THREE.SphereGeometry(0.06, 8, 6), m(0x2e8b57, 0.6)); bag.visible = false; arms[0].c.add(bag); bag.position.y = -0.1;
