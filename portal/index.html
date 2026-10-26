@@ -169,9 +169,10 @@ dialog::backdrop{background:rgba(0,0,0,.45)}
 <script>
 // Kursliste: neue Kurse hier eintragen. Der Pfad ist relativ zum Portal. Jeder Kurs wird automatisch zu einer Kachel in der Galerie.
 var COURSES = [
-  {id: "lesen", icon: "📖", title: "Lesetraining", text: "8 Wochen schneller lesen: feste Lektionen, Lesefenster mit Pacer, Tests und Fortschritt.", href: "lesen/"},
-  {id: "lesen-fortgeschritten", icon: "🎓", title: "Lesetraining Fortgeschritten", text: "24 Lektionen für alle, die das Lesetraining geschafft haben: Lesen mit Plan, Abruf, kritisches Lesen, dazu das Fachmodul Recht mit Datenschutz, Zivilrecht und Steuerrecht.", href: "lesen/?kurs=fortgeschritten", needs: "lesen"},
-  {id: "schach", icon: "♞", title: "Schachtraining", text: "Mehr Wertungspunkte: Tagesaufgabe, Taktikaufgaben, Smirnov-Lektionen, Stappenmethode in Stufen, tägliche Abfrage, verbunden mit deinem Lichess- oder chess.com-Konto.", href: "schach/"},
+  // Die Portal-Kacheln sind Überpunkte: Lernen, Spiele, Gesundheit, Entspannung, Weltkarte. Unterkurse liegen auf der jeweiligen Seite.
+  // Lernen (lernen/) bündelt Lesetraining, Lesetraining Fortgeschritten, Schachtraining, Sprachen und Bücher, Klavier kommt dazu. Die Kurse behalten ihre Adressen.
+  // Früher hatte jeder Kurs eine eigene Kachel: alte Freigaben (lesen, schach, sprachen, …) und Dashboard-Kacheln werden zu „lernen“.
+  {id: "lernen", icon: "🎓", title: "Lernen", text: "Lesetraining, Schachtraining, Sprachen und deine Bücher an einer Stelle, Klavier kommt bald dazu.", href: "lernen/"},
   // Spiele (spiele/) bündelt Flipper, Götterquiz, Wortwürfel, Poker, Murmelbahn und Vestaboard. Die Spiele behalten ihre Adressen.
   // Früher hatte jedes Spiel eine eigene Kachel: alte Freigaben (quiz, wortwuerfel, …) und Dashboard-Kacheln werden zu „spiele“.
   {id: "spiele", icon: "🕹️", title: "Spiele", text: "Flipper mit vier Tischen, Götterquiz, Wortwürfel und Poker zum Spielen, Murmelbahn und Vestaboard zum Abschalten.", href: "spiele/"},
@@ -181,16 +182,13 @@ var COURSES = [
   // Entspannung (entspannung/): Boxatmung und gesprochene Meditationen. Die Kachel zeigt die Meditation des Tages und den heutigen Stand (schach_docs, Pfade entspannung/tag.<datum>).
   {id: "entspannung", icon: "🧘", title: "Entspannung", text: "Boxatmung im Quadrat und gesprochene Meditationen von 3 bis 10 Minuten: Body-Scan, Atem, Dankbarkeit, Schlaf, Fokus, Stress lösen. Jeden Tag eine Meditation des Tages.", href: "entspannung/"},
   // Jedes Konto hat seine eigene Karte (weltkarte/, Orte in schach_docs unter weltkarte/ort.<id>). Die Kachel zeigt, wie viele Orte besucht und geplant sind.
-  {id: "weltkarte", icon: "🗺️", title: "Weltkarte", text: "Alle Orte, an denen du warst und wo du noch hin willst, als Pins auf einer großen Weltkarte. Mit Datum, Notizen und Bildern als Andenken.", href: "weltkarte/"},
-  // Bücher (buecher/): eigene Bücherliste mit Kurzzusammenfassung von Claude, Learnings, Sternen und Schlagwörtern (schach_docs, Pfade buecher/buch.<id>).
-  // Die Kachel zeigt die Zahl der Bücher und das zuletzt eingetragene. Nicht in module_defaults, Freigabe über den Dialog.
-  {id: "buecher", icon: "📚", title: "Bücher", text: "Deine Wissensplattform für Bücher: eintragen oder ISBN scannen, Kurzzusammenfassung von Claude, deine eigenen Learnings mit Datum, Sterne und Schlagwörter.", href: "buecher/"},
-  // Sprachen (sprachen/): Niederländisch, Japanisch, Thai, Koreanisch, Englisch, Türkisch. Die Kachel zeigt die Punkte aller Sprachen (schach_docs, Pfade sprachen/<sprache>.fortschritt).
-  {id: "sprachen", icon: "🗣️", title: "Sprachen", text: "Niederländisch, Japanisch, Thai, Koreanisch und Englisch für Anfänger und Fortgeschrittene: nachsprechen mit Spracherkennung, Dialoge, Schreiben und Lesen, mit Punkten, Serien und Stufen.", href: "sprachen/"}
+  {id: "weltkarte", icon: "🗺️", title: "Weltkarte", text: "Alle Orte, an denen du warst und wo du noch hin willst, als Pins auf einer großen Weltkarte. Mit Datum, Notizen und Bildern als Andenken.", href: "weltkarte/"}
 ];
 // Spiele mit eigener Freigabe-Kennung (wie früher ihre Kachel). Jede davon zeigt die Kachel Spiele, die Spiele-Seite blendet die übrigen aus.
 var GAME_IDS = ["flipper", "quiz", "wortwuerfel", "poker", "murmelbahn", "vestaboard"];
-function courseId(x) { return x === "huberman" ? "gesundheit" : GAME_IDS.indexOf(x) >= 0 ? "spiele" : x; }
+// Lernkurse mit eigener Freigabe-Kennung, dazu sprachen:<ordner>. Jede davon zeigt die Kachel Lernen, die Lernen-Seite blendet die übrigen aus.
+var LERN_IDS = ["lesen", "lesen-fortgeschritten", "schach", "sprachen", "buecher", "klavier"];
+function courseId(x) { return x === "huberman" ? "gesundheit" : GAME_IDS.indexOf(x) >= 0 ? "spiele" : LERN_IDS.indexOf(x) >= 0 || x.indexOf("sprachen:") === 0 ? "lernen" : x; }
 // Nur für einzeln freigeschaltete Konten sichtbar (Zeile in gevt_members). Ohne Freigabe taucht die Kachel nicht auf.
 var GEVT = {id: "gevt", icon: "🥋", title: "Ving Tsun Wissen", text: "Frag deine GEVT-Wissensdatenbank: Göksels Lehre und deine Notizen getrennt, mit Grad und Quellen.", href: "gevt/"};
 (function () {
@@ -226,7 +224,8 @@ var GEVT = {id: "gevt", icon: "🥋", title: "Ving Tsun Wissen", text: "Frag dei
   // neue Konten bekommen beim Registrieren die Standardmodule. Admins sehen immer alles. GEVT hat seine eigene Freigabe.
   var access = null;
   // „sprachen:niederlaendisch“ gibt nur diese Sprache frei, die Kachel Sprachen erscheint trotzdem.
-  function allowed(id) { return isAdmin || access === null || id === "gevt" || access.some(function (x) { x = courseId(x); return x === id || x.indexOf(id + ":") === 0; }); }
+  // „lernen“ gibt alle Lernkurse frei (auch die Kacheln Lektion und Schach-Wertung), „lesen“ zeigt die Kachel Lernen.
+  function allowed(id) { return isAdmin || access === null || id === "gevt" || access.some(function (x) { return x === id || x.indexOf(id + ":") === 0 || courseId(x) === id || (courseId(id) === x && x !== id); }); }
   async function loadAccess() {
     var ak = "portal-access-" + user.id;
     try { var ad = await sb.from("app_admins").select("user_id").eq("user_id", user.id).maybeSingle(); isAdmin = !ad.error && !!ad.data; } catch (e) {}
@@ -269,7 +268,7 @@ var GEVT = {id: "gevt", icon: "🥋", title: "Ving Tsun Wissen", text: "Frag dei
   function courseList() { return COURSES.filter(function (c) { return allowed(c.id); }); }
   function courseOf(type) { var id = type.slice(5); return courseList().filter(function (c) { return c.id === id; })[0] || null; }
   function typeOf(type) {
-    if (type.slice(0, 5) === "kurs:") { var c = courseOf(type); return c ? {group: "Kurse", icon: c.icon, title: c.title, desc: c.text, w: 1, h: 2, course: c, render: renderCourse} : null; }
+    if (type.slice(0, 5) === "kurs:") { var c = courseOf(type); return c ? {group: "Bereiche", icon: c.icon, title: c.title, desc: c.text, w: 1, h: 2, course: c, render: renderCourse} : null; }
     var ty = TYPES[type] || null;
     if (ty && ty.module && !allowed(ty.module)) return null;
     return ty && ty.admin && !isAdmin ? null : ty;
@@ -433,7 +432,7 @@ var GEVT = {id: "gevt", icon: "🥋", title: "Ving Tsun Wissen", text: "Frag dei
   }
   function renderGallery() {
     var body = $("galBody"); body.replaceChildren();
-    ["Kurse", "Info", "Werkzeuge", "Projekte"].forEach(function (grp) {
+    ["Bereiche", "Info", "Werkzeuge", "Projekte"].forEach(function (grp) {
       var items = allTypes().filter(function (k) { return typeOf(k).group === grp; });
       if (!items.length) return;
       body.appendChild(el("h2", {text: grp}));
@@ -494,9 +493,8 @@ var GEVT = {id: "gevt", icon: "🥋", title: "Ving Tsun Wissen", text: "Frag dei
       return;
     }
     if (c.id === "gesundheit") hubermanToday(b, row);
-    if (c.id === "sprachen") sprachenStand(b, row);
+    if (c.id === "lernen") { if (allowed("sprachen")) sprachenStand(b, row); if (allowed("buecher")) buecherStand(b, row); }
     if (c.id === "weltkarte") weltkarteStand(b, row);
-    if (c.id === "buecher") buecherStand(b, row);
     if (c.id === "entspannung") entspannungStand(b, row);
     row.appendChild(el("a", {class: "btn primary", href: c.href, text: "Öffnen", onclick: function () { if (isNew(c)) setSeen((seen() || []).concat([c.id])); }}));
   }
@@ -790,8 +788,14 @@ var GEVT = {id: "gevt", icon: "🥋", title: "Ving Tsun Wissen", text: "Frag dei
   }
 
   /* ---------- Freigaben (nur Admins): welche Module jedes Konto sieht, und der Standard für neue Konten ---------- */
-  // Einzelne Sprachen und Spiele: wer „Sprachen“ bzw. „Spiele“ hat, bekommt alle; sonst nur die hier angehakten (die Seiten blenden die übrigen aus).
+  // Einzelne Lernkurse, Sprachen und Spiele: wer „Lernen“, „Sprachen“ bzw. „Spiele“ hat, bekommt alle; sonst nur die hier angehakten (die Seiten blenden die übrigen aus).
   var SUBMODS = [
+    // Einzelne Lernkurse: wer „Lernen“ hat, bekommt alle; sonst nur die hier angehakten. „Sprachen“ gibt alle Sprachen frei.
+    {id: "lesen", icon: "📖", title: "Nur Lesetraining"},
+    {id: "lesen-fortgeschritten", icon: "🎓", title: "Nur Lesetraining Fortgeschritten"},
+    {id: "schach", icon: "♞", title: "Nur Schachtraining"},
+    {id: "buecher", icon: "📚", title: "Nur Bücher"},
+    {id: "sprachen", icon: "🗣️", title: "Alle Sprachen"},
     {id: "sprachen:niederlaendisch", icon: "🇳🇱", title: "Nur Niederländisch"},
     {id: "sprachen:japanisch", icon: "🇯🇵", title: "Nur Japanisch"},
     {id: "sprachen:thai", icon: "🇹🇭", title: "Nur Thai"},
