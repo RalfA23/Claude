@@ -58,7 +58,7 @@ footer{margin-top:40px;color:var(--muted);font-size:.85rem}
   <a class="back" href="../">← Portal</a>
   <p class="eyebrow">Lebensplattform · Lernen</p>
   <h1>Lernen</h1>
-  <p class="lede">Alles, womit du besser wirst: schneller lesen, mehr Wertungspunkte, neue Sprachen, Bücher festhalten und bald Klavier. Dein Fortschritt bleibt, wo er war.</p>
+  <p class="lede">Alles, womit du besser wirst: schneller lesen, mehr Wertungspunkte, neue Sprachen, Bücher festhalten und Klavier spielen. Dein Fortschritt bleibt, wo er war.</p>
 
   <h2 id="h-lesen">Lesen und Wissen</h2>
   <div class="grid" id="lesen"></div>
@@ -85,8 +85,8 @@ footer{margin-top:40px;color:var(--muted);font-size:.85rem}
       text: "Niederländisch, Japanisch, Thai, Koreanisch, Englisch und Türkisch: nachsprechen mit Spracherkennung, Dialoge, Schreiben und Lesen, mit Punkten, Serien und Stufen.", href: "../sprachen/"},
     {id: "schach", sec: "koennen", icon: "♞", title: "Schachtraining", g: "linear-gradient(135deg,#8d9aa5,#1f2a33)",
       text: "Mehr Wertungspunkte: Tagesaufgabe, Taktik, Smirnov-Lektionen, Stappenmethode in Stufen, verbunden mit Lichess oder chess.com.", href: "../schach/"},
-    {id: "klavier", sec: "koennen", icon: "🎹", title: "Klavier", soon: true, g: "linear-gradient(135deg,#f4f1e8,#3a3a46)",
-      text: "Klavier üben wie mit Flowkey: Handy aufs Notenpult, Noten mitspielen, das Mikrofon hört zu und zeigt, was gepasst hat.", href: "../klavier/"}
+    {id: "klavier", sec: "koennen", icon: "🎹", title: "Klavier", g: "linear-gradient(135deg,#f4f1e8,#3a3a46)",
+      text: "Klavier üben wie mit Flowkey: Handy neben das Klavier, die Noten laufen mit, das Mikrofon hört zu und wartet auf den richtigen Ton. 26 Stücke von C-D-E bis Für Elise.", href: "../klavier/"}
   ];
   var $ = function (id) { return document.getElementById(id); };
   function el(tag, attrs, kids) {
@@ -135,7 +135,7 @@ footer{margin-top:40px;color:var(--muted);font-size:.85rem}
       var done = pr.error ? null : pr.data && pr.data.lessons ? Object.keys(pr.data.lessons).length : 0;
       render(mods, admin, done);
       if (done !== null) stat("lesen", done >= 48 ? "✓ Alle 48 Lektionen" : done + " von 48 Lektionen");
-      // Stand der Sprachen und Bücher wie auf den Kacheln (schach_docs, Pfade sprachen/<sprache>.fortschritt und buecher/buch.<id>)
+      // Stand der Sprachen, Bücher und Klavier (schach_docs, Pfade sprachen/<sprache>.fortschritt, buecher/buch.<id>, klavier/stand)
       var r = await sb.from("schach_docs").select("path,punkte:data->punkte,serie:data->serie").eq("user_id", user.id).like("path", "sprachen/%.fortschritt");
       if (!r.error && r.data && r.data.length) {
         var sum = 0, best = 0;
@@ -144,6 +144,14 @@ footer{margin-top:40px;color:var(--muted);font-size:.85rem}
       }
       var b = await sb.from("schach_docs").select("path").eq("user_id", user.id).like("path", "buecher/buch.%");
       if (!b.error && b.data && b.data.length) stat("buecher", b.data.length + (b.data.length === 1 ? " Buch" : " Bücher"));
+      // Sterne und geschaffte Stücke am Klavier (schach_docs, Pfad klavier/stand)
+      var k = await sb.from("schach_docs").select("data").eq("user_id", user.id).eq("path", "klavier/stand").maybeSingle();
+      var kl = !k.error && k.data && k.data.data && k.data.data.lieder;
+      if (kl) {
+        var sterne = 0, stuecke = 0;
+        Object.keys(kl).forEach(function (id) { var n = +kl[id].sterne || 0; sterne += n; if (n) stuecke++; });
+        if (stuecke) stat("klavier", stuecke + (stuecke === 1 ? " Stück" : " Stücke") + " · " + sterne + " ★");
+      }
     } catch (e) {}
   })();
 })();

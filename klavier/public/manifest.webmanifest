@@ -1,0 +1,15 @@
+{
+  "name": "Klavier",
+  "short_name": "Klavier",
+  "description": "Klavier lernen mit mitlaufenden Noten und Tonerkennung übers Mikrofon.",
+  "lang": "de",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#14110f",
+  "theme_color": "#14110f",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}
