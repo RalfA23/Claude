@@ -88,8 +88,9 @@ const STUFEN = [
   {nr: 4, titel: "Beide Hände", text: "Melodie rechts, Grundtöne links. Erst langsam im Warten-Modus, dann im Tempo."},
   {nr: 5, titel: "Akkorde", text: "Dreiklänge auf C, F und G, Kadenz mit Bass und gebrochene Akkorde."},
   {nr: 6, titel: "Tonleitern", text: "C-Dur und G-Dur mit Daumenuntersatz, einzeln und mit beiden Händen."},
-  {nr: 7, titel: "Klassik", text: "Menuett in G und der Anfang von Für Elise."},
-  {nr: 8, titel: "Notentrainer", text: "Zufällige Noten lesen und sofort spielen, bis es ohne Nachdenken geht."}
+  {nr: 7, titel: "Bekannte Melodien", text: "Stücke, die jeder kennt: Happy Birthday, Stille Nacht, Greensleeves und der Kanon von Pachelbel."},
+  {nr: 8, titel: "Klassik", text: "Eine kleine Nachtmusik, Menuett in G, das Präludium in C von Bach und der Anfang von Für Elise."},
+  {nr: 9, titel: "Notentrainer", text: "Zufällige Noten lesen und sofort spielen, bis es ohne Nachdenken geht."}
 ];
 
 const ENTCHEN = "C4 D4 E4 F4 | G4:2 G4:2 | A4:1 A4 A4 A4 | G4:4 | A4:1 A4 A4 A4 | G4:4 | F4:1 F4 F4 F4 | E4:2 E4:2 | D4:1 D4 D4 D4 | C4:4";
@@ -106,10 +107,16 @@ const LIEDER = [
 
   {id: "entchen", stufe: 2, titel: "Alle meine Entchen", info: "Für das A streckt sich der kleine Finger einen Ton weiter.", bpm: 90,
     rechts: ENTCHEN},
+  {id: "mary", stufe: 2, titel: "Mary hat ein kleines Lamm", info: "Nur C, D, E und einmal G. Die Hand bleibt ganz ruhig liegen.", bpm: 96,
+    rechts: "E4_3 D4_2 C4_1 D4_2 | E4_3 E4 E4:2 | D4_2:1 D4 D4:2 | E4_3:1 G4_5 G4:2 | E4_3:1 D4_2 C4_1 D4_2 | E4_3 E4 E4 E4 | D4_2 D4 E4_3 D4_2 | C4_1:4"},
   {id: "haenschen", stufe: 2, titel: "Hänschen klein", info: "Im Fünftonraum C bis G, mit langen Tönen zum Ausruhen.", bpm: 96,
     rechts: "G4:1 E4 E4:2 | F4:1 D4 D4:2 | C4:1 D4 E4 F4 | G4 G4 G4:2 | G4:1 E4 E4:2 | F4:1 D4 D4:2 | C4:1 E4 G4 G4 | C4:4 | D4:1 D4 D4 D4 | D4 E4 F4:2 | E4:1 E4 E4 E4 | E4 F4 G4:2 | G4:1 E4 E4:2 | F4:1 D4 D4:2 | C4:1 E4 G4 G4 | C4:4"},
   {id: "morgen", stufe: 2, titel: "Morgen kommt der Weihnachtsmann", info: "Die Melodie von „Twinkle, Twinkle“, mit einem Sprung zum G.", bpm: 96,
     rechts: MORGEN},
+  {id: "jingle", stufe: 2, titel: "Jingle Bells", info: "Der Refrain, fast nur E, F und G, mit einem Sprung runter zum C.", bpm: 108,
+    rechts: "E4 E4 E4:2 | E4:1 E4 E4:2 | E4:1 G4 C4:1.5 D4:0.5 | E4:4 | F4:1 F4 F4 F4 | F4 E4 E4 E4:0.5 E4 | E4:1 D4 D4 E4 | D4:2 G4:2 | E4:1 E4 E4:2 | E4:1 E4 E4:2 | E4:1 G4 C4:1.5 D4:0.5 | E4:4 | F4:1 F4 F4 F4 | F4 E4 E4 E4:0.5 E4 | G4:1 G4 F4 D4 | C4:4"},
+  {id: "oldmac", stufe: 2, titel: "Old MacDonald", info: "Der Daumen rutscht kurz runter zum G und A unter dem C.", bpm: 100,
+    rechts: "C4 C4 C4 G3 | A3 A3 G3:2 | E4:1 E4 D4 D4 | C4:3 G3:1 | C4:1 C4 C4 G3 | A3 A3 G3:2 | E4:1 E4 D4 D4 | C4:4"},
   {id: "jakob", stufe: 2, titel: "Bruder Jakob", info: "Mit Achteln in der dritten Zeile und dem tiefen G unter dem C.", bpm: 100,
     rechts: "C4 D4 E4 C4 | C4 D4 E4 C4 | E4 F4 G4:2 | E4:1 F4 G4:2 | G4:0.5 A4 G4 F4 E4:1 C4 | G4:0.5 A4 G4 F4 E4:1 C4 | C4 G3 C4:2 | C4:1 G3 C4:2"},
   {id: "ode", stufe: 2, titel: "Ode an die Freude", info: "Beethovens Melodie, mit punktierten Vierteln am Zeilenende.", bpm: 100,
@@ -146,16 +153,30 @@ const LIEDER = [
   {id: "gdur", stufe: 6, titel: "G-Dur rechts", info: "Die erste schwarze Taste: Fis mit dem vierten Finger.", bpm: 80,
     rechts: "G4_1:1 A4_2 B4_3 C5_1 | D5_2 E5_3 F#5_4 G5_5 | F#5_4 E5_3 D5_2 C5_1 | B4_3 A4_2 G4_1:2"},
 
-  {id: "menuett", stufe: 7, titel: "Menuett in G", info: "Christian Petzold, früher Bach zugeschrieben. Erste acht Takte, Bass vereinfacht.", bpm: 96, takt: [3, 4],
+  {id: "birthday", stufe: 7, titel: "Happy Birthday", info: "Im Dreiertakt mit Auftakt und dem großen Sprung zum hohen G.", bpm: 100, takt: [3, 4], auftakt: 1,
+    rechts: "G4:0.5 G4 | A4:1 G4 C5 | B4:2 G4:0.5 G4 | A4:1 G4 D5 | C5:2 G4:0.5 G4 | G5:1 E5 C5 | B4 A4 F5:0.5 F5 | E5:1 C5 D5 | C5:3"},
+  {id: "stillenacht", stufe: 7, titel: "Stille Nacht", info: "Im wiegenden 6/8-Takt, gezählt wird in Achteln.", bpm: 150, takt: [6, 8],
+    rechts: "G4:1.5 A4:0.5 G4:1 E4:3 | G4:1.5 A4:0.5 G4:1 E4:3 | D5:2 D5:1 B4:3 | C5:2 C5:1 G4:3 | A4:2 A4:1 C5:1.5 B4:0.5 A4:1 | G4:1.5 A4:0.5 G4:1 E4:3 | A4:2 A4:1 C5:1.5 B4:0.5 A4:1 | G4:1.5 A4:0.5 G4:1 E4:3 | D5:2 D5:1 F5:1.5 D5:0.5 B4:1 | C5:3 E5:3 | C5:1.5 G4:0.5 E4:1 G4:1.5 F4:0.5 D4:1 | C4:6"},
+  {id: "greensleeves", stufe: 7, titel: "Greensleeves", info: "Altes englisches Lied in a-Moll, mit Gis als einziger schwarzer Taste.", bpm: 100, takt: [3, 4], auftakt: 1,
+    rechts: "A4:1 | C5:2 D5:1 | E5:1.5 F5:0.5 E5:1 | D5:2 B4:1 | G4:1.5 A4:0.5 B4:1 | C5:2 A4:1 | A4:1.5 G#4:0.5 A4:1 | B4:2 G#4:1 | E4:2 A4:1 | C5:2 D5:1 | E5:1.5 F5:0.5 E5:1 | D5:2 B4:1 | G4:1.5 A4:0.5 B4:1 | C5:1.5 B4:0.5 A4:1 | G#4:1.5 F#4:0.5 G#4:1 | A4:3"},
+  {id: "kanon", stufe: 7, titel: "Kanon von Pachelbel", info: "Die berühmte Basslinie links, rechts die Melodie in halben Noten. Nach C-Dur versetzt.", bpm: 72,
+    rechts: "E5:2 D5:2 | C5:2 B4:2 | A4:2 G4:2 | A4:2 B4:2 | C5:2 B4:2 | A4:2 G4:2 | F4:2 E4:2 | F4:2 G4:2 | E4:4",
+    links: "C3:2 G2:2 | A2:2 E2:2 | F2:2 C3:2 | F2:2 G2:2 | C3:2 G2:2 | A2:2 E2:2 | F2:2 C3:2 | F2:2 G2:2 | C3:4"},
+
+  {id: "nachtmusik", stufe: 8, titel: "Eine kleine Nachtmusik", info: "Mozarts Anfang in G-Dur mit kurzen Pausen und Fis.", bpm: 112,
+    rechts: "G4:1 r:0.5 D4:0.5 G4:1 r:0.5 D4:0.5 | G4:0.5 D4 G4 B4 D5:2 | C5:1 r:0.5 A4:0.5 C5:1 r:0.5 A4:0.5 | C5:0.5 A4 F#4 A4 D4:2 | G4:4"},
+  {id: "menuett", stufe: 8, titel: "Menuett in G", info: "Christian Petzold, früher Bach zugeschrieben. Erste acht Takte, Bass vereinfacht.", bpm: 96, takt: [3, 4],
     rechts: "D5:1 G4:0.5 A4 B4 C5 | D5:1 G4 G4 | E5:1 C5:0.5 D5 E5 F#5 | G5:1 G4 G4 | C5:1 D5:0.5 C5 B4 A4 | B4:1 C5:0.5 B4 A4 G4 | F#4:1 G4:0.5 A4 B4 G4 | A4:3",
     links: "G3:2 A3:1 | B3:3 | C4:3 | B3:3 | A3:3 | G3:3 | D4:1 B3 G3 | D4:2 D3:1"},
-  {id: "elise", stufe: 7, titel: "Für Elise (Anfang)", info: "Beethoven, die ersten acht Takte. Zählzeit ist die Achtel, also langsam anfangen.", bpm: 132, takt: [3, 8], auftakt: 1,
+  {id: "praeludium", stufe: 8, titel: "Präludium in C (Bach)", info: "Die ersten vier Takte als gebrochene Akkorde mit der rechten Hand, in Sechzehnteln.", bpm: 56,
+    rechts: "C4:0.25 E4 G4 C5 E5 G4 C5 E5 C4 E4 G4 C5 E5 G4 C5 E5 | C4 D4 A4 D5 F5 A4 D5 F5 C4 D4 A4 D5 F5 A4 D5 F5 | B3 D4 G4 D5 F5 G4 D5 F5 B3 D4 G4 D5 F5 G4 D5 F5 | C4 E4 G4 C5 E5 G4 C5 E5 C4 E4 G4 C5 E5 G4 C5 E5"},
+  {id: "elise", stufe: 8, titel: "Für Elise (Anfang)", info: "Beethoven, die ersten acht Takte. Zählzeit ist die Achtel, also langsam anfangen.", bpm: 132, takt: [3, 8], auftakt: 1,
     rechts: "E5:0.5 D#5 | E5 D#5 E5 B4 D5 C5 | A4:1 r:0.5 C4 E4 A4 | B4:1 r:0.5 E4 G#4 B4 | C5:1 r:0.5 E4 E5 D#5 | E5 D#5 E5 B4 D5 C5 | A4:1 r:0.5 C4 E4 A4 | B4:1 r:0.5 E4 C5 B4 | A4:3",
     links: "r:1 | r:3 | A2:0.5 E3 A3 r:1.5 | E2:0.5 E3 G#3 r:1.5 | A2:0.5 E3 A3 r:1.5 | r:3 | A2:0.5 E3 A3 r:1.5 | E2:0.5 E3 G#3 r:1.5 | A2:0.5 E3 A3 r:1.5"},
 
-  {id: "noten-violin", stufe: 8, titel: "Violinschlüssel", info: "16 zufällige Noten von C bis G'' für die rechte Hand.", bpm: 60, trainer: "violin"},
-  {id: "noten-bass", stufe: 8, titel: "Bassschlüssel", info: "16 zufällige Noten von C bis H für die linke Hand.", bpm: 60, trainer: "bass"},
-  {id: "noten-beide", stufe: 8, titel: "Beide Schlüssel", info: "16 zufällige Noten, mal oben, mal unten.", bpm: 60, trainer: "beide"}
+  {id: "noten-violin", stufe: 9, titel: "Violinschlüssel", info: "16 zufällige Noten von C bis G'' für die rechte Hand.", bpm: 60, trainer: "violin"},
+  {id: "noten-bass", stufe: 9, titel: "Bassschlüssel", info: "16 zufällige Noten von C bis H für die linke Hand.", bpm: 60, trainer: "bass"},
+  {id: "noten-beide", stufe: 9, titel: "Beide Schlüssel", info: "16 zufällige Noten, mal oben, mal unten.", bpm: 60, trainer: "beide"}
 ];
 
 // Für den Notentrainer jedes Mal neue Noten, sonst das Stück wie notiert.
