@@ -1,7 +1,7 @@
 {
   "name": "Spiele",
   "short_name": "Spiele",
-  "description": "Alle Spiele der Lebensplattform: Flipper, Götterquiz, Wortwürfel, Poker, Murmelbahn und Vestaboard.",
+  "description": "Alle Spiele der Lebensplattform: Hundeleben, Flipper, Götterquiz, Wortwürfel, Poker, Murmelbahn und Vestaboard.",
   "lang": "de",
   "start_url": "./",
   "scope": "./",

@@ -173,9 +173,9 @@ var COURSES = [
   // Lernen (lernen/) bündelt Lesetraining, Lesetraining Fortgeschritten, Schachtraining, Sprachen und Bücher, Klavier kommt dazu. Die Kurse behalten ihre Adressen.
   // Früher hatte jeder Kurs eine eigene Kachel: alte Freigaben (lesen, schach, sprachen, …) und Dashboard-Kacheln werden zu „lernen“.
   {id: "lernen", icon: "🎓", title: "Lernen", text: "Lesetraining, Schachtraining, Sprachen und deine Bücher an einer Stelle, Klavier kommt bald dazu.", href: "lernen/"},
-  // Spiele (spiele/) bündelt Flipper, Götterquiz, Wortwürfel, Poker, Murmelbahn und Vestaboard. Die Spiele behalten ihre Adressen.
+  // Spiele (spiele/) bündelt Hundeleben, Flipper, Götterquiz, Wortwürfel, Poker, Murmelbahn und Vestaboard. Die Spiele behalten ihre Adressen.
   // Früher hatte jedes Spiel eine eigene Kachel: alte Freigaben (quiz, wortwuerfel, …) und Dashboard-Kacheln werden zu „spiele“.
-  {id: "spiele", icon: "🕹️", title: "Spiele", text: "Flipper mit vier Tischen, Götterquiz, Wortwürfel und Poker zum Spielen, Murmelbahn und Vestaboard zum Abschalten.", href: "spiele/"},
+  {id: "spiele", icon: "🕹️", title: "Spiele", text: "Hundeleben mit deinem Pinscher in 3D, Flipper mit vier Tischen, Götterquiz, Wortwürfel und Poker zum Spielen, Murmelbahn und Vestaboard zum Abschalten.", href: "spiele/"},
   // Gesundheit (gesundheit/) bündelt die Huberman-Checkliste (huberman/, Häkchen weiter unter huberman/tag.<datum>), die Trainingswoche und das Wissen.
   // Die Kachel zeigt den heutigen Huberman-Stand. Früher hieß die Kachel „huberman“, alte Freigaben und Dashboard-Kacheln werden übernommen.
   {id: "gesundheit", icon: "🫀", title: "Gesundheit", text: "Huberman-Checkliste, Trainingswoche mit dem 12-Wochen-Plan und dein Wissen zu Schlaf, Licht, Bewegung, Ernährung und Stress an einer Stelle.", href: "gesundheit/"},
@@ -185,7 +185,7 @@ var COURSES = [
   {id: "weltkarte", icon: "🗺️", title: "Weltkarte", text: "Alle Orte, an denen du warst und wo du noch hin willst, als Pins auf einer großen Weltkarte. Mit Datum, Notizen und Bildern als Andenken.", href: "weltkarte/"}
 ];
 // Spiele mit eigener Freigabe-Kennung (wie früher ihre Kachel). Jede davon zeigt die Kachel Spiele, die Spiele-Seite blendet die übrigen aus.
-var GAME_IDS = ["flipper", "quiz", "wortwuerfel", "poker", "murmelbahn", "vestaboard"];
+var GAME_IDS = ["hund", "flipper", "quiz", "wortwuerfel", "poker", "murmelbahn", "vestaboard"];
 // Lernkurse mit eigener Freigabe-Kennung, dazu sprachen:<ordner>. Jede davon zeigt die Kachel Lernen, die Lernen-Seite blendet die übrigen aus.
 var LERN_IDS = ["lesen", "lesen-fortgeschritten", "schach", "sprachen", "buecher", "klavier"];
 function courseId(x) { return x === "huberman" ? "gesundheit" : GAME_IDS.indexOf(x) >= 0 ? "spiele" : LERN_IDS.indexOf(x) >= 0 || x.indexOf("sprachen:") === 0 ? "lernen" : x; }
@@ -803,6 +803,7 @@ var GEVT = {id: "gevt", icon: "🥋", title: "Ving Tsun Wissen", text: "Frag dei
     {id: "sprachen:englisch", icon: "🇬🇧", title: "Nur Englisch"},
     {id: "sprachen:tuerkisch", icon: "🇹🇷", title: "Nur Türkisch"},
     // Einzelne Spiele: wer „Spiele“ hat, bekommt alle; sonst nur die hier angehakten.
+    {id: "hund", icon: "🐕", title: "Nur Hundeleben"},
     {id: "flipper", icon: "🕹️", title: "Nur Flipper"},
     {id: "quiz", icon: "⚡", title: "Nur Götterquiz"},
     {id: "wortwuerfel", icon: "🎲", title: "Nur Wortwürfel"},
