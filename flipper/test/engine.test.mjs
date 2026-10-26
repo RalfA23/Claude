@@ -9,14 +9,14 @@ function freeBall(g, x, y, vx = 0, vy = 0) {
 }
 
 test("alle Tische sind vollständig beschrieben", () => {
-  assert.deepEqual(F.TABLE_ORDER, ["klassik", "comic", "huberman", "weltraum"]);
+  assert.deepEqual(F.TABLE_ORDER, ["klassik", "comic", "huberman", "weltraum", "buecher"]);
   for (const id of F.TABLE_ORDER) {
     const t = F.TABLES[id];
     assert.equal(t.id, id);
     assert.ok(t.name && t.blurb && t.theme && t.theme.dmd, id);
     assert.equal(t.lanes.xs.length + 1, t.lanes.guides.length, id + ": Lanes und Führungen");
     assert.ok(t.missions.length >= 5, id + ": Missionen");
-    for (const m of t.missions) assert.ok(["bumper", "bank", "ramp", "spin", "lanes", "saucer", "standups"].includes(m.ev), id + ": " + m.ev);
+    for (const m of t.missions) assert.ok(["bumper", "bank", "ramp", "spin", "lanes", "saucer", "standups", "mover", "orbit", "drop", "lane"].includes(m.ev), id + ": " + m.ev);
   }
 });
 
@@ -144,4 +144,46 @@ test("ganze Spiele mit Autopilot: keine Kugel verlässt den Tisch, keine hängt 
       assert.ok(g.score > 0);
     }
   }
+});
+
+test("wanderndes Ziel bewegt sich, zählt und startet nach drei Treffern den Hurry-up", () => {
+  for (const id of F.TABLE_ORDER) {
+    const g = new F.Game(F.TABLES[id], {rand: seeded(12)});
+    const m = g.w.mover; assert.ok(m, id + ": mover");
+    const x0 = m.x; for (let i = 0; i < 60; i++) g.update(1 / 60);
+    assert.notEqual(m.x, x0, id + ": bewegt sich");
+  }
+  const g = new F.Game(F.TABLES.klassik, {rand: seeded(13)});
+  const ev = [];
+  for (let i = 0; i < 3; i++) { g.w.mover.cool = 0; g.onHit(g.w.mover, {x: g.w.mover.x, y: g.w.mover.y}, 400); ev.push(...g.drainEvents().map((e) => e.type)); }
+  assert.ok(ev.includes("mover") && ev.includes("hurryStart"));
+  assert.ok(g.hurry && g.hurry.v > 0);
+});
+
+test("Kickback rettet die Kugel einmal, Mystery und Frenzy geben Punkte", () => {
+  const g = new F.Game(F.TABLES.comic, {rand: seeded(14)});
+  const b = freeBall(g, 40, 900, 0, 600);
+  const ev = [];
+  for (let i = 0; i < 90; i++) { g.update(1 / 60); ev.push(...g.drainEvents().map((e) => e.type)); }
+  assert.ok(ev.includes("kickback"), "Kickback ausgelöst");
+  assert.ok(b.x > 90 || b.y < 600, "Kugel wieder im Spiel");
+  assert.equal(g.kickLit, false);
+  const before = g.score; g.mystery(); assert.ok(g.drainEvents().some((e) => e.type === "mystery"));
+  g.startFrenzy(); g.drainEvents();
+  const bu = g.w.circs.find((c) => c.tag === "bumper"); bu.cool = 0; const s = g.score; g.onHit(bu, {x: 0, y: 0}, 300);
+  //.find((c) => c.tag === "bumper"), {x: 0, y: 0}, 300);
+  assert.ok(g.score - s >= 1500, "Frenzy-Bonus");
+  assert.ok(g.score >= before);
+});
+
+test("Bibliothek: Missionen aus Klassikern und der eigenen Bücher-App", () => {
+  assert.ok(F.CLASSICS.length >= 30);
+  const lib = [{title: "Der Zauberberg", author: "Thomas Mann", status: "lese"}];
+  const ms = F.bookMissions(lib, seeded(15));
+  assert.ok(ms.length >= 5);
+  assert.ok(ms.some((m) => m.mine && m.title === "Der Zauberberg"), "eigenes Buch drin");
+  const g = new F.Game(F.TABLES.buecher, {rand: seeded(16), missions: ms});
+  assert.equal(g.missions, ms);
+  const plain = F.bookMissions([], seeded(17));
+  assert.ok(plain.every((m) => !m.mine) && plain.length >= 5);
 });

@@ -77,8 +77,8 @@ footer{margin-top:40px;color:var(--muted);font-size:.85rem}
     {id: "hund", sec: "play", icon: "🐕", title: "Hundeleben", isNew: true, g: "linear-gradient(135deg,#a8582a,#151110 55%,#2c4a2f)",
       text: "Leben mit Hund wie bei den Sims, fünf Rassen zur Wahl: Wohnung, Garten und Stadtpark in 3D. Homeoffice und Gassirunden, Postbote, Besuch, Leute und Hunde im Park, Tricks mit Leckerli, samstags Hundeschule. Allein oder zu zweit.", href: "../hund/"},
     {id: "flipper", sec: "play", icon: "🕹️", title: "Flipper", g: "linear-gradient(135deg,#ff3df2,#7a5cff 50%,#21d4fd)",
-      text: "Vier Tische mit eigener Physik, Kunst und Klang: Retro-Klassiker, Comic-Superhelden, ein Huberman-Tag und ein Weltraum-Tisch mit Schwerkraft. Multiball, Missionen, Rekorde.", href: "../flipper/",
-      tables: [["🎰", "Goldene Ära", "klassik"], ["💥", "Kapow City", "comic"], ["🌅", "Protokoll", "huberman"], ["🪐", "Orbit 9", "weltraum"]]},
+      text: "Fünf Tische voller Action: Retro-Klassiker, Comic-Superhelden, ein Huberman-Tag, ein Weltraum-Tisch mit Schwerkraft und die Bibliothek mit deinen Büchern und den Klassikern der Weltliteratur. Wandernde Ziele, Hurry-up, Frenzy, Multiball.", href: "../flipper/",
+      tables: [["🎰", "Goldene Ära", "klassik"], ["💥", "Kapow City", "comic"], ["🌅", "Protokoll", "huberman"], ["🪐", "Orbit 9", "weltraum"], ["📚", "Bibliothek", "buecher"]]},
     {id: "quiz", sec: "play", icon: "⚡", title: "Götterquiz", g: "linear-gradient(135deg,#f7b733,#fc4a1a)",
       text: "Wissensspiel nach dem Vorbild von Powerplay: vier Götter, je vier Krieger, Duelle und Mutationen. Fragen aus allen Bereichen und aus dem Lesetraining.", href: "../quiz/"},
     {id: "wortwuerfel", sec: "play", icon: "🎲", title: "Wortwürfel", g: "linear-gradient(135deg,#43cea2,#185a9d)",
@@ -116,7 +116,7 @@ footer{margin-top:40px;color:var(--muted);font-size:.85rem}
   function fmt(n) { return Math.round(n).toLocaleString("de-DE"); }
   function flipperStat(list) {
     if (!cards.flipper) return;
-    var best = 0, name = "", games = 0, names = {klassik: "Goldene Ära", comic: "Kapow City", huberman: "Protokoll", weltraum: "Orbit 9"};
+    var best = 0, name = "", games = 0, names = {klassik: "Goldene Ära", comic: "Kapow City", huberman: "Protokoll", weltraum: "Orbit 9", buecher: "Bibliothek"};
     Object.keys(list).forEach(function (id) { var d = list[id] || {}; games += d.spiele || 0; if ((d.best || 0) > best) { best = d.best; name = names[id] || id; } });
     if (best) cards.flipper.stat.textContent = "Rekord " + fmt(best) + " auf " + name + " · " + games + (games === 1 ? " Spiel" : " Spiele");
   }

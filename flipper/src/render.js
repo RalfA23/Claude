@@ -100,6 +100,36 @@
       [[60, 480], [180, 470], [70, 560]].forEach(function (p) { for (var k = 0; k < 3; k++) { var a = k * Math.PI / 3; c.beginPath(); c.moveTo(p[0] - Math.cos(a) * 9, p[1] - Math.sin(a) * 9); c.lineTo(p[0] + Math.cos(a) * 9, p[1] + Math.sin(a) * 9); c.stroke(); } });
       c.restore();
     },
+    buecher: function (c, def, th) {
+      // Holzregale außen, grünes Leder innen, Goldprägung
+      var wood = c.createLinearGradient(0, 0, W, 0); wood.addColorStop(0, "#3a2414"); wood.addColorStop(0.5, "#5a3a20"); wood.addColorStop(1, "#2e1c0f");
+      c.fillStyle = wood; c.fillRect(0, 0, W, H);
+      c.save(); fieldPath(c); c.clip();
+      var g = c.createRadialGradient(280, 560, 60, 280, 520, 640); g.addColorStop(0, "#2c5a3e"); g.addColorStop(0.6, "#16301f"); g.addColorStop(1, "#0b1a10");
+      c.fillStyle = g; c.fillRect(0, 0, W, H);
+      // Lederprägung: feines Rautenmuster
+      c.strokeStyle = "rgba(201,164,92,.10)"; c.lineWidth = 1;
+      for (var k = -H; k < W + H; k += 26) { c.beginPath(); c.moveTo(k, 0); c.lineTo(k + H, H); c.stroke(); c.beginPath(); c.moveTo(k, 0); c.lineTo(k - H, H); c.stroke(); }
+      // Regal unter dem Bogen mit Buchrücken: deine Bücher, sonst Klassiker
+      var lib = (F.LIBRARY || []).filter(function (b) { return b && b.title; }).map(function (b) { return b.title; });
+      var titles = lib.concat((F.CLASSICS || []).map(function (x) { return x.t; })), rnd = seeded(5), x = 60, n = 0;
+      c.fillStyle = "#3a2414"; c.fillRect(20, 228, 540, 8);
+      while (x < 500 && n < 40) {
+        var w = 12 + rnd() * 10, hgt = 40 + rnd() * 26, col = ["#8c2f2b", "#2f5d8c", "#3d6b3a", "#6b3d7a", "#b07a2a", "#1f3a5a", "#7a1f1f"][n % 7];
+        var top = 228 - hgt; if (top < 280 - Math.sqrt(Math.max(0, 280 * 280 - Math.pow(x + w / 2 - 300, 2))) + 6) { x += w + 1; n++; continue; }
+        c.fillStyle = col; c.fillRect(x, top, w, hgt); c.fillStyle = "rgba(232,198,106,.8)"; c.fillRect(x, top + 5, w, 1.5); c.fillRect(x, 222, w, 1.5);
+        c.save(); c.translate(x + w / 2 + 3, top + hgt / 2); c.rotate(-Math.PI / 2); c.fillStyle = "#f5e6c0"; c.font = "8px " + th.font; c.textAlign = "center"; c.fillText((titles[n % titles.length] || "").slice(0, Math.floor(hgt / 5)), 0, 0); c.restore();
+        x += w + 1; n++;
+      }
+      // Leselampe
+      var lg = c.createRadialGradient(470, 640, 10, 470, 640, 220); lg.addColorStop(0, "rgba(255,215,122,.25)"); lg.addColorStop(1, "rgba(255,215,122,0)"); c.fillStyle = lg; c.fillRect(0, 0, W, H);
+      // Goldrahmen und Titel
+      c.strokeStyle = "rgba(201,164,92,.6)"; c.lineWidth = 2; c.strokeRect(150, 655, 260, 96); c.strokeRect(156, 661, 248, 84);
+      c.textAlign = "center"; c.fillStyle = "#e8c66a"; c.font = "700 40px " + th.font; c.shadowColor = "rgba(0,0,0,.6)"; c.shadowBlur = 6;
+      c.fillText("Bibliothek", 280, 705); c.shadowBlur = 0;
+      c.font = "italic 15px " + th.font; c.fillStyle = "#e8d9b0"; c.fillText("Weltliteratur · " + (lib.length ? lib.length + " deiner Bücher" : "deine Bücher"), 280, 730);
+      c.restore();
+    },
     weltraum: function (c, def, th) {
       c.fillStyle = "#05040f"; c.fillRect(0, 0, W, H);
       c.save(); fieldPath(c); c.clip();
@@ -236,8 +266,42 @@
       case "points": this.pop("+" + fmt(e.points), e.x, e.y, {size: 18, color: th.light, float: true}); break;
       case "gameover": this.message("GAME OVER", fmt(e.score), 4); break;
       case "eject": this.burst(e.x, e.y, th.accent2, 10, 180); break;
+      case "mover":
+        this.burst(e.x, e.y, th.light, 22, 320); this.shake = Math.max(this.shake, 7);
+        this.message((this.def.mover.name || "TREFFER").toUpperCase() + "!", fmt(e.points) + (e.n % 3 === 0 ? "" : " · NOCH " + (3 - e.n % 3) + " FÜR HURRY-UP"), 1.4);
+        if (id === "comic") this.pop(["SMASH!", "KRAWUMM!", "ZACK!"][e.n % 3], e.x, e.y - 40, {style: "bubble", size: 30});
+        if (id === "buecher") this.pop("Bücherwurm!", e.x, e.y - 34, {size: 18, color: "#ffd77a"});
+        if (id === "huberman") this.pop("☕ zu früh!", e.x, e.y - 34, {size: 16, color: "#fff"});
+        break;
+      case "kickback": this.message("KICKBACK", "GERETTET", 1.4); this.burst(60, 900, th.light, 30, 400); this.shake = 10; this.bolt(40, 950, 78, 770); break;
+      case "mystery": this.message("MYSTERY", MYST[e.award] + (e.points ? " " + fmt(e.points) : ""), 2.4); this.flashT = 0.3; this.confetti(280, 300, 40); break;
+      case "hurryStart": this.message("HURRY-UP", "RAMPE TREFFEN: " + fmt(e.v), 2); this.shake = 8; break;
+      case "hurryCollect": this.message("HURRY-UP!", fmt(e.points), 2.4); this.flashT = 0.6; this.shake = 14; this.slow = 0.7; this.confetti(280, 400, 60); break;
+      case "hurryEnd": this.message("HURRY-UP VORBEI", "", 1.2); break;
+      case "frenzy": this.message("FRENZY", "ALLES +1.500", 2); this.flashT = 0.3; break;
+      case "frenzyEnd": break;
+      case "addaball": this.message("ADD-A-BALL", "", 1.6); this.shake = 8; break;
+    }
+    if (e.type === "multiball" || e.type === "superjackpot" || e.type === "wizard") { this.lightning = 0.7; this.slow = e.type === "multiball" ? 0.5 : 0.9; }
+    if (e.type === "jackpot") this.slow = 0.5;
+    if (e.type === "mission") this.confetti(280, 450, 70);
+    if (id === "buecher" && (e.type === "drop" || e.type === "skill" || e.type === "saucer" && !g.multiball && !g.lockLit)) {
+      var bk = this.bookPick(); if (bk) this.message(e.type === "saucer" ? "BUCHTIPP" : bk.t, e.type === "saucer" ? bk.t + " · " + bk.a : bk.a, 1.6);
     }
   };
+
+  var MYST = {punkte: "PUNKTE", kickback: "KICKBACK AN", hurry: "HURRY-UP", frenzy: "FRENZY", bonusx: "BONUS × +1", save: "BALLSICHERUNG 20 S", lock: "LOCKS BEREIT", extraball: "EXTRABALL!"};
+  // Bücher-Tisch: ein zufälliges Buch, eigene Bücher bevorzugt
+  RP.bookPick = function () {
+    var lib = (F.LIBRARY || []).filter(function (b) { return b && b.title; }), cl = F.CLASSICS || [];
+    if (lib.length && Math.random() < 0.6) { var b = lib[Math.floor(Math.random() * lib.length)]; return {t: b.title, a: b.author || "AUS DEINER BIBLIOTHEK"}; }
+    var c = cl[Math.floor(Math.random() * cl.length)]; return c ? {t: c.t, a: c.a} : null;
+  };
+  RP.confetti = function (x, y, n) {
+    var cols = ["#ff3b30", "#ffcc00", "#34c759", "#0a84ff", "#ff2d55", "#ffffff", this.th.light];
+    for (var i = 0; i < n; i++) { var a = -Math.PI / 2 + (Math.random() - 0.5) * 2.4, v = 300 + Math.random() * 500; this.fx.push({x: x, y: y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, life: 1.2 + Math.random() * 0.6, t: 0, c: cols[i % cols.length], s: 4 + Math.random() * 4, grav: true}); }
+  };
+  RP.bolt = function (x1, y1, x2, y2) { this.bolts = (this.bolts || []).concat([{x1: x1, y1: y1, x2: x2, y2: y2, t: 0.35}]); };
 
   /* ---------- Punktedisplay: echte 5×7-Pixelschrift auf 128×24 Punkten ---------- */
   var GLYPHS = {
@@ -271,6 +335,11 @@
       x += ((gph ? gph.w : 3) + 1) * sx;
     }
   }
+  // Großbuchstaben, ß zu SS, Akzente weg (é → E), Umlaute bleiben
+  function dmdClean(t) {
+    return String(t).toUpperCase().replace(/ß/g, "SS").replace(/Ä/g, "\u0001").replace(/Ö/g, "\u0002").replace(/Ü/g, "\u0003")
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\u0001/g, "Ä").replace(/\u0002/g, "Ö").replace(/\u0003/g, "Ü").replace(/[„“”»«]/g, "'").replace(/[–—]/g, "-");
+  }
   RP.dmdText = function () {
     var g = this.g, m = this.msgs[0], blink = Math.floor(this.t * 4) % 2;
     if (m) return {big: m.big, small: m.small, msg: true, blink: blink};
@@ -278,10 +347,12 @@
     if (g.waiting() && !g.multiball) small = "KUGEL " + g.ballNo + " · ABZUG HALTEN UND LOSLASSEN";
     if (g.multiball) small = "MULTIBALL · RAMPE = JACKPOT";
     if (g.wizard > 0) small = this.def.texts.wizard + " " + Math.ceil(g.wizard) + "S · PUNKTE × 3";
+    if (g.frenzy > 0) small = "FRENZY " + Math.ceil(g.frenzy) + "S · ALLES +1.500";
+    if (g.hurry) small = "HURRY-UP " + fmt(g.hurry.v) + " · RAMPE! " + Math.ceil(g.hurry.t) + "S";
     return {big: fmt(g.score), small: small, msg: false, blink: 0};
   };
   RP.drawDMD = function (c) {
-    var d = this.dmdText(), big = d.big.toUpperCase().replace(/ß/g, "SS"), small = (d.small || "").toUpperCase().replace(/ß/g, "SS");
+    var d = this.dmdText(), big = dmdClean(d.big), small = dmdClean(d.small || "");
     var sw = textWidth(small, 1), scroll = sw > 126 ? Math.floor(this.t * 24) % (sw + 30) : 0;
     var key = big + "|" + small + "|" + (d.msg ? d.blink : "") + "|" + scroll;
     var dc = this.dmdCache;
@@ -314,7 +385,7 @@
   /* ---------- Zeichnen pro Bild ---------- */
   RP.sky = function (c) {
     // Huberman: Himmel nach Tageszeit, die mit den Missionen fortschreitet
-    var g = this.g, n = this.def.missions.length, mi = g.currentMission();
+    var g = this.g, n = g.missions.length, mi = g.currentMission();
     var p = ((g.mission % n) + (mi ? Math.min(1, mi.have / mi.need) : 0)) / n; if (g.wizard > 0) p = 0.35 + 0.1 * Math.sin(this.t);
     var stops = [[0, "#3a2a5a", "#f08a4b"], [0.25, "#4f8fc9", "#ffd08a"], [0.5, "#5fb3e8", "#cfeaff"], [0.7, "#4a3b78", "#e07a5f"], [0.85, "#141b3a", "#4b3a78"], [1, "#070b1c", "#1b2a4f"]];
     var a = stops[0], b = stops[stops.length - 1];
@@ -360,6 +431,10 @@
       case "saucer": return w.saucer ? {x: w.saucer.x, y: w.saucer.y + 44} : null;
       case "lanes": return {x: 280, y: this.def.lanes.y1 + 80};
       case "bumper": var b = w.circs.filter(function (c) { return c.tag === "bumper"; }); return b.length ? {x: b[b.length > 2 ? 2 : 0].x, y: b[b.length > 2 ? 2 : 0].y + 60} : null;
+      case "mover": return w.mover ? {x: w.mover.x, y: w.mover.y + 46} : null;
+      case "orbit": return {x: 60, y: 330};
+      case "drop": d = avg(w.segs.filter(function (s) { return s.tag === "drop"; })); return {x: d.x, y: d.y + 70};
+      case "lane": return {x: 280, y: this.def.lanes.y1 + 80};
     }
     return null;
   };
@@ -375,6 +450,55 @@
     c.save(); c.shadowColor = "rgba(0,0,0,.5)"; c.shadowOffsetX = 3; c.shadowOffsetY = 5; c.shadowBlur = 6; c.fillStyle = th.flipper; c.fill(); c.restore();
     c.strokeStyle = th.flipperEdge; c.lineWidth = 4; c.stroke();
     c.fillStyle = th.flipperEdge; c.beginPath(); c.arc(f.px, f.py, 4, 0, TAU); c.fill();
+  };
+  RP.zap = function (c, x1, y1, x2, y2) {
+    c.save(); c.strokeStyle = "#fff"; c.shadowColor = this.th.light; c.shadowBlur = 18; c.lineWidth = 3; c.beginPath(); c.moveTo(x1, y1);
+    for (var i = 1; i <= 8; i++) { var f = i / 8; c.lineTo(x1 + (x2 - x1) * f + (i < 8 ? (Math.random() - 0.5) * 50 : 0), y1 + (y2 - y1) * f + (i < 8 ? (Math.random() - 0.5) * 20 : 0)); }
+    c.stroke(); c.restore();
+  };
+  RP.spineTitle = function (i) {
+    var lib = (F.LIBRARY || []).filter(function (b) { return b && b.title; }), cl = F.CLASSICS || [];
+    var b = lib.length ? lib[i % lib.length] : null;
+    return (b ? b.title : cl.length ? cl[(i * 7) % cl.length].t : "BUCH").toUpperCase();
+  };
+  // Das bewegliche Ziel, je Tisch anders gezeichnet
+  RP.drawMover = function (c, o, t) {
+    var id = this.def.id, th = this.th, fl = o.flash > 0 ? o.flash / 0.4 : 0, r = o.r;
+    c.save(); c.translate(o.x, o.y);
+    if (fl) { c.fillStyle = rgba(th.light, 0.6 * fl); c.beginPath(); c.arc(0, 0, r + 16, 0, TAU); c.fill(); }
+    c.fillStyle = "rgba(0,0,0,.35)"; c.beginPath(); c.arc(3, 5, r, 0, TAU); c.fill();
+    if (id === "klassik") {
+      c.rotate(t * 3);
+      for (var i = 0; i < 8; i++) { c.fillStyle = i % 2 ? "#c8322b" : "#e8b341"; c.beginPath(); c.moveTo(0, 0); c.arc(0, 0, r, i * TAU / 8, (i + 1) * TAU / 8); c.closePath(); c.fill(); }
+      c.strokeStyle = "#f4ecd8"; c.lineWidth = 3; c.beginPath(); c.arc(0, 0, r, 0, TAU); c.stroke();
+      c.fillStyle = "#f4ecd8"; c.beginPath(); c.arc(0, 0, 4, 0, TAU); c.fill();
+    } else if (id === "comic") {
+      c.fillStyle = "#6b2fa0"; c.beginPath(); c.moveTo(-r - 8, 6); c.lineTo(0, -4); c.lineTo(r + 8, 6); c.lineTo(r + 4, r + 6); c.lineTo(-r - 4, r + 6); c.closePath(); c.fill(); c.strokeStyle = "#111"; c.lineWidth = 2.5; c.stroke();
+      c.fillStyle = "#9be15d"; c.beginPath(); c.arc(0, 0, r, 0, TAU); c.fill(); c.stroke();
+      c.fillStyle = "#111"; c.fillRect(-r + 2, -5, 2 * r - 4, 7);
+      c.fillStyle = "#fff"; c.beginPath(); c.arc(-6, -2, 3, 0, TAU); c.arc(6, -2, 3, 0, TAU); c.fill();
+      c.strokeStyle = "#111"; c.lineWidth = 2; c.beginPath(); c.moveTo(-7, 8); c.quadraticCurveTo(0, 4, 7, 8); c.stroke();
+    } else if (id === "huberman") {
+      c.fillStyle = "#f6f3ea"; c.beginPath(); c.moveTo(-r + 2, -r + 6); c.lineTo(r - 2, -r + 6); c.lineTo(r - 5, r - 2); c.lineTo(-r + 5, r - 2); c.closePath(); c.fill();
+      c.strokeStyle = "#f6f3ea"; c.lineWidth = 4; c.beginPath(); c.arc(r - 1, 0, 6, -1.2, 1.2); c.stroke();
+      c.fillStyle = "#5a3a22"; c.fillRect(-r + 4, -r + 7, 2 * r - 8, 5);
+      c.strokeStyle = "rgba(255,255,255,.7)"; c.lineWidth = 2;
+      for (i = -1; i <= 1; i++) { c.beginPath(); c.moveTo(i * 6, -r); c.bezierCurveTo(i * 6 + 5, -r - 6, i * 6 - 5, -r - 10, i * 6 + Math.sin(t * 4 + i) * 3, -r - 16); c.stroke(); }
+    } else if (id === "weltraum") {
+      c.fillStyle = "rgba(57,255,176,.18)"; c.beginPath(); c.moveTo(-8, 4); c.lineTo(8, 4); c.lineTo(22, 60); c.lineTo(-22, 60); c.closePath(); c.fill();
+      c.fillStyle = "#9fb4c8"; c.beginPath(); c.ellipse(0, 2, r + 8, 7, 0, 0, TAU); c.fill();
+      c.fillStyle = "rgba(33,212,253,.8)"; c.beginPath(); c.arc(0, -2, 10, Math.PI, TAU); c.fill();
+      for (i = 0; i < 5; i++) { c.fillStyle = (Math.floor(t * 8) + i) % 2 ? "#ff3df2" : "#fff1a8"; c.beginPath(); c.arc(-16 + i * 8, 4, 2, 0, TAU); c.fill(); }
+    } else {
+      // Bücherwurm mit Brille
+      var wig = Math.sin(t * 6);
+      c.fillStyle = "#6fb04a"; c.strokeStyle = "#2d5a1c"; c.lineWidth = 1.5;
+      for (i = 2; i >= 1; i--) { c.beginPath(); c.arc(-i * 11, Math.sin(t * 6 - i) * 3, r * 0.6, 0, TAU); c.fill(); c.stroke(); }
+      c.beginPath(); c.arc(0, wig * 2, r * 0.8, 0, TAU); c.fill(); c.stroke();
+      c.strokeStyle = "#1a1a1a"; c.lineWidth = 1.5; c.beginPath(); c.arc(-4, wig * 2 - 2, 4, 0, TAU); c.moveTo(8, wig * 2 - 2); c.arc(4, wig * 2 - 2, 4, 0, TAU); c.stroke();
+      c.fillStyle = "#1a1a1a"; c.beginPath(); c.arc(-4, wig * 2 - 2, 1.5, 0, TAU); c.arc(4, wig * 2 - 2, 1.5, 0, TAU); c.fill();
+    }
+    c.restore();
   };
   RP.ball = function (c, b, scale) {
     var th = this.th, r = F.R * (scale || 1);
@@ -418,7 +542,15 @@
       if (s.tag !== "drop" && s.tag !== "standup") return;
       var mx = (s.ax + s.bx) / 2, my = (s.ay + s.by) / 2, ang = Math.atan2(s.by - s.ay, s.bx - s.ax), len = Math.hypot(s.bx - s.ax, s.by - s.ay);
       c.save(); c.translate(mx, my); c.rotate(ang);
-      if (s.tag === "drop") {
+      if (s.tag === "drop" && def.id === "buecher") {
+        // Buchrücken im Regal; umgefallen, wenn getroffen
+        var bc = ["#8c2f2b", "#2f5d8c", "#3d6b3a", "#6b3d7a", "#b07a2a"][s.i % 5], bt = self.spineTitle(s.i);
+        if (s.on) {
+          c.fillStyle = s.flash > 0 ? "#fff" : bc; c.fillRect(-len / 2, -44, len, 48); c.strokeStyle = "#1a120a"; c.lineWidth = 1.5; c.strokeRect(-len / 2, -44, len, 48);
+          c.fillStyle = "#e8c66a"; c.fillRect(-len / 2, -38, len, 2); c.fillRect(-len / 2, -4, len, 2);
+          c.save(); c.translate(3, -21); c.rotate(-Math.PI / 2); c.fillStyle = "#f5e6c0"; c.font = "700 9px " + th.font; c.textAlign = "center"; c.fillText(bt.slice(0, 9), 0, 0); c.restore();
+        } else { c.fillStyle = bc; c.globalAlpha = 0.6; c.fillRect(-len / 2 - 8, -6, len + 16, 8); c.globalAlpha = 1; }
+      } else if (s.tag === "drop") {
         if (s.on) { c.fillStyle = s.flash > 0 ? "#fff" : th.accent2; c.fillRect(-len / 2, -6, len, 12); c.fillStyle = "rgba(255,255,255,.6)"; c.fillRect(-len / 2 + 3, -3, len - 6, 3); c.strokeStyle = "#111"; c.lineWidth = 1.5; c.strokeRect(-len / 2, -6, len, 12); }
         else { c.fillStyle = "rgba(0,0,0,.55)"; c.fillRect(-len / 2, -3, len, 6); }
       } else {
@@ -431,7 +563,13 @@
     w.segs.forEach(function (s) { if (s.tag === "sling" && s.flash > 0) { c.strokeStyle = th.light; c.lineWidth = 8; c.globalAlpha = s.flash * 5; c.beginPath(); c.moveTo(s.ax, s.ay); c.lineTo(s.bx, s.by); c.stroke(); c.globalAlpha = 1; } });
     // Spinner
     var sp = w.spinner;
-    if (sp) {
+    if (sp && def.id === "buecher") {
+      c.save(); c.translate(sp.x, sp.y - 26); c.strokeStyle = "#5a3d1e"; c.lineWidth = 6; c.beginPath(); c.moveTo(0, 0); c.lineTo(0, 30); c.stroke();
+      c.rotate(sp.ang * 0.5);
+      for (i = 0; i < 4; i++) { c.rotate(Math.PI / 2); c.fillStyle = "#f2e6c9"; c.strokeStyle = "#5a3d1e"; c.lineWidth = 1.5; c.beginPath(); c.moveTo(2, -2); c.lineTo(24, -6); c.lineTo(24, 4); c.lineTo(2, 2); c.closePath(); c.fill(); c.stroke(); }
+      c.fillStyle = "#8c2f2b"; c.beginPath(); c.arc(0, 0, 4, 0, TAU); c.fill(); c.restore();
+      c.fillStyle = "rgba(0,0,0,.4)"; c.fillRect(sp.x - sp.w / 2, sp.y - 1, sp.w, 2);
+    } else if (sp) {
       var hgt = Math.abs(Math.cos(sp.ang)) * 12 + 2;
       c.fillStyle = "rgba(0,0,0,.4)"; c.fillRect(sp.x - sp.w / 2 - 3, sp.y - 2, sp.w + 6, 4);
       c.fillStyle = th.accent; c.fillRect(sp.x - sp.w / 2, sp.y - hgt / 2, sp.w, hgt);
@@ -484,6 +622,23 @@
       c.fillStyle = cg; c.beginPath(); c.arc(o.x, o.y - 2, o.r * 0.72, 0, TAU); c.fill();
       c.fillStyle = th.bumper; c.font = "700 " + Math.round(o.r * 0.55) + "px " + th.font; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText(o.label, o.x, o.y - 1); c.textBaseline = "alphabetic";
     });
+    // Bewegliches Ziel
+    if (w.mover) this.drawMover(c, w.mover, t);
+    // Kickback-Licht in der linken Outlane
+    this.arrow(c, 40, 905, 0, g.kickLit && (blink || !g.balls.some(function (b) { return b.x < 70 && b.y > 820; })), th.accent2);
+    c.fillStyle = g.kickLit ? th.light : th.off; c.font = "700 10px " + th.font; c.textAlign = "center"; c.fillText("KICK", 40, 935);
+    // Lauflichter am oberen Bogen: schneller und bunt bei Multiball, Frenzy und Hurry-Up
+    var hot = g.multiball || g.frenzy > 0 || g.hurry || g.wizard > 0, step = Math.floor(t * (hot ? 22 : 6));
+    for (i = 0; i < 26; i++) {
+      var aa = Math.PI * (1.04 + 0.92 * i / 25), lx = 300 + Math.cos(aa) * 266, ly = 280 + Math.sin(aa) * 266, on2 = (i + step) % (hot ? 3 : 5) === 0;
+      c.fillStyle = on2 ? (hot ? "hsl(" + ((i * 30 + t * 400) % 360) + ",100%,60%)" : th.light) : th.off;
+      c.beginPath(); c.arc(lx, ly, on2 ? 4 : 3, 0, TAU); c.fill();
+    }
+    // Hurry-Up-Wert groß über der Rampe
+    if (g.hurry) {
+      var re = w.ramps[0].entry; c.save(); c.textAlign = "center"; c.font = "900 26px " + th.font; c.lineWidth = 5; c.strokeStyle = "rgba(0,0,0,.7)";
+      c.globalAlpha = blink ? 1 : 0.75; c.strokeText(fmt(g.hurry.v), re.x, re.y + 150); c.fillStyle = th.light; c.fillText(fmt(g.hurry.v), re.x, re.y + 150); c.restore();
+    }
     // Abzug
     var pl = g.pull, py = F.PLUNGER_Y + 4 + pl * 36;
     c.strokeStyle = "#999"; c.lineWidth = 2; c.beginPath();
@@ -492,6 +647,13 @@
     c.fillStyle = th.accent; c.fillRect(546, py - 4, 28, 10);
     // Flipper und Kugeln
     w.flippers.forEach(function (f) { self.flipperShape(c, f); });
+    // Kugelspur: je schneller, desto länger
+    g.balls.forEach(function (b) {
+      var tr = b._trail || (b._trail = []); tr.push(b.x, b.y); if (tr.length > 20) tr.splice(0, 2);
+      var spd = Math.hypot(b.vx, b.vy); if (spd < 500 || b.held) return;
+      for (var k = 0; k < tr.length - 2; k += 2) { c.globalAlpha = (k / tr.length) * Math.min(0.5, spd / 4000); c.fillStyle = hot ? "hsl(" + ((k * 20 + t * 300) % 360) + ",100%,65%)" : th.light; c.beginPath(); c.arc(tr[k], tr[k + 1], F.R * (0.4 + 0.6 * k / tr.length), 0, TAU); c.fill(); }
+      c.globalAlpha = 1;
+    });
     g.balls.forEach(function (b) { if (!b.ramp) self.ball(c, b); });
     c.drawImage(this.ramps, 0, 0, W, H);
     w.ramps.forEach(function (r) { if (r.flash > 0) { c.save(); c.globalAlpha = Math.min(1, r.flash * 2) * 0.6; c.strokeStyle = th.light; c.lineWidth = 6; c.lineCap = "round"; c.beginPath(); r.path.forEach(function (p, j) { if (j) c.lineTo(p[0], p[1]); else c.moveTo(p[0], p[1]); }); c.stroke(); c.restore(); } });
@@ -499,7 +661,7 @@
 
     // Partikel und Texte
     this.fx = this.fx.filter(function (p) { p.t += dt; return p.t < p.life; });
-    this.fx.forEach(function (p) { p.x += p.vx * dt; p.y += p.vy * dt; p.vx *= 0.96; p.vy *= 0.96; c.globalAlpha = 1 - p.t / p.life; c.fillStyle = p.c; c.fillRect(p.x - p.s / 2, p.y - p.s / 2, p.s, p.s); });
+    this.fx.forEach(function (p) { p.x += p.vx * dt; p.y += p.vy * dt; if (p.grav) { p.vy += 900 * dt; p.vx *= 0.99; } else { p.vx *= 0.96; p.vy *= 0.96; } c.globalAlpha = 1 - p.t / p.life; c.fillStyle = p.c; c.fillRect(p.x - p.s / 2, p.y - p.s / 2, p.s, p.s); });
     c.globalAlpha = 1;
     this.pops = this.pops.filter(function (p) { p.t += dt; return p.t < p.life; });
     this.pops.forEach(function (p) {
@@ -515,6 +677,13 @@
       }
       c.restore();
     });
+    // Blitze bei Multiball, Super-Jackpot und Kickback
+    if (this.lightning > 0) {
+      this.lightning -= dt;
+      for (i = 0; i < 3; i++) this.zap(c, 80 + Math.random() * 400, 0, 120 + Math.random() * 320, 300 + Math.random() * 500);
+    }
+    if (this.bolts) { this.bolts = this.bolts.filter(function (bo) { bo.t -= dt; if (bo.t > 0) self.zap(c, bo.x1, bo.y1, bo.x2, bo.y2); return bo.t > 0; }); }
+    if (g.frenzy > 0) { c.save(); c.lineWidth = 10; c.strokeStyle = "hsl(" + ((t * 300) % 360) + ",100%,60%)"; c.globalAlpha = 0.7; fieldPath(c); c.stroke(); c.restore(); }
     // Blitz bei Jackpot und Multiball, Tilt-Schleier
     if (this.flashT > 0) { this.flashT -= dt; c.fillStyle = rgba(th.light, Math.max(0, this.flashT) * 0.6); c.fillRect(0, 0, W, H); }
     if (g.tilted) { c.fillStyle = "rgba(0,0,0,.35)"; c.fillRect(0, 0, W, H); c.fillStyle = "#ff3b30"; c.font = "900 90px " + th.font; c.textAlign = "center"; c.globalAlpha = blink ? 1 : 0.6; c.fillText("TILT", 280, 520); c.globalAlpha = 1; }

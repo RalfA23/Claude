@@ -45,6 +45,12 @@
   function arp(notes, gap, type, vol, len, delay) { notes.forEach(function (n, i) { tone(n, len || 0.18, type || "square", vol || 0.1, 0, (delay || 0) + i * gap); }); }
   var N = function (semi) { return 440 * Math.pow(2, (semi - 9) / 12); }; // 0 = C4
 
+  // Gezupfte Saite (Cembalo): Sägezahn mit schnell schließendem Filter
+  function pluck(f, vol, delay) {
+    var t = now() + (delay || 0), o = ctx.createOscillator(), fl = ctx.createBiquadFilter(), g = ctx.createGain();
+    o.type = "sawtooth"; o.frequency.value = f; fl.type = "lowpass"; fl.frequency.setValueAtTime(f * 8, t); fl.frequency.exponentialRampToValueAtTime(f * 1.2, t + 0.3);
+    env(g, t, 0.002, vol || 0.12, 0.6); o.connect(fl); fl.connect(g); g.connect(sfxBus); o.start(t); o.stop(t + 0.7);
+  }
   function thunk(f) { noise(0.06, 900, 0.22, "lowpass"); tone(f || 95, 0.08, "sine", 0.3, 50); }
 
   // Klangrezepte pro Stil. Ereignisse ohne Rezept bleiben still.
@@ -115,9 +121,37 @@
       jackpot: function () { for (var i = 0; i < 10; i++) tone(N(24 + i * 2), 0.1, "square", 0.06, 0, i * 0.04); },
       drain: function () { tone(800, 1.2, "sawtooth", 0.1, 40); noise(1, 1000, 0.1, "lowpass", 1, 0, 60); }
     }
+,
+    library: {
+      // Cembalo-artig gezupft, Seitenrascheln, Schreibmaschine
+      bumper: function () { pluck(N(19 + [0, 3, 7, 10][Math.floor(Math.random() * 4)]), 0.14); },
+      sling: function () { noise(0.05, 3000, 0.12, "bandpass", 1.5); },
+      drop: function () { noise(0.18, 1800, 0.18, "bandpass", 0.8, 0, 5000); tone(140, 0.08, "sine", 0.2, 70); },
+      bank: function () { [0, 3, 7, 12, 15].forEach(function (x, i) { pluck(N(12 + x), 0.12, i * 0.09); }); },
+      standup: function () { tone(1600, 0.03, "square", 0.05); noise(0.03, 4000, 0.08, "highpass"); },
+      spin: function () { noise(0.02, 2400, 0.07, "bandpass", 2); },
+      lane: function () { pluck(N(31), 0.1); },
+      lanes: function () { [0, 4, 7, 12].forEach(function (x, i) { pluck(N(19 + x), 0.11, i * 0.07); }); },
+      ramp: function () { [0, 2, 3, 5, 7, 8, 11, 12].forEach(function (x, i) { pluck(N(19 + x), 0.09, i * 0.045); }); },
+      rampEnter: function () { noise(0.5, 1200, 0.08, "bandpass", 1, 0, 6000); },
+      saucer: function () { tone(N(-5), 0.9, "sine", 0.2); pluck(N(7), 0.12, 0.1); },
+      eject: function () { noise(0.25, 1500, 0.15, "bandpass", 0.7, 0, 6000); },
+      mover: function () { tone(300, 0.15, "triangle", 0.15, 120); tone(90, 0.12, "sine", 0.2); },
+      multiball: function () { [0, 3, 7, 12, 15, 19, 24, 19, 15, 12].forEach(function (x, i) { pluck(N(12 + x), 0.12, i * 0.08); }); },
+      jackpot: function () { for (var i = 0; i < 8; i++) pluck(N(24 + [0, 4, 7, 12][i % 4]), 0.12, i * 0.06); },
+      drain: function () { [12, 10, 8, 7].forEach(function (x, i) { pluck(N(x), 0.13, i * 0.22); }); }
+    }
   };
   // Für alle Tische gleich
   var COMMON = {
+    mover: function () { tone(220, 0.12, "square", 0.1, 660); tone(440, 0.2, "triangle", 0.1, 0, 0.08); },
+    kickback: function () { tone(70, 0.3, "sine", 0.5, 35); noise(0.2, 600, 0.3); tone(300, 0.4, "sawtooth", 0.08, 1500, 0.15); },
+    mystery: function () { for (var i = 0; i < 12; i++) tone(N(24 + (i * 5) % 12), 0.05, "square", 0.05, 0, i * 0.05); tone(N(36), 0.4, "triangle", 0.12, 0, 0.62); },
+    hurryStart: function () { [0, 0, 7, 7].forEach(function (x, i) { tone(N(24 + x), 0.1, "square", 0.08, 0, i * 0.12); }); },
+    hurryCollect: function () { for (var i = 0; i < 14; i++) tone(N(24 + i), 0.06, "square", 0.06, 0, i * 0.035); tone(55, 0.4, "sine", 0.4, 30, 0.5); },
+    hurryTick: function () { tone(1800, 0.02, "square", 0.03); },
+    frenzy: function () { for (var i = 0; i < 6; i++) tone(N(30 + i * 2), 0.08, "sawtooth", 0.06, 0, i * 0.05); },
+    addaball: function () { tone(N(19), 0.12, "square", 0.08); tone(N(26), 0.12, "square", 0.08, 0, 0.1); tone(N(31), 0.25, "square", 0.08, 0, 0.2); },
     flip: function () { thunk(); }, flipDown: function () { noise(0.03, 500, 0.06); },
     pull: function () { noise(0.6, 200, 0.06, "bandpass", 3, 0, 900); },
     launch: function (e) { noise(0.12, 900, 0.3, "lowpass"); tone(160, 0.25, "triangle", 0.15 + e.power * 0.1, 60); },
@@ -151,6 +185,12 @@
 
   /* ---------- Musik: kleiner Sequenzer mit Vorausplanung ---------- */
   var SONGS = {
+    baroque: {bpm: 96, steps: 16, play: function (s, t) {
+      // Kleines Präludium in a-Moll, Achtel gebrochen wie bei Bach
+      var ch = [[-3, 0, 4, 9], [-5, 2, 5, 9], [-8, -1, 4, 8], [-3, 0, 4, 9]][Math.floor(s / 4)];
+      schedTone(N(ch[[0, 1, 2, 3][s % 4]] + 12), 0.25, "sawtooth", 0.09, t, 1800);
+      if (s % 4 === 0) schedTone(N(ch[0] - 12), 0.8, "triangle", 0.3, t);
+    }},
     swing: {bpm: 132, steps: 16, play: function (s, t) {
       var bass = [0, 4, 7, 9, 12, 9, 7, 4, 5, 9, 12, 14, 7, 11, 14, 11];
       if (s % 2 === 0) schedTone(N(-12 + bass[s]), 0.22, "triangle", 0.5, t);

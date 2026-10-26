@@ -43,8 +43,8 @@
     s.push(seg(60, 790, 60, 860, {r: 4}), seg(60, 860, 176, 932, {r: 4, e: 0.3}));
     s.push(seg(500, 790, 500, 860, {r: 4}), seg(500, 860, 384, 932, {r: 4, e: 0.3}));
     // Slingshots: die schräge Kante schießt
-    s.push(seg(96, 762, 96, 836, {r: 4}), seg(96, 836, 148, 868, {r: 4}), seg(96, 762, 148, 868, {r: 5, kick: 640, tag: "sling", i: 0, e: 0.7}));
-    s.push(seg(464, 762, 464, 836, {r: 4}), seg(464, 836, 412, 868, {r: 4}), seg(464, 762, 412, 868, {r: 5, kick: 640, tag: "sling", i: 1, e: 0.7}));
+    s.push(seg(96, 762, 96, 836, {r: 4}), seg(96, 836, 148, 868, {r: 4}), seg(96, 762, 148, 868, {r: 5, kick: 690, tag: "sling", i: 0, e: 0.7}));
+    s.push(seg(464, 762, 464, 836, {r: 4}), seg(464, 836, 412, 868, {r: 4}), seg(464, 762, 412, 868, {r: 5, kick: 690, tag: "sling", i: 1, e: 0.7}));
     var c = [circ(96, 762, 7), circ(96, 836, 7), circ(148, 868, 7), circ(464, 762, 7), circ(464, 836, 7), circ(412, 868, 7), circ(60, 790, 5), circ(500, 790, 5)];
     return {segs: s, circs: c};
   }
@@ -61,7 +61,7 @@
     var L = def.lanes;
     L.guides.forEach(function (x) { segs.push(seg(x, L.y0, x, L.y1, {r: 4})); circs.push(circ(x, L.y0, 5)); });
     L.xs.forEach(function (x, i) { sensors.push({x: x, y: (L.y0 + L.y1) / 2 + 6, r: 14, ev: "lane", i: i}); });
-    (def.bumpers || []).forEach(function (b, i) { circs.push(circ(b.x, b.y, b.r, {kick: b.kick || 720, e: 0.6, tag: "bumper", i: i, label: b.label})); });
+    (def.bumpers || []).forEach(function (b, i) { circs.push(circ(b.x, b.y, b.r, {kick: b.kick || 780, e: 0.6, tag: "bumper", i: i, label: b.label})); });
     (def.posts || []).forEach(function (p) { circs.push(circ(p.x, p.y, p.r || 6)); });
     (def.walls || []).forEach(function (w) { segs.push(seg(w[0], w[1], w[2], w[3], w[4])); });
     (def.drops || []).forEach(function (d, i) { segs.push(seg(d[0], d[1], d[2], d[3], {r: 4, e: 0.3, tag: "drop", i: i})); });
@@ -75,8 +75,13 @@
     if (def.orbit) sensors.push({x: def.orbit.x, y: def.orbit.y, r: def.orbit.r || 20, ev: "orbit", i: 0, up: true});
     var sp = def.spinner ? {x: def.spinner.x, y: def.spinner.y, w: def.spinner.w, ang: 0, spd: 0, half: 0} : null;
     if (def.spinner && def.spinner.walls) def.spinner.walls.forEach(function (w) { segs.push(seg(w[0], w[1], w[2], w[3], {r: 4})); });
+    // Bewegliches Ziel (Glücksrad, Schurke, UFO, Bücherwurm …): fährt zwischen zwei Punkten hin und her
+    var mv = null;
+    if (def.mover) { mv = circ(def.mover.path[0][0], def.mover.path[0][1], def.mover.r || 16, {kick: 380, e: 0.6, tag: "mover"}); mv.path = def.mover.path; mv.speed = def.mover.speed || 0.45; mv.t = 0; mv.vx = 0; mv.vy = 0; circs.push(mv); }
+    // Kickback in der linken Outlane: holt die Kugel zurück in die Inlane, wenn er leuchtet
+    sensors.push({x: 40, y: 950, r: 18, ev: "kickback", i: 0});
     var sc = def.saucer ? {x: def.saucer.x, y: def.saucer.y, vx: def.saucer.vx, vy: def.saucer.vy, out: def.saucer.out || null, flash: 0} : null;
-    return {segs: segs, circs: circs, sensors: sensors, ramps: ramps, spinner: sp, saucer: sc, attractors: (def.attractors || []).slice(),
+    return {segs: segs, circs: circs, sensors: sensors, ramps: ramps, spinner: sp, saucer: sc, mover: mv, attractors: (def.attractors || []).slice(),
       flippers: [flipper("L"), flipper("R")], nDrops: (def.drops || []).length, nStandups: (def.standups || []).length, nLanes: L.xs.length};
   }
 
@@ -107,7 +112,7 @@
     if (s.oneWay && (b.x - px) * s.oneWay.nx + (b.y - py) * s.oneWay.ny <= 0) return 0;
     return contact(b, px, py, s.r, 0, 0, s);
   }
-  function hitCirc(b, c) { return c.on ? contact(b, c.x, c.y, c.r, 0, 0, c) : 0; }
+  function hitCirc(b, c) { return c.on ? contact(b, c.x, c.y, c.r, c.vx || 0, c.vy || 0, c) : 0; }
   var FLIP_MAT = {e: 0.3, f: 0.02, kick: 0};
   function hitFlipper(b, fl) {
     var c = Math.cos(fl.ang), s = Math.sin(fl.ang), tx = fl.px + c * fl.len, ty = fl.py + s * fl.len;
@@ -121,6 +126,8 @@
   function Game(def, opts) {
     opts = opts || {};
     this.def = def; this.rand = opts.rand || Math.random;
+    // Missionen kann die Seite pro Spiel neu zusammenstellen (Bücher-Tisch: Klassiker und eigene Bücher)
+    this.missions = opts.missions || def.missions || [];
     this.w = buildWorld(def);
     this.input = {left: false, right: false, plunger: false};
     this.events = [];
@@ -129,7 +136,8 @@
     this.tiltMeter = 0; this.tilted = false; this.warned = false;
     this.mission = 0; this.progress = 0; this.level = 1; this.wizard = 0; this.mult = 1;
     this.locks = 0; this.lockLit = 0; this.multiball = false; this.save = 0; this.pause = 0;
-    this.stats = {bumper: 0, ramp: 0, spin: 0, drop: 0, lanes: 0, missions: 0};
+    this.stats = {bumper: 0, ramp: 0, spin: 0, drop: 0, lanes: 0, missions: 0, mover: 0};
+    this.hurry = null; this.frenzy = 0; this.kickLit = true; this.moverHits = 0;
     this.newBallState();
     this.spawnInLane(false);
   }
@@ -144,6 +152,7 @@
     w.segs.forEach(function (s) { if (s.tag === "drop") s.on = true; });
     this.bonus = 0; this.bonusX = 1; this.tilted = false; this.warned = false; this.tiltMeter = 0;
     this.skillLane = -1; this.skillT = 0; this.combo = 0; this.comboT = 0; this.dropResetT = 0;
+    this.kickLit = true; this.frenzy = 0; this.hurry = null;
   };
   GP.spawnInLane = function (auto) {
     var b = {x: 560, y: PLUNGER_Y - 3 - R, vx: 0, vy: 0, ramp: null, held: null, cool: 0, inside: {}, still: 0, auto: auto ? 0.5 : 0, launched: false, sx: 560, sy: PLUNGER_Y};
@@ -154,6 +163,7 @@
   GP.inLane = function (b) { return !b.ramp && !b.held && b.x > LANE_X && b.y > 960 && Math.abs(b.vy) < 80 && Math.abs(b.vx) < 80; };
   GP.waiting = function () { var g = this; return this.balls.some(function (b) { return g.inLane(b); }); };
   GP.add = function (p, x, y, quiet) {
+    if (this.frenzy > 0 && !quiet && p < 1000) p += 1500;
     p = Math.round(p * this.mult * (this.wizard > 0 ? 3 : 1));
     this.score += p;
     if (!quiet && p >= 1000) this.emit("points", {points: p, x: x, y: y});
@@ -173,7 +183,7 @@
 
   // Ein Spielereignis zählt für Missionen, Bonus und Punkte.
   GP.progressMission = function (ev, n) {
-    var list = this.def.missions || [];
+    var list = this.missions;
     if (!list.length || this.tilted) return;
     var m = list[this.mission % list.length];
     if (m.ev !== ev) return;
@@ -192,7 +202,7 @@
   GP.startMultiball = function () {
     if (this.tilted) return;
     var add = this.multiball ? 1 : 2;
-    this.multiball = true; this.superLit = false; this.save = Math.max(this.save, 15); this.locks = 0; this.lockLit = 0;
+    this.multiball = true; this.superLit = false; this.addedBall = false; this.save = Math.max(this.save, 15); this.locks = 0; this.lockLit = 0;
     for (var i = 0; i < add; i++) this.queue.push({t: 0.3 + i * 0.9});
     this.emit("multiball");
   };
@@ -212,7 +222,7 @@
         o.on = false; o.flash = 0.4; this.drops[o.i] = true; this.stats.drop++;
         this.add(750, b.x, b.y); this.bonus += 300; this.emit("drop", {x: b.x, y: b.y, i: o.i}); this.progressMission("drop");
         if (this.drops.every(Boolean)) {
-          this.add(5000, b.x, b.y); this.emit("bank", {x: b.x, y: b.y}); this.progressMission("bank");
+          this.add(5000, b.x, b.y); this.emit("bank", {x: b.x, y: b.y}); this.progressMission("bank"); this.startFrenzy();
           this.dropResetT = 1.2;
         }
         break;
@@ -224,6 +234,13 @@
           this.standups = this.standups.map(function () { return false; });
           this.lockLit = Math.min(2, this.lockLit + 1); this.add(3000, b.x, b.y); this.emit("standups"); this.emit("lockLit"); this.progressMission("standups");
         }
+        break;
+      case "mover":
+        if (this.tilted) return;
+        o.cool = 0.35; o.flash = 0.4; this.stats.mover++; this.moverHits++;
+        var mp = this.add(5000 * this.level, o.x, o.y - 30); this.bonus += 1000;
+        this.emit("mover", {x: o.x, y: o.y, n: this.moverHits, points: mp}); this.progressMission("mover");
+        if (this.moverHits % 3 === 0) this.startHurry();
         break;
       default:
         if (imp > 380 && o.cool <= 0) { o.cool = 0.08; g.emit("wall", {v: imp, x: b.x, y: b.y}); }
@@ -241,6 +258,12 @@
         this.bonusX = Math.min(6, this.bonusX + 1); this.stats.lanes++;
         this.add(2500, s.x, s.y); this.emit("lanes", {x: s.x, y: s.y, bonusX: this.bonusX}); this.progressMission("lanes");
       }
+    } else if (s.ev === "kickback") {
+      if (!this.kickLit || this.tilted || b.vy < 0) return;
+      this.kickLit = false;
+      // Kugel kurz festhalten und oben in die linke Inlane setzen
+      b.held = 0.45; b.release = {x: 40, y: 740, vx: 1000, vy: -1000}; b.vx = 0; b.vy = 0;
+      this.add(2500, s.x, s.y - 60); this.emit("kickback", {x: s.x, y: s.y});
     } else if (s.ev === "orbit") {
       if (b.vy > -250 || this.tilted) return;
       this.add(2000, s.x, s.y); this.emit("orbit", {x: s.x, y: s.y}); this.progressMission("orbit");
@@ -255,6 +278,7 @@
     if (this.multiball) { var j = this.add(25000 + 5000 * this.combo, 280, 400, true); this.superLit = true; this.emit("jackpot", {points: j}); }
     else if (this.lockLit < 2) { this.lockLit++; this.emit("lockLit"); }
     this.emit("ramp", {i: r.i, combo: this.combo, points: pts});
+    if (this.hurry) { var hv = this.add(this.hurry.v, 280, 400, true); this.emit("hurryCollect", {points: hv}); this.hurry = null; }
     this.progressMission("ramp");
   };
   GP.onSaucer = function (b) {
@@ -262,15 +286,38 @@
     if (this.tilted) return;
     this.add(1500, sc.x, sc.y); this.bonus += 500;
     if (this.multiball && this.superLit) { this.superLit = false; var j = this.add(75000, sc.x, sc.y, true); this.emit("superjackpot", {points: j}); }
-    else if (this.multiball) { /* Super-Jackpot erst nach einem Jackpot auf der Rampe */ }
+    else if (this.multiball) { if (!this.addedBall) { this.addedBall = true; this.queue.push({t: 0.4}); this.emit("addaball"); } }
     else if (this.lockLit > 0) {
       this.lockLit--; this.locks++;
       this.emit("lock", {n: this.locks});
       if (this.locks >= 2) this.startMultiball();
-    }
+    } else this.mystery();
     this.emit("saucer", {x: sc.x, y: sc.y});
     this.progressMission("saucer");
   };
+
+  // Mystery im Loch: eine zufällige Belohnung
+  var MYSTERY = ["punkte", "kickback", "hurry", "frenzy", "bonusx", "save", "lock", "punkte", "frenzy", "extraball"];
+  GP.mystery = function () {
+    var r = this.rand(), a = MYSTERY[Math.floor(r * (MYSTERY.length - 1))];
+    if (r > 0.97) a = "extraball";
+    var pts = 0;
+    if (a === "punkte") pts = this.add(25000 * this.level, 0, 0, true);
+    if (a === "kickback") this.kickLit = true;
+    if (a === "hurry") this.startHurry();
+    if (a === "frenzy") this.startFrenzy();
+    if (a === "bonusx") this.bonusX = Math.min(6, this.bonusX + 1);
+    if (a === "save") this.save = Math.max(this.save, 20);
+    if (a === "lock") this.lockLit = 2;
+    if (a === "extraball") this.extra++;
+    this.emit("mystery", {award: a, points: pts});
+  };
+  GP.startHurry = function () {
+    if (this.tilted) return;
+    this.hurry = {v: 100000 * this.level, t: 25};
+    this.emit("hurryStart", {v: this.hurry.v});
+  };
+  GP.startFrenzy = function () { if (!this.tilted) { this.frenzy = 15; this.emit("frenzy"); } };
 
   GP.launch = function (b, power) {
     b.vy = -(1050 + 1450 * power); b.vx = 0; b.launched = true;
@@ -319,6 +366,14 @@
     if (this.save > 0 && this.balls.some(function (b) { return b.launched; })) this.save -= dt;
     if (this.skillT > 0) this.skillT -= dt;
     if (this.comboT > 0) this.comboT -= dt;
+    if (this.frenzy > 0) { this.frenzy -= dt; if (this.frenzy <= 0) this.emit("frenzyEnd"); }
+    if (this.hurry) { this.hurry.t -= dt; this.hurry.v = Math.max(20000 * this.level, this.hurry.v - 3000 * this.level * dt); if (this.hurry.t <= 0) { this.hurry = null; this.emit("hurryEnd"); } }
+    var mv = w.mover;
+    if (mv && dt > 0) {
+      mv.t += dt * mv.speed; var f = (1 - Math.cos(mv.t * Math.PI)) / 2, a = mv.path[0], z = mv.path[1];
+      var nx = a[0] + (z[0] - a[0]) * f, ny = a[1] + (z[1] - a[1]) * f;
+      mv.vx = (nx - mv.x) / dt; mv.vy = (ny - mv.y) / dt; mv.x = nx; mv.y = ny;
+    }
     if (this.wizard > 0) { this.wizard -= dt; if (this.wizard <= 0) this.emit("wizardEnd"); }
     this.tiltMeter = Math.max(0, this.tiltMeter - dt * 0.55);
     if (this.tiltMeter < 1) this.warned = false;
@@ -366,6 +421,7 @@
         b.held -= h;
         if (b.held <= 0) {
           b.held = null; var sc = w.saucer;
+          if (b.release) { b.x = b.release.x; b.y = b.release.y; b.vx = b.release.vx; b.vy = b.release.vy; b.release = null; b.inside = {}; continue; }
           if (sc.out) { b.x = sc.out.x; b.y = sc.out.y; }
           b.vx = sc.vx + (this.rand() - 0.5) * 60; b.vy = sc.vy; b.cool = 0.6; this.emit("eject", {x: b.x, y: b.y});
         }
@@ -467,7 +523,7 @@
     this.emit("ball", {n: this.ballNo});
   };
   GP.currentMission = function () {
-    var list = this.def.missions || [];
+    var list = this.missions;
     if (!list.length) return null;
     var m = list[this.mission % list.length];
     return {title: m.title, text: m.text, have: this.progress, need: Math.ceil(m.n * (1 + (this.level - 1) * 0.5)), i: this.mission % list.length, ev: m.ev};
