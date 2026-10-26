@@ -39,7 +39,7 @@ input[type=text]{font:inherit;color:var(--ink);background:#0f0d18;border:1px sol
 .panel{position:fixed;z-index:4;background:var(--panel);border:1px solid var(--line);border-radius:16px;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);width:250px;max-width:calc(50vw - 14px)}
 .panel .head{display:flex;align-items:center;gap:8px;width:100%;border:0;background:transparent;min-height:44px;padding:8px 12px;font-weight:700;text-align:left;border-radius:16px}
 .panel .body{display:none;padding:0 12px 12px}
-.panel.open .body{display:block}
+.panel.open .body{display:block;max-height:calc(100vh - 150px);overflow:auto}
 #needs{left:max(8px,env(safe-area-inset-left));top:calc(62px + env(safe-area-inset-top))}
 #tasks{right:max(8px,env(safe-area-inset-right));top:calc(62px + env(safe-area-inset-top));width:300px}
 #moodDot{width:14px;height:22px;clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);background:var(--good);flex:none}
@@ -64,8 +64,20 @@ input[type=text]{font:inherit;color:var(--ink);background:#0f0d18;border:1px sol
 #bar>*{pointer-events:auto}
 #bar button{display:flex;align-items:center;gap:6px;min-height:46px;font-weight:700}
 #bar button span{font-size:1.1rem}
+#bar button i{font-style:normal;font-size:.75rem;background:rgba(255,255,255,.14);border-radius:8px;padding:0 5px}
+.chip{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 10px;font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums}
+.small{font-size:.84rem;color:var(--muted)}
+#more{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(68px + env(safe-area-inset-bottom));z-index:6;display:grid;grid-template-columns:repeat(3,minmax(96px,1fr));gap:6px;background:var(--solid);border:1px solid var(--line);border-radius:16px;padding:8px;box-shadow:0 10px 40px rgba(0,0,0,.5)}
+#more button{display:flex;flex-direction:column;align-items:center;gap:0;background:#26223a;-webkit-backdrop-filter:none;backdrop-filter:none;padding:6px}
+#more button span{font-size:1.2rem}
+#more button small{color:var(--muted);font-size:.72rem}
+#school{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(70px + env(safe-area-inset-bottom));z-index:4;width:min(460px,calc(100vw - 20px));background:var(--solid);border:1px solid var(--accent);border-radius:16px;padding:10px 12px;box-shadow:0 8px 30px rgba(0,0,0,.45)}
+#school p{margin:4px 0 8px;font-size:.9rem}
+#school .pb{height:6px;background:rgba(255,255,255,.12);border-radius:4px;overflow:hidden;margin-bottom:8px}
+#school .pb i{display:block;height:100%;background:var(--accent);width:0}
+#school button{min-height:32px;font-size:.85rem}
 #bags{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-weight:700}
-@media (max-width:640px){#bNet,#bSound,#bHelp,#speed button[data-s="8"]{display:none}#toasts{top:calc(118px + env(safe-area-inset-top))}#bar button b{display:none}#bar button{min-width:46px;justify-content:center;padding:6px 8px}#clock{font-size:.9rem;padding:8px}#top a.back span{display:none}.panel{width:auto;max-width:calc(100vw - 16px)}#tasks{top:calc(112px + env(safe-area-inset-top))}#needs.open,#tasks.open{left:8px;right:8px;max-width:none;width:auto;z-index:6}#speed button{min-width:34px;padding:6px 5px}}
+@media (max-width:640px){#bNet,#bSound,#bHelp,#speed button[data-s="8"],#weather,#money{display:none}#school{bottom:calc(122px + env(safe-area-inset-bottom))}#toasts{top:calc(118px + env(safe-area-inset-top))}#bar button b{display:none}#bar button{min-width:46px;justify-content:center;padding:6px 8px}#clock{font-size:.9rem;padding:8px}#top a.back span{display:none}.panel{width:auto;max-width:calc(100vw - 16px)}#tasks{top:calc(112px + env(safe-area-inset-top))}#needs.open,#tasks.open{left:8px;right:8px;max-width:none;width:auto;z-index:6}#speed button{min-width:34px;padding:6px 5px}}
 /* Joystick */
 #joy{position:fixed;left:max(18px,env(safe-area-inset-left));bottom:calc(80px + env(safe-area-inset-bottom));width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.08);border:1px solid var(--line);z-index:4;touch-action:none}
 #knob{position:absolute;left:35px;top:35px;width:50px;height:50px;border-radius:50%;background:rgba(255,255,255,.35);pointer-events:none}
@@ -126,6 +138,8 @@ kbd{border:1px solid var(--line);border-radius:5px;padding:0 5px;font-size:.85em
     <button type="button" data-s="3" title="Schneller" aria-label="Schneller">⏩</button>
     <button type="button" data-s="8" title="Sehr schnell" aria-label="Sehr schnell">⏭</button>
   </div>
+  <div id="money" class="chip" title="Kontostand">💶 120 €</div>
+  <div id="weather" class="chip" hidden title="Es regnet">🌧️</div>
   <span class="sp"></span>
   <button type="button" id="bNet" title="Zu zweit spazieren" aria-label="Zu zweit">👥</button>
   <button type="button" id="bSound" title="Ton an oder aus" aria-label="Ton">🔊</button>
@@ -135,7 +149,7 @@ kbd{border:1px solid var(--line);border-radius:5px;padding:0 5px;font-size:.85em
 
 <section class="panel" id="needs">
   <button type="button" class="head" id="needHead"><span id="moodDot"></span><span id="dogName">Hund</span><span id="needChip"></span></button>
-  <div class="body"><div id="needList"></div><p class="sub">Du</p><div id="meList"></div></div>
+  <div class="body"><div id="needList"></div><p class="sub">Du</p><div id="meList"></div><p class="sub">Vorrat</p><div id="vorrat" class="small"></div><p class="sub" id="skillHead">Können</p><div id="skillList"></div></div>
 </section>
 <section class="panel" id="tasks">
   <button type="button" class="head" id="taskHead">📋 Aufgaben heute <span id="taskCount">0/0</span></button>
@@ -147,12 +161,16 @@ kbd{border:1px solid var(--line);border-radius:5px;padding:0 5px;font-size:.85em
   <button type="button" id="bSitz" title="Sitz (2)"><span>🪑</span><b>Sitz</b></button>
   <button type="button" id="bPlatz" title="Platz (3)"><span>⬇️</span><b>Platz</b></button>
   <button type="button" id="bPfote" title="Pfote (4)"><span>🐾</span><b>Pfote</b></button>
+  <button type="button" id="bMore" title="Weitere Kommandos: Bleib, Fuß, Aus, Dreh dich, Rolle, Parcours"><span>✨</span><b>Mehr</b></button>
+  <button type="button" id="bTreat" title="Leckerli geben (R), gleich nach einem Kommando lernt der Hund"><span>🦴</span><b>Leckerli</b><i id="treatN">0</i></button>
   <button type="button" id="bLeash" title="Leine (L)"><span>🦮</span><b>Anleinen</b></button>
   <button type="button" id="bThrow" title="Werfen (Leertaste)" hidden><span>🎾</span><b>Werfen</b></button>
   <span id="bags" hidden></span>
   <button type="button" id="bJoy" title="Joystick ein oder aus" aria-label="Joystick">🕹️</button>
 </div>
 <div id="joy" hidden><div id="knob"></div></div>
+<div id="more" hidden></div>
+<div id="school" hidden><b id="schTitle"></b><p id="schText"></p><div class="pb"><i id="schBar"></i></div><button type="button" id="schSkip">Übung überspringen</button></div>
 
 <div id="menu" hidden></div>
 <div id="bubble" hidden></div>
@@ -163,7 +181,7 @@ kbd{border:1px solid var(--line);border-radius:5px;padding:0 5px;font-size:.85em
 
 <div class="overlay" id="start">
   <div class="card">
-    <div class="hero"><div class="pic">🐕</div><div><h1>Hundeleben</h1><p>Ein Tag mit deinem Hund, wie bei den Sims: Pinscher, Dackel, Labrador, Schäferhund oder Border Collie, du als Mann oder Frau. Wohnung, Garten und Stadtpark. Füttern, Gassi gehen, spielen, Tricks üben, baden und abends müde ins Bett.</p></div></div>
+    <div class="hero"><div class="pic">🐕</div><div><h1>Hundeleben</h1><p>Das Leben mit deinem Hund, wie bei den Sims: Pinscher, Dackel, Labrador, Schäferhund oder Border Collie, du als Mann oder Frau. Unter der Woche Homeoffice und Gassirunden, zwischendurch klingelt der Postbote, Nachbarn kommen vorbei und im Park triffst du Leute und andere Hunde. Samstags geht es in die Hundeschule.</p></div></div>
     <label for="nameIn">Wie heißt dein Hund?</label>
     <input type="text" id="nameIn" maxlength="20" placeholder="Name" autocomplete="off">
     <label>Du spielst</label>
@@ -183,7 +201,8 @@ kbd{border:1px solid var(--line);border-radius:5px;padding:0 5px;font-size:.85em
     <div class="help">
       <div><b>Antippen</b>Tipp auf Napf, Sofa, Bett, Regal, Badewanne oder den Hund und wähle, was du tun willst. Tipp auf den Boden, um hinzugehen.</div>
       <div><b>Bedürfnisse</b>Hunger, Durst, Gassi, Energie, Spaß, Zuneigung, Sauberkeit. Die Raute über dem Hund zeigt die Laune.</div>
-      <div><b>Aufgaben</b>Jeden Tag neue: Morgen- und Abendrunde, füttern, Haufen einsammeln, Stock werfen, Sitz, Platz, Pfote.</div>
+      <div><b>Aufgaben</b>Jeden Tag neue, und über den Tag kommen weitere dazu: Post, Besuch, Regen, eine geklaute Socke, ein Kind im Park.</div>
+      <div><b>Erziehung</b>Je besser trainiert, desto eher hört der Hund. Gleich nach einem befolgten Kommando ein Leckerli 🦴 geben, dann lernt er dazu.</div>
     </div>
   </div>
 </div>
@@ -198,6 +217,10 @@ kbd{border:1px solid var(--line);border-radius:5px;padding:0 5px;font-size:.85em
       <div><b>Spielen</b>Ball oder Stock antippen und aufheben, dann Werfen (<kbd>Leertaste</kbd>) oder auf eine Stelle tippen. Ohne Leine holt der Hund ihn zurück.</div>
       <div><b>Gassi</b>Anleinen, durch die Haustür und den Garten zum Park. Der Hund macht sein Geschäft an Bäumen und Laternen. Haufen antippen, einpacken, in einen Mülleimer werfen.</div>
       <div><b>Tag und Nacht</b>Eine Minute im Spiel dauert eine Sekunde. Oben kannst du pausieren oder vorspulen. Ab 20 Uhr ins Bett, dann beginnt der nächste Tag mit neuen Aufgaben.</div>
+      <div><b>Alltag</b>Werktags 4 Stunden am Schreibtisch im Schlafzimmer arbeiten, das bringt Geld. Dort bestellst du auch Futter und Leckerli, der Postbote bringt sie. Ohne Futter kein voller Napf.</div>
+      <div><b>Erziehung</b>Mehr ✨ öffnet Bleib <kbd>5</kbd>, Fuß <kbd>6</kbd>, Aus <kbd>7</kbd>, Dreh dich <kbd>8</kbd>, Rolle <kbd>9</kbd> und Parcours <kbd>0</kbd>. Leckerli 🦴 mit <kbd>R</kbd>, direkt nach dem Befolgen. Neue Tricks übst du, indem du den Hund antippst.</div>
+      <div><b>Leute und Hunde</b>Im Park sind Spaziergänger, Jogger und Kinder unterwegs. Antippen zum Plaudern, fremde Hunde zum Spielen. Lass den Hund nicht den Joggern hinterherrennen.</div>
+      <div><b>Wochenende</b>Samstag 10 bis 12 Uhr Hundeschule auf der Westwiese: die Trainerin antippen, fünf Übungen mit Parcours, Abzeichen sammeln. Sonntagnachmittag ist Hundewiese am Teich.</div>
     </div>
     <div class="row"><button type="button" class="primary" id="helpClose">Verstanden</button></div>
   </div>

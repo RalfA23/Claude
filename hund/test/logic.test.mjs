@@ -5,7 +5,8 @@ import { createRequire } from "node:module";
 const H = createRequire(import.meta.url)("../src/logic.js");
 
 const W = H.buildWorld(7), N = H.buildNav(W, 0.3);
-function sim(extra = {}) { return new H.Sim(Object.assign({world: W, nav: N, rand: H.rng(5), name: "Bello"}, extra)); }
+// Standard: der Hund folgt immer, damit die Abläufe gleich bleiben. Gehorsam selbst testet ein eigener Test.
+function sim(extra = {}) { const s = new H.Sim(Object.assign({world: W, nav: N, rand: H.rng(5), name: "Bello"}, extra)); s.obeyChance = () => 1; s.ambient = () => null; s.plan = []; return s; }
 function run(s, sec, inp = {}) { for (let i = 0; i < sec * 30; i++) s.step(1 / 30, typeof inp === "function" ? inp(i) : inp); }
 
 test("Park und Haus sind gleich gebaut, Start und Körbchen sind frei", () => {
@@ -157,4 +158,160 @@ test("Haufen im Park: einpacken und in den Mülleimer werfen", () => {
   s.order("wegwerfen", {type: "obj", id: bin.id});
   run(s, 80);
   assert.ok(s.tasks[0].done, "Haufen-Aufgabe");
+});
+
+test("Gehorsam: Unbekanntes verwirrt, Leckerli direkt nach dem Befolgen bringt Können", () => {
+  const s = new H.Sim({world: W, nav: N, rand: H.rng(9), name: "Bello"}); s.ambient = () => null; s.plan = [];
+  s.setDog("idle", 9); s.d.x = s.p.x + 1.2; s.d.z = s.p.z;
+  s.command("rolle"); run(s, 1);
+  assert.ok(s.events.some(e => e.type === "unknown" && e.cmd === "rolle"));
+  s.skills.sitz = 100; s.obeyChance = () => 1;
+  const before = s.skills.sitz, lk = s.vorrat.leckerli;
+  s.skills.sitz = 50; s.command("sitz"); run(s, 1);
+  assert.equal(s.d.mode, "sit");
+  assert.ok(s.reward());
+  assert.ok(s.skills.sitz > 50, "Können steigt: " + s.skills.sitz);
+  assert.equal(s.vorrat.leckerli, lk - 1);
+  const now = s.skills.sitz; s.reward();
+  assert.equal(s.skills.sitz, now, "zweites Leckerli ohne neues Kommando bringt nichts");
+  void before;
+});
+
+test("Ohne Training folgt der Hund nicht immer", () => {
+  const s = new H.Sim({world: W, nav: N, rand: H.rng(3), name: "Bello"}); s.ambient = () => null; s.plan = [];
+  s.skills.platz = 10; let ign = 0;
+  for (let i = 0; i < 20; i++) { s.setDog("idle", 9); s.d.x = s.p.x + 1.2; s.d.z = s.p.z; s.events = []; s.command("platz"); run(s, 1); if (s.events.some(e => e.type === "ignored")) ign++; }
+  assert.ok(ign >= 8, "ignoriert: " + ign);
+});
+
+test("Tricks üben kostet 2 Leckerli und bringt Können, Drehen und Rolle gehen danach", () => {
+  const s = sim();
+  s.setDog("idle", 9); s.d.x = s.p.x + 1.2; s.d.z = s.p.z;
+  s.order("ueben:dreh", {type: "train"}); run(s, 15);
+  assert.ok(s.skills.dreh >= 8, "dreh " + s.skills.dreh);
+  assert.equal(s.vorrat.leckerli, 18);
+  s.tasks.push({id: "dreh", need: 1, have: 0, done: false, failed: false, text: ""});
+  s.setDog("idle", 9); s.command("dreh"); run(s, 3);
+  assert.ok(s.tasks.find(t => t.id === "dreh").done, "Drehen erledigt");
+});
+
+test("Arbeiten bringt Geld, bestelltes Futter bringt der Postbote", () => {
+  const s = sim();
+  s.t = 9 * 60;
+  const m0 = s.money;
+  s.order("arbeiten", {type: "obj", id: "schreibtisch"}); run(s, 130);
+  assert.ok(s.money > m0 + 40, "Geld " + s.money);
+  assert.ok(s.tasks.find(t => t.id === "arbeit").have >= 119);
+  s.t = 10 * 60; s.p.act = null;
+  s.order("bestellen_futter", {type: "obj", id: "schreibtisch"}); run(s, 5);
+  assert.equal(s.orders.length, 1);
+  s.t = s.orders[0].at + 1; s.d.mode = "sleep"; s.d.timer = 999;
+  run(s, 2);
+  const post = s.npcs.find(n => n.role === "post");
+  assert.ok(post && post.parcel, "Postbote mit Paket");
+  for (let i = 0; i < 40 && !post.arrived; i++) run(s, 1);
+  assert.ok(post.arrived, "an der Tür");
+  s.p.x = -0.4; s.p.z = -118.6; const f0 = s.vorrat.futter;
+  s.order("paket", {type: "npc", id: post.id}); run(s, 4);
+  assert.equal(s.vorrat.futter, f0 + 10);
+  assert.equal(s.orders.length, 0);
+  assert.ok(s.tasks.find(t => t.id === "post").done);
+});
+
+test("Socke klauen und mit Aus zurückgeben", () => {
+  const s = sim();
+  s.t = 15 * 60; s.setDog("idle", 3); s.d.x = -3; s.d.z = -126; s.p.x = -5; s.p.z = -126;
+  assert.ok(s.trigger("socke"));
+  assert.equal(s.d.mode, "keepaway");
+  assert.ok(s.item(s.d.item).kind === "socke");
+  run(s, 2);
+  s.command("aus"); run(s, 2);
+  assert.ok(!s.items.some(it => it.kind === "socke"), "Socke weg");
+  assert.ok(s.tasks.find(t => t.id === "socke").done);
+});
+
+test("Regen macht den Hund draußen nass, drinnen abtrocknen", () => {
+  const s = sim();
+  s.t = 11 * 60; s.trigger("regen");
+  s.setDog("idle", 3); s.d.x = 0; s.d.z = -114; run(s, 1);
+  assert.equal(s.d.wet, 1);
+  s.d.x = -3; s.d.z = -126; s.p.x = -4; s.p.z = -126; s.setDog("idle", 9); run(s, 1);
+  assert.ok(s.tasks.find(t => t.id === "trocken"), "Aufgabe abtrocknen");
+  s.order("abtrocknen", {type: "dog"}); run(s, 8);
+  assert.equal(s.d.wet, 0);
+  assert.ok(s.tasks.find(t => t.id === "trocken").done);
+});
+
+test("Fremde Hunde: beschnuppern und spielen", () => {
+  const s = sim();
+  s.t = 17 * 60; s.p.x = 0; s.p.z = -50; s.d.x = 1; s.d.z = -50; s.setDog("idle", 0.1);
+  const n = s.spawnNpc("walker", {x: 0, z: -45, yaw: Math.PI, withDog: true});
+  s.tasks.push({id: "hundefreund", need: 1, have: 0, done: false, failed: false, text: ""});
+  s.startPlay(n); run(s, 11);
+  assert.ok(s.events.some(e => e.type === "played"));
+  assert.ok(s.tasks.find(t => t.id === "hundefreund").done);
+});
+
+test("Leute im Park kommen am Abend, gehen und lassen sich ansprechen", () => {
+  const s = new H.Sim({world: W, nav: N, rand: H.rng(4), name: "Bello"}); s.plan = []; s.obeyChance = () => 1;
+  s.t = 17 * 60; s.p.x = 0; s.p.z = -60; s.d.x = 1; s.d.z = -60; s.d.mode = "follow";
+  run(s, 30);
+  const amb = s.npcs.filter(n => n.ambient);
+  assert.ok(amb.length >= 4, "Leute: " + amb.length);
+  assert.ok(amb.some(n => n.walk > 5), "laufen");
+  const w = amb[0]; w.x = 0; w.z = -57; w.pause = 5;
+  s.tasks.push({id: "plaudern", need: 2, have: 0, done: false, failed: false, text: ""});
+  s.order("plaudern", {type: "npc", id: w.id}); run(s, 15);
+  assert.ok(s.events.some(e => e.type === "talk"));
+  assert.equal(s.tasks.find(t => t.id === "plaudern").have, 1);
+});
+
+test("Wochenplan: werktags Homeoffice, samstags Hundeschule, sonntags Hundewiese", () => {
+  const mo = H.makeTasks(1, 3).map(t => t.id), sa = H.makeTasks(6, 3).map(t => t.id), so = H.makeTasks(7, 3).map(t => t.id);
+  assert.ok(mo.includes("arbeit") && mo.includes("mittagsrunde") && !mo.includes("hundeschule"));
+  assert.ok(sa.includes("hundeschule") && !sa.includes("arbeit"));
+  assert.ok(so.includes("hundewiese"));
+  assert.ok(H.makePlan(6, 3).some(e => e.type === "schule"));
+  assert.ok(mo.length >= 10, "Aufgaben am Montag: " + mo.length);
+});
+
+test("Hundeschule: Training starten, Übungen, Abzeichen", () => {
+  const s = sim();
+  s.day = 6; s.tasks = H.makeTasks(6, 1); s.t = 9 * 60 + 40;
+  s.trigger("schule");
+  const tr = s.npcs.find(n => n.role === "trainer");
+  assert.ok(tr);
+  s.p.x = -31; s.p.z = -82; s.d.x = -31.5; s.d.z = -83; s.setDog("idle", 9); s.t = 600;
+  const m0 = s.money;
+  assert.ok(s.startSchool(tr.id));
+  assert.equal(s.money, m0 - 15);
+  assert.ok(s.tasks.find(t => t.id === "hundeschule").done);
+  assert.equal(s.schoolStep().id, "fuss");
+  s.schoolSkip();
+  assert.equal(s.schoolStep().id, "bleib");
+  s.task("stayed");
+  assert.equal(s.schoolStep().id, "komm");
+  s.task("came", {from: 9});
+  assert.equal(s.schoolStep().id, "neu");
+  s.schoolSkip(); s.schoolSkip();
+  const done = s.events.find(e => e.type === "schoolDone");
+  assert.ok(done && done.badge === "Welpenkurs", JSON.stringify(done));
+  assert.equal(s.schoolN, 1);
+  assert.ok(!s.school);
+});
+
+test("Parcours auf dem Übungsplatz", () => {
+  const s = sim();
+  s.skills.parcours = 100; s.p.x = -37; s.p.z = -84; s.d.x = -37.5; s.d.z = -85; s.setDog("idle", 9);
+  s.command("parcours"); run(s, 25);
+  const c = s.events.find(e => e.type === "course");
+  assert.ok(c, "Parcours beendet");
+  assert.ok(c.hits >= 2);
+});
+
+test("Speichern behält Geld, Vorrat und Können", () => {
+  const s = sim();
+  s.money = 77.5; s.vorrat.futter = 3; s.skills.rolle = 33; s.schoolN = 2;
+  const t = new H.Sim({world: W, nav: N, save: JSON.parse(JSON.stringify(s.save()))});
+  assert.equal(t.money, 77.5); assert.equal(t.vorrat.futter, 3); assert.equal(t.skills.rolle, 33); assert.equal(t.schoolN, 2);
 });

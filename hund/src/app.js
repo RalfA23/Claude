@@ -46,9 +46,11 @@
   marker.rotation.x = -Math.PI / 2; scene.add(marker);
   var itemMeshes = {}, poopMeshes = {}, puddleMeshes = {};
   var stickMat = new THREE.MeshStandardMaterial({color: 0x7a5533, roughness: 0.9}), ballMat = new THREE.MeshStandardMaterial({color: 0xc9e04a, roughness: 0.7});
+  var sockMat = new THREE.MeshStandardMaterial({color: 0xf2f2f2, roughness: 0.95}), sockMat2 = new THREE.MeshStandardMaterial({color: 0xd23b2f, roughness: 0.95});
   function itemMesh(it) {
     var g = new THREE.Group();
     if (it.kind === "ball") { var b = new THREE.Mesh(new THREE.SphereGeometry(0.06, 14, 10), ballMat); b.castShadow = true; g.add(b); }
+    else if (it.kind === "socke") { var so = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.05, 0.07), sockMat); so.castShadow = true; g.add(so); var toe = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.05, 0.12), sockMat2); toe.position.set(0.1, 0, 0.03); g.add(toe); }
     else { var s = new THREE.Mesh(new THREE.CylinderGeometry(0.016, 0.022, it.len || 0.6, 6), stickMat); s.rotation.z = Math.PI / 2; s.castShadow = true; g.add(s); var tw = new THREE.Mesh(new THREE.CylinderGeometry(0.006, 0.01, 0.15, 5), stickMat); tw.position.set(0.1, 0.05, 0); tw.rotation.z = -0.6; g.add(tw); }
     var hit = new THREE.Mesh(new THREE.SphereGeometry(0.35, 6, 4), new THREE.MeshBasicMaterial({visible: false})); g.add(hit);
     hit.userData.pick = {type: "item", id: it.id};
@@ -61,8 +63,9 @@
     var hit = new THREE.Mesh(new THREE.SphereGeometry(0.35, 6, 4), new THREE.MeshBasicMaterial({visible: false})); g.add(hit); hit.userData.pick = {type: "poop", id: q.id};
     scene.add(g); return {g: g, hit: hit};
   }
+  var waterPuddleMat = new THREE.MeshStandardMaterial({color: 0x9ec9e0, roughness: 0.05, transparent: true, opacity: 0.55, depthWrite: false});
   function puddleMesh(q) {
-    var m = new THREE.Mesh(new THREE.CircleGeometry(0.32, 20), puddleMat); m.rotation.x = -Math.PI / 2; m.position.set(q.x, 0.035, q.z); m.scale.set(1, 0.7, 1); scene.add(m);
+    var m = new THREE.Mesh(new THREE.CircleGeometry(q.water ? 0.45 : 0.32, 20), q.water ? waterPuddleMat : puddleMat); m.rotation.x = -Math.PI / 2; m.position.set(q.x, 0.035, q.z); m.scale.set(1, 0.7, 1); scene.add(m);
     m.userData.pick = {type: "puddle", id: q.id};
     return {g: m, hit: m};
   }
@@ -75,6 +78,7 @@
     Object.keys(itemMeshes).forEach(function (k) { scene.remove(itemMeshes[k].g); }); itemMeshes = {};
     sim.items.forEach(function (it) { itemMeshes[it.id] = itemMesh(it); });
     warned = {}; lastTaskKey = "";
+    Object.keys(npcViews).forEach(dropNpcView);
     cam.fx = sim.p.x; cam.fz = sim.p.z;
   }
   function saveLocal() { if (!sim) return; var s = sim.save(); s.seed = sim.seed; store(SAVE_KEY, {sim: s, name: sim.name, look: settings.look, breed: settings.breed, gender: settings.gender}); return s; }
@@ -101,17 +105,21 @@
   }
 
   /* ---------- Licht nach Uhrzeit ---------- */
+  var rainK = 0, skyRain = new THREE.Color(), skyGrey = new THREE.Color(0x6f7a85);
   var skyDay = new THREE.Color(0x9fcbe8), skyDusk = new THREE.Color(0xe9a36d), skyNight = new THREE.Color(0x0c1530), skyC = new THREE.Color();
   function smooth(a, b, x) { var t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); }
   function lighting(t) {
     var h = (t % 1440) / 60, el = Math.sin(Math.PI * (h - 6) / 14.5), day = smooth(-0.08, 0.3, el), dusk = smooth(0.35, 0.0, Math.abs(el)) * smooth(-0.25, 0.05, el);
     skyC.copy(skyNight).lerp(skyDay, day).lerp(skyDusk, dusk * 0.6);
+    var wet = sim && sim.weather ? 1 : 0; rainK += ((wet) - rainK) * 0.02;
+    if (rainK > 0.01) skyC.lerp(skyRain.copy(skyC).multiplyScalar(0.55).lerp(skyGrey, 0.5), rainK);
+    scene.fog.near = 45 - rainK * 25; scene.fog.far = 150 - rainK * 80;
     scene.background = skyC; scene.fog.color.copy(skyC);
     var az = Math.PI * (h - 6) / 12;
     var fx = cam.fx, fz = cam.fz;
     sun.position.set(fx + Math.cos(az) * 30, 8 + Math.max(0.05, el) * 40, fz - 18 + Math.sin(az) * 10);
     sun.target.position.set(fx, 0, fz);
-    sun.intensity = 2.6 * day + 0.25 * (1 - day);
+    sun.intensity = (2.6 * day + 0.25 * (1 - day)) * (1 - 0.65 * rainK);
     sun.color.setHSL(0.1, 0.6, 0.6 + 0.3 * day);
     hemi.intensity = 0.28 + 0.75 * day;
     world.lampMats.forEach(function (m) { m.emissiveIntensity = (1 - day) * 2.2; });
@@ -164,6 +172,7 @@
     Hund.DOG_NEEDS.forEach(function (k) { var bar = el("i"), row = el("div", {class: "need", title: k.name}, [el("span", {text: k.icon}), el("b", {text: k.name}), el("em", {}, [bar])]); box.appendChild(row); needEls["d_" + k.id] = bar; });
     var me = $("meList"); me.replaceChildren();
     Hund.ME_NEEDS.forEach(function (k) { var bar = el("i"), row = el("div", {class: "need", title: k.name}, [el("span", {text: k.icon}), el("b", {text: k.name}), el("em", {}, [bar])]); me.appendChild(row); needEls["m_" + k.id] = bar; });
+    $("skillList").replaceChildren();
   }
   function updateNeeds() {
     Hund.DOG_NEEDS.forEach(function (k) { var v = sim.need[k.id], b = needEls["d_" + k.id]; b.style.width = Math.max(3, v) + "%"; b.style.background = needColor(v); });
@@ -172,6 +181,13 @@
     $("moodDot").style.background = needColor(m); $("dogName").textContent = sim.name;
     $("needChip").replaceChildren.apply($("needChip"), Hund.DOG_NEEDS.filter(function (k) { return sim.need[k.id] < 40; }).map(function (k) { return el("span", {text: k.icon, style: "--c:" + needColor(sim.need[k.id])}); }));
     if (!$("needChip").children.length) $("needChip").textContent = "😊";
+    $("vorrat").textContent = "💶 " + Math.floor(sim.money) + " € · 🍖 " + sim.vorrat.futter + " Portionen · 🦴 " + sim.vorrat.leckerli + " Leckerli" + (sim.orders.length ? " · 📦 bestellt" : "");
+    var badge = Hund.badgeFor(sim.schoolN);
+    $("skillHead").textContent = "Können" + (badge ? " · 🎓 " + badge : "");
+    var sl = $("skillList");
+    if (!sl.children.length) Hund.TRICKS.forEach(function (t) { var bar = el("i"), row = el("div", {class: "need", title: t.name}, [el("span", {text: t.icon}), el("b", {text: t.name}), el("em", {}, [bar])]); sl.appendChild(row); needEls["s_" + t.id] = bar; });
+    Hund.TRICKS.forEach(function (t) { var v = sim.skills[t.id], b = needEls["s_" + t.id]; if (!b) return; b.style.width = Math.max(2, v) + "%"; b.style.background = v >= 60 ? "#4cd964" : v >= 25 ? "#ffcc00" : "#8e8aa8"; b.parentNode.title = t.name + ": " + Math.round(v) + " %"; });
+    $("treatN").textContent = sim.vorrat.leckerli;
   }
   var lastTaskKey = "";
   function updateTasks() {
@@ -195,6 +211,9 @@
     $("bLeash").classList.toggle("on", sim.d.leash);
     $("bLeash").lastChild.textContent = sim.d.leash ? "Leine ab" : "Anleinen";
     $("bags").hidden = !sim.p.bags; $("bags").textContent = "🛍️ " + sim.p.bags;
+    $("money").textContent = "💶 " + Math.floor(sim.money) + " €";
+    $("weather").hidden = !sim.weather;
+    updateSchool();
   }
   var tv = new THREE.Vector3();
   function screenPos(x, y, z) { tv.set(x, y, z).project(camera); return {x: (tv.x * 0.5 + 0.5) * canvas.clientWidth, y: (-tv.y * 0.5 + 0.5) * canvas.clientHeight, vis: tv.z < 1 && tv.z > -1}; }
@@ -211,6 +230,11 @@
       $("actBar").style.width = (a.total > 0 ? 100 * (1 - a.left / a.total) : 0) + "%";
     } else lab.hidden = true;
     $("sleepShade").hidden = !sim.sleeping;
+    sim.npcs.forEach(function (n) {
+      var v = npcViews[n.id]; if (!v) return;
+      var near = Hund.dist(n, sim.p) < 14 && Hund.inHouse(n) === Hund.inHouse(sim.p);
+      var s4 = screenPos(n.x, n.kid ? 1.4 : 2.15, n.z); v.tag.hidden = !near || !s4.vis; if (!v.tag.hidden) v.tag.style.transform = "translate(calc(" + s4.x + "px - 50%)," + (s4.y - 20) + "px)";
+    });
     Object.keys(Net.others).forEach(function (id) {
       var o = Net.others[id], tag = Net.tags[id]; if (!o.view || !tag) return;
       var s3 = screenPos(o.view.p.x, 2.2, o.view.p.z); tag.hidden = !s3.vis; tag.style.transform = "translate(calc(" + s3.x + "px - 50%)," + (s3.y - 20) + "px)";
@@ -243,6 +267,47 @@
         case "pet": tone([700, 900], 0.1, "sine", 0.05); break;
         case "dayEnd": showDayEnd(e); break;
         case "leashOn": tone([380, 500], 0.06, "triangle", 0.05); break;
+        case "newTask": toast("Neu: " + e.text); tone([880, 1100], 0.09, "sine", 0.06); break;
+        case "doorbell": tone([784, 622], 0.45, "sine", 0.14); toast("Ding-dong! Es klingelt an der Haustür."); break;
+        case "visitor": toast(e.who + " ist mit " + e.dog + " im Garten."); break;
+        case "sock": toast(nm + " hat eine Socke geklaut und rennt damit weg!", "bad"); bark(0.7); break;
+        case "sockBack": toast("Socke zurück.", "good"); break;
+        case "traded": toast(nm + " tauscht die Beute gegen ein Leckerli."); break;
+        case "rain": toast("Es fängt an zu regnen. 🌧️"); break;
+        case "rainEnd": toast("Der Regen hört auf."); break;
+        case "wetShake": toast(nm + " schüttelt sich, jetzt ist der Boden nass. Pfütze aufwischen und " + nm + " abtrocknen.", "bad"); break;
+        case "ignored": toast(nm + " hört gerade nicht auf „" + trickName(e.cmd) + "“ (" + e.skill + " %). Üben hilft, Ablenkung stört."); break;
+        case "unknown": toast(nm + " kennt „" + trickName(e.cmd) + "“ noch nicht. Tipp " + nm + " an und wähle Tricks üben."); break;
+        case "rewarded": toast("🦴 Gut gemacht! " + trickName(e.cmd) + ": " + e.skill + " % (+" + e.gain + ")", "good"); tone([700, 1050], 0.08, "sine", 0.06); break;
+        case "treat": toast("🦴 " + nm + " freut sich. Zum Lernen gleich nach einem Kommando belohnen."); break;
+        case "practiced": toast(trickName(e.cmd) + " geübt: jetzt " + e.skill + " % (+" + e.gain + ")", "good"); break;
+        case "stay": toast("Bleib! Jetzt mindestens 6 m weggehen und warten."); break;
+        case "stayed": toast(nm + " hat brav gewartet. Geh zurück, um aufzulösen.", "good"); break;
+        case "stayBroke": toast(nm + " ist aufgestanden und kommt hinterher."); break;
+        case "talk": toast(e.who + (e.line.slice(0, 5) === "winkt" ? " " + e.line : ": „" + e.line + "“")); tone([500, 600], 0.07, "sine", 0.04); break;
+        case "greet": if (e.name) toast(nm + " beschnuppert " + e.name + "."); else toast("Die Hunde beschnuppern sich."); bark(0.8); break;
+        case "playStart": toast(nm + " und " + e.name + " toben los!"); bark(0.9); break;
+        case "played": toast(nm + " hatte Spaß mit " + e.name + ".", "good"); break;
+        case "petOther": toast(e.name + " lässt sich gern kraulen. " + e.owner + " lächelt."); break;
+        case "chase": toast(nm + " rennt einem Jogger hinterher! Schnell Komm rufen.", "bad"); bark(1); break;
+        case "chaseEnd": toast(e.who + " schimpft über den frechen Hund.", "bad"); break;
+        case "kid": toast(e.who + " fragt: „Darf ich den Hund streicheln?“"); break;
+        case "kidPet": toast(e.who + " streichelt " + nm + " ganz vorsichtig.", "good"); break;
+        case "parcel": toast("Angenommen" + (e.got ? ": " + e.got : ". Nur Briefe und Werbung.")); break;
+        case "missedParcel": toast("Der Postbote ist wieder weg. Das Paket kommt morgen noch einmal.", "bad"); break;
+        case "ordered": toast("Bestellt. Lieferung " + e.when + "."); tone([520, 780], 0.08, "sine", 0.05); break;
+        case "lowFood": toast("Nur noch " + e.left + " Portionen Futter. Am Schreibtisch kannst du nachbestellen."); break;
+        case "brushed": toast(nm + " glänzt."); break;
+        case "dried": toast(nm + " ist wieder trocken."); break;
+        case "schoolSoon": toast("Die Hundeschule fängt um 10 Uhr an: Übungsplatz auf der Westwiese im Park."); break;
+        case "schoolStart": toast("Die Trainerin begrüßt euch. Los geht's!", "good"); break;
+        case "schoolStep": toast("Übung " + e.n + " von " + e.of + ": " + e.text); break;
+        case "schoolAbort": toast("Ihr habt den Übungsplatz verlassen, das Training ist vorbei.", "bad"); break;
+        case "schoolDone": toast("Training geschafft: " + "★★★★★".slice(0, e.stars) + "☆☆☆☆☆".slice(0, 5 - e.stars) + (e.badge ? " · Neues Abzeichen: " + e.badge : ""), "good"); tone([523, 659, 784, 1046], 0.2, "triangle", 0.08); break;
+        case "wiese": toast("Am Teich ist Hundewiese. Viele Hunde zum Spielen!"); break;
+        case "miss": toast(nm + " lässt die " + e.what + " aus."); break;
+        case "course": toast("Parcours geschafft: " + e.hits + " von " + e.total + " Hindernissen.", e.hits === e.total ? "good" : ""); break;
+        case "trick": toast(nm + ": " + trickName(e.cmd) + "!", "good"); break;
       }
     });
     // Warnungen, wenn ein Bedürfnis kippt
@@ -251,12 +316,80 @@
       if (v < 22 && !warned[k.id]) { warned[k.id] = 1; toast({hunger: nm + " hat Hunger. Füll den Napf in der Küche.", durst: nm + " hat Durst. Frisches Wasser in den Wassernapf.", blase: nm + " muss raus. Anleinen und ab in den Park.", energie: nm + " ist müde.", spass: nm + " langweilt sich. Ball werfen oder raus in den Park.", liebe: nm + " möchte gestreichelt werden.", sauber: nm + " ist schmutzig. Ab in die Badewanne."}[k.id]); }
       if (v > 45) warned[k.id] = 0;
     });
+    if (sim.me.sozial < 18 && !warned.sozial) { warned.sozial = 1; toast("Dir fehlt Gesellschaft. Sprich mit Leuten im Park."); }
+    if (sim.me.sozial > 40) warned.sozial = 0;
   }
   function showDayEnd(r) {
     $("deTitle").textContent = "Tag " + r.day + " ist vorbei";
     $("deStars").textContent = "★★★★★".slice(0, r.stars) + "☆☆☆☆☆".slice(0, 5 - r.stars);
-    $("deText").textContent = r.done + " von " + r.total + " Aufgaben geschafft, " + sim.name + " war im Schnitt zu " + r.mood + " % zufrieden.";
+    $("deText").textContent = r.done + " von " + r.total + " Aufgaben geschafft, " + sim.name + " war im Schnitt zu " + r.mood + " % zufrieden. Kontostand: " + Math.floor(sim.money) + " €.";
     $("dayEnd").hidden = false; saveAll(true);
+  }
+
+  /* ---------- Leute und fremde Hunde ---------- */
+  var npcViews = {}, npcLeashMat = new THREE.LineBasicMaterial({color: 0x3a2a20});
+  function trickName(id) { var t = Hund.TRICKS.filter(function (x) { return x.id === id; })[0]; return t ? t.name : id; }
+  function npcView(n) {
+    var v = {person: makePerson(n.look, n.gender, {kid: n.kid}), dog: null, line: null, tag: el("div", {class: "tag", text: n.name + (n.dog ? " & " + n.dog.name : "")})};
+    v.person.hit.userData.pick = {type: "npc", id: n.id};
+    v.person.root.traverse(function (o) { if (o.isMesh && o !== v.person.hit) o.userData.pick = {type: "npc", id: n.id}; });
+    scene.add(v.person.root); $("tags").appendChild(v.tag);
+    if (n.dog) {
+      v.dog = makeDog(n.dog.lookIdx, n.dog.breed);
+      v.dog.root.traverse(function (o) { if (o.isMesh) o.userData.pick = {type: "npcdog", id: n.id}; });
+      scene.add(v.dog.root);
+      var lg = new THREE.BufferGeometry(); lg.setAttribute("position", new THREE.Float32BufferAttribute(new Float32Array(9), 3));
+      v.line = new THREE.Line(lg, npcLeashMat); v.line.frustumCulled = false; scene.add(v.line);
+    }
+    return v;
+  }
+  function dropNpcView(id) { var v = npcViews[id]; if (!v) return; scene.remove(v.person.root); if (v.dog) scene.remove(v.dog.root); if (v.line) scene.remove(v.line); v.tag.remove(); delete npcViews[id]; }
+  var hv = new THREE.Vector3(), cv2 = new THREE.Vector3();
+  function syncNpcs(dt, time) {
+    var seen = {};
+    sim.npcs.forEach(function (n) {
+      seen[n.id] = 1;
+      var v = npcViews[n.id] || (npcViews[n.id] = npcView(n));
+      v.person.update({x: n.x, z: n.z, yaw: n.yaw, speed: n.speed, phase: n.phase, pose: n.pose, leash: n.dog && n.dog.leash, parcel: n.role === "post" && n.parcel && !n.handled}, time, dt);
+      if (v.dog) {
+        v.dog.update(n.dog, time, dt);
+        v.line.visible = !!n.dog.leash;
+        if (n.dog.leash) {
+          v.person.handPos(hv); v.dog.head.parent.getWorldPosition(cv2);
+          var a = v.line.geometry.attributes.position; a.setXYZ(0, hv.x, hv.y, hv.z); a.setXYZ(1, (hv.x + cv2.x) / 2, (hv.y + cv2.y) / 2 - 0.25, (hv.z + cv2.z) / 2); a.setXYZ(2, cv2.x, cv2.y, cv2.z); a.needsUpdate = true;
+        }
+      }
+    });
+    Object.keys(npcViews).forEach(function (id) { if (!seen[id]) dropNpcView(id); });
+  }
+  function syncItems() {
+    var seen = {};
+    sim.items.forEach(function (it) { seen[it.id] = 1; if (!itemMeshes[it.id]) itemMeshes[it.id] = itemMesh(it); });
+    Object.keys(itemMeshes).forEach(function (id) { if (!seen[id]) { scene.remove(itemMeshes[id].g); delete itemMeshes[id]; } });
+  }
+  // Regen: Striche, die um die Kamera herum fallen.
+  var RAIN_N = mobile ? 900 : 1800, rainPos = new Float32Array(RAIN_N * 6), rainGeo = new THREE.BufferGeometry();
+  rainGeo.setAttribute("position", new THREE.BufferAttribute(rainPos, 3));
+  var rain = new THREE.LineSegments(rainGeo, new THREE.LineBasicMaterial({color: 0xaabbcc, transparent: true, opacity: 0.45})); rain.frustumCulled = false; rain.visible = false; scene.add(rain);
+  var rainSeed = []; for (var ri = 0; ri < RAIN_N; ri++) rainSeed.push([Math.random() * 30 - 15, Math.random() * 14, Math.random() * 30 - 15]);
+  function stepRain(dt) {
+    rain.visible = rainK > 0.05 && !Hund.inHouse({x: cam.fx, z: cam.fz}); if (!rain.visible) return;
+    rain.material.opacity = 0.45 * rainK;
+    for (var i = 0; i < RAIN_N; i++) {
+      var r = rainSeed[i]; r[1] -= dt * 14; if (r[1] < 0) { r[1] += 14; r[0] = Math.random() * 30 - 15; r[2] = Math.random() * 30 - 15; }
+      var x = cam.fx + r[0], z = cam.fz + r[2], k = i * 6;
+      rainPos[k] = x; rainPos[k + 1] = r[1]; rainPos[k + 2] = z; rainPos[k + 3] = x + 0.03; rainPos[k + 4] = r[1] + 0.45; rainPos[k + 5] = z;
+    }
+    rainGeo.attributes.position.needsUpdate = true;
+  }
+  // Hundeschule: Anzeige der aktuellen Übung
+  function updateSchool() {
+    var box = $("school"), st = sim.schoolStep();
+    box.hidden = !st; if (!st) return;
+    $("schTitle").textContent = "🎓 Hundeschule · Übung " + (sim.school.step + 1) + " von " + Hund.SCHOOL_STEPS.length;
+    $("schText").textContent = sim.schoolText();
+    $("schBar").style.width = (100 * Math.min(1, sim.school.have / st.need)) + "%";
+    $("schBar").parentNode.hidden = st.need <= 1;
   }
 
   /* ---------- Darstellung pro Bild ---------- */
@@ -279,6 +412,7 @@
       leash = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3([h, mid, c2]), 20, 0.007, 5, false), leashMat); leash.castShadow = true; scene.add(leash);
     }
     // Gegenstände
+    syncItems();
     sim.items.forEach(function (it) {
       var im = itemMeshes[it.id]; if (!im) return;
       var g = im.g;
@@ -309,6 +443,7 @@
     // Markierung fürs Antippen
     if (marker.material.opacity > 0) { marker.material.opacity = Math.max(0, marker.material.opacity - dt * 0.8); marker.scale.setScalar(1 + (0.8 - marker.material.opacity) * 0.6); }
     Net.render(dt, time);
+    syncItems(); syncNpcs(dt, time); stepRain(dt);
   }
   function syncList(list, meshes, make) {
     var seen = {};
@@ -323,10 +458,12 @@
     keys[e.code] = true;
     if (!running) return;
     if (e.code === "Space") { e.preventDefault(); if (sim.p.holding) sim.throwItem(); }
-    if (e.code === "Digit1") sim.command("komm"); if (e.code === "Digit2") sim.command("sitz"); if (e.code === "Digit3") sim.command("platz"); if (e.code === "Digit4") sim.command("pfote");
+    var keyCmd = {Digit1: "komm", Digit2: "sitz", Digit3: "platz", Digit4: "pfote", Digit5: "bleib", Digit6: "fuss", Digit7: "aus", Digit8: "dreh", Digit9: "rolle", Digit0: "parcours"}[e.code];
+    if (keyCmd) sim.command(keyCmd);
+    if (e.code === "KeyR") sim.reward();
     if (e.code === "KeyL") leashBtn();
     if (e.code === "KeyP") setSpeed(sim.speed ? 0 : 1);
-    if (e.code === "Escape") closeMenu();
+    if (e.code === "Escape") { closeMenu(); moreEl.hidden = true; }
   });
   window.addEventListener("keyup", function (e) { keys[e.code] = false; });
   window.addEventListener("blur", function () { keys = {}; });
@@ -383,6 +520,7 @@
   var ray = new THREE.Raycaster(), ndc = new THREE.Vector2(), groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
   function pickables() {
     var list = world.picks.slice(); list.push(dog.hit);
+    Object.keys(npcViews).forEach(function (id) { var v = npcViews[id]; list.push(v.person.hit); if (v.dog) list.push(v.dog.hit); });
     Object.keys(itemMeshes).forEach(function (k) { var it = sim.item(k); if (it && it.state === "ground") list.push(itemMeshes[k].hit); });
     Object.keys(poopMeshes).forEach(function (k) { list.push(poopMeshes[k].hit); });
     Object.keys(puddleMeshes).forEach(function (k) { list.push(puddleMeshes[k].hit); });
@@ -417,7 +555,8 @@
     else {
       acts = sim.actionsFor(tg);
       var o = tg.type === "obj" ? sim.obj(tg.id) : null;
-      title = tg.type === "dog" ? sim.name : o ? o.name : tg.type === "poop" ? "Haufen" : tg.type === "puddle" ? "Pfütze" : tg.type === "item" ? (sim.item(tg.id).kind === "ball" ? "Ball" : "Stock") : "";
+      var nn = (tg.type === "npc" || tg.type === "npcdog") ? sim.npcById(tg.id) : null;
+      title = tg.type === "dog" ? sim.name : tg.type === "train" ? "Tricks üben (2 🦴)" : nn ? (tg.type === "npcdog" ? nn.dog.name + " (" + nn.name + ")" : nn.name) : o ? o.name : tg.type === "poop" ? "Haufen" : tg.type === "puddle" ? "Pfütze" : tg.type === "item" ? ({ball: "Ball", stock: "Stock", socke: "Socke"}[sim.item(tg.id).kind]) : "";
       if (o && o.kind === "tuer") { sim.order("tuer", tg); return; }
     }
     if (!acts.length) return;
@@ -428,7 +567,8 @@
         closeMenu();
         if (a.id === "walk") { walkMark(tg.x, tg.z); sim.walkTo(tg.x, tg.z); return; }
         if (a.id === "throwAt") { sim.throwItem(tg.x, tg.z); return; }
-        var pos = sim.targetPos(tg); if (pos && a.id.indexOf("cmd:") !== 0 && a.id !== "ableinen") walkMark(pos.use ? pos.use.x : pos.x, pos.use ? pos.use.z : pos.z);
+        if (a.id === "sub:train") { openMenu({type: "train"}, cx, cy); return; }
+        var pos = tg.type === "train" ? sim.d : sim.targetPos(tg); if (pos && a.id.indexOf("cmd:") !== 0 && a.id !== "ableinen") walkMark(pos.use ? pos.use.x : pos.x, pos.use ? pos.use.z : pos.z);
         sim.order(a.id, tg);
       }}));
     });
@@ -448,6 +588,18 @@
   $("bPlatz").onclick = function () { sim.command("platz"); };
   $("bPfote").onclick = function () { sim.command("pfote"); };
   $("bLeash").onclick = leashBtn;
+  $("bTreat").onclick = function () { sim.reward(); };
+  $("schSkip").onclick = function () { sim.schoolSkip(); updateSchool(); };
+  var moreEl = $("more");
+  function openMore() {
+    moreEl.replaceChildren();
+    [["bleib", "5"], ["fuss", "6"], ["aus", "7"], ["dreh", "8"], ["rolle", "9"], ["parcours", "0"]].forEach(function (c) {
+      var t = Hund.TRICKS.filter(function (x) { return x.id === c[0]; })[0];
+      moreEl.appendChild(el("button", {type: "button", title: t.name + " (" + c[1] + ")", onclick: function () { moreEl.hidden = true; sim.command(c[0]); }}, [el("span", {text: t.icon}), el("b", {text: t.name}), el("small", {text: Math.round(sim.skills[c[0]]) + " %"})]));
+    });
+    moreEl.hidden = false;
+  }
+  $("bMore").onclick = function () { if (moreEl.hidden) openMore(); else moreEl.hidden = true; };
   $("bThrow").onclick = function () { sim.throwItem(); };
   $("actCancel").onclick = function () { sim.cancel(); };
   function soundLabel() { $("bSound").textContent = settings.sound ? "🔊" : "🔈"; $("sSound").textContent = settings.sound ? "🔊 Ton an" : "🔈 Ton aus"; }
