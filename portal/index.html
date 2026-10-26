@@ -170,9 +170,9 @@ dialog::backdrop{background:rgba(0,0,0,.45)}
 // Kursliste: neue Kurse hier eintragen. Der Pfad ist relativ zum Portal. Jeder Kurs wird automatisch zu einer Kachel in der Galerie.
 var COURSES = [
   // Die Portal-Kacheln sind Überpunkte: Lernen, Spiele, Gesundheit, Entspannung, Weltkarte. Unterkurse liegen auf der jeweiligen Seite.
-  // Lernen (lernen/) bündelt Lesetraining, Lesetraining Fortgeschritten, Schachtraining, Sprachen und Bücher, Klavier kommt dazu. Die Kurse behalten ihre Adressen.
+  // Lernen (lernen/) bündelt Lesetraining, Lesetraining Fortgeschritten, Schachtraining, Sprachen, Bücher und Klavier. Die Kurse behalten ihre Adressen.
   // Früher hatte jeder Kurs eine eigene Kachel: alte Freigaben (lesen, schach, sprachen, …) und Dashboard-Kacheln werden zu „lernen“.
-  {id: "lernen", icon: "🎓", title: "Lernen", text: "Lesetraining, Schachtraining, Sprachen und deine Bücher an einer Stelle, Klavier kommt bald dazu.", href: "lernen/"},
+  {id: "lernen", icon: "🎓", title: "Lernen", text: "Lesetraining, Schachtraining, Sprachen, deine Bücher und Klavier an einer Stelle.", href: "lernen/"},
   // Spiele (spiele/) bündelt Flipper, Götterquiz, Wortwürfel, Poker, Murmelbahn und Vestaboard. Die Spiele behalten ihre Adressen.
   // Früher hatte jedes Spiel eine eigene Kachel: alte Freigaben (quiz, wortwuerfel, …) und Dashboard-Kacheln werden zu „spiele“.
   {id: "spiele", icon: "🕹️", title: "Spiele", text: "Flipper mit vier Tischen, Götterquiz, Wortwürfel und Poker zum Spielen, Murmelbahn und Vestaboard zum Abschalten.", href: "spiele/"},
@@ -795,6 +795,7 @@ var GEVT = {id: "gevt", icon: "🥋", title: "Ving Tsun Wissen", text: "Frag dei
     {id: "lesen-fortgeschritten", icon: "🎓", title: "Nur Lesetraining Fortgeschritten"},
     {id: "schach", icon: "♞", title: "Nur Schachtraining"},
     {id: "buecher", icon: "📚", title: "Nur Bücher"},
+    {id: "klavier", icon: "🎹", title: "Nur Klavier"},
     {id: "sprachen", icon: "🗣️", title: "Alle Sprachen"},
     {id: "sprachen:niederlaendisch", icon: "🇳🇱", title: "Nur Niederländisch"},
     {id: "sprachen:japanisch", icon: "🇯🇵", title: "Nur Japanisch"},

@@ -1,6 +1,6 @@
 # Lernen
 
-Sammelkachel der Lebensplattform unter `/lernen/`, Portal-Kachel „Lernen“ (Kennung `lernen`). Bündelt Lesetraining (`/lesen/`), Lesetraining Fortgeschritten (`/lesen/?kurs=fortgeschritten`), Schachtraining (`/schach/`), Sprachen (`/sprachen/`) und Bücher (`/buecher/`). Klavier kommt als eigener Ordner dazu und bekommt hier eine Karte. Die Kurse behalten ihre Adressen und Daten.
+Sammelkachel der Lebensplattform unter `/lernen/`, Portal-Kachel „Lernen“ (Kennung `lernen`). Bündelt Lesetraining (`/lesen/`), Lesetraining Fortgeschritten (`/lesen/?kurs=fortgeschritten`), Schachtraining (`/schach/`), Sprachen (`/sprachen/`), Bücher (`/buecher/`) und Klavier (`/klavier/`). Die Kurse behalten ihre Adressen und Daten.
 
 Neuer Lernkurs: Eintrag in `COURSES` in `src/index.html` (Abschnitt `sec`, `id` = Freigabe-Kennung) und die Kennung in `LERN_IDS` in `portal/index.html` plus einen „Nur …“-Eintrag in `SUBMODS`.
 
