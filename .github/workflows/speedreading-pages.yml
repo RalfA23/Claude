@@ -3,9 +3,9 @@ name: Trainer veröffentlichen (Lesetraining und Schachtraining)
 on:
   push:
     branches: [main]
-    paths: ["speedreading-trainer/**", "schach-trainer/**", "gevt-wissen/**", "goetterquiz/**", "wortwuerfel/**", "murmelbahn/**", "vestaboard/**", "poker/**", "huberman/**", "gesundheit/**", "weltkarte/**", "sprachen/**", "portal/**", ".github/workflows/speedreading-pages.yml"]
+    paths: ["speedreading-trainer/**", "schach-trainer/**", "gevt-wissen/**", "goetterquiz/**", "wortwuerfel/**", "murmelbahn/**", "vestaboard/**", "poker/**", "huberman/**", "gesundheit/**", "weltkarte/**", "buecher/**", "sprachen/**", "portal/**", ".github/workflows/speedreading-pages.yml"]
   pull_request:
-    paths: ["speedreading-trainer/**", "schach-trainer/**", "gevt-wissen/**", "goetterquiz/**", "wortwuerfel/**", "murmelbahn/**", "vestaboard/**", "poker/**", "huberman/**", "gesundheit/**", "weltkarte/**", "sprachen/**", "portal/**", ".github/workflows/speedreading-pages.yml"]
+    paths: ["speedreading-trainer/**", "schach-trainer/**", "gevt-wissen/**", "goetterquiz/**", "wortwuerfel/**", "murmelbahn/**", "vestaboard/**", "poker/**", "huberman/**", "gesundheit/**", "weltkarte/**", "buecher/**", "sprachen/**", "portal/**", ".github/workflows/speedreading-pages.yml"]
   workflow_dispatch:
 
 permissions:
@@ -70,6 +70,9 @@ jobs:
       - name: Build Weltkarte
         working-directory: weltkarte
         run: node build.mjs && node -e "const s=require('fs').readFileSync('dist/index.html','utf8');const m=s.match(/<script>([\s\S]*?)<\/script>/g);for(const b of m){new Function(b.replace(/<\/?script>/g,''))}console.log('ok',m.length)"
+      - name: Build Bücher
+        working-directory: buecher
+        run: node build.mjs && node -e "const s=require('fs').readFileSync('dist/index.html','utf8');const m=s.match(/<script>([\s\S]*?)<\/script>/g);for(const b of m){new Function(b.replace(/<\/?script>/g,''))}console.log('ok',m.length)"
       - name: Build Sprachen
         working-directory: sprachen
         run: node build.mjs
@@ -88,6 +91,7 @@ jobs:
           cp -r huberman/dist site/huberman
           cp -r gesundheit/dist site/gesundheit
           cp -r weltkarte/dist site/weltkarte
+          cp -r buecher/dist site/buecher
           cp -r sprachen/dist site/sprachen
           cp site/lesen/config.js site/schach/config.js
           cp portal/index.html site/index.html

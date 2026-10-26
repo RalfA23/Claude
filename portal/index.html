@@ -172,6 +172,9 @@ var COURSES = [
   {id: "gesundheit", icon: "🫀", title: "Gesundheit", text: "Huberman-Checkliste, Trainingswoche mit dem 12-Wochen-Plan und dein Wissen zu Schlaf, Licht, Bewegung, Ernährung und Stress an einer Stelle.", href: "gesundheit/"},
   // Jedes Konto hat seine eigene Karte (weltkarte/, Orte in schach_docs unter weltkarte/ort.<id>). Die Kachel zeigt, wie viele Orte besucht und geplant sind.
   {id: "weltkarte", icon: "🗺️", title: "Weltkarte", text: "Alle Orte, an denen du warst und wo du noch hin willst, als Pins auf einer großen Weltkarte. Mit Datum, Notizen und Bildern als Andenken.", href: "weltkarte/"},
+  // Bücher (buecher/): eigene Bücherliste mit Kurzzusammenfassung von Claude, Learnings, Sternen und Schlagwörtern (schach_docs, Pfade buecher/buch.<id>).
+  // Die Kachel zeigt die Zahl der Bücher und das zuletzt eingetragene. Nicht in module_defaults, Freigabe über den Dialog.
+  {id: "buecher", icon: "📚", title: "Bücher", text: "Deine Wissensplattform für Bücher: eintragen oder ISBN scannen, Kurzzusammenfassung von Claude, deine eigenen Learnings mit Datum, Sterne und Schlagwörter.", href: "buecher/"},
   // Sprachen (sprachen/): Niederländisch, Japanisch, Thai, Koreanisch, Englisch, Türkisch. Die Kachel zeigt die Punkte aller Sprachen (schach_docs, Pfade sprachen/<sprache>.fortschritt).
   {id: "sprachen", icon: "🗣️", title: "Sprachen", text: "Niederländisch, Japanisch, Thai, Koreanisch und Englisch für Anfänger und Fortgeschrittene: nachsprechen mit Spracherkennung, Dialoge, Schreiben und Lesen, mit Punkten, Serien und Stufen.", href: "sprachen/"}
 ];
@@ -477,6 +480,7 @@ var GEVT = {id: "gevt", icon: "🥋", title: "Ving Tsun Wissen", text: "Frag dei
     if (c.id === "gesundheit") hubermanToday(b, row);
     if (c.id === "sprachen") sprachenStand(b, row);
     if (c.id === "weltkarte") weltkarteStand(b, row);
+    if (c.id === "buecher") buecherStand(b, row);
     row.appendChild(el("a", {class: "btn primary", href: c.href, text: "Öffnen", onclick: function () { if (isNew(c)) setSeen((seen() || []).concat([c.id])); }}));
   }
   // Heutiger Stand der Huberman-Checkliste (schach_docs, Pfad huberman/tag.JJJJ-MM-TT)
@@ -510,6 +514,16 @@ var GEVT = {id: "gevt", icon: "🥋", title: "Ving Tsun Wissen", text: "Frag dei
       if (r.error || !r.data || !r.data.length) return;
       var war = r.data.filter(function (x) { return x.kind !== "will"; }).length, will = r.data.length - war;
       txt.textContent = war + (war === 1 ? " Ort besucht" : " Orte besucht") + " · " + will + (will === 1 ? " Ziel" : " Ziele");
+    });
+  }
+
+  // Zahl der Bücher und das zuletzt eingetragene (schach_docs, Pfade buecher/buch.<id>)
+  function buecherStand(b, row) {
+    var txt = el("p", {text: ""}); b.insertBefore(txt, row);
+    sb.from("schach_docs").select("title:data->>title,created:data->>created").eq("user_id", user.id).like("path", "buecher/buch.%").then(function (r) {
+      if (r.error || !r.data || !r.data.length) return;
+      var last = r.data.slice().sort(function (x, y) { return String(y.created || "").localeCompare(String(x.created || "")); })[0];
+      txt.textContent = r.data.length + (r.data.length === 1 ? " Buch" : " Bücher") + (last && last.title ? " · zuletzt „" + last.title + "“" : "");
     });
   }
 
