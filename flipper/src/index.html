@@ -10,7 +10,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bangers&family=Orbitron:wght@600;900&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bangers&family=Cormorant+Garamond:wght@600;700&family=Orbitron:wght@600;900&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&display=swap">
 <script src="../config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <style>
@@ -77,12 +77,14 @@ kbd{border:1px solid var(--line);border-radius:5px;padding:0 5px;font-size:.85em
   <div class="overlay" id="menu">
     <div class="inner">
       <h2>Welcher Tisch?</h2>
-      <p class="lede">Vier Tische mit eigener Kunst, eigenen Klängen und eigenen Missionen. Drei Kugeln pro Spiel, Rekorde werden in deinem Konto gespeichert.</p>
+      <p class="lede">Fünf Tische mit eigener Kunst, eigenen Klängen und eigenen Missionen. Drei Kugeln pro Spiel, Rekorde werden in deinem Konto gespeichert.</p>
       <div class="tables" id="tables"></div>
       <div class="help">
         <div><b>Am Handy</b>Linke Bildschirmhälfte tippen bewegt den linken Flipper, rechte Hälfte den rechten. Zum Abschießen rechts halten und loslassen: je länger, desto kräftiger. ⇡ oben rüttelt den Tisch.</div>
         <div><b>Mit Tastatur</b><kbd>←</kbd> oder <kbd>Shift</kbd> links, <kbd>→</kbd> oder <kbd>Shift</kbd> rechts. <kbd>Leertaste</kbd> halten zum Abschuss. <kbd>↑</kbd> rüttelt, <kbd>P</kbd> pausiert.</div>
         <div><b>So punktest du</b>Der blinkende Pfeil zeigt deine Mission. Rampen schalten Locks frei, zwei Kugeln im Loch starten den Multiball, dann gibt jede Rampe einen Jackpot. Alle Missionen geschafft: Wizard-Modus mit dreifachen Punkten.</div>
+        <div><b>Gimmicks</b>Das wandernde Ziel in der Mitte bringt dicke Punkte und startet den Hurry-up: jetzt schnell die Rampe treffen. Das Loch oben rechts gibt Mystery-Preise, die volle Fallziel-Reihe startet den Frenzy, der linke Kickback rettet einmal pro Kugel.</div>
+        <div><b>Bibliothek</b>Der Bücher-Tisch holt Titel aus deiner Bücher-App und die Klassiker der Weltliteratur: jedes Spiel stellt neue Missionen von Homer bis Kafka, eines davon mit einem Buch, das du gerade liest.</div>
         <div><b>Vorsicht</b>Zu viel rütteln gibt <i>Tilt</i>: Flipper tot, Bonus weg. Die Lanes oben drehst du mit den Flippertasten, die blinkende Lane direkt nach dem Abschuss ist der Skillshot.</div>
       </div>
     </div>
@@ -149,8 +151,30 @@ kbd{border:1px solid var(--line);border-radius:5px;padding:0 5px;font-size:.85em
       if (r.error) throw r.error;
       (r.data || []).forEach(function (row) { var id = row.path.slice("flipper/score.".length); if (row.data) scores[id] = merge(rec(id), row.data); });
       saveLocal(); drawMenu();
+      loadLibrary(true);
     } catch (e) { user = null; }
   }
+
+  /* ---------- Bücher-App: eigene Bibliothek für den Tisch „Bibliothek“ ---------- */
+  function setLibrary(obj) {
+    var list = [];
+    for (var k in obj) { var b = obj[k]; if (b && b.title) list.push({title: String(b.title), author: String(b.author || ""), status: b.status || ""}); }
+    F.LIBRARY = list;
+  }
+  function loadLocalLibrary() {
+    try { setLibrary(JSON.parse(localStorage.getItem("buecher-" + (user ? user.id : "gast")) || "{}") || {}); } catch (e) { F.LIBRARY = []; }
+  }
+  async function loadLibrary(remote) {
+    loadLocalLibrary();
+    if (remote && sb && user) {
+      try {
+        var r = await sb.from("schach_docs").select("data").eq("user_id", user.id).like("path", "buecher/buch.%");
+        if (!r.error && r.data && r.data.length) { var o = {}; r.data.forEach(function (row, i) { if (row.data) o[row.data.id || i] = row.data; }); setLibrary(o); }
+      } catch (e) {}
+    }
+    if (!$("menu").hidden) drawMenu();
+  }
+  loadLocalLibrary();
   async function storeScore(id) {
     var el = $("store");
     if (!sb || !user) { el.textContent = "Rekord nur in diesem Browser gespeichert. Im Portal anmelden, dann landet er in deinem Konto."; return; }
@@ -193,7 +217,7 @@ kbd{border:1px solid var(--line);border-radius:5px;padding:0 5px;font-size:.85em
   function start(id) {
     S.unlock();
     tableId = id; prefs.table = id; savePrefs();
-    game = new F.Game(F.TABLES[id]);
+    game = new F.Game(F.TABLES[id], id === "buecher" && F.bookMissions ? {missions: F.bookMissions(F.LIBRARY || [], Math.random)} : {});
     S.setTable(F.TABLES[id].theme); S.setMusic(!!prefs.music);
     $("tname").textContent = F.TABLES[id].name;
     $("menu").hidden = true; $("over").hidden = true; $("paused").hidden = true;
@@ -228,11 +252,16 @@ kbd{border:1px solid var(--line);border-radius:5px;padding:0 5px;font-size:.85em
     if (!game) return;
     var dt = Math.min(0.05, (now - lastT) / 1000); lastT = now;
     if (running && !paused) {
-      game.update(dt);
-      game.drainEvents().forEach(function (e) { rend.handle(e); S.play(e); if (e.type === "gameover") setTimeout(gameOver, 1600); });
+      var gdt = dt;
+      if (rend.slow > 0) { rend.slow -= dt; gdt = dt * 0.35; }
+      game.update(gdt);
+      game.drainEvents().forEach(function (e) { rend.handle(e); S.play(e); buzz(e); if (e.type === "gameover") setTimeout(gameOver, 1600); });
     }
     rend.draw(running && !paused ? dt : 0);
   }
+
+  var BUZZ = {bumper: 12, mover: 25, kickback: 40, tilt: 200, multiball: [60, 40, 60, 40, 120], jackpot: [40, 30, 80], superjackpot: [80, 40, 80, 40, 160], drain: 90, frenzy: [30, 30, 30], hurryCollect: [50, 30, 100]};
+  function buzz(e) { var v = BUZZ[e.type]; if (v && navigator.vibrate && prefs.sound) try { navigator.vibrate(v); } catch (er) {} }
 
   /* ---------- Eingabe: Touch mit mehreren Fingern, Maus, Tastatur ---------- */
   var ptrs = {};
