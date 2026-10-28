@@ -7,7 +7,7 @@ Was drin ist:
 - **Heute:** eine Tagesaufgabe aus einem Wochenplan (vier Mal Woodpecker, drei Mal Smirnov-Lektion, zufällig gemischt, Verpasstes wird am nächsten Tag nachgeholt) und die Abfrage des Tages (eigene Fehlerstellung und Woodpecker-Aufgabe am Brett, eine Theoriefrage).
 - **Woodpecker:** die 222 leichten Aufgaben aus „The Woodpecker Method“ als interaktives Brett. Nur legale Züge, die Seite prüft gegen die Lösung und spielt die Antwort des Gegners.
 - **Smirnov:** sechs Kurzlektionen mit Übungsstellungen aus den eigenen Partien und Links zu Clips auf YouTube.
-- **Stappen:** Training in Stufen nach dem Prinzip der niederländischen Stappenmethode. Fünf Stufen (Grundlagen, Doppelangriff, Linien, Kombinationen, Rechnen) mit je drei bis fünf Lektionen: kurze Erklärung, dann Aufgaben genau zum Thema. Ab 80 Prozent ist eine Lektion bestanden, sind alle Lektionen einer Stufe bestanden, öffnet sich die nächste. Mit dem Stufentest (10 Aufgaben, ab 8 richtig) lässt sich eine Stufe überspringen. Die Aufgaben sind selbst erzeugt, nicht aus den Arbeitsheften (siehe unten).
+- **Stappen:** Training in Stufen nach dem Prinzip der niederländischen Stappenmethode. Sechs Stufen (Grundlagen, Doppelangriff, Linien, Kombinationen, Rechnen, Meisterstufe) mit je drei bis fünf Lektionen: kurze Erklärung, dann Aufgaben genau zum Thema. Ab 80 Prozent ist eine Lektion bestanden, sind alle Lektionen einer Stufe bestanden, öffnet sich die nächste. Mit dem Stufentest (10 Aufgaben, ab 8 richtig) lässt sich eine Stufe überspringen. Die Aufgaben sind selbst erzeugt, nicht aus den Arbeitsheften (siehe unten). Der Reiter hat vier Bereiche: Weg (Stufen mit klaren Aufstiegsbedingungen), Statistik (Trefferquote, Serie, Zeit, letzte 14 Tage, schwache Lektionen), Werkzeuge (Tagesziel, Fehlerheft, Auffrischen, Denk-Check, Merkzettel) und Erfolge (Abzeichen, Diplom je Stufe).
 - **Fortschritt:** Trainingsminuten, Lichess-Wertung, Trefferquote je Runde, grobe Fehler pro Partie, Tagebuch.
 - **Eintragen:** Partien, Lektionen aus den gekauften Kursen, Rapid-Wertung, einmalige Datenübernahme aus der Claude-Seite.
 
@@ -39,7 +39,7 @@ Der Workflow `.github/workflows/speedreading-pages.yml` baut beide Apps und legt
 
 `src/data/stappen.json` wird mit `node tools/stappen-gen.mjs [lektion …]` erzeugt (lokales Stockfish nötig, `STOCKFISH=/pfad`). Grundlagen, Mattaufgaben und Bauernendspiele sind zufällige, dünn besetzte Stellungen; Motive wie Gabel, Fesselung, Spieß, Abzug, Beseitigung des Verteidigers, Hinlenkung und Ablenkung stammen aus Partien, die Stockfish in Vereinsstärke gegen sich selbst spielt. Jede Lösung ist mit Stockfish geprüft: Der Schlüsselzug muss klar der beste sein, bei Matt zählt jedes Matt im letzten Zug. Format je Aufgabe: `f` Stellung, `l` Lösungszüge (UCI, Gegnerzüge dazwischen), `a` weitere richtige Züge für den letzten Zug, `m` jedes Matt zählt, `z` Ziel im Endspiel.
 
-Stand pro Konto im Dokument `stappen/stand` (`l` je Lektion bestes Ergebnis und Datum des Bestehens, `t` je Stufentest), jede Runde zusätzlich als Sitzung `sitzungen/stappen-<zeit>` mit Minuten.
+Stand pro Konto im Dokument `stappen/stand` (`l` je Lektion bestes Ergebnis und Datum des Bestehens, `t` je Stufentest), `z` Zähler (gesamt, `tage` je Datum, `l` je Lektion gemacht/richtig/Sekunden), `f` Fehlerheft (Lektion, Aufgabe, Datum), `ziel` Tagesziel. Jede Runde zusätzlich als Sitzung `sitzungen/stappen-<zeit>` mit Minuten.
 
 ## Daten
 

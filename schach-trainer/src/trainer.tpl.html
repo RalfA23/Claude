@@ -252,6 +252,41 @@ nav.tabs.dragging button{cursor:grabbing}
 .st-run details{margin:8px 0}
 .st-run details p{margin:6px 0}
 .st-run .merk{border-left:3px solid var(--c-stappen);padding-left:10px;font-weight:600}
+
+.st-sub{display:flex;gap:4px;margin:14px 0 12px;border-bottom:1px solid var(--line);overflow-x:auto}
+.st-sub button{background:none;border:0;border-bottom:3px solid transparent;color:var(--muted);font:inherit;font-weight:600;padding:8px 12px;cursor:pointer;white-space:nowrap}
+.st-sub button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--c-stappen)}
+.st-steps{display:flex;align-items:center;gap:0;margin:8px 0 0}
+.st-steps i{flex:1;height:2px;background:var(--line);min-width:6px}
+.st-steps button{display:flex;flex-direction:column;align-items:center;gap:2px;background:none;border:0;color:var(--muted);font:inherit;cursor:pointer;padding:2px}
+.st-steps b{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;border:2px solid var(--line);font-family:var(--f-display);font-size:1rem;color:var(--ink);background:var(--bg)}
+.st-steps small{font-size:.7rem}
+.st-steps .done b{background:var(--good);border-color:var(--good);color:#fff}
+.st-steps .cur b{border-color:var(--c-stappen);box-shadow:0 0 0 3px color-mix(in srgb,var(--c-stappen) 25%,transparent)}
+.st-steps .lock b{opacity:.5}
+.st-how{margin:0;padding-left:20px;line-height:1.5}
+.st-goal{margin-top:8px;padding:8px 10px;border-left:3px solid var(--c-stappen);background:color-mix(in srgb,var(--c-stappen) 8%,transparent);border-radius:4px;font-size:.9rem}
+.st-stand{margin:4px 0 10px;font-weight:600;color:var(--ink)}
+.st-chart{position:relative;display:flex;align-items:flex-end;gap:4px;height:120px;margin-top:6px;padding-bottom:16px}
+.st-chart .col{flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;position:relative}
+.st-chart .bar{width:100%;background:color-mix(in srgb,var(--c-stappen) 35%,transparent);border-radius:3px 3px 0 0;display:flex;align-items:flex-end;min-height:0}
+.st-chart .bar .r{display:block;width:100%;background:var(--c-stappen);border-radius:3px 3px 0 0}
+.st-chart small{position:absolute;bottom:-16px;font-size:.65rem;color:var(--muted)}
+.st-chart .goalline{position:absolute;left:0;right:0;border-top:1px dashed var(--muted);margin-bottom:16px;pointer-events:none}
+.st-chart .goalline small{position:static;float:right;background:var(--surface);padding:0 3px;transform:translateY(-100%)}
+.st-bar{display:grid;grid-template-columns:minmax(120px,1.4fr) 2fr 44px auto auto;gap:8px;align-items:center;padding:4px 0;font-size:.88rem}
+.st-bar small{color:var(--muted)} .st-bar b{text-align:right;font-variant-numeric:tabular-nums}
+.st-bar.weak .progress>span{background:var(--bad)}
+@media (max-width:600px){.st-bar{grid-template-columns:1fr 1fr 44px}.st-bar small,.st-bar button{grid-column:1/-1}}
+.st-merk{margin:6px 0 10px;padding-left:18px;line-height:1.5}
+.st-badges{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.st-badge{display:flex;flex-direction:column;gap:2px;padding:10px;border:1px dashed var(--line);border-radius:8px;opacity:.5;filter:grayscale(1)}
+.st-badge.got{opacity:1;filter:none;border:1px solid var(--c-stappen)}
+.st-badge .ic{font-size:1.6rem} .st-badge small{color:var(--muted)}
+.st-dipl{margin:8px 0;padding:18px;border:3px double var(--c-stappen);border-radius:8px;text-align:center}
+.st-dipl .t{font-family:var(--f-display);font-size:1.8rem;letter-spacing:.08em;text-transform:uppercase}
+.st-dipl .s{font-weight:600;margin:4px 0} .st-dipl .d{color:var(--muted);margin-bottom:8px}
+@media print{body *{visibility:hidden}.st-dipl.print,.st-dipl.print *{visibility:visible}.st-dipl.print{position:absolute;left:0;top:0;width:100%}.no-print{display:none}}
 </style>
 
 <div class="wrap">
@@ -628,7 +663,20 @@ const ST_LEVELS=[
    merk:'Kein Motiv erraten, sondern systematisch suchen.'},
   {id:'5.3',title:'Bauernendspiel: der einzige Zug',kind:'ende',task:'Finde den einzigen Zug, der das beste Ergebnis hält.',
    expl:['In Bauernendspielen gibt es oft nur einen Zug, der gewinnt oder hält. Alle anderen verlieren ein entscheidendes Tempo.','Zähle Tempi, denk an Opposition und Quadratregel, und frag dich, wo dein König hingehört.'],
-   merk:'Im Bauernendspiel zählt jedes Tempo.'}]}
+   merk:'Im Bauernendspiel zählt jedes Tempo.'}]},
+ {n:6,title:'Stufe 6 · Meisterstufe',text:'Grundreihe, Opfer, lange Varianten und Turmendspiele: alles zusammen, mit genauem Rechnen.',lessons:[
+  {id:'6.1',title:'Grundreihenmatt',kind:'matt',n:1,task:'Setz Matt in einem Zug auf der Grundreihe.',
+   expl:['Beim Grundreihenmatt steht der König auf seiner ersten Reihe, eigene Bauern nehmen ihm die Fluchtfelder, und ein Turm oder die Dame setzt entlang der Reihe matt.','Oft ist vorher ein Tausch oder Opfer nötig, das den letzten Verteidiger der Reihe entfernt. Prüfe bei jedem König ohne Luftloch, ob die Grundreihe schwach ist.'],
+   merk:'Kein Luftloch beim Gegner? Dann die Grundreihe angreifen.'},
+  {id:'6.2',title:'Turmendspiel',kind:'ende',task:'Finde den einzigen Zug, der das beste Ergebnis hält.',
+   expl:['Im Turmendspiel ist die Turmaktivität wichtiger als ein Bauer. Der Turm gehört hinter den Freibauern, und der König muss ihm helfen.','Der verteidigende König bleibt vor dem Bauern, der Turm schneidet den gegnerischen König ab. Ein falscher Schachsatz kostet oft das ganze Remis.'],
+   merk:'Aktiver Turm, König zum Bauern, Schachs von hinten.'},
+  {id:'6.3',title:'Lange Kombinationen',kind:'gewinn',task:'Gewinne Material. Die Lösung hat drei eigene Züge.',
+   expl:['Bei langen Kombinationen führen mehrere Züge hintereinander zum Gewinn, und der Gegner antwortet jedes Mal mit seinem besten Zug.','Rechne die zwingenden Züge zuerst. Schreib dir im Kopf die Zugfolge auf und prüfe an jedem Punkt die beste Gegenantwort.'],
+   merk:'Zwingend rechnen: Schach, Schlag, Drohung, und die beste Antwort mitdenken.'},
+  {id:'6.4',title:'Matt in vier',kind:'matt',n:4,task:'Setz Matt in vier Zügen.',
+   expl:['Vier Züge tief lassen sich nur mit klarer Ordnung rechnen. Sammle die Kandidaten, bei denen der Gegner am wenigsten Antworten hat.','Zeichne dir die Fluchtfelder des Königs auf. Jeder Zug muss ein Feld wegnehmen oder eine Verteidigung beseitigen.'],
+   merk:'Je weniger Antworten der Gegner hat, desto leichter rechnest du.'}]}
 ];
 const ST_ALL=ST_LEVELS.flatMap(L=>L.lessons.map(x=>Object.assign({level:L.n},x)));
 let stStand={l:{},t:{}}, stRun=null, stBoard=null;
@@ -639,37 +687,125 @@ const stLevelOpen=n=>n===1||stLevelDone(n-1);
 function stNext(){return ST_ALL.find(x=>stLevelOpen(x.level)&&!stLevelDone(x.level)&&!stDone(x.id)&&stEx(x.id).length)}
 async function stSave(){if(db){try{await db.doc('stappen/stand').set(stStand)}catch(e){}}}
 // Jede beantwortete Aufgabe zählt sofort: Zähler gesamt und pro Tag, laufende Lektion mit Zwischenstand (zum Weitermachen).
-function stCount(ok){const R=stRun,d=today();const z=stStand.z=stStand.z||{gemacht:0,richtig:0,tage:{}};z.gemacht++;if(ok)z.richtig++;
+function stCount(ok,x){const R=stRun,d=today();const z=stStand.z=stStand.z||{gemacht:0,richtig:0,tage:{}};z.gemacht++;if(ok)z.richtig++;
   const t=z.tage[d]=z.tage[d]||[0,0];t[0]++;if(ok)t[1]++;Object.keys(z.tage).sort().slice(0,-60).forEach(k=>delete z.tage[k]);
+  if(x){const id=x.lesson.id,l=z.l=z.l||{},a=l[id]=l[id]||[0,0,0];a[0]++;if(ok)a[1]++;a[2]+=Math.min(180,Math.round((Date.now()-(R.tq||Date.now()))/1000));
+    // Fehlerheft: falsch gelöste Aufgaben merken, richtig gelöste streichen.
+    const f=(stStand.f||[]).filter(y=>!(y[0]===id&&y[1]===x.i));if(!ok)f.push([id,x.i,d]);stStand.f=f.slice(-80)}
   if(R.kind==='lektion'){const o=stStand.l[R.id]=stStand.l[R.id]||{};o.lauf={res:R.res.slice(),t0:R.t0};o.zuletzt=d}
+  if(R.kind==='auffrisch'||R.kind==='wdh'){const o=stStand.l[R.id];if(o)o.zuletzt=d}
   stSave()}
 // Runde abgebrochen: gelöste Aufgaben und Minuten trotzdem als Sitzung festhalten.
 function stLeave(){const R=stRun;stRun=null;clearTimeout(animTimer);if(R&&R.res.length&&!R.logged)stLog(R,false);renderStappen()}
 function stLog(R,end){R.logged=true;const n=R.list.length,r=R.res.filter(Boolean).length,d=today();
   const mins=Math.max(1,Math.min(90,Math.round((Date.now()-(R.s0||R.t0))/60000)));
-  const doc={typ:'stappen',datum:d,ts:new Date().toISOString(),minuten:mins,lektion:R.title+(R.kind==='wdh'?' (Wiederholung)':''),richtig:r,gesamt:R.res.length,notiz:!end?'unterbrochen nach '+R.res.length+' von '+n:R.kind==='wdh'?'':r>=Math.ceil(n*ST_PASS)?'bestanden':'noch nicht bestanden, nötig '+Math.ceil(n*ST_PASS)};
+  const doc={typ:'stappen',datum:d,ts:new Date().toISOString(),minuten:mins,lektion:R.title+(R.kind==='wdh'?' (Wiederholung)':''),richtig:r,gesamt:R.res.length,notiz:!end?'unterbrochen nach '+R.res.length+' von '+n:R.kind==='wdh'||R.kind==='heft'||R.kind==='auffrisch'?'':r>=Math.ceil(n*ST_PASS)?'bestanden':'noch nicht bestanden, nötig '+Math.ceil(n*ST_PASS)};
   const id='stappen-'+Date.now();sitzungen.push({id,...doc});if(db){try{Promise.resolve(db.doc('sitzungen/'+id).set(doc)).catch(()=>{})}catch(e){}}
   renderSide()}
-function renderStappen(){
-  const box=$('v-st');if(!box)return;if(stRun)return;
+let stSub='weg';
+const stKey=x=>x.getFullYear()+'-'+pad(x.getMonth()+1)+'-'+pad(x.getDate());
+const stDate=s=>s?s.slice(8,10)+'.'+s.slice(5,7)+'.'+s.slice(0,4):'';
+const stPct=(r,n)=>n?Math.round(r/n*100):0;
+const stGoal=()=>stStand.ziel||10;
+function stLevelDate(n){const L=ST_LEVELS.find(x=>x.n===n);if(!stLevelDone(n))return null;
+  const ds=L.lessons.map(x=>stStand.l[x.id]&&stStand.l[x.id].ok);const t=stStand.t[n]&&stStand.t[n].ok;
+  const all=ds.every(Boolean)?ds.slice().sort().pop():null;return [all,t].filter(Boolean).sort()[0]||null}
+function stStreak(){const t=(stStand.z&&stStand.z.tage)||{};const d=new Date();if(!(t[stKey(d)]&&t[stKey(d)][0]))d.setDate(d.getDate()-1);let n=0;while(t[stKey(d)]&&t[stKey(d)][0]>0){n++;d.setDate(d.getDate()-1)}return n}
+function stBestStreak(){const t=(stStand.z&&stStand.z.tage)||{};const ks=Object.keys(t).filter(k=>t[k][0]>0).sort();let best=0,cur=0,prev=null;
+  ks.forEach(k=>{const d=new Date(k+'T12:00:00');if(prev&&Math.round((d-prev)/864e5)===1)cur++;else cur=1;prev=d;if(cur>best)best=cur});return best}
+function stLevelRate(n){const L=ST_LEVELS.find(x=>x.n===n),zl=(stStand.z&&stStand.z.l)||{};let g=0,r=0;L.lessons.forEach(x=>{const a=zl[x.id];if(a){g+=a[0];r+=a[1]}});return [g,r]}
+function stMinutes(){return sitzungen.filter(s=>s.typ==='stappen').reduce((a,s)=>a+(+s.minuten||0),0)}
+function stOpenLessons(n){return ST_LEVELS.find(x=>x.n===n).lessons.filter(x=>stEx(x.id).length&&!stDone(x.id))}
+// Auffrischen fällig: bestanden, aber seit mindestens 7 Tagen nicht mehr geübt.
+function stDue(){const lim=new Date();lim.setDate(lim.getDate()-7);const k=stKey(lim);
+  return ST_ALL.filter(x=>stDone(x.id)&&stEx(x.id).length&&((stStand.l[x.id].zuletzt||stStand.l[x.id].ok)<=k))}
+function stBadges(){const z=stStand.z||{gemacht:0,richtig:0,tage:{},l:{}},ss=sitzungen.filter(s=>s.typ==='stappen'),best=stBestStreak();
+  const goalDays=Object.keys(z.tage||{}).filter(k=>z.tage[k][0]>=stGoal()).length;
+  const B=[
+   ['🌱','Erster Schritt','Die erste Aufgabe lösen',z.gemacht>=1],
+   ['💯','100 richtig','100 Aufgaben richtig lösen',z.richtig>=100],
+   ['🏅','500 richtig','500 Aufgaben richtig lösen',z.richtig>=500],
+   ['🏆','1000 richtig','1000 Aufgaben richtig lösen',z.richtig>=1000],
+   ['🔥','3 Tage in Folge','An drei Tagen hintereinander üben',best>=3],
+   ['🔥','7 Tage in Folge','Eine ganze Woche ohne Pause',best>=7],
+   ['🔥','14 Tage in Folge','Zwei Wochen am Stück',best>=14],
+   ['🎯','Tagesziel 5-mal','An fünf Tagen das Tagesziel schaffen',goalDays>=5],
+   ['✨','Fehlerfreie Runde','Eine Runde mit mindestens 10 Aufgaben ohne Fehler',ss.some(s=>s.gesamt>=10&&s.richtig===s.gesamt)],
+   ['🧹','Fehlerheft leer','Das Fehlerheft ganz leeren (nach mindestens 50 Aufgaben)',z.gemacht>=50&&!(stStand.f||[]).length]];
+  ST_LEVELS.forEach(L=>B.push(['🎓','Stufe '+L.n+' geschafft',L.title.split(' · ')[1]||'',stLevelDone(L.n)]));
+  return B}
+function stSubNav(){return '<div class="st-sub" role="tablist">'+[['weg','Weg'],['stat','Statistik'],['tool','Werkzeuge'],['erf','Erfolge']].map(t=>'<button type="button" role="tab" aria-selected="'+(stSub===t[0])+'" data-st-sub="'+t[0]+'">'+t[1]+'</button>').join('')+'</div>'}
+function stHeader(){
   const nx=stNext();const total=ST_ALL.filter(x=>stEx(x.id).length).length,done=ST_ALL.filter(x=>stDone(x.id)||stLevelDone(x.level)).length;
-  box.innerHTML='<div class="card st-intro"><h3 style="margin:0 0 6px">Stappenmethode</h3>'+
-    '<p style="margin:0 0 8px">Schach in kleinen Schritten, nach dem Prinzip der niederländischen Stappenmethode: Jede Lektion erklärt ein Thema kurz, dann folgen viele Aufgaben genau dazu. Ab 80 Prozent richtig ist die Lektion bestanden. Sind alle Lektionen einer Stufe bestanden, öffnet sich die nächste. Kannst du eine Stufe schon, mach den Test und spring weiter.</p>'+
-    '<div class="progress"><span style="width:'+(total?Math.round(done/total*100):0)+'%"></span></div><p class="note" style="margin:6px 0 0">'+done+' von '+total+' Lektionen bestanden.'+(nx?' Als Nächstes: '+nx.id+' '+nx.title+'.':'')+'</p>'+
-    (()=>{const z=stStand.z;if(!z||!z.gemacht)return '';const td=(z.tage||{})[today()]||[0,0];return '<p class="note" style="margin:4px 0 0">Gelöst: '+z.richtig+' von '+z.gemacht+' Aufgaben richtig'+(td[0]?', heute '+td[1]+' von '+td[0]:'')+'.</p>'})()+
-    (nx?'<div class="btns" style="margin-top:10px"><span class="here">▶ Hier weiter</span><button class="b primary" type="button" data-st-go="'+nx.id+'">'+nx.id+' '+nx.title+'</button></div>':'')+'</div>'+
-    '<div class="st-levels">'+ST_LEVELS.map(L=>{const open=stLevelOpen(L.n),ld=stLevelDone(L.n),t=stStand.t[L.n];
-      const items=L.lessons.filter(x=>stEx(x.id).length).map(x=>{const r=stStand.l[x.id];const ok=stDone(x.id)||ld;
+  const cur=ST_LEVELS.find(L=>stLevelOpen(L.n)&&!stLevelDone(L.n));const td=((stStand.z&&stStand.z.tage)||{})[today()]||[0,0];const goal=stGoal();
+  const steps='<div class="st-steps">'+ST_LEVELS.map(L=>{const d=stLevelDone(L.n),o=stLevelOpen(L.n);return '<button type="button" class="'+(d?'done':cur&&cur.n===L.n?'cur':o?'':'lock')+'" data-st-lv="'+L.n+'" aria-label="Stufe '+L.n+(d?' geschafft':o?'':' gesperrt')+'"><b>'+(d?'✓':L.n)+'</b><small>Stufe '+L.n+'</small></button>'}).join('<i></i>')+'</div>';
+  return '<div class="card st-intro"><h3 style="margin:0 0 6px">Stappenmethode</h3>'+steps+
+    '<div class="progress" style="margin-top:10px"><span style="width:'+(total?Math.round(done/total*100):0)+'%"></span></div><p class="note" style="margin:6px 0 0">'+done+' von '+total+' Lektionen bestanden'+(cur?' · du bist in Stufe '+cur.n:' · alle Stufen geschafft')+'.</p>'+
+    '<p class="note" style="margin:4px 0 0">Heute: '+td[1]+' richtig von '+td[0]+' Aufgaben, Tagesziel '+goal+(td[0]>=goal?' ✓':'')+' · Serie '+stStreak()+' '+(stStreak()===1?'Tag':'Tage')+'.</p>'+
+    (nx?'<div class="btns" style="margin-top:10px"><span class="here">▶ Hier weiter</span><button class="b primary" type="button" data-st-go="'+nx.id+'">'+nx.id+' '+nx.title+'</button></div>':'')+'</div>'}
+function stWeg(){
+  const nx=stNext();
+  return '<div class="card st-intro"><h3 style="margin:0 0 6px">So kommst du weiter</h3><ol class="st-how"><li>Jede Lektion erklärt ein Thema kurz, dann folgen Aufgaben genau dazu.</li><li>Eine Lektion ist <b>bestanden bei 80 Prozent</b> richtig, also zum Beispiel 10 von 12.</li><li>Sind <b>alle Lektionen</b> einer Stufe bestanden, öffnet sich die nächste Stufe und du bekommst ein Diplom.</li><li>Kannst du eine Stufe schon? Der <b>Stufentest</b> (10 gemischte Aufgaben, ab 8 richtig) schaltet sie sofort frei.</li></ol></div>'+
+  '<div class="st-levels">'+ST_LEVELS.map(L=>{const open=stLevelOpen(L.n),ld=stLevelDone(L.n),t=stStand.t[L.n];
+      const les=L.lessons.filter(x=>stEx(x.id).length);const nDone=les.filter(x=>stDone(x.id)||ld).length;
+      const items=les.map(x=>{const r=stStand.l[x.id];const ok=stDone(x.id)||ld;
         const n0=stEx(x.id).length,lf=r&&r.lauf&&r.lauf.res.length<n0?r.lauf:null;
         const sub=(lf?'Angefangen: '+lf.res.length+' von '+n0+' gemacht, '+lf.res.filter(Boolean).length+' richtig. ':'')+(stDone(x.id)?'Bestanden'+(r.best!=null?', bestes Ergebnis '+r.best+' von '+r.n:''):ld?'Per Test übersprungen':r&&r.n?'Bisher '+r.best+' von '+r.n+', nötig '+Math.ceil(r.n*ST_PASS):lf?'':n0+' Aufgaben');
         return '<button class="st-item'+(ok?' done':'')+(nx&&nx.id===x.id?' next':'')+'" type="button" data-st-go="'+x.id+'"'+(open?'':' disabled')+'><b>'+x.id+' '+x.title+'</b><small>'+(ok?'✓ ':'')+sub+'</small></button>'}).join('');
-      return '<div class="card st-level'+(open?'':' locked')+'"><div class="meta"><h3>'+L.title+'</h3>'+(ld?'<span class="pill good">geschafft</span>':open?'':'<span class="pill warn">noch zu</span>')+'</div><p class="note" style="margin:0">'+L.text+(open?'':' Öffnet sich, wenn Stufe '+(L.n-1)+' geschafft ist, oder per Test.')+'</p>'+
-        '<div class="st-list">'+items+'</div>'+
-        (ld?'':'<div class="btns" style="margin-top:10px"><button class="b sm" type="button" data-st-test="'+L.n+'">Test für Stufe '+L.n+(t?' (bisher '+t.best+' von '+t.n+')':'')+'</button><span class="note" style="margin:0">10 gemischte Aufgaben, ab 8 richtig gilt die Stufe als geschafft.</span></div>')+'</div>'}).join('')+'</div>'+
+      const need=ld?'':'<div class="st-goal"><b>So geht es weiter:</b> bestehe '+(nDone===0?'alle '+les.length:'die '+(les.length-nDone)+' offenen von '+les.length)+' Lektionen mit mindestens 80 Prozent'+(nDone>0?' ('+stOpenLessons(L.n).map(x=>x.id).join(', ')+')':'')+', oder schaffe den Stufentest mit 8 von 10. '+(L.n<ST_LEVELS.length?'Dann öffnet sich Stufe '+(L.n+1)+'.':'Dann hast du alle Stufen geschafft.')+'</div>';
+      const dt=stLevelDate(L.n);
+      return '<div class="card st-level'+(open?'':' locked')+'" id="st-lv'+L.n+'"><div class="meta"><h3>'+L.title+'</h3>'+(ld?'<span class="pill good">geschafft'+(dt?' am '+stDate(dt):'')+'</span>':open?'<span class="pill warn">'+nDone+' von '+les.length+'</span>':'<span class="pill warn">noch zu</span>')+'</div><p class="note" style="margin:0">'+L.text+(open?'':' Öffnet sich, wenn Stufe '+(L.n-1)+' geschafft ist, oder per Test.')+'</p>'+
+        '<div class="progress" style="margin-top:8px"><span style="width:'+(les.length?Math.round(nDone/les.length*100):0)+'%"></span></div>'+
+        (open&&!ld?need:'')+'<div class="st-list">'+items+'</div>'+
+        (ld?'':'<div class="btns" style="margin-top:10px"><button class="b sm" type="button" data-st-test="'+L.n+'">Test für Stufe '+L.n+(t?' (bisher '+t.best+' von '+t.n+')':'')+'</button><span class="note" style="margin:0">10 gemischte Aufgaben, ab 8 richtig gilt die Stufe als geschafft.</span></div>')+'</div>'}).join('')+'</div>'}
+function stStat(){
+  const z=stStand.z||{gemacht:0,richtig:0,tage:{},l:{}},zl=z.l||{};let sek=0,gl=0;Object.keys(zl).forEach(k=>{sek+=zl[k][2]||0;gl+=zl[k][0]});
+  const kp=[['Aufgaben gelöst',z.gemacht,'davon '+z.richtig+' richtig'],['Trefferquote',stPct(z.richtig,z.gemacht)+' %','alle Aufgaben'],['Serie',stStreak()+(stStreak()===1?' Tag':' Tage'),'beste: '+stBestStreak()],['Trainingszeit',stMinutes()+' min','nur Stappen'],['Zeit pro Aufgabe',gl?Math.round(sek/gl)+' s':'–','Durchschnitt']];
+  const days=[];for(let i=13;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const k=stKey(d);days.push([k,(z.tage||{})[k]||[0,0]])}
+  const mx=Math.max(stGoal(),...days.map(d=>d[1][0]),1);
+  const chart='<div class="st-chart">'+days.map(([k,v])=>'<div class="col" title="'+stDate(k)+': '+v[1]+' richtig von '+v[0]+'"><div class="bar" style="height:'+Math.round(v[0]/mx*100)+'%"><span class="r" style="height:'+(v[0]?Math.round(v[1]/v[0]*100):0)+'%"></span></div><small>'+k.slice(8)+'</small></div>').join('')+'<div class="goalline" style="bottom:'+Math.round(stGoal()/mx*100)+'%"><small>Ziel '+stGoal()+'</small></div></div>';
+  const lv=ST_LEVELS.map(L=>{const [g,r]=stLevelRate(L.n),les=L.lessons.filter(x=>stEx(x.id).length),nd=les.filter(x=>stDone(x.id)||stLevelDone(L.n)).length;
+    return '<div class="st-bar"><span>Stufe '+L.n+'</span><div class="progress"><span style="width:'+Math.round(nd/les.length*100)+'%"></span></div><b>'+nd+'/'+les.length+'</b><small>'+(g?stPct(r,g)+' % richtig':'–')+'</small></div>'}).join('');
+  const rows=ST_ALL.filter(x=>stEx(x.id).length).map(x=>{const a=zl[x.id]||[0,0,0],p=stPct(a[1],a[0]),weak=a[0]>=8&&p<70;
+    return '<div class="st-bar'+(weak?' weak':'')+'"><span>'+x.id+' '+x.title+'</span><div class="progress"><span style="width:'+p+'%"></span></div><b>'+(a[0]?p+' %':'–')+'</b><small>'+(a[0]?a[0]+' Aufgaben'+(a[2]?', ⌀ '+Math.round(a[2]/a[0])+' s':''):'noch nicht geübt')+'</small>'+(weak?'<button class="b sm" type="button" data-st-drill="'+x.id+'">Üben</button>':'')+'</div>'}).join('');
+  const weak=ST_ALL.filter(x=>{const a=zl[x.id];return a&&a[0]>=8&&stPct(a[1],a[0])<70});
+  return '<div class="kpis">'+kp.map(k=>'<div class="kpi"><span class="note">'+k[0]+'</span><span class="v">'+k[1]+'</span><span class="s">'+k[2]+'</span></div>').join('')+'</div>'+
+   '<div class="card" style="margin-top:12px"><h3 style="margin:0 0 6px">Letzte 14 Tage</h3>'+chart+'<p class="note" style="margin:6px 0 0">Hell: richtig, dunkel: Aufgaben insgesamt. Die Linie ist dein Tagesziel.</p></div>'+
+   '<div class="card" style="margin-top:12px"><h3 style="margin:0 0 6px">Nach Stufen</h3>'+lv+'</div>'+
+   '<div class="card" style="margin-top:12px"><h3 style="margin:0 0 6px">Nach Lektionen</h3>'+(weak.length?'<p class="note" style="margin:0 0 6px">Schwach (unter 70 Prozent bei mindestens 8 Aufgaben): '+weak.map(x=>x.id).join(', ')+'. Dafür gibt es unten den Knopf „Üben“.</p>':'')+rows+'<p class="note" style="margin:8px 0 0">Zahlen pro Lektion zählen ab dem Update der Statistik.</p></div>'}
+function stTools(){
+  const f=(stStand.f||[]).filter(y=>STX[y[0]]&&STX[y[0]][y[1]]);const due=stDue();const goal=stGoal();
+  const byL={};f.forEach(y=>{byL[y[0]]=(byL[y[0]]||0)+1});
+  const merk=ST_LEVELS.filter(L=>stLevelOpen(L.n)).map(L=>'<details><summary>'+L.title+'</summary><ul class="st-merk">'+L.lessons.map(x=>'<li><b>'+x.id+' '+x.title+':</b> '+x.merk+'</li>').join('')+'</ul></details>').join('');
+  return '<div class="card"><h3 style="margin:0 0 6px">Tagesziel</h3><p class="note" style="margin:0 0 8px">Wie viele Stappen-Aufgaben willst du am Tag lösen? Das Ziel zählt für Serie, Statistik und Abzeichen.</p><div class="btns">'+[5,10,15,20,30].map(n=>'<button class="b sm'+(goal===n?' primary':'')+'" type="button" data-st-goal="'+n+'">'+n+'</button>').join('')+'</div></div>'+
+   '<div class="card" style="margin-top:12px"><h3 style="margin:0 0 6px">Fehlerheft</h3>'+(f.length?'<p class="note" style="margin:0 0 8px">'+f.length+' Aufgaben, die du nicht gelöst hast: '+Object.keys(byL).sort().map(k=>k+' ('+byL[k]+')').join(', ')+'. Eine richtige Antwort streicht die Aufgabe aus dem Heft.</p><div class="btns"><button class="b primary" type="button" id="stHeft">Fehlerheft üben ('+Math.min(10,f.length)+' Aufgaben)</button></div>':'<p class="note" style="margin:0">Leer. Falsch gelöste Aufgaben landen hier automatisch, damit du sie später noch einmal übst.</p>')+'</div>'+
+   '<div class="card" style="margin-top:12px"><h3 style="margin:0 0 6px">Auffrischen</h3>'+(due.length?'<p class="note" style="margin:0 0 8px">Diese bestandenen Lektionen hast du seit mindestens einer Woche nicht geübt. Sechs Aufgaben halten das Wissen frisch.</p><div class="btns">'+due.slice(0,8).map(x=>'<button class="b sm" type="button" data-st-ref="'+x.id+'">'+x.id+' '+x.title+'</button>').join('')+'</div>':'<p class="note" style="margin:0">Nichts fällig. Bestandene Lektionen erscheinen hier nach einer Woche ohne Übung.</p>')+'</div>'+
+   '<div class="card" style="margin-top:12px"><h3 style="margin:0 0 6px">Denk-Check vor jedem Zug</h3><ol class="st-how"><li>Was hat mein Gegner gerade gezogen, was droht er?</li><li>Hängt eine meiner Figuren, oder ist eine zu wenig gedeckt?</li><li>Welche Schachs, Schlagzüge und Drohungen habe ich?</li><li>Welches Motiv passt: Gabel, Fesselung, Spieß, Abzug, Ablenkung?</li><li>Nach meinem Zug: Was kann der Gegner dann tun?</li></ol></div>'+
+   '<div class="card" style="margin-top:12px"><h3 style="margin:0 0 6px">Merkzettel</h3><p class="note" style="margin:0 0 6px">Die Merksätze aller Lektionen der Stufen, die du schon erreicht hast.</p>'+merk+'</div>'}
+function stAwards(){
+  const B=stBadges();const dip=ST_LEVELS.filter(L=>stLevelDone(L.n));
+  return '<div class="card"><h3 style="margin:0 0 6px">Abzeichen · '+B.filter(b=>b[3]).length+' von '+B.length+'</h3><div class="st-badges">'+B.map(b=>'<div class="st-badge'+(b[3]?' got':'')+'"><span class="ic">'+b[0]+'</span><b>'+b[1]+'</b><small>'+b[2]+'</small></div>').join('')+'</div></div>'+
+   '<div class="card" style="margin-top:12px"><h3 style="margin:0 0 6px">Diplome</h3>'+(dip.length?dip.map(L=>{const [g,r]=stLevelRate(L.n);const dt=stLevelDate(L.n);return '<div class="st-dipl" id="stD'+L.n+'"><div class="t">Diplom</div><div class="s">Stappenmethode · '+L.title+'</div><div class="d">geschafft'+(dt?' am '+stDate(dt):'')+(g?' · Trefferquote in dieser Stufe '+stPct(r,g)+' %':'')+'</div><button class="b sm no-print" type="button" data-st-print="'+L.n+'">Drucken</button></div>'}).join(''):'<p class="note" style="margin:0">Schaff alle Lektionen einer Stufe oder den Stufentest, dann bekommst du hier das Diplom.</p>')+'</div>'}
+function renderStappen(){
+  const box=$('v-st');if(!box)return;if(stRun)return;
+  box.innerHTML=stHeader()+stSubNav()+'<div id="stBody">'+(stSub==='stat'?stStat():stSub==='tool'?stTools():stSub==='erf'?stAwards():stWeg())+'</div>'+
     '<p class="note" style="margin-top:14px">Die Aufgaben sind für diese Seite erstellt und jede Lösung ist mit Stockfish geprüft. Sie stammen nicht aus den Arbeitsheften der Stappenmethode. Dein Stand wird in deinem Konto gespeichert.</p>';
   box.querySelectorAll('[data-st-go]').forEach(b=>b.addEventListener('click',()=>stStart(b.dataset.stGo)));
   box.querySelectorAll('[data-st-test]').forEach(b=>b.addEventListener('click',()=>stTest(+b.dataset.stTest)));
+  box.querySelectorAll('[data-st-sub]').forEach(b=>b.addEventListener('click',()=>{stSub=b.dataset.stSub;renderStappen()}));
+  box.querySelectorAll('[data-st-lv]').forEach(b=>b.addEventListener('click',()=>{stSub='weg';renderStappen();const e=$('st-lv'+b.dataset.stLv);if(e)e.scrollIntoView({behavior:'smooth',block:'start'})}));
+  box.querySelectorAll('[data-st-drill]').forEach(b=>b.addEventListener('click',()=>stStart(b.dataset.stDrill,[...stEx(b.dataset.stDrill).keys()])));
+  box.querySelectorAll('[data-st-ref]').forEach(b=>b.addEventListener('click',()=>stRefresh(b.dataset.stRef)));
+  box.querySelectorAll('[data-st-goal]').forEach(b=>b.addEventListener('click',()=>{stStand.ziel=+b.dataset.stGoal;stSave();renderStappen();renderSide()}));
+  box.querySelectorAll('[data-st-print]').forEach(b=>b.addEventListener('click',()=>{const e=$('stD'+b.dataset.stPrint);e.classList.add('print');window.print();setTimeout(()=>e.classList.remove('print'),500)}));
+  if($('stHeft'))$('stHeft').addEventListener('click',stHeft);
 }
+function stHeft(){const f=(stStand.f||[]).filter(y=>STX[y[0]]&&STX[y[0]][y[1]]);
+  const list=f.slice(0,10).map(y=>({e:STX[y[0]][y[1]],lesson:ST_ALL.find(x=>x.id===y[0]),i:y[1]}));if(!list.length)return;
+  stRun={kind:'heft',title:'Fehlerheft',list,k:0,res:[],t0:Date.now(),s0:Date.now(),intro:false};stRender()}
+function stRefresh(id){const L=ST_ALL.find(x=>x.id===id),ex=stEx(id);const seed=dayNum()+id.length*7;
+  const picks=[...ex.keys()].sort((a,b)=>((a*7919+seed)%97)-((b*7919+seed)%97)).slice(0,6);
+  stRun={kind:'auffrisch',id,title:id+' '+L.title+' · Auffrischen',list:picks.map(i=>({e:ex[i],lesson:L,i})),k:0,res:[],t0:Date.now(),s0:Date.now(),intro:true};stRender()}
 function stStart(id,only){const L=ST_ALL.find(x=>x.id===id);let list=stEx(id).map((e,i)=>({e,lesson:L,i}));if(only)list=list.filter(x=>only.includes(x.i));
   stRun={kind:only?'wdh':'lektion',id,title:id+' '+L.title,list,k:0,res:[],t0:Date.now(),s0:Date.now(),intro:!only};
   const lf=!only&&stStand.l[id]&&stStand.l[id].lauf;if(lf&&lf.res&&lf.res.length&&lf.res.length<list.length){stRun.res=lf.res.slice();stRun.k=lf.res.length;stRun.t0=lf.t0||Date.now();stRun.intro=false}
@@ -686,9 +822,9 @@ function stPrompt(x){const L=x.lesson,w=x.e.f.split(' ')[1]==='w'?'Weiß':'Schwa
 function stRender(){
   clearTimeout(animTimer);const box=$('v-st');const R=stRun;const x=R.list[R.k];const L=x.lesson;
   const chips='<div class="res">'+R.list.map((_,i)=>'<span class="'+(i<R.res.length?(R.res[i]?'ok':'no'):i===R.k?'cur':'')+'">'+(i+1)+'</span>').join('')+'</div>';
-  const intro=R.kind!=='test'?'<details'+(R.intro&&R.k===0?' open':'')+'><summary>Erklärung</summary>'+L.expl.map(p=>'<p>'+p+'</p>').join('')+'<p class="merk">'+L.merk+'</p></details>':'';
+  R.tq=Date.now();const intro=(R.kind==='lektion'||R.kind==='wdh'||R.kind==='auffrisch')?'<details'+(R.intro&&R.k===0?' open':'')+'><summary>Erklärung</summary>'+L.expl.map(p=>'<p>'+p+'</p>').join('')+'<p class="merk">'+L.merk+'</p></details>':'';
   box.innerHTML='<div class="card st-run"><div class="inline" style="justify-content:space-between"><h3 style="margin:0">'+R.title+(R.kind==='wdh'?' · Wiederholung':'')+'</h3><button class="b sm" type="button" id="stBack">Zur Übersicht</button></div>'+intro+chips+
-    '<p class="q">Aufgabe '+(R.k+1)+' von '+R.list.length+(R.kind==='test'?' ('+L.title+')':'')+': '+stPrompt(x)+'</p><div class="board" id="stB"></div><div class="fb" id="stFb" hidden></div><div class="btns" id="stBtns"></div></div>';
+    '<p class="q">Aufgabe '+(R.k+1)+' von '+R.list.length+(R.kind==='test'||R.kind==='heft'?' ('+L.id+' '+L.title+')':'')+': '+stPrompt(x)+'</p><div class="board" id="stB"></div><div class="fb" id="stFb" hidden></div><div class="btns" id="stBtns"></div></div>';
   $('stBack').addEventListener('click',stLeave);
   const ex=x.e;let ply=0,failed=false;
   stBoard=makeBoard($('stB'),(from,to)=>{const g=stBoard.game;const exp=ex.l[ply];const c=g.moves({square:from,verbose:true}).filter(m=>m.to===to);
@@ -703,7 +839,7 @@ function stRender(){
       f.textContent='Der Gegner spielt '+figurine(mm?mm.san:r)+'. Weiter.'},600)});
   const B=stBoard;stBoard.load(ex.f);stBoard.locked=false;stBoard.draw();
 }
-function stAnswer(ok,msg,ex){const R=stRun;R.res.push(ok);stCount(ok);const f=$('stFb');f.hidden=false;f.className='fb '+(ok?'ok':'no');f.textContent=msg;
+function stAnswer(ok,msg,ex){const R=stRun;R.res.push(ok);stCount(ok,R.list[R.k]);const f=$('stFb');f.hidden=false;f.className='fb '+(ok?'ok':'no');f.textContent=msg;
   const lastQ=R.k>=R.list.length-1;
   $('stBtns').innerHTML='<button class="b" type="button" id="stSol">Lösung zeigen</button> <button class="b primary" type="button" id="stNx">'+(lastQ?'Auswerten':'Weiter')+'</button>';
   $('stSol').addEventListener('click',()=>{f.className='fb hint';f.textContent='Lösung: '+germanLine(ex.f,ex.l).text;animateLine(stBoard,ex.f,ex.l,(t,l)=>{f.textContent=t+(l?'  (Ende der Lösung)':'')},1000)});
@@ -712,16 +848,25 @@ function stAnswer(ok,msg,ex){const R=stRun;R.res.push(ok);stCount(ok);const f=$(
 }
 async function stFinish(){
   clearTimeout(animTimer);const R=stRun;const n=R.list.length,r=R.res.filter(Boolean).length,pass=r>=Math.ceil(n*ST_PASS);const d=today();
+  const wasDone=R.kind==='lektion'?stLevelDone(ST_ALL.find(x=>x.id===R.id).level):R.kind==='test'?stLevelDone(R.level):false;
   if(R.kind==='lektion'){const o=stStand.l[R.id]||{};stStand.l[R.id]={best:Math.max(o.best||0,r),n,ok:o.ok||(pass?d:null),zuletzt:d,versuche:(o.versuche||0)+1}}
   if(R.kind==='test'){const o=stStand.t[R.level]||{};stStand.t[R.level]={best:Math.max(o.best||0,r),n,ok:o.ok||(pass?d:null),zuletzt:d}}
   const wrong=R.list.filter((_,i)=>!R.res[i]).map(x=>x.i);
+  const lvN=R.kind==='lektion'?ST_ALL.find(x=>x.id===R.id).level:R.kind==='test'?R.level:0;
   stLog(R,true);
-  if(R.kind!=='wdh')await stSave();
+  await stSave();
   const nx=stNext();const box=$('v-st');
+  const free=['wdh','heft','auffrisch'].includes(R.kind);
+  // Klar sagen, was jetzt fehlt oder was sich geöffnet hat.
+  let stand='';
+  if(lvN){const ld=stLevelDone(lvN),open=stOpenLessons(lvN);
+    if(ld&&!wasDone)stand=lvN<ST_LEVELS.length?'Stufe '+lvN+' ist geschafft, Stufe '+(lvN+1)+' ist offen. Dein Diplom liegt unter Erfolge.':'Stufe '+lvN+' ist geschafft. Damit hast du alle sechs Stufen durch. Dein Diplom liegt unter Erfolge.';
+    else if(!ld)stand=open.length?'Bis Stufe '+(lvN+1)+' fehlen noch '+open.length+' Lektion'+(open.length===1?'':'en')+': '+open.map(x=>x.id).join(', ')+'.':''}
+  if(R.kind==='heft')stand=(stStand.f||[]).length?'Im Fehlerheft sind noch '+stStand.f.length+' Aufgaben.':'Das Fehlerheft ist leer.';
   box.innerHTML='<div class="card st-run"><h3 style="margin:0 0 6px">'+R.title+'</h3><div class="res">'+R.res.map((ok,i)=>'<span class="'+(ok?'ok':'no')+'">'+(i+1)+'</span>').join('')+'</div>'+
-    '<p class="q">'+r+' von '+n+' richtig. '+(R.kind==='wdh'?'Wiederholung erledigt.':pass?(R.kind==='test'?'Stufe '+R.level+' geschafft.':'Bestanden.'):'Noch nicht bestanden, nötig sind '+Math.ceil(n*ST_PASS)+'. Lies die Erklärung noch einmal und versuch es wieder.')+'</p>'+
-    '<div class="btns">'+(wrong.length&&R.kind!=='test'?'<button class="b" type="button" id="stWdh">Fehler wiederholen</button> ':'')+(!pass&&R.kind==='lektion'?'<button class="b" type="button" id="stAgain">Lektion neu starten</button> ':'')+
-    (nx&&(pass||R.kind==='wdh')?'<button class="b primary" type="button" id="stNext">Weiter: '+nx.id+' '+nx.title+'</button> ':'')+'<button class="b" type="button" id="stHome">Zur Übersicht</button></div></div>';
+    '<p class="q">'+r+' von '+n+' richtig. '+(free?'Übung erledigt.':pass?(R.kind==='test'?'Stufe '+R.level+' geschafft.':'Bestanden.'):'Noch nicht bestanden, nötig sind '+Math.ceil(n*ST_PASS)+'. Lies die Erklärung noch einmal und versuch es wieder.')+'</p>'+(stand?'<p class="note st-stand">'+stand+'</p>':'')+
+    '<div class="btns">'+(wrong.length&&(R.kind==='lektion'||R.kind==='wdh')?'<button class="b" type="button" id="stWdh">Fehler wiederholen</button> ':'')+(!pass&&R.kind==='lektion'?'<button class="b" type="button" id="stAgain">Lektion neu starten</button> ':'')+
+    (nx&&(pass||free)?'<button class="b primary" type="button" id="stNext">Weiter: '+nx.id+' '+nx.title+'</button> ':'')+'<button class="b" type="button" id="stHome">Zur Übersicht</button></div></div>';
   const id0=R.id;stRun=null;
   if($('stWdh'))$('stWdh').addEventListener('click',()=>stStart(id0,wrong));
   if($('stAgain'))$('stAgain').addEventListener('click',()=>stStart(id0));

@@ -382,7 +382,19 @@ const LESSONS = [
   { id: "5.1", make: mateIn(3, W("KQRNPP|KRBPPP"), { shelter: true }) },
   { id: "5.2", make: tactic(W("KQRBNPP|KQRNBPP"), {}, () => true, { minGain: 3 }) },
   { id: "5.3", make: endingOnly(W("KPP|KP"), {}) },
+  // Stufe 6
+  { id: "6.1", make: mateIn(1, W("KRPPP|KRPPP"), { shelter: true }, (f, l) => backRank(f, l)) },
+  { id: "6.2", make: endingOnly(W("KRP|KR"), { pawnRanks: [4, 5] }) },
+  { id: "6.3", make: async () => null }, // only from games (see mine)
+  { id: "6.4", make: mateIn(4, W("KQRNPP|KRBPPP"), { shelter: true }) },
 ];
+// Back-rank mate: the mated king stands on its first rank and the rook or queen mates along that rank.
+function backRank(fen, line) {
+  const g = play(fen, line); if (!g || !g.in_checkmate()) return false;
+  const loser = g.turn(), k = find(g, loser, "k")[0], to = line[0].slice(2, 4);
+  const first = loser === "w" ? "1" : "8";
+  return k[1] === first && to[1] === first && "rq".includes(boardMap(g)[to].type);
+}
 function mirrorTurn(fen) { const p = fen.split(" "); p[1] = other(p[1]); p[3] = "-"; return p.join(" "); }
 
 // ---------- Positions from games ----------
@@ -456,10 +468,14 @@ async function checkMined(e, fen) {
       const g = play(fen, line.slice(0, i)); const r = await e.analyse(g.fen(), { depth: 14, multipv: 2 });
       if (r[0].move !== line[i] || (r[1] && r[1].mate && r[1].mate > 0 && r[1].mate <= n - i / 2)) return st("m-mate");
     }
-    const id = n === 1 ? (mates1(fen).length === 1 ? "2.4" : null) : n === 3 ? "5.1" : keyIsSacrifice(fen, line) ? "4.5" : "3.4";
+    const id = n === 1 ? (mates1(fen).length === 1 ? "2.4" : null) : n === 4 ? "6.4" : n === 3 ? "5.1" : keyIsSacrifice(fen, line) ? "4.5" : "3.4";
     if (!id) return null;
     st("c" + id);
     return { id, f: fen, ex: { f: fen, l: line, m: 1 } };
+  }
+  const long = cutLine(fen, deep[0].pv, 3, 7);
+  if (long && long.length >= 5) {
+    const alts = await forced(e, fen, long); if (alts !== null) { st("c6.3"); return { id: "6.3", f: fen, ex: { f: fen, l: long, a: alts.length ? alts : undefined } }; }
   }
   const line = cutLine(fen, deep[0].pv, 2); if (!line) return st("m-cut");
   const id = classify(fen, line, false); if (!id) return st("m-noclass");
