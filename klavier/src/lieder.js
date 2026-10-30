@@ -88,8 +88,8 @@ const STUFEN = [
   {nr: 4, titel: "Beide Hände", text: "Melodie rechts, Grundtöne links. Erst langsam im Warten-Modus, dann im Tempo."},
   {nr: 5, titel: "Akkorde", text: "Dreiklänge auf C, F und G, Kadenz mit Bass und gebrochene Akkorde."},
   {nr: 6, titel: "Tonleitern", text: "C-Dur und G-Dur mit Daumenuntersatz, einzeln und mit beiden Händen."},
-  {nr: 7, titel: "Bekannte Melodien", text: "Stücke, die jeder kennt: Happy Birthday, Stille Nacht, Greensleeves und der Kanon von Pachelbel."},
-  {nr: 8, titel: "Klassik", text: "Eine kleine Nachtmusik, Menuett in G, das Präludium in C von Bach und der Anfang von Für Elise."},
+  {nr: 7, titel: "Bekannte Melodien", text: "Stücke, die jeder kennt: Happy Birthday, Stille Nacht, Greensleeves, Amazing Grace, das Largo von Dvořák und der Kanon von Pachelbel."},
+  {nr: 8, titel: "Klassik", text: "Eine kleine Nachtmusik, Menuett in G, Morgenstimmung, das Präludium in C von Bach, der Anfang von Für Elise und der Mondscheinsonate."},
   {nr: 9, titel: "Notentrainer", text: "Zufällige Noten lesen und sofort spielen, bis es ohne Nachdenken geht."}
 ];
 
@@ -116,7 +116,11 @@ const LIEDER = [
   {id: "jingle", stufe: 2, titel: "Jingle Bells", info: "Der Refrain, fast nur E, F und G, mit einem Sprung runter zum C.", bpm: 108,
     rechts: "E4 E4 E4:2 | E4:1 E4 E4:2 | E4:1 G4 C4:1.5 D4:0.5 | E4:4 | F4:1 F4 F4 F4 | F4 E4 E4 E4:0.5 E4 | E4:1 D4 D4 E4 | D4:2 G4:2 | E4:1 E4 E4:2 | E4:1 E4 E4:2 | E4:1 G4 C4:1.5 D4:0.5 | E4:4 | F4:1 F4 F4 F4 | F4 E4 E4 E4:0.5 E4 | G4:1 G4 F4 D4 | C4:4"},
   {id: "oldmac", stufe: 2, titel: "Old MacDonald", info: "Der Daumen rutscht kurz runter zum G und A unter dem C.", bpm: 100,
-    rechts: "C4 C4 C4 G3 | A3 A3 G3:2 | E4:1 E4 D4 D4 | C4:3 G3:1 | C4:1 C4 C4 G3 | A3 A3 G3:2 | E4:1 E4 D4 D4 | C4:4"},
+    rechts: "C4 C4 C4 G3 | A3 A3 G3:2 | E4:1 E4 D4 D4 | C4:3 G3:1 | C4:1 C4 C4 G3 | A3 A3 G3:2 | E4:1 E4 D4 D4 | C4:4"},  {id: "london", stufe: 2, titel: "London Bridge", info: "Englisches Kinderlied, die Melodie läuft auf und ab wie über eine Brücke.", bpm: 100,
+    rechts: "G4:1.5 A4:0.5 G4:1 F4 | E4 F4 G4:2 | D4:1 E4 F4:2 | E4:1 F4 G4:2 | G4:1.5 A4:0.5 G4:1 F4 | E4 F4 G4:2 | D4:2 G4:2 | E4:1 C4:3"},
+  {id: "saints", stufe: 2, titel: "When the Saints", info: "Spiritual aus New Orleans. Jede Zeile beginnt nach einer Pause auf der Eins.", bpm: 112,
+    rechts: "r:1 C4 E4 F4 | G4:4 | r:1 C4 E4 F4 | G4:4 | r:1 C4 E4 F4 | G4:2 E4:2 | C4:2 E4:2 | D4:4 | r:1 E4 E4 D4 | C4:3 C4:1 | E4:2 G4:2 | G4:1 F4:3 | r:1 E4 F4 G4 | E4:2 C4:2 | D4:2 D4:2 | C4:4"},
+
   {id: "jakob", stufe: 2, titel: "Bruder Jakob", info: "Mit Achteln in der dritten Zeile und dem tiefen G unter dem C.", bpm: 100,
     rechts: "C4 D4 E4 C4 | C4 D4 E4 C4 | E4 F4 G4:2 | E4:1 F4 G4:2 | G4:0.5 A4 G4 F4 E4:1 C4 | G4:0.5 A4 G4 F4 E4:1 C4 | C4 G3 C4:2 | C4:1 G3 C4:2"},
   {id: "ode", stufe: 2, titel: "Ode an die Freude", info: "Beethovens Melodie, mit punktierten Vierteln am Zeilenende.", bpm: 100,
@@ -134,7 +138,10 @@ const LIEDER = [
   {id: "odebeide", stufe: 4, titel: "Ode an die Freude mit Bass", info: "Links nur C und G als lange Töne.", bpm: 90,
     rechts: ODE, links: "C3:4 | G2:4 | C3:4 | G2:4 | C3:4 | G2:4 | C3:4 | G2:2 C3:2"},
   {id: "morgenbeide", stufe: 4, titel: "Weihnachtsmann mit Bass", info: "Halbe Noten links, die Melodie bleibt wie gelernt.", bpm: 88,
-    rechts: MORGEN, links: "C3:4 | F3:2 C3:2 | F3:2 C3:2 | G3:2 C3:2 | C3:2 G3:2 | C3:2 G3:2 | C3:2 G3:2 | C3:2 G3:2 | C3:4 | F3:2 C3:2 | F3:2 C3:2 | G3:2 C3:2"},
+    rechts: MORGEN, links: "C3:4 | F3:2 C3:2 | F3:2 C3:2 | G3:2 C3:2 | C3:2 G3:2 | C3:2 G3:2 | C3:2 G3:2 | C3:2 G3:2 | C3:4 | F3:2 C3:2 | F3:2 C3:2 | G3:2 C3:2"},  {id: "jakobbeide", stufe: 4, titel: "Bruder Jakob mit Bass", info: "Links immer C und G im Wechsel, rechts die Melodie wie gelernt.", bpm: 92,
+    rechts: "C4 D4 E4 C4 | C4 D4 E4 C4 | E4 F4 G4:2 | E4:1 F4 G4:2 | G4:0.5 A4 G4 F4 E4:1 C4 | G4:0.5 A4 G4 F4 E4:1 C4 | C4 G3 C4:2 | C4:1 G3 C4:2",
+    links: "C3:2 G2:2 | C3:2 G2:2 | C3:2 G2:2 | C3:2 G2:2 | C3:2 G2:2 | C3:2 G2:2 | C3:2 G2:2 | C3:4"},
+
 
   {id: "dreiklaenge", stufe: 5, titel: "Drei Dreiklänge", info: "C-Dur, F-Dur und G-Dur in der bequemsten Lage, alle Töne gleichzeitig.", bpm: 60,
     rechts: "[C4E4G4]_135:4 | [C4F4A4]_125:4 | [B3D4G4]_125:4 | [C4E4G4]_135:4"},
@@ -161,7 +168,12 @@ const LIEDER = [
     rechts: "A4:1 | C5:2 D5:1 | E5:1.5 F5:0.5 E5:1 | D5:2 B4:1 | G4:1.5 A4:0.5 B4:1 | C5:2 A4:1 | A4:1.5 G#4:0.5 A4:1 | B4:2 G#4:1 | E4:2 A4:1 | C5:2 D5:1 | E5:1.5 F5:0.5 E5:1 | D5:2 B4:1 | G4:1.5 A4:0.5 B4:1 | C5:1.5 B4:0.5 A4:1 | G#4:1.5 F#4:0.5 G#4:1 | A4:3"},
   {id: "kanon", stufe: 7, titel: "Kanon von Pachelbel", info: "Die berühmte Basslinie links, rechts die Melodie in halben Noten. Nach C-Dur versetzt.", bpm: 72,
     rechts: "E5:2 D5:2 | C5:2 B4:2 | A4:2 G4:2 | A4:2 B4:2 | C5:2 B4:2 | A4:2 G4:2 | F4:2 E4:2 | F4:2 G4:2 | E4:4",
-    links: "C3:2 G2:2 | A2:2 E2:2 | F2:2 C3:2 | F2:2 G2:2 | C3:2 G2:2 | A2:2 E2:2 | F2:2 C3:2 | F2:2 G2:2 | C3:4"},
+    links: "C3:2 G2:2 | A2:2 E2:2 | F2:2 C3:2 | F2:2 G2:2 | C3:2 G2:2 | A2:2 E2:2 | F2:2 C3:2 | F2:2 G2:2 | C3:4"},  {id: "amazing", stufe: 7, titel: "Amazing Grace", info: "Altes Kirchenlied im Dreiertakt mit Auftakt, nach C-Dur versetzt.", bpm: 84, takt: [3, 4], auftakt: 1,
+    rechts: "G3:1 | C4:2 E4:0.5 C4:0.5 | E4:2 D4:1 | C4:2 A3:1 | G3:2 G3:1 | C4:2 E4:0.5 C4:0.5 | E4:2 D4:1 | G4:3 | r:2 E4:1 | G4:2 E4:0.5 C4:0.5 | E4:2 D4:1 | C4:2 A3:1 | G3:2 G3:1 | C4:2 E4:0.5 C4:0.5 | E4:2 D4:1 | C4:3"},
+  {id: "largo", stufe: 7, titel: "Largo aus der Neuen Welt", info: "Dvořáks ruhige Melodie, links liegen lange Grundtöne.", bpm: 66,
+    rechts: "E4:1.5 G4:0.5 G4:2 | E4:1.5 D4:0.5 C4:2 | D4:1 E4 G4 E4 | D4:4 | E4:1.5 G4:0.5 G4:2 | E4:1.5 D4:0.5 C4:2 | D4:1 E4 D4 C4 | C4:4",
+    links: "C3:4 | C3:2 A2:2 | G2:4 | G2:4 | C3:4 | C3:2 A2:2 | G2:4 | C3:4"},
+
 
   {id: "nachtmusik", stufe: 8, titel: "Eine kleine Nachtmusik", info: "Mozarts Anfang in G-Dur mit kurzen Pausen und Fis.", bpm: 112,
     rechts: "G4:1 r:0.5 D4:0.5 G4:1 r:0.5 D4:0.5 | G4:0.5 D4 G4 B4 D5:2 | C5:1 r:0.5 A4:0.5 C5:1 r:0.5 A4:0.5 | C5:0.5 A4 F#4 A4 D4:2 | G4:4"},
@@ -169,7 +181,12 @@ const LIEDER = [
     rechts: "D5:1 G4:0.5 A4 B4 C5 | D5:1 G4 G4 | E5:1 C5:0.5 D5 E5 F#5 | G5:1 G4 G4 | C5:1 D5:0.5 C5 B4 A4 | B4:1 C5:0.5 B4 A4 G4 | F#4:1 G4:0.5 A4 B4 G4 | A4:3",
     links: "G3:2 A3:1 | B3:3 | C4:3 | B3:3 | A3:3 | G3:3 | D4:1 B3 G3 | D4:2 D3:1"},
   {id: "praeludium", stufe: 8, titel: "Präludium in C (Bach)", info: "Die ersten vier Takte als gebrochene Akkorde mit der rechten Hand, in Sechzehnteln.", bpm: 56,
-    rechts: "C4:0.25 E4 G4 C5 E5 G4 C5 E5 C4 E4 G4 C5 E5 G4 C5 E5 | C4 D4 A4 D5 F5 A4 D5 F5 C4 D4 A4 D5 F5 A4 D5 F5 | B3 D4 G4 D5 F5 G4 D5 F5 B3 D4 G4 D5 F5 G4 D5 F5 | C4 E4 G4 C5 E5 G4 C5 E5 C4 E4 G4 C5 E5 G4 C5 E5"},
+    rechts: "C4:0.25 E4 G4 C5 E5 G4 C5 E5 C4 E4 G4 C5 E5 G4 C5 E5 | C4 D4 A4 D5 F5 A4 D5 F5 C4 D4 A4 D5 F5 A4 D5 F5 | B3 D4 G4 D5 F5 G4 D5 F5 B3 D4 G4 D5 F5 G4 D5 F5 | C4 E4 G4 C5 E5 G4 C5 E5 C4 E4 G4 C5 E5 G4 C5 E5"},  {id: "morgenstimmung", stufe: 8, titel: "Morgenstimmung (Grieg)", info: "Aus Peer Gynt, im 6/8-Takt, gezählt wird in Achteln. Nach C-Dur versetzt.", bpm: 132, takt: [6, 8],
+    rechts: "G4:2 E4:1 D4:2 C4:1 | D4:2 E4:1 G4:2 E4:1 | D4:2 C4:1 D4:2 E4:1 | D4:2 E4:1 G4:2 E4:1 | G4:2 A4:1 E4:2 A4:1 | G4:2 E4:1 D4:2 C4:1"},
+  {id: "mondschein", stufe: 8, titel: "Mondscheinsonate (Anfang)", info: "Beethoven, vereinfacht in a-Moll: rechts gleichmäßige Triolen, links lange Basstöne. Gezählt wird in Triolen-Achteln.", bpm: 120, takt: [12, 8],
+    rechts: "E4:1 A4 C5 E4 A4 C5 E4 A4 C5 E4 A4 C5 | E4 A4 C5 E4 A4 C5 E4 A4 C5 E4 A4 C5 | F4 A4 C5 F4 A4 C5 F4 Bb4 D5 F4 Bb4 D5 | E4 G#4 B4 E4 G#4 B4 E4 G#4 B4 E4 G#4 B4 | E4 A4 C5 E4 A4 C5 E4 A4 C5 E4 A4 C5",
+    links: "A2:12 | G2:12 | F2:6 D2:6 | E2:12 | A2:12"},
+
   {id: "elise", stufe: 8, titel: "Für Elise (Anfang)", info: "Beethoven, die ersten acht Takte. Zählzeit ist die Achtel, also langsam anfangen.", bpm: 132, takt: [3, 8], auftakt: 1,
     rechts: "E5:0.5 D#5 | E5 D#5 E5 B4 D5 C5 | A4:1 r:0.5 C4 E4 A4 | B4:1 r:0.5 E4 G#4 B4 | C5:1 r:0.5 E4 E5 D#5 | E5 D#5 E5 B4 D5 C5 | A4:1 r:0.5 C4 E4 A4 | B4:1 r:0.5 E4 C5 B4 | A4:3",
     links: "r:1 | r:3 | A2:0.5 E3 A3 r:1.5 | E2:0.5 E3 G#3 r:1.5 | A2:0.5 E3 A3 r:1.5 | r:3 | A2:0.5 E3 A3 r:1.5 | E2:0.5 E3 G#3 r:1.5 | A2:0.5 E3 A3 r:1.5"},
