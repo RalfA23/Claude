@@ -317,7 +317,8 @@ dialog.reader{width:100vw;max-width:100vw;height:100dvh;max-height:100dvh;margin
       <label class="f">Stimme <select id="rvsel"></select></label>
       <label class="f">Tempo <select id="rvrate"><option value="0.9">Ruhig</option><option value="1">Normal</option><option value="1.12">Etwas schneller</option><option value="1.25">Schnell</option><option value="1.45">Sehr schnell</option></select></label>
       <div class="acts"><button type="button" class="btn" id="rvtest">▶︎ Probehören</button></div>
-      <p class="hint" id="rvhint">Am natürlichsten klingen Stimmen mit „Natural“, „Premium“ oder „Erweitert“ im Namen. Auf dem iPhone und Mac: Einstellungen › Bedienungshilfen › Gesprochene Inhalte › Stimmen › Deutsch, dort z. B. Anna oder Helena (Premium) laden. Im Edge-Browser gibt es die Natural-Stimmen Katja, Amala, Conrad und Florian.</p>
+      <p class="hint">Thorsten liest die Bücher aus „Entdecken“ als fertige Aufnahme vor. Bei deinen eigenen Kurzfassungen übernimmt die beste Stimme deines Geräts.</p>
+      <p class="hint" id="rvhint">Bei Gerätestimmen klingen am natürlichsten klingen Stimmen mit „Natural“, „Premium“ oder „Erweitert“ im Namen. Auf dem iPhone und Mac: Einstellungen › Bedienungshilfen › Gesprochene Inhalte › Stimmen › Deutsch, dort z. B. Anna oder Helena (Premium) laden. Im Edge-Browser gibt es die Natural-Stimmen Katja, Amala, Conrad und Florian.</p>
     </div>
     <footer><button type="submit" class="btn primary">Übernehmen</button></footer>
   </form>
@@ -1092,8 +1093,15 @@ $("rbody").addEventListener("click", function (e) {
 $("reader").addEventListener("close", function () { stopSpeak(); if (recOn) recOn.stop(); renderKurz(); if ($("view").open) drawView(); });
 
 // Vorlesen: Satz für Satz (lange Texte bricht Chrome sonst ab), danach automatisch das nächste Häppchen
-var speakRun = 0;
-function stopSpeak() { speakRun++; if (R) R.auto = false; if (window.speechSynthesis) speechSynthesis.cancel(); $("rplay").classList.remove("on"); }
+// Katalog-Bücher haben fertige Aufnahmen mit der Piper-Stimme „Thorsten“ (wie die Ving-Tsun-Erklärvideos): kurz-audio/<id>/<seite>.mp3
+var speakRun = 0, player = null;
+function stopSpeak() { speakRun++; if (R) R.auto = false; if (window.speechSynthesis) speechSynthesis.cancel(); if (player) player.pause(); $("rplay").classList.remove("on"); }
+function useThorsten() { var p = pref("buecher-voice", ""); return !p || p === "thorsten"; }
+function audioId(x) {
+  if (!x) return null;
+  var k = x.kat || (x.book && x.book.katalog && katalog.find(function (y) { return y.id === x.book.katalog; }));
+  return k && k.audio ? k.id : null;
+}
 // Stimmenwahl: gespeicherte Stimme, sonst die natürlichste deutsche (Natural/Neural/Online > Premium/Erweitert > Google > Rest)
 function voiceRank(x) {
   var n = x.name; return /natural|neural/i.test(n) ? 0 : /online/i.test(n) ? 1 : /premium|enhanced|erweitert|siri/i.test(n) ? 2 : /google/i.test(n) ? 3 : x.localService === false ? 4 : 5;
@@ -1105,30 +1113,53 @@ function deVoices() {
 function pref(k, d) { try { return localStorage.getItem(k) || d; } catch (e) { return d; } }
 function deVoice() {
   var v = deVoices(), want = pref("buecher-voice", "");
+  if (want === "thorsten") want = "";
   return v.find(function (x) { return x.name === want; }) || v[0] || null;
 }
 function voiceRate() { return +pref("buecher-rate", "1") || 1; }
 function fillVoices() {
-  var v = deVoices(), cur = deVoice();
-  $("rvsel").innerHTML = v.length ? v.map(function (x) { return '<option' + (cur && x.name === cur.name ? " selected" : "") + '>' + esc(x.name) + '</option>'; }).join("") : '<option value="">Keine deutsche Stimme gefunden</option>';
+  var v = deVoices(), th = useThorsten(), cur = th ? null : deVoice();
+  $("rvsel").innerHTML = '<option value="thorsten"' + (th ? " selected" : "") + '>Thorsten (wie in den Ving-Tsun-Videos)</option>' +
+    v.map(function (x) { return '<option' + (cur && x.name === cur.name ? " selected" : "") + '>' + esc(x.name) + '</option>'; }).join("");
   $("rvrate").value = String(voiceRate()); if (!$("rvrate").value) $("rvrate").value = "1";
 }
 if (window.speechSynthesis) speechSynthesis.addEventListener && speechSynthesis.addEventListener("voiceschanged", function () { if ($("rvoice").open) fillVoices(); });
-$("rvoicebtn").addEventListener("click", function () { if (!window.speechSynthesis) { toast("Vorlesen geht in diesem Browser nicht."); return; } fillVoices(); $("rvoice").showModal(); });
+$("rvoicebtn").addEventListener("click", function () { fillVoices(); $("rvoice").showModal(); });
 $("rvtest").addEventListener("click", function () {
-  speechSynthesis.cancel();
+  if (window.speechSynthesis) speechSynthesis.cancel();
+  if ($("rvsel").value === "thorsten") {
+    if (!player) player = new Audio();
+    player.onended = player.onerror = null; player.src = "kurz-audio/atomic-habits/0.mp3"; player.playbackRate = +$("rvrate").value || 1; player.play().catch(function () {});
+    return;
+  }
+  if (player) player.pause();
   var x = deVoices().find(function (y) { return y.name === $("rvsel").value; });
   var u = new SpeechSynthesisUtterance("So klingt diese Stimme. Die Kernidee: Kleine Gewohnheiten, große Wirkung."); u.lang = "de-DE"; u.rate = +$("rvrate").value || 1; if (x) u.voice = x;
   speechSynthesis.speak(u);
 });
 $("rvform").addEventListener("submit", function (e) {
-  e.preventDefault(); speechSynthesis.cancel();
+  e.preventDefault(); if (window.speechSynthesis) speechSynthesis.cancel(); if (player) player.pause();
   try { localStorage.setItem("buecher-voice", $("rvsel").value); localStorage.setItem("buecher-rate", $("rvrate").value); } catch (er) {}
   $("rvoice").close(); toast("Stimme gespeichert");
   if (R && R.auto) { stopSpeak(); speakPage(); }
 });
+function playPage(id) {
+  var run = ++speakRun;
+  R.auto = true; $("rplay").classList.add("on");
+  if (!player) player = new Audio();
+  player.onended = function () { if (run !== speakRun) return; if (R.pos < R.n - 1) { R.pos++; drawReader(); speakPage(); } else stopSpeak(); };
+  player.onerror = function () { if (run !== speakRun) return; speakTts(); };
+  player.src = "kurz-audio/" + id + "/" + R.pos + ".mp3"; player.playbackRate = voiceRate();
+  var pr = player.play(); if (pr && pr.catch) pr.catch(function (e) { if (run === speakRun && e && e.name !== "AbortError") speakTts(); });
+}
 function speakPage() {
-  if (!window.speechSynthesis) { toast("Vorlesen geht in diesem Browser nicht."); return; }
+  var id = useThorsten() && audioId(R.x);
+  if (id) { playPage(id); return; }
+  speakTts();
+}
+function speakTts() {
+  if (!window.speechSynthesis) { toast("Vorlesen geht in diesem Browser nicht."); stopSpeak(); return; }
+  if (player) player.pause();
   var run = ++speakRun, parts = pageText(R.pos).match(/[^.!?…]+[.!?…]+["“”»«]?|\S[^.!?…]*$/g) || [], i = 0, voice = deVoice();
   R.auto = true; $("rplay").classList.add("on");
   (function next() {
