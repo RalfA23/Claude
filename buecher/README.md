@@ -9,6 +9,10 @@ Wissensplattform für Bücher als Kurs der Lebensplattform, unter `/buecher/`. J
   - Knopf „Zusammenfassung erstellen“: Supabase-Funktion `buch-zusammenfassung` (Quelle in `supabase/`). Admins nutzen den Projektschlüssel `ANTHROPIC_API_KEY`, alle anderen ihren eigenen Schlüssel, der nur im Browser liegt und pro Anfrage mitgeht.
   - „In Claude fragen“ öffnet claude.ai mit fertiger Frage, „Antwort einfügen“ übernimmt die Antwort.
   - „Im Chat anfragen“ setzt `requested`, dann trägt Claude die Zusammenfassung im Chat ein.
+- „⚡ Kurz gelesen“ (Reiter oben, direkt per `#kurz`, Karte „Kurz gelesen“ unter Lernen): Kurzfassungen wie bei Blinkist. Kernidee, für wen, 5 bis 8 Häppchen, Fazit, Lesezeit, Leser mit Wischen, Schriftgröße und Vorlesen, das Häppchen für Häppchen weiterliest. Am Ende ein Learning notieren.
+  - Katalog „Entdecken“: `public/kurz-katalog.json`, von Claude geschriebene Kurzfassungen. Ein Katalogbuch lässt sich auf die eigene Liste setzen (`book.katalog`, `book.kurz.source = "katalog"`).
+  - Zu eigenen Büchern: `buch-zusammenfassung` mit `format: "kurz"`, „In Claude fragen“ mit Einfügen (Format KERNIDEE, FÜR WEN, ## Häppchen, FAZIT) oder im Chat (`requestedKurz`).
+  - `book.kurz = {idea, forWhom, parts: [{title, text}], outro, unknown, source, date}`, Lesestand in `buecher/kurz` als `{"b:<id>"|"k:<katalogId>": {pos, done, date}}`.
 - Speicherung: Supabase `schach_docs`, Pfad `buecher/buch.<id>` (nur ein Schrägstrich erlaubt), zusätzlich im Browser.
 - Die Portal-Kachel zeigt die Zahl der Bücher und das zuletzt eingetragene.
 

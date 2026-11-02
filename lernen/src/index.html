@@ -58,7 +58,7 @@ footer{margin-top:40px;color:var(--muted);font-size:.85rem}
   <a class="back" href="../">← Portal</a>
   <p class="eyebrow">Lebensplattform · Lernen</p>
   <h1>Lernen</h1>
-  <p class="lede">Alles, womit du besser wirst: schneller lesen, mehr Wertungspunkte, neue Sprachen, Bücher festhalten und Klavier spielen. Dein Fortschritt bleibt, wo er war.</p>
+  <p class="lede">Alles, womit du besser wirst: schneller lesen, Bücher in Minuten erfassen, mehr Wertungspunkte, neue Sprachen, Bücher festhalten und Klavier spielen. Dein Fortschritt bleibt, wo er war.</p>
 
   <h2 id="h-lesen">Lesen und Wissen</h2>
   <div class="grid" id="lesen"></div>
@@ -81,6 +81,8 @@ footer{margin-top:40px;color:var(--muted);font-size:.85rem}
       text: "24 Lektionen für alle, die das Lesetraining geschafft haben: Lesen mit Plan, Abruf, kritisches Lesen, dazu das Fachmodul Recht.", href: "../lesen/?kurs=fortgeschritten"},
     {id: "buecher", sec: "lesen", icon: "📚", title: "Bücher", g: "linear-gradient(135deg,#d6a35c,#5a3a1a)",
       text: "Deine Wissensplattform für Bücher: eintragen oder ISBN scannen, Kurzzusammenfassung von Claude, eigene Learnings, Sterne und Schlagwörter.", href: "../buecher/"},
+    {id: "kurz", perm: "buecher", sec: "lesen", icon: "⚡", title: "Kurz gelesen", g: "linear-gradient(135deg,#e0795c,#5a1f2a)",
+      text: "Bücher in wenigen Minuten, wie bei Blinkist: Kernidee und die wichtigsten Gedanken in Häppchen, zum Lesen oder Vorlesen. Mit Katalog zum Entdecken und Kurzfassungen zu deinen eigenen Büchern.", href: "../buecher/#kurz"},
     {id: "sprachen", sec: "sprachen", icon: "🗣️", title: "Sprachen", g: "linear-gradient(135deg,#ff8a5c,#8a2b5a)",
       text: "Niederländisch, Japanisch, Thai, Koreanisch, Englisch und Türkisch: nachsprechen mit Spracherkennung, Dialoge, Schreiben und Lesen, mit Punkten, Serien und Stufen.", href: "../sprachen/"},
     {id: "schach", sec: "koennen", icon: "♞", title: "Schachtraining", g: "linear-gradient(135deg,#8d9aa5,#1f2a33)",
@@ -100,7 +102,8 @@ footer{margin-top:40px;color:var(--muted);font-size:.85rem}
     SECS.forEach(function (s) { $(s).replaceChildren(); }); cards = {};
     var shown = COURSES.filter(function (c) {
       if (c.soon) return !mods;
-      return !mods || mods.indexOf("lernen") >= 0 || mods.some(function (x) { return x === c.id || x.indexOf(c.id + ":") === 0; });
+      var pid = c.perm || c.id;
+      return !mods || mods.indexOf("lernen") >= 0 || mods.some(function (x) { return x === pid || x.indexOf(pid + ":") === 0; });
     });
     shown.forEach(function (c) {
       var locked = c.needs && !admin && done !== null && done < 48;
@@ -143,6 +146,12 @@ footer{margin-top:40px;color:var(--muted);font-size:.85rem}
         stat("sprachen", sum + " Punkte" + (best ? " · Serie " + best + (best === 1 ? " Tag" : " Tage") : ""));
       }
       var b = await sb.from("schach_docs").select("path").eq("user_id", user.id).like("path", "buecher/buch.%");
+      // Gelesene Kurzfassungen (schach_docs buecher/kurz)
+      var kz = await sb.from("schach_docs").select("data").eq("user_id", user.id).eq("path", "buecher/kurz").maybeSingle();
+      if (!kz.error && kz.data && kz.data.data) {
+        var kd = kz.data.data, kn = Object.keys(kd).filter(function (x) { return kd[x] && kd[x].done; }).length;
+        if (kn) stat("kurz", kn + (kn === 1 ? " Kurzfassung" : " Kurzfassungen") + " gelesen");
+      }
       if (!b.error && b.data && b.data.length) stat("buecher", b.data.length + (b.data.length === 1 ? " Buch" : " Bücher"));
       // Sterne und geschaffte Stücke am Klavier (schach_docs, Pfad klavier/stand)
       var k = await sb.from("schach_docs").select("data").eq("user_id", user.id).eq("path", "klavier/stand").maybeSingle();
