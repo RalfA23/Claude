@@ -296,6 +296,7 @@ dialog.reader{width:100vw;max-width:100vw;height:100dvh;max-height:100dvh;margin
     <div class="rhead">
       <button type="button" class="x" data-close aria-label="Schließen">✕</button>
       <div class="t"><b id="rtitle"></b><span id="rinfo"></span></div>
+      <button type="button" class="rsize" id="rvoicebtn" aria-label="Stimme wählen">🎙️</button>
       <button type="button" class="rsize" id="rsize" aria-label="Schriftgröße">A↕</button>
     </div>
     <div class="rbar" id="rbar" aria-hidden="true"></div>
@@ -306,6 +307,20 @@ dialog.reader{width:100vw;max-width:100vw;height:100dvh;max-height:100dvh;margin
       <button type="button" class="btn primary" id="rnext">Weiter ›</button>
     </div>
   </div>
+</dialog>
+
+<!-- Vorlesestimme -->
+<dialog class="sheet" id="rvoice" aria-labelledby="rvtitle">
+  <form class="dlg" method="dialog" id="rvform" novalidate>
+    <header><h2 id="rvtitle">Vorlesestimme</h2><button type="button" class="x" data-close aria-label="Schließen">✕</button></header>
+    <div class="body">
+      <label class="f">Stimme <select id="rvsel"></select></label>
+      <label class="f">Tempo <select id="rvrate"><option value="0.9">Ruhig</option><option value="1">Normal</option><option value="1.12">Etwas schneller</option><option value="1.25">Schnell</option><option value="1.45">Sehr schnell</option></select></label>
+      <div class="acts"><button type="button" class="btn" id="rvtest">▶︎ Probehören</button></div>
+      <p class="hint" id="rvhint">Am natürlichsten klingen Stimmen mit „Natural“, „Premium“ oder „Erweitert“ im Namen. Auf dem iPhone und Mac: Einstellungen › Bedienungshilfen › Gesprochene Inhalte › Stimmen › Deutsch, dort z. B. Anna oder Helena (Premium) laden. Im Edge-Browser gibt es die Natural-Stimmen Katja, Amala, Conrad und Florian.</p>
+    </div>
+    <footer><button type="submit" class="btn primary">Übernehmen</button></footer>
+  </form>
 </dialog>
 
 <!-- Zusammenfassung aus Claude einfügen -->
@@ -1079,10 +1094,39 @@ $("reader").addEventListener("close", function () { stopSpeak(); if (recOn) recO
 // Vorlesen: Satz für Satz (lange Texte bricht Chrome sonst ab), danach automatisch das nächste Häppchen
 var speakRun = 0;
 function stopSpeak() { speakRun++; if (R) R.auto = false; if (window.speechSynthesis) speechSynthesis.cancel(); $("rplay").classList.remove("on"); }
-function deVoice() {
-  var v = speechSynthesis.getVoices().filter(function (x) { return /^de/i.test(x.lang); });
-  return v.find(function (x) { return /premium|enhanced|google/i.test(x.name); }) || v[0] || null;
+// Stimmenwahl: gespeicherte Stimme, sonst die natürlichste deutsche (Natural/Neural/Online > Premium/Erweitert > Google > Rest)
+function voiceRank(x) {
+  var n = x.name; return /natural|neural/i.test(n) ? 0 : /online/i.test(n) ? 1 : /premium|enhanced|erweitert|siri/i.test(n) ? 2 : /google/i.test(n) ? 3 : x.localService === false ? 4 : 5;
 }
+function deVoices() {
+  return speechSynthesis.getVoices().filter(function (x) { return /^de/i.test(x.lang); })
+    .sort(function (a, b) { return voiceRank(a) - voiceRank(b) || a.name.localeCompare(b.name); });
+}
+function pref(k, d) { try { return localStorage.getItem(k) || d; } catch (e) { return d; } }
+function deVoice() {
+  var v = deVoices(), want = pref("buecher-voice", "");
+  return v.find(function (x) { return x.name === want; }) || v[0] || null;
+}
+function voiceRate() { return +pref("buecher-rate", "1") || 1; }
+function fillVoices() {
+  var v = deVoices(), cur = deVoice();
+  $("rvsel").innerHTML = v.length ? v.map(function (x) { return '<option' + (cur && x.name === cur.name ? " selected" : "") + '>' + esc(x.name) + '</option>'; }).join("") : '<option value="">Keine deutsche Stimme gefunden</option>';
+  $("rvrate").value = String(voiceRate()); if (!$("rvrate").value) $("rvrate").value = "1";
+}
+if (window.speechSynthesis) speechSynthesis.addEventListener && speechSynthesis.addEventListener("voiceschanged", function () { if ($("rvoice").open) fillVoices(); });
+$("rvoicebtn").addEventListener("click", function () { if (!window.speechSynthesis) { toast("Vorlesen geht in diesem Browser nicht."); return; } fillVoices(); $("rvoice").showModal(); });
+$("rvtest").addEventListener("click", function () {
+  speechSynthesis.cancel();
+  var x = deVoices().find(function (y) { return y.name === $("rvsel").value; });
+  var u = new SpeechSynthesisUtterance("So klingt diese Stimme. Die Kernidee: Kleine Gewohnheiten, große Wirkung."); u.lang = "de-DE"; u.rate = +$("rvrate").value || 1; if (x) u.voice = x;
+  speechSynthesis.speak(u);
+});
+$("rvform").addEventListener("submit", function (e) {
+  e.preventDefault(); speechSynthesis.cancel();
+  try { localStorage.setItem("buecher-voice", $("rvsel").value); localStorage.setItem("buecher-rate", $("rvrate").value); } catch (er) {}
+  $("rvoice").close(); toast("Stimme gespeichert");
+  if (R && R.auto) { stopSpeak(); speakPage(); }
+});
 function speakPage() {
   if (!window.speechSynthesis) { toast("Vorlesen geht in diesem Browser nicht."); return; }
   var run = ++speakRun, parts = pageText(R.pos).match(/[^.!?…]+[.!?…]+["“”»«]?|\S[^.!?…]*$/g) || [], i = 0, voice = deVoice();
@@ -1090,7 +1134,7 @@ function speakPage() {
   (function next() {
     if (run !== speakRun) return;
     if (i >= parts.length) { if (R.pos < R.n - 1) { R.pos++; drawReader(); speakPage(); } else stopSpeak(); return; }
-    var u = new SpeechSynthesisUtterance(parts[i++].trim()); u.lang = "de-DE"; u.rate = 1.02; if (voice) u.voice = voice;
+    var u = new SpeechSynthesisUtterance(parts[i++].trim()); u.lang = "de-DE"; u.rate = voiceRate(); if (voice) u.voice = voice;
     u.onend = next; u.onerror = function (ev) { if (ev.error !== "interrupted" && ev.error !== "canceled") next(); };
     speechSynthesis.speak(u);
   })();
