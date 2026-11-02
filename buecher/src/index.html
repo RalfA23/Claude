@@ -142,6 +142,47 @@ label.f small,.f small{font-weight:400;color:var(--muted)}
 .tagedit .tag{display:inline-flex;align-items:center;gap:4px;background:var(--chip);border-radius:999px;padding:4px 6px 4px 12px;font-size:.92rem}
 .tagedit .tag button{border:0;background:none;width:30px;height:30px;border-radius:50%;color:var(--muted)}
 .tagedit input{flex:1;min-width:140px;min-height:44px;padding:8px 12px}
+
+/* Kurz gelesen: Kurzfassungen in Häppchen, wie Blinkist */
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:var(--chip);border-radius:16px;padding:5px;margin-bottom:14px}
+.tabs button{border:0;background:none;border-radius:12px;min-height:46px;font-weight:700;color:var(--muted)}
+.tabs button[aria-selected="true"]{background:var(--surface);color:var(--fg);box-shadow:var(--shadow)}
+.kh{font-size:1.2rem;margin:22px 0 10px}
+.kgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}
+.kcard{display:grid;grid-template-columns:54px 1fr;gap:12px;text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:16px;padding:12px;box-shadow:var(--shadow);width:100%;align-items:start}
+.kcard .cover{width:54px;height:78px;font-size:1.4rem}
+.kcard .kc{width:54px;height:78px;border-radius:6px;display:grid;place-items:center;font-family:var(--display);font-size:1.5rem;color:#fff;background:var(--kg,#8a6a4a)}
+.kcard h3{font-size:1.02rem}
+.kcard .by{color:var(--muted);font-size:.88rem}
+.kcard .idea{font-size:.88rem;margin-top:4px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.kcard .meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;font-size:.8rem}
+.bar{height:5px;border-radius:99px;background:var(--chip);overflow:hidden;margin-top:8px}
+.bar i{display:block;height:100%;background:var(--accent);border-radius:99px}
+.newkurz{background:var(--surface);border:1px dashed var(--line);border-radius:16px;padding:14px;display:grid;gap:10px;margin-top:10px}
+/* Leser */
+dialog.reader{width:100vw;max-width:100vw;height:100dvh;max-height:100dvh;margin:0;border-radius:0;background:var(--bg)}
+.reader .dlg{height:100%;max-height:100%}
+.rhead{display:flex;align-items:center;gap:10px;padding:max(10px, env(safe-area-inset-top)) 16px 8px;max-width:760px;width:100%;margin:0 auto}
+.rhead .t{flex:1;min-width:0}
+.rhead .t b{display:block;font-family:var(--display);font-size:1rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rhead .t span{font-size:.82rem;color:var(--muted)}
+.rbar{display:flex;gap:3px;max-width:760px;width:100%;margin:0 auto;padding:0 16px}
+.rbar i{flex:1;height:4px;border-radius:99px;background:var(--line)}
+.rbar i.on{background:var(--accent)}
+.rbody{flex:1;overflow:auto;padding:22px 20px 30px}
+.rpage{max-width:680px;margin:0 auto;display:grid;gap:14px}
+.rpage .num{font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);font-weight:700}
+.rpage h2{font-size:1.7rem}
+.rpage .txt{font-size:var(--rs,1.15rem);line-height:1.7;white-space:pre-wrap}
+.rpage .idea{font-family:var(--display);font-size:1.35rem;line-height:1.45}
+.rpage ol{margin:0;padding-left:1.3em;display:grid;gap:6px;color:var(--muted)}
+.rpage .box{background:var(--surface);border-radius:14px;padding:14px 16px;box-shadow:var(--shadow)}
+.rfoot{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;padding:10px 16px calc(12px + env(safe-area-inset-bottom));border-top:1px solid var(--line);max-width:760px;width:100%;margin:0 auto}
+.rfoot .btn{min-height:56px}
+.rfoot .play{width:64px;padding:0;font-size:1.3rem}
+.rfoot .play.on{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.rsize{border:0;background:var(--chip);border-radius:12px;height:44px;padding:0 10px;font-weight:700}
+.kurzsec .acts .btn.big{flex:1 1 100%}
 </style>
 </head>
 <body>
@@ -153,6 +194,27 @@ label.f small,.f small{font-weight:400;color:var(--muted)}
     <button type="button" class="iconbtn" id="setbtn" aria-label="Einstellungen">⚙︎</button>
   </div>
 
+  <div class="tabs" id="tabs" role="tablist" hidden>
+    <button type="button" role="tab" data-tab="liste" aria-selected="true">📚 Meine Bücher</button>
+    <button type="button" role="tab" data-tab="kurz" aria-selected="false">⚡ Kurz gelesen</button>
+  </div>
+  <div id="kurzmain" hidden>
+    <p class="hint">Bücher in wenigen Minuten: die Kernidee und die wichtigsten Gedanken in Häppchen, zum Lesen oder Anhören.</p>
+    <div id="kweiter"></div>
+    <div id="kmine"></div>
+    <h2 class="kh">Entdecken</h2>
+    <div class="chips tags" id="kgenre" role="group" aria-label="Themen"></div>
+    <div class="kgrid" id="kkat"><p class="hint">Lade Kurzfassungen …</p></div>
+    <div class="newkurz">
+      <b>Kurzfassung zu einem anderen Buch</b>
+      <div class="searchrow" style="margin:0">
+        <input type="text" id="knew" maxlength="160" placeholder="Titel, gern mit Autor" autocomplete="off" enterkeyhint="go">
+        <button type="button" class="mic" data-mic="knew" aria-label="Titel diktieren">🎤</button>
+      </div>
+      <div class="acts"><button type="button" class="btn accent" id="knewbtn">⚡ Kurzfassung holen</button></div>
+      <p class="hint">Das Buch kommt auf deine Liste „Will lesen“. Claude schreibt die Kurzfassung nur, wenn es das Buch sicher kennt.</p>
+    </div>
+  </div>
   <div id="main" hidden>
     <div class="searchrow">
       <input type="search" id="q" placeholder="Suchen: Titel, Autor, Schlagwort, Learning" autocomplete="off" enterkeyhint="search" aria-label="Suchen">
@@ -228,6 +290,24 @@ label.f small,.f small{font-weight:400;color:var(--muted)}
   </div>
 </dialog>
 
+<!-- Kurzfassung lesen -->
+<dialog class="reader" id="reader" aria-labelledby="rtitle">
+  <div class="dlg">
+    <div class="rhead">
+      <button type="button" class="x" data-close aria-label="Schließen">✕</button>
+      <div class="t"><b id="rtitle"></b><span id="rinfo"></span></div>
+      <button type="button" class="rsize" id="rsize" aria-label="Schriftgröße">A↕</button>
+    </div>
+    <div class="rbar" id="rbar" aria-hidden="true"></div>
+    <div class="rbody" id="rbody"></div>
+    <div class="rfoot">
+      <button type="button" class="btn" id="rprev">‹ Zurück</button>
+      <button type="button" class="btn play" id="rplay" aria-label="Vorlesen">🔊</button>
+      <button type="button" class="btn primary" id="rnext">Weiter ›</button>
+    </div>
+  </div>
+</dialog>
+
 <!-- Zusammenfassung aus Claude einfügen -->
 <dialog class="sheet" id="paste" aria-labelledby="ptitle">
   <form class="dlg" method="dialog" id="pasteform" novalidate>
@@ -288,7 +368,7 @@ function aiReady() { return isAdmin || !!getKey(); }
 
 var toastTimer = null;
 function toast(t, ms) {
-  var el = $("toast"), host = document.querySelector("dialog[open]") || document.body;
+  var el = $("toast"), ds = document.querySelectorAll("dialog[open]"), host = ds[ds.length - 1] || document.body;
   if (el.parentNode !== host) host.appendChild(el);
   el.textContent = t; el.hidden = false;
   clearTimeout(toastTimer); toastTimer = setTimeout(function () { el.hidden = true; }, ms || 2600);
@@ -300,12 +380,12 @@ function saveLocal() { try { localStorage.setItem(lkey(), JSON.stringify(books))
 function chk(r) { if (r.error) throw r.error; return r; }
 function saveBook(b) {
   b.updated = new Date().toISOString();
-  books[b.id] = b; saveLocal(); render();
+  books[b.id] = b; saveLocal(); render(); renderKurz();
   return sb.from("schach_docs").upsert({user_id: user.id, path: DOC + "buch." + b.id, data: b, updated_at: b.updated}).then(chk)
     .catch(function () { toast("Speichern im Konto ging gerade nicht. Im Browser ist es gemerkt.", 4500); });
 }
 function deleteBook(id) {
-  delete books[id]; saveLocal(); render();
+  delete books[id]; saveLocal(); render(); renderKurz();
   return sb.from("schach_docs").delete().eq("user_id", user.id).eq("path", DOC + "buch." + id).then(chk)
     .catch(function () { toast("Löschen im Konto ging gerade nicht.", 4000); });
 }
@@ -633,6 +713,27 @@ function drawView() {
   if (!(s && s.text) && !b.requested) h += '<button type="button" class="btn" id="vreq">Im Chat anfragen</button>';
   h += '</div></section>';
 
+  // Kurzfassung in Häppchen
+  var k = b.kurz;
+  h += '<section class="sec kurzsec"><h3>⚡ Kurzfassung in Häppchen</h3>';
+  if (k && k.parts && k.parts.length) {
+    var kp = kurzStand["b:" + b.id];
+    h += '<p class="hint">' + esc(k.idea || "") + '</p><div class="acts"><button type="button" class="btn accent big" id="vkread">📖 ' + (kp && kp.pos && !kp.done ? "Weiterlesen" : "Lesen") + ' · ' + kurzMin(k) + ' Min · ' + k.parts.length + ' Häppchen</button></div>';
+  } else if (k && k.unknown) {
+    h += '<p class="unknown">Claude kennt dieses Buch nicht sicher genug für eine Kurzfassung.</p>';
+  } else {
+    h += '<p class="hint">' + (b.requestedKurz ? "Im Chat angefragt. Sag Claude im Chat Bescheid, dann kommt die Kurzfassung hierher." : "Kernidee und die wichtigsten Gedanken, in wenigen Minuten gelesen.") + '</p>';
+  }
+  if (!(k && k.parts && k.parts.length) || k.source !== "katalog") {
+    h += '<div class="acts">';
+    if (aiReady()) h += '<button type="button" class="btn' + (k && k.parts ? "" : " accent") + '" id="vkgen">⚡ ' + (k && (k.parts || k.unknown) ? "Neu erstellen" : "Kurzfassung erstellen") + '</button>';
+    h += '<a class="btn" target="_blank" rel="noopener" href="https://claude.ai/new?q=' + encodeURIComponent(kurzPrompt(b)) + '">In Claude fragen</a>';
+    h += '<button type="button" class="btn" id="vkpaste">Antwort einfügen</button>';
+    if (!(k && k.parts) && !b.requestedKurz) h += '<button type="button" class="btn" id="vkreq">Im Chat anfragen</button>';
+    h += '</div>';
+  }
+  h += '</section>';
+
   // Learnings
   var ls = (b.learnings || []).slice().sort(function (x, y) { return (y.date || "").localeCompare(x.date || ""); });
   h += '<section class="sec"><h3>Meine Besonderheiten und Learnings</h3>' +
@@ -668,7 +769,11 @@ $("vbody").addEventListener("click", function (e) {
     b.learnings = (b.learnings || []).concat([{id: uid(), date: today(), text: v.slice(0, 4000)}]); saveBook(b); drawView(); toast("Learning gespeichert"); return;
   }
   if (t.closest("#vgen")) { summarize(b.id); return; }
-  if (t.closest("#vpaste")) { $("ptext").value = ""; $("paste").showModal(); return; }
+  if (t.closest("#vpaste")) { pasteMode = "sum"; $("ptitle").textContent = "Antwort von Claude einfügen"; $("ptext").value = ""; $("paste").showModal(); return; }
+  if (t.closest("#vkpaste")) { pasteMode = "kurz"; $("ptitle").textContent = "Kurzfassung von Claude einfügen"; $("ptext").value = ""; $("paste").showModal(); return; }
+  if (t.closest("#vkgen")) { makeKurz(b.id); return; }
+  if (t.closest("#vkread")) { openReader({key: "b:" + b.id, book: b, kurz: b.kurz}); return; }
+  if (t.closest("#vkreq")) { b.requestedKurz = true; saveBook(b); drawView(); toast("Angefragt. Sag Claude im Chat Bescheid."); return; }
   if (t.closest("#vreq")) { b.requested = true; saveBook(b); drawView(); toast("Angefragt. Sag Claude im Chat Bescheid."); return; }
   if (t.closest("#vread")) { readAloud(b); return; }
 });
@@ -725,9 +830,15 @@ function summarize(id) {
   }).finally(function () { busy[id] = false; if (viewId === id && $("view").open) drawView(); });
 }
 // Antwort aus claude.ai: erster Teil ist der Text, Zeilen mit Aufzählungszeichen werden zu Kernthesen.
+var pasteMode = "sum";
 $("pasteform").addEventListener("submit", function (e) {
   e.preventDefault();
   var b = books[viewId], raw = $("ptext").value.trim(); if (!b || !raw) { $("paste").close(); return; }
+  if (pasteMode === "kurz") {
+    var kz = parseKurz(raw);
+    if (!kz) { toast("Das sieht nicht nach einer Kurzfassung aus. Es braucht Abschnitte mit ## Überschrift.", 5000); return; }
+    b.kurz = kz; b.requestedKurz = false; $("paste").close(); saveBook(b); drawView(); toast("Kurzfassung übernommen"); return;
+  }
   if (/^\W*unbekannt\b/i.test(raw)) b.summary = {text: "", points: [], unknown: true, source: "claude.ai", date: today()};
   else {
     var lines = raw.replace(/\*\*/g, "").split(/\n/), text = [], points = [];
@@ -739,6 +850,252 @@ $("pasteform").addEventListener("submit", function (e) {
   }
   b.requested = false; $("paste").close(); saveBook(b); drawView(); toast("Übernommen");
 });
+
+
+/* ---------- Kurz gelesen (Kurzfassungen in Häppchen, wie Blinkist) ---------- */
+// Eine Kurzfassung: {idea, forWhom, parts: [{title, text}], outro, unknown, source: "claude"|"claude.ai"|"chat"|"katalog", date}.
+// Sie hängt als book.kurz am Buch. Der Katalog „Entdecken“ liegt in kurz-katalog.json (von Claude geschrieben, gleiche Form plus id, title, author, genre, tags).
+// Lesestand für alle Kurzfassungen in schach_docs buecher/kurz: {"b:<buchId>"|"k:<katalogId>": {pos, done, date}}.
+var katalog = [], kurzStand = {}, kGenre = "", WPM = 220;
+var KG = ["#b5492f", "#3f7a63", "#3a5a8c", "#8a5a2b", "#6b4a8a", "#2f6f7a", "#8c3a5a", "#5a6b2f"];
+function kurzWords(k) { return [k.idea, k.forWhom, k.outro].concat((k.parts || []).map(function (p) { return p.title + " " + p.text; })).join(" ").split(/\s+/).length; }
+function kurzMin(k) { return Math.max(1, Math.round(kurzWords(k) / WPM)); }
+function showTab(t) {
+  $("tabs").querySelectorAll("button").forEach(function (x) { x.setAttribute("aria-selected", x.dataset.tab === t ? "true" : "false"); });
+  $("main").hidden = t !== "liste"; $("addbtn").hidden = t !== "liste"; $("kurzmain").hidden = t !== "kurz";
+  try { history.replaceState(null, "", t === "kurz" ? "#kurz" : location.pathname + location.search); } catch (e) {}
+  if (t === "kurz") renderKurz();
+}
+$("tabs").addEventListener("click", function (e) { var b = e.target.closest("[data-tab]"); if (b) showTab(b.dataset.tab); });
+window.addEventListener("hashchange", function () { if (user) showTab(location.hash === "#kurz" ? "kurz" : "liste"); });
+function loadKatalog() {
+  fetch("kurz-katalog.json", {cache: "no-cache"}).then(function (r) { return r.json(); }).then(function (j) { katalog = (j && j.books) || []; renderKurz(); })
+    .catch(function () { $("kkat").innerHTML = '<p class="hint">Der Katalog ließ sich gerade nicht laden.</p>'; });
+}
+function loadKurzStand() {
+  try { kurzStand = JSON.parse(localStorage.getItem(lkey() + "-kurz") || "{}") || {}; } catch (e) { kurzStand = {}; }
+  sb.from("schach_docs").select("data").eq("user_id", user.id).eq("path", DOC + "kurz").maybeSingle().then(function (r) {
+    if (!r.error && r.data && r.data.data) { kurzStand = r.data.data; try { localStorage.setItem(lkey() + "-kurz", JSON.stringify(kurzStand)); } catch (e) {} renderKurz(); }
+  });
+}
+var standTimer = null;
+function saveKurzStand() {
+  try { localStorage.setItem(lkey() + "-kurz", JSON.stringify(kurzStand)); } catch (e) {}
+  clearTimeout(standTimer);
+  standTimer = setTimeout(function () {
+    sb.from("schach_docs").upsert({user_id: user.id, path: DOC + "kurz", data: kurzStand, updated_at: new Date().toISOString()}).then(function () {});
+  }, 800);
+}
+// Alles Lesbare: eigene Bücher mit Kurzfassung und der Katalog (ein Katalogbuch, das schon auf der Liste steht, zählt als eigenes)
+function kurzItems() {
+  var mine = Object.values(books).filter(function (b) { return b.kurz && b.kurz.parts && b.kurz.parts.length; })
+    .map(function (b) { return {key: "b:" + b.id, book: b, kurz: b.kurz, title: b.title, author: b.author}; });
+  var have = {}; mine.forEach(function (x) { if (x.book.katalog) have[x.book.katalog] = 1; });
+  var kat = katalog.filter(function (k) { return !have[k.id]; }).map(function (k) { return {key: "k:" + k.id, kat: k, kurz: k, title: k.title, author: k.author}; });
+  return {mine: mine, kat: kat};
+}
+function kcard(x, i) {
+  var st = kurzStand[x.key] || {}, n = x.kurz.parts.length + 2, pct = st.done ? 100 : Math.round((st.pos || 0) / (n - 1) * 100);
+  var cov = x.book && x.book.cover ? coverHtml(x.book) : '<span class="kc" style="--kg:' + KG[i % KG.length] + '">' + esc((x.title || "?")[0]) + '</span>';
+  return '<button type="button" class="kcard" data-k="' + esc(x.key) + '">' + cov + '<div><h3>' + esc(x.title) + '</h3>' +
+    (x.author ? '<p class="by">' + esc(x.author) + '</p>' : "") + '<p class="idea">' + esc(x.kurz.idea || "") + '</p>' +
+    '<p class="meta"><span class="pill">⏱ ' + kurzMin(x.kurz) + ' Min</span><span class="pill">' + x.kurz.parts.length + ' Häppchen</span>' +
+    (st.done ? '<span class="pill ok">✓ Gelesen</span>' : "") + '</p>' + (pct && !st.done ? '<div class="bar"><i style="width:' + pct + '%"></i></div>' : "") + '</div></button>';
+}
+var kIndex = {};
+function renderKurz() {
+  if (!user || $("kurzmain").hidden) return;
+  var it = kurzItems(), all = it.mine.concat(it.kat); kIndex = {};
+  all.forEach(function (x) { kIndex[x.key] = x; });
+  var weiter = all.filter(function (x) { var s = kurzStand[x.key]; return s && s.pos && !s.done; })
+    .sort(function (a, b) { return (kurzStand[b.key].date || "").localeCompare(kurzStand[a.key].date || ""); });
+  $("kweiter").innerHTML = weiter.length ? '<h2 class="kh">Weiterlesen</h2><div class="kgrid">' + weiter.map(kcard).join("") + '</div>' : "";
+  $("kmine").innerHTML = it.mine.length ? '<h2 class="kh">Aus deiner Bücherliste</h2><div class="kgrid">' + it.mine.map(kcard).join("") + '</div>' : "";
+  var genres = {}; it.kat.forEach(function (k) { if (k.kat.genre) genres[k.kat.genre] = 1; });
+  var gk = Object.keys(genres).sort(); if (kGenre && !genres[kGenre]) kGenre = "";
+  $("kgenre").innerHTML = gk.length > 1 ? ['<button type="button" data-g="" aria-pressed="' + !kGenre + '">Alle</button>'].concat(gk.map(function (g) {
+    return '<button type="button" data-g="' + esc(g) + '" aria-pressed="' + (g === kGenre) + '">' + esc(g) + '</button>'; })).join("") : "";
+  var kl = it.kat.filter(function (k) { return !kGenre || k.kat.genre === kGenre; });
+  $("kkat").innerHTML = kl.length ? kl.map(function (x, i) { return kcard(x, i + 3); }).join("") : (katalog.length ? '<p class="hint">Alle Kurzfassungen aus dem Katalog stehen schon auf deiner Liste.</p>' : $("kkat").innerHTML);
+}
+$("kgenre").addEventListener("click", function (e) { var b = e.target.closest("[data-g]"); if (!b) return; kGenre = b.dataset.g; renderKurz(); });
+$("kurzmain").addEventListener("click", function (e) { var b = e.target.closest("[data-k]"); if (b && kIndex[b.dataset.k]) openReader(kIndex[b.dataset.k]); });
+// Katalogbuch auf die eigene Liste: mit Kurzfassung, damit Learnings, Sterne und Status dazukommen können
+function adoptKatalog(k) {
+  var now = new Date().toISOString();
+  var b = {id: uid(), title: k.title, author: k.author || "", isbn: k.isbn || "", genre: k.genre || "", tags: (k.tags || []).slice(0, 12), status: "will", rating: 0,
+    cover: k.isbn ? "https://covers.openlibrary.org/b/isbn/" + k.isbn + "-M.jpg?default=false" : "", summary: null, requested: false, learnings: [], created: now,
+    katalog: k.id, kurz: {idea: k.idea, forWhom: k.forWhom, parts: k.parts, outro: k.outro, unknown: false, source: "katalog", date: today()}};
+  if (kurzStand["k:" + k.id]) { kurzStand["b:" + b.id] = kurzStand["k:" + k.id]; delete kurzStand["k:" + k.id]; saveKurzStand(); }
+  saveBook(b); return b;
+}
+
+// Neues Buch nur für die Kurzfassung
+$("knewbtn").addEventListener("click", newKurz);
+$("knew").addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); newKurz(); } });
+function newKurz() {
+  var raw = $("knew").value.trim(); if (raw.length < 2) { toast("Bitte einen Titel eintragen."); $("knew").focus(); return; }
+  var m = raw.match(/^(.*?)\s+(?:von|by)\s+(.+)$/i), title = m ? m[1].trim() : raw, author = m ? m[2].trim() : "";
+  var hit = Object.values(books).find(function (b) { return b.title.toLowerCase() === title.toLowerCase(); });
+  var now = new Date().toISOString();
+  var b = hit || {id: uid(), title: title, author: author, isbn: "", genre: "", tags: [], status: "will", rating: 0, cover: "", summary: null, requested: false, learnings: [], created: now};
+  $("knew").value = "";
+  saveBook(b).then(function () {
+    if (b.kurz && b.kurz.parts) { openReader({key: "b:" + b.id, book: b, kurz: b.kurz}); return; }
+    openView(b.id);
+    if (aiReady()) makeKurz(b.id); else toast("Ohne Schlüssel: „In Claude fragen“ und die Antwort einfügen, oder im Chat anfragen.", 5500);
+  });
+}
+function kurzPrompt(b) {
+  return "Schreibe eine deutsche Kurzfassung des Buches „" + b.title + "“" + (b.author ? " von " + b.author : "") + (b.isbn ? " (ISBN " + b.isbn + ")" : "") +
+    " zum Lesen in wenigen Minuten, genau in diesem Format:\nKERNIDEE: ein bis zwei Sätze\nFÜR WEN: ein Satz\n## Überschrift des ersten Häppchens\n90 bis 150 Wörter\n(5 bis 8 solcher Häppchen in der Reihenfolge des Buches)\nFAZIT: zwei bis drei Sätze, was man mitnehmen kann\n" +
+    "Nur aus sicherem Wissen, nichts erfinden, keine Zitate. Wenn du genau dieses Buch nicht sicher kennst, antworte nur mit dem Wort UNBEKANNT.";
+}
+function parseKurz(raw) {
+  raw = raw.replace(/\*\*/g, "").replace(/\r/g, "");
+  if (/^\W*unbekannt\b/i.test(raw)) return {unknown: true, parts: null, source: "claude.ai", date: today()};
+  var k = {idea: "", forWhom: "", parts: [], outro: "", unknown: false, source: "claude.ai", date: today()}, cur = null, mode = "";
+  raw.split("\n").forEach(function (l) {
+    var t = l.trim(), m;
+    if (!t) { if (cur) cur.text += "\n"; return; }
+    if ((m = t.match(/^kernidee\s*:?\s*(.*)$/i))) { mode = "idea"; cur = null; k.idea = m[1]; return; }
+    if ((m = t.match(/^f(?:ü|ue)r wen\s*:?\s*(.*)$/i))) { mode = "forWhom"; cur = null; k.forWhom = m[1]; return; }
+    if ((m = t.match(/^#*\s*fazit\s*:?\s*(.*)$/i))) { mode = "outro"; cur = null; k.outro = m[1]; return; }
+    if ((m = t.match(/^#{1,4}\s+(?:\d+[.)]\s*)?(.+)$/))) { mode = ""; cur = {title: m[1].trim(), text: ""}; k.parts.push(cur); return; }
+    if (cur) cur.text += (cur.text && !/\n$/.test(cur.text) ? " " : "") + t;
+    else if (mode) k[mode] += (k[mode] ? " " : "") + t;
+  });
+  k.parts = k.parts.map(function (p) { return {title: p.title.slice(0, 120), text: p.text.replace(/\n{2,}/g, "\n").trim().slice(0, 3000)}; }).filter(function (p) { return p.text; }).slice(0, 12);
+  k.idea = k.idea.trim().slice(0, 600); k.forWhom = k.forWhom.trim().slice(0, 400); k.outro = k.outro.trim().slice(0, 800);
+  return k.parts.length >= 2 ? k : null;
+}
+var kbusy = {};
+function makeKurz(id) {
+  var b = books[id]; if (!b || kbusy[id]) return;
+  kbusy[id] = true; toast("Claude schreibt die Kurzfassung, das dauert etwa eine halbe Minute …", 30000);
+  var g = $("vkgen"); if (g && viewId === id) { g.disabled = true; g.textContent = "Claude schreibt …"; }
+  var body = {title: b.title, author: b.author || "", isbn: b.isbn || "", format: "kurz"}, key = getKey();
+  if (key) body.key = key;
+  sb.functions.invoke("buch-zusammenfassung", {body: body}).then(async function (r) {
+    if (r.error) { var code = ""; try { code = (await r.error.context.json()).error; } catch (e) {} throw new Error(code || "fehler"); }
+    var d = r.data || {}, x = books[id]; if (!x) return;
+    if (d.known && !Array.isArray(d.parts)) throw new Error("alt");
+    x.kurz = d.known ? {idea: d.idea || "", forWhom: d.forWhom || "", parts: d.parts, outro: d.outro || "", unknown: false, source: "claude", date: today()}
+      : {unknown: true, parts: null, source: "claude", date: today()};
+    x.requestedKurz = false;
+    await saveBook(x);
+    if (d.known) { toast("Kurzfassung ist da", 2500); if ($("view").open && viewId === id) openReader({key: "b:" + id, book: x, kurz: x.kurz}); }
+    else toast("Claude kennt „" + x.title + "“ nicht sicher", 4000);
+  }).catch(function (e) {
+    var m = {no_key: "Für Kurzfassungen per Knopf brauchst du einen eigenen API-Schlüssel (⚙︎). Oder nutze „In Claude fragen“.",
+      bad_key: "Der API-Schlüssel wurde abgelehnt. Bitte unter ⚙︎ prüfen.", busy: "Claude ist gerade ausgelastet. Gleich nochmal versuchen."}[e.message];
+    toast(m || "Kurzfassung ging gerade nicht. Versuch es gleich nochmal oder nutze „In Claude fragen“.", 5500);
+  }).finally(function () { kbusy[id] = false; if (viewId === id && $("view").open) drawView(); });
+}
+
+/* ---------- Leser ---------- */
+// Seite 0: Kernidee, für wen, Inhalt. Seiten 1..n: die Häppchen. Letzte Seite: Fazit. Vorlesen liest Seite für Seite weiter.
+var R = null, rsizes = ["1.05rem", "1.15rem", "1.3rem", "1.45rem"];
+function rsizeGet() { try { return +localStorage.getItem("buecher-rsize") || 1; } catch (e) { return 1; } }
+function openReader(x) {
+  stopSpeak();
+  var st = kurzStand[x.key] || {};
+  R = {x: x, n: x.kurz.parts.length + 2, pos: st.done ? 0 : Math.min(st.pos || 0, x.kurz.parts.length + 1), auto: false};
+  $("rtitle").textContent = x.title || (x.book && x.book.title) || "";
+  $("rinfo").textContent = (x.author ? x.author + " · " : "") + "⏱ " + kurzMin(x.kurz) + " Min";
+  $("reader").style.setProperty("--rs", rsizes[rsizeGet()]);
+  drawReader(); if (!$("reader").open) $("reader").showModal();
+}
+function pageText(i) {
+  var k = R.x.kurz;
+  if (i === 0) return (R.x.title || "") + (R.x.author ? " von " + R.x.author : "") + ". Die Kernidee. " + (k.idea || "") + (k.forWhom ? " Für wen: " + k.forWhom : "");
+  if (i <= k.parts.length) { var p = k.parts[i - 1]; return "Häppchen " + i + ". " + p.title + ". " + p.text; }
+  return "Fazit. " + (k.outro || "");
+}
+function drawReader() {
+  var k = R.x.kurz, i = R.pos, h = "";
+  $("rbar").innerHTML = Array.apply(null, Array(R.n)).map(function (_, j) { return '<i class="' + (j <= i ? "on" : "") + '"></i>'; }).join("");
+  if (i === 0) {
+    h += '<p class="num">Die Kernidee</p><p class="idea">' + esc(k.idea || "") + '</p>';
+    if (k.forWhom) h += '<div class="box"><p class="num" style="margin-bottom:4px">Für wen</p><p>' + esc(k.forWhom) + '</p></div>';
+    h += '<p class="num" style="margin-top:8px">' + k.parts.length + ' Häppchen · ' + kurzMin(k) + ' Minuten</p><ol>' + k.parts.map(function (p) { return '<li>' + esc(p.title) + '</li>'; }).join("") + '</ol>';
+  } else if (i <= k.parts.length) {
+    var p = k.parts[i - 1];
+    h += '<p class="num">Häppchen ' + i + ' von ' + k.parts.length + '</p><h2>' + esc(p.title) + '</h2><p class="txt">' + esc(p.text) + '</p>';
+  } else {
+    var inLib = !!R.x.book, b = R.x.book;
+    h += '<p class="num">Fazit</p><p class="txt">' + esc(k.outro || "") + '</p>';
+    if (inLib) {
+      h += '<div class="box" style="display:grid;gap:10px"><b>Was nimmst du mit?</b><div class="addrow"><textarea id="rlearn" placeholder="Tippen oder 🎤 diktieren"></textarea>' +
+        '<button type="button" class="mic" data-mic="rlearn" aria-label="Learning diktieren">🎤</button></div><div class="acts"><button type="button" class="btn primary" id="rlearnadd">Learning speichern</button>' +
+        '<button type="button" class="btn" id="ropen">Zum Buch</button></div></div>';
+    } else {
+      h += '<div class="box" style="display:grid;gap:10px"><b>Gefällt dir das Buch?</b><p class="hint">Setz es auf deine Liste, dann kannst du Learnings, Sterne und Schlagwörter dazuschreiben.</p>' +
+        '<div class="acts"><button type="button" class="btn accent" id="radopt">＋ Auf meine Bücherliste</button></div></div>';
+    }
+    if (k.source) h += '<p class="sum-src">' + ({katalog: "Kurzfassung von Claude für den Katalog", claude: "Kurzfassung von Claude", "claude.ai": "Aus Claude übernommen", chat: "Von Claude im Chat"}[k.source] || "") + (k.date ? ", " + fmtDate(k.date) : "") + '</p>';
+  }
+  $("rbody").innerHTML = '<div class="rpage">' + h + '</div>'; $("rbody").scrollTop = 0;
+  $("rprev").disabled = i === 0;
+  $("rnext").textContent = i === 0 ? "Los geht's ›" : i < R.n - 1 ? "Weiter ›" : "✓ Fertig";
+  $("rplay").classList.toggle("on", R.auto);
+  var st = kurzStand[R.x.key] || {};
+  if (i > 0 || st.pos) { st.pos = i; st.date = new Date().toISOString(); if (i === R.n - 1) st.done = true; kurzStand[R.x.key] = st; saveKurzStand(); }
+}
+function rgo(d) {
+  var j = R.pos + d; if (j < 0) return;
+  if (j >= R.n) { stopSpeak(); $("reader").close(); toast("Gelesen: „" + R.x.title + "“"); return; }
+  R.pos = j; var a = R.auto; stopSpeak(); R.auto = a; drawReader(); if (R.auto) speakPage();
+}
+$("rprev").addEventListener("click", function () { rgo(-1); });
+$("rnext").addEventListener("click", function () { rgo(1); });
+$("rsize").addEventListener("click", function () {
+  var n = (rsizeGet() + 1) % rsizes.length; try { localStorage.setItem("buecher-rsize", n); } catch (e) {}
+  $("reader").style.setProperty("--rs", rsizes[n]);
+});
+$("reader").addEventListener("keydown", function (e) {
+  if (e.target.tagName === "TEXTAREA" || e.target.tagName === "INPUT") return;
+  if (e.key === "ArrowRight") { e.preventDefault(); rgo(1); } else if (e.key === "ArrowLeft") { e.preventDefault(); rgo(-1); }
+});
+var tx = null;
+$("rbody").addEventListener("touchstart", function (e) { tx = e.touches.length === 1 ? [e.touches[0].clientX, e.touches[0].clientY] : null; }, {passive: true});
+$("rbody").addEventListener("touchend", function (e) {
+  if (!tx) return; var dx = e.changedTouches[0].clientX - tx[0], dy = e.changedTouches[0].clientY - tx[1]; tx = null;
+  if (Math.abs(dx) > 70 && Math.abs(dx) > Math.abs(dy) * 1.6) rgo(dx < 0 ? 1 : -1);
+});
+$("rbody").addEventListener("click", function (e) {
+  var t = e.target;
+  if (t.closest("#radopt")) { var b = adoptKatalog(R.x.kat); R.x = {key: "b:" + b.id, book: b, kurz: b.kurz, title: b.title, author: b.author}; drawReader(); toast("Steht jetzt auf deiner Liste"); return; }
+  if (t.closest("#ropen")) { var id = R.x.book.id; stopSpeak(); $("reader").close(); showTab("liste"); openView(id); return; }
+  if (t.closest("#rlearnadd")) {
+    if (recOn) recOn.stop();
+    var v = $("rlearn").value.trim(); if (!v) { toast("Schreib oder diktier zuerst dein Learning."); return; }
+    var bk = books[R.x.book.id]; if (!bk) return;
+    bk.learnings = (bk.learnings || []).concat([{id: uid(), date: today(), text: v.slice(0, 4000)}]); saveBook(bk); $("rlearn").value = ""; toast("Learning gespeichert");
+  }
+});
+$("reader").addEventListener("close", function () { stopSpeak(); if (recOn) recOn.stop(); renderKurz(); if ($("view").open) drawView(); });
+
+// Vorlesen: Satz für Satz (lange Texte bricht Chrome sonst ab), danach automatisch das nächste Häppchen
+var speakRun = 0;
+function stopSpeak() { speakRun++; if (R) R.auto = false; if (window.speechSynthesis) speechSynthesis.cancel(); $("rplay").classList.remove("on"); }
+function deVoice() {
+  var v = speechSynthesis.getVoices().filter(function (x) { return /^de/i.test(x.lang); });
+  return v.find(function (x) { return /premium|enhanced|google/i.test(x.name); }) || v[0] || null;
+}
+function speakPage() {
+  if (!window.speechSynthesis) { toast("Vorlesen geht in diesem Browser nicht."); return; }
+  var run = ++speakRun, parts = pageText(R.pos).match(/[^.!?…]+[.!?…]+["“”»«]?|\S[^.!?…]*$/g) || [], i = 0, voice = deVoice();
+  R.auto = true; $("rplay").classList.add("on");
+  (function next() {
+    if (run !== speakRun) return;
+    if (i >= parts.length) { if (R.pos < R.n - 1) { R.pos++; drawReader(); speakPage(); } else stopSpeak(); return; }
+    var u = new SpeechSynthesisUtterance(parts[i++].trim()); u.lang = "de-DE"; u.rate = 1.02; if (voice) u.voice = voice;
+    u.onend = next; u.onerror = function (ev) { if (ev.error !== "interrupted" && ev.error !== "canceled") next(); };
+    speechSynthesis.speak(u);
+  })();
+}
+$("rplay").addEventListener("click", function () { if (R.auto) stopSpeak(); else speakPage(); });
 
 /* ---------- Einstellungen ---------- */
 function drawSettings() {
@@ -766,16 +1123,17 @@ $("skeydel").addEventListener("click", function () { try { localStorage.removeIt
       user = s.data.session ? s.data.session.user : null;
     } catch (e) { user = null; }
     if (!user) { $("gate").hidden = false; $("stat").textContent = "Nicht angemeldet"; $("setbtn").hidden = true; return; }
-    $("main").hidden = false; $("addbtn").hidden = false;
+    $("tabs").hidden = false; showTab(location.hash === "#kurz" ? "kurz" : "liste");
+    loadKatalog(); loadKurzStand();
     try { books = JSON.parse(localStorage.getItem(lkey()) || "{}") || {}; } catch (e) { books = {}; }
-    render();
+    render(); renderKurz();
     sb.from("app_admins").select("user_id").eq("user_id", user.id).maybeSingle().then(function (r) { isAdmin = !r.error && !!r.data; if (viewId && $("view").open) drawView(); });
     try {
       var r = await sb.from("schach_docs").select("path,data").eq("user_id", user.id).like("path", DOC + "buch.%");
       if (r.error) throw r.error;
       books = {};
       (r.data || []).forEach(function (row) { var d = row.data || {}; if (d.id && d.title) books[d.id] = d; });
-      saveLocal(); render();
+      saveLocal(); render(); renderKurz();
     } catch (e) { toast("Konto gerade nicht erreichbar. Du siehst den letzten Stand aus diesem Browser.", 5000); }
   })();
 })();

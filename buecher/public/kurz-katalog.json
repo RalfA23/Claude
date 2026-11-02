@@ -1,0 +1,349 @@
+{
+ "note": "Kurzfassungen von Claude, in eigenen Worten, nur aus sicherem Wissen. Form wie book.kurz in src/index.html.",
+ "books": [
+  {
+   "id": "atomic-habits",
+   "title": "Die 1%-Methode (Atomic Habits)",
+   "author": "James Clear",
+   "isbn": "9780735211292",
+   "genre": "Produktivität",
+   "tags": [
+    "Gewohnheiten",
+    "Selbstführung"
+   ],
+   "idea": "Große Veränderungen entstehen nicht durch einen großen Kraftakt, sondern durch winzige Gewohnheiten, die sich über die Zeit aufsummieren. Wer gute Gewohnheiten leicht und schlechte schwer macht, braucht kaum Willenskraft.",
+   "forWhom": "Für alle, die Vorsätze immer wieder abbrechen und ein praktisches System suchen, um dauerhaft dranzubleiben.",
+   "parts": [
+    {
+     "title": "Ein Prozent besser, jeden Tag",
+     "text": "Clear vergleicht Gewohnheiten mit Zinseszins. Wer sich jeden Tag nur um ein Prozent verbessert, ist nach einem Jahr rund 37-mal besser, wer jeden Tag ein Prozent nachlässt, landet fast bei null. Im Alltag merkt man davon lange nichts. Clear nennt das das Plateau des verborgenen Potenzials: Wie ein Eiswürfel, der bei minus vier, minus drei, minus zwei Grad unverändert bleibt und bei null Grad plötzlich schmilzt, zeigen sich Ergebnisse oft erst spät. Viele geben genau in dieser Phase auf, weil sie Fortschritt nicht sehen. Die Arbeit war aber nicht umsonst, sie wurde nur gespeichert."
+    },
+    {
+     "title": "Systeme schlagen Ziele",
+     "text": "Gewinner und Verlierer haben oft dieselben Ziele. Der Unterschied liegt im System, also in den täglichen Abläufen, die zum Ergebnis führen. Ziele haben Schwächen: Sie machen glücklich erst am Ende, sie gelten nur für einen Moment, und wer sie erreicht hat, fällt oft in alte Muster zurück. Clears Rat: Ziele geben die Richtung vor, aber die Aufmerksamkeit gehört dem System. Wer jeden Tag schreibt, hat am Ende ein Buch. Wer nur das Buch im Kopf hat, schreibt oft keinen Satz. Man steigt nicht auf das Niveau seiner Ziele, sondern fällt auf das Niveau seiner Systeme."
+    },
+    {
+     "title": "Wer willst du sein?",
+     "text": "Clear unterscheidet drei Ebenen der Veränderung: Ergebnisse, Abläufe und Identität. Die meisten setzen beim Ergebnis an, etwa zehn Kilo abnehmen. Wirksamer ist es, bei der Identität anzufangen: Ich bin jemand, der sich bewegt. Wer eine Zigarette ablehnt mit dem Satz, er versuche aufzuhören, kämpft noch. Wer sagt, er sei Nichtraucher, hat die Frage für sich entschieden. Jede ausgeführte Gewohnheit ist wie eine Stimme für die Person, die man werden will. Man braucht keine Einstimmigkeit, nur eine Mehrheit. So wird jede kleine Handlung zum Beweis für das neue Selbstbild."
+    },
+    {
+     "title": "Die vier Gesetze und das erste: offensichtlich",
+     "text": "Jede Gewohnheit läuft in einer Schleife: Auslöser, Verlangen, Reaktion, Belohnung. Daraus leitet Clear vier Gesetze ab: Mach es offensichtlich, attraktiv, einfach und befriedigend. Für das erste Gesetz empfiehlt er klare Umsetzungsabsichten nach dem Muster: Ich mache Verhalten X um Uhrzeit Y an Ort Z. Dazu kommt das Gewohnheiten-Stapeln: Nach dem Kaffee am Morgen meditiere ich eine Minute. Die neue Gewohnheit hängt sich an eine bestehende. Und die Umgebung zählt mehr als Motivation. Wer mehr Obst essen will, stellt es sichtbar auf den Tisch. Wer weniger fernsehen will, legt die Fernbedienung in eine Schublade."
+    },
+    {
+     "title": "Attraktiv machen",
+     "text": "Gewohnheiten werden durch Erwartung angetrieben. Schon die Vorfreude auf eine Belohnung setzt Dopamin frei und motiviert zum Handeln. Clear schlägt deshalb Versuchungsbündelung vor: Etwas, das man tun sollte, wird mit etwas verknüpft, das man gern tut. Zum Beispiel darf man den Lieblingspodcast nur auf dem Laufband hören. Außerdem übernehmen Menschen stark die Gewohnheiten ihres Umfelds, besonders der Nahen, der Vielen und der Angesehenen. Wer sich einer Gruppe anschließt, in der das gewünschte Verhalten normal ist, hat es leichter. Dann fühlt sich die Gewohnheit nicht wie Verzicht an, sondern wie Zugehörigkeit."
+    },
+    {
+     "title": "Einfach machen: die Zwei-Minuten-Regel",
+     "text": "Menschen folgen dem Weg des geringsten Widerstands. Je weniger Reibung, desto eher passiert eine Gewohnheit. Clear rät, die Schritte zur guten Gewohnheit zu verkürzen und die zur schlechten zu verlängern, etwa die Sportkleidung abends bereitzulegen. Kern ist die Zwei-Minuten-Regel: Jede neue Gewohnheit sollte sich am Anfang in zwei Minuten erledigen lassen. Statt dreißig Minuten Yoga heißt es: die Matte ausrollen. Statt ein Buch lesen: eine Seite lesen. Es geht darum, zuerst das Erscheinen zu meistern. Eine Gewohnheit muss erst existieren, bevor man sie verbessern kann. Häufigkeit zählt dabei mehr als die Dauer."
+    },
+    {
+     "title": "Befriedigend machen und dranbleiben",
+     "text": "Was sich sofort gut anfühlt, wird wiederholt. Bei guten Gewohnheiten liegt der Lohn aber oft in der Zukunft, bei schlechten im Jetzt. Darum braucht es kleine sofortige Belohnungen. Ein Gewohnheits-Tracker hilft: Jeder Haken im Kalender ist ein sichtbarer Erfolg, und man will die Kette nicht reißen lassen. Clears wichtigste Regel dazu: Nie zweimal hintereinander aussetzen. Ein Ausrutscher ist normal, zwei sind der Beginn einer neuen Gewohnheit. Für schlechte Gewohnheiten dreht man alle vier Gesetze um: unsichtbar, unattraktiv, schwer und unbefriedigend machen, etwa durch einen Partner, der einen zur Rechenschaft zieht."
+    }
+   ],
+   "outro": "Setz nicht auf Willenskraft, sondern auf Gestaltung. Such dir heute eine Gewohnheit aus, verkleinere sie auf zwei Minuten und hänge sie an etwas, das du ohnehin jeden Tag tust."
+  },
+  {
+   "id": "schnelles-denken",
+   "title": "Schnelles Denken, langsames Denken",
+   "author": "Daniel Kahneman",
+   "isbn": "9780374533557",
+   "genre": "Psychologie",
+   "tags": [
+    "Entscheidungen",
+    "Denkfehler"
+   ],
+   "idea": "Unser Denken arbeitet mit zwei Systemen: einem schnellen, intuitiven und einem langsamen, bedächtigen. Das schnelle System entscheidet meistens, und es irrt sich auf vorhersehbare Weise.",
+   "forWhom": "Für alle, die bessere Entscheidungen treffen und verstehen wollen, warum kluge Menschen systematisch danebenliegen.",
+   "parts": [
+    {
+     "title": "System 1 und System 2",
+     "text": "Kahneman beschreibt zwei Denkweisen. System 1 arbeitet automatisch, schnell und ohne Anstrengung: Es erkennt ein wütendes Gesicht, rechnet zwei plus zwei und fährt Auto auf leerer Straße. System 2 ist langsam und anstrengend: Es rechnet 17 mal 24, sucht im Gedächtnis oder füllt eine Steuererklärung aus. Wir halten uns gern für System 2, für den bewussten, vernünftigen Teil. Tatsächlich liefert System 1 die meisten Eindrücke und Entscheidungen, und System 2 nickt sie oft nur ab. Das ist meistens gut so, denn System 1 ist schnell und oft treffsicher. Gefährlich wird es dort, wo seine Abkürzungen nicht passen."
+    },
+    {
+     "title": "Das faule Kontrollsystem",
+     "text": "System 2 kostet Kraft, deshalb spart es sich Arbeit. Ein berühmtes Beispiel: Schläger und Ball kosten zusammen 1,10 Dollar, der Schläger kostet einen Dollar mehr als der Ball. Was kostet der Ball? Fast jeder denkt sofort an zehn Cent, richtig sind fünf. Viele Studierende an Spitzenuniversitäten lagen falsch, nicht weil sie nicht rechnen konnten, sondern weil sie nicht nachprüften. System 1 liefert eine plausible Antwort, und System 2 ist zu bequem, sie zu kontrollieren. Wer müde, gestresst oder abgelenkt ist, verlässt sich noch stärker auf diese schnellen Eindrücke."
+    },
+    {
+     "title": "Abkürzungen im Kopf: Anker und Verfügbarkeit",
+     "text": "Unser Gehirn nutzt Faustregeln, sogenannte Heuristiken. Beim Ankereffekt beeinflusst eine zufällige Zahl spätere Schätzungen. In einem Versuch drehten Menschen ein manipuliertes Glücksrad, das bei 10 oder 65 stehen blieb, und sollten dann schätzen, wie viele afrikanische Staaten Mitglied der Vereinten Nationen sind. Wer 65 gesehen hatte, schätzte deutlich höher. Bei der Verfügbarkeitsheuristik halten wir für häufig, was uns leicht einfällt. Ereignisse, über die viel berichtet wird, wirken wahrscheinlicher, als sie sind. Wir ersetzen dabei oft unbemerkt eine schwierige Frage durch eine leichtere und beantworten diese."
+    },
+    {
+     "title": "Was du siehst, ist alles, was es gibt",
+     "text": "Kahneman fasst eine Grundschwäche von System 1 in eine Abkürzung: WYSIATI, what you see is all there is. Wir bauen aus den wenigen Informationen, die wir haben, eine stimmige Geschichte und fragen nicht, was fehlt. Je weniger wir wissen, desto leichter passt alles zusammen, und desto sicherer fühlen wir uns. Daraus entstehen Selbstüberschätzung und Rückschaufehler: Im Nachhinein wirkt alles vorhersehbar. Das zeigt sich auch beim Linda-Problem. Menschen halten eine sehr spezifische Beschreibung für wahrscheinlicher als eine allgemeine, nur weil sie besser ins Bild passt, obwohl das logisch unmöglich ist."
+    },
+    {
+     "title": "Planungsfehler und der Blick von außen",
+     "text": "Projekte dauern fast immer länger und kosten mehr als geplant. Kahneman erzählt, wie er selbst mit einem Team ein Lehrbuch plante und alle mit etwa zwei Jahren rechneten. Erst als er fragte, wie lange vergleichbare Teams gebraucht hatten, kam heraus: meist sieben bis zehn Jahre, und viele wurden nie fertig. Das Team machte trotzdem weiter und brauchte am Ende acht Jahre. Der Fehler: Wir planen aus der Innensicht, mit unserem Plan im Kopf. Besser ist der Blick von außen, also die Frage, wie es ähnlichen Vorhaben ergangen ist. Diese Basisrate ist der realistische Startpunkt."
+    },
+    {
+     "title": "Verluste wiegen schwerer als Gewinne",
+     "text": "Mit Amos Tversky entwickelte Kahneman die Neue Erwartungstheorie, für die er den Wirtschaftsnobelpreis erhielt. Kern: Menschen bewerten Ergebnisse nicht absolut, sondern als Gewinn oder Verlust gegenüber einem Bezugspunkt. Und Verluste schmerzen etwa doppelt so stark, wie gleich große Gewinne freuen. Deshalb lehnen viele eine Münzwette ab, bei der sie 100 Euro verlieren oder 150 gewinnen können. Auch die Formulierung zählt: Eine Operation mit 90 Prozent Überlebensrate wirkt besser als eine mit 10 Prozent Sterblichkeit, obwohl beides dasselbe bedeutet. Dieser Rahmungseffekt beeinflusst sogar Ärzte."
+    },
+    {
+     "title": "Das erlebende und das erinnernde Selbst",
+     "text": "Zum Schluss unterscheidet Kahneman zwei Selbste. Das erlebende Selbst lebt den Moment, das erinnernde Selbst bewertet im Rückblick und trifft die Entscheidungen. Die Erinnerung folgt der Höchststand-Ende-Regel: Es zählt vor allem der intensivste Moment und das Ende, die Dauer wird fast ignoriert. In einem Versuch hielten Menschen eine Hand in kaltes Wasser. Eine längere Runde, die am Ende etwas weniger kalt war, wollten die meisten lieber wiederholen als eine kürzere, obwohl sie insgesamt mehr Schmerz enthielt. Ein schöner Urlaub mit schlechtem Ende bleibt schlechter in Erinnerung, als er war."
+    }
+   ],
+   "outro": "Misstraue deiner ersten, sicheren Antwort, wenn viel auf dem Spiel steht. Frag dich bei Plänen, wie es vergleichbaren Vorhaben ergangen ist, und prüfe, wie eine Entscheidung anders formuliert auf dich wirken würde."
+  },
+  {
+   "id": "deep-work",
+   "title": "Konzentriert arbeiten (Deep Work)",
+   "author": "Cal Newport",
+   "isbn": "9781455586691",
+   "genre": "Produktivität",
+   "tags": [
+    "Fokus",
+    "Arbeit"
+   ],
+   "idea": "Die Fähigkeit, sich ohne Ablenkung lange auf eine schwierige Aufgabe zu konzentrieren, wird immer seltener und gleichzeitig immer wertvoller. Wer sie trainiert, verschafft sich einen großen Vorteil.",
+   "forWhom": "Für Wissensarbeiter, die sich zwischen Mails, Chats und Meetings zerrieben fühlen und wieder echte Ergebnisse schaffen wollen.",
+   "parts": [
+    {
+     "title": "Tiefe Arbeit gegen flache Arbeit",
+     "text": "Newport unterscheidet zwei Arten von Arbeit. Deep Work ist konzentrierte Arbeit ohne Ablenkung, die die geistigen Fähigkeiten an ihre Grenze bringt und echten Wert schafft. Shallow Work sind logistische Aufgaben, die kaum Konzentration brauchen und leicht nachzumachen sind, etwa Mails beantworten oder Termine abstimmen. Im modernen Büro dominiert die flache Arbeit, weil sie sich beschäftigt anfühlt und sichtbar ist. Newports These: Gerade weil tiefe Arbeit so selten geworden ist, wird sie immer wertvoller. Wer sie beherrscht, lernt schneller schwierige Dinge und liefert Ergebnisse auf hohem Niveau."
+    },
+    {
+     "title": "Warum Ablenkung so teuer ist",
+     "text": "Newport fasst hochwertige Arbeit in eine Formel: Ergebnis gleich Zeit mal Intensität der Konzentration. Wer ständig unterbrochen wird, arbeitet nie mit voller Intensität. Dazu kommt ein Effekt, den die Forscherin Sophie Leroy Aufmerksamkeitsrückstand nennt: Wenn wir von Aufgabe A zu B wechseln, bleibt ein Teil unserer Aufmerksamkeit noch bei A hängen. Schon ein kurzer Blick ins Postfach hinterlässt so einen Rest. Wer alle paar Minuten Nachrichten prüft, arbeitet deshalb dauerhaft mit gedrosselter Leistung. Tiefe Arbeit macht laut Newport außerdem zufriedener, weil völlige Vertiefung zu den erfüllendsten Erfahrungen gehört."
+    },
+    {
+     "title": "Vier Wege, tiefe Arbeit einzuplanen",
+     "text": "Nicht jeder kann sich wie ein Mönch zurückziehen. Newport beschreibt vier Philosophien. Die mönchische: fast alle Ablenkungen streichen, wie Autoren, die keine Mail-Adresse haben. Die bimodale: feste längere Phasen, Tage oder Wochen, ganz in die Tiefe, den Rest normal arbeiten. Die rhythmische: jeden Tag zur gleichen Zeit ein fester Block, sodass es zur Gewohnheit wird. Die journalistische: tiefe Arbeit immer dann einschieben, wenn sich Zeit ergibt, was viel Übung verlangt. Für die meisten Berufstätigen empfiehlt sich der rhythmische Weg, weil er am wenigsten Willenskraft kostet."
+    },
+    {
+     "title": "Regel 1: Tief arbeiten mit Ritualen",
+     "text": "Willenskraft ist begrenzt, darum braucht tiefe Arbeit Rituale. Newport rät, festzulegen, wo, wie lange und nach welchen Regeln man arbeitet, etwa ohne Internet, und was man zur Unterstützung braucht, wie Kaffee oder einen Spaziergang vorab. Manchmal hilft eine große Geste: J. K. Rowling zog sich zum Abschluss des letzten Harry-Potter-Bandes in ein teures Hotelzimmer zurück. Wichtig ist auch ein fester Feierabend. Newport beendet jeden Arbeitstag mit einem Abschlussritual: offene Aufgaben prüfen, für morgen planen und den Tag bewusst für beendet erklären. So kann sich das Gehirn wirklich erholen."
+    },
+    {
+     "title": "Regel 2: Langeweile aushalten",
+     "text": "Konzentration ist wie ein Muskel. Wer bei jeder Sekunde Leerlauf zum Handy greift, trainiert sein Gehirn auf Ablenkung und kann sich dann auch bei der Arbeit nicht mehr sammeln. Newport schlägt vor, nicht Pausen von der Ablenkung zu machen, sondern Pausen vom Fokus: Man plant im Voraus, wann man online geht, und bleibt außerhalb dieser Zeiten offline, auch in der Freizeit. Dazu empfiehlt er produktives Nachdenken: Beim Gehen, Duschen oder Autofahren denkt man gezielt über ein einziges berufliches Problem nach und holt die Gedanken immer wieder zurück, wenn sie abschweifen."
+    },
+    {
+     "title": "Regel 3: Soziale Medien kritisch prüfen",
+     "text": "Viele nutzen ein Netzwerk, weil es irgendeinen Nutzen hat. Newport nennt das den Irgendein-Nutzen-Trugschluss: Fast alles hat irgendeinen Nutzen, die Frage ist, ob er die Kosten an Zeit und Aufmerksamkeit übersteigt. Er empfiehlt den Ansatz eines Handwerkers, der ein Werkzeug nur nutzt, wenn es die wichtigsten Ziele deutlich voranbringt. Ein praktischer Test: Dreißig Tage lang alle sozialen Medien pausieren, ohne Abmeldung oder Ankündigung. Danach fragt man sich bei jedem Dienst, ob die letzten Wochen damit besser gewesen wären und ob es überhaupt jemandem aufgefallen ist."
+    },
+    {
+     "title": "Regel 4: Das Flache trockenlegen",
+     "text": "Flache Arbeit lässt sich nicht abschaffen, aber begrenzen. Newport plant jede Minute seines Arbeitstages in Blöcken, etwa auf einem Blatt Papier, und passt den Plan an, wenn etwas dazwischenkommt. Es geht nicht um Starrheit, sondern um bewusste Entscheidungen über die eigene Zeit. Er rät, mit der Führungskraft ein Budget für flache Arbeit zu vereinbaren und Aufgaben danach zu fragen, wie lange eine gut ausgebildete Person ohne Fachwissen bräuchte, sie zu lernen. Je kürzer, desto flacher. Außerdem: Mails so beantworten, dass sie den Vorgang abschließen, und sich schwerer erreichbar machen."
+    }
+   ],
+   "outro": "Plane dir ab morgen jeden Tag einen festen Block tiefer Arbeit ohne Handy und Postfach, auch wenn es nur 60 Minuten sind. Beende den Arbeitstag mit einem kurzen Abschlussritual, damit der Kopf wirklich frei wird."
+  },
+  {
+   "id": "7-wege",
+   "title": "Die 7 Wege zur Effektivität",
+   "author": "Stephen R. Covey",
+   "isbn": "9780743269513",
+   "genre": "Persönlichkeit",
+   "tags": [
+    "Selbstführung",
+    "Beziehungen"
+   ],
+   "idea": "Dauerhafter Erfolg entsteht nicht durch Techniken, sondern durch Charakter. Covey beschreibt sieben Gewohnheiten, die von der Abhängigkeit über die Unabhängigkeit zur echten Zusammenarbeit führen.",
+   "forWhom": "Für alle, die sich selbst besser führen und im Beruf wie in der Familie bessere Beziehungen aufbauen wollen.",
+   "parts": [
+    {
+     "title": "Von innen nach außen",
+     "text": "Covey stellt fest, dass sich die Erfolgsliteratur im 20. Jahrhundert vom Charakter hin zu Techniken und Auftreten verschoben hat. Er hält das für oberflächlich. Wer nur an Methoden feilt, ohne an Werten und Haltung zu arbeiten, wird auf Dauer nicht glaubwürdig. Entscheidend sind Paradigmen, also die Brillen, durch die wir die Welt sehen. Covey erzählt von einem Mann in der U-Bahn, dessen Kinder laut herumtoben. Er wirkt rücksichtslos, bis er erklärt, dass ihre Mutter vor einer Stunde gestorben ist. Mit einem Schlag sieht man die Szene anders. Veränderung beginnt mit einem neuen Blick, von innen nach außen."
+    },
+    {
+     "title": "Weg 1: Proaktiv sein",
+     "text": "Zwischen Reiz und Reaktion liegt ein Raum, in dem wir unsere Antwort wählen. Covey stützt sich hier ausdrücklich auf Viktor Frankl. Reaktive Menschen machen ihr Befinden von Wetter, Chef oder Laune anderer abhängig. Proaktive Menschen übernehmen Verantwortung, wörtlich die Fähigkeit, eine Antwort zu wählen. Covey unterscheidet den Kreis der Sorgen, alles, was uns beschäftigt, vom Kreis des Einflusses, das, was wir tatsächlich ändern können. Proaktive Menschen konzentrieren ihre Energie auf den Einflusskreis, und der wächst dadurch. Man erkennt die Haltung an der Sprache: Statt ich muss heißt es ich entscheide mich."
+    },
+    {
+     "title": "Weg 2: Schon am Anfang das Ende im Sinn haben",
+     "text": "Covey lädt zu einem Gedankenexperiment ein: Man stellt sich die eigene Trauerfeier vor. Was sollen Familie, Freunde, Kollegen über einen sagen? Die Antwort zeigt, was einem wirklich wichtig ist. Daraus soll ein persönliches Leitbild entstehen, eine Art Verfassung für das eigene Leben, mit Werten und Rollen, an der man Entscheidungen ausrichtet. Alles wird zweimal erschaffen: erst im Kopf, dann in der Wirklichkeit, wie ein Haus erst als Bauplan. Wer diesen ersten Schritt auslässt, lässt sich von anderen oder von Umständen gestalten. Effektiv ist nur, wer weiß, wohin die Leiter führen soll, an der er hochklettert."
+    },
+    {
+     "title": "Weg 3: Das Wichtigste zuerst",
+     "text": "Hier geht es um die Umsetzung. Covey teilt Aufgaben in eine Matrix aus wichtig und dringend. Quadrant eins enthält Krisen und Fristen, wichtig und dringend. Quadrant drei enthält Unterbrechungen und viele Anrufe, dringend, aber unwichtig. Quadrant vier ist Zeitverschwendung. Der entscheidende Bereich ist Quadrant zwei: wichtig, aber nicht dringend, etwa Planung, Vorsorge, Beziehungspflege und Weiterbildung. Wer hier investiert, hat später weniger Krisen. Dafür muss man Nein sagen zu Dringendem, das nicht wichtig ist. Covey rät, die Woche zu planen statt nur den Tag, und zwar ausgehend von Rollen und Zielen."
+    },
+    {
+     "title": "Das Beziehungskonto und Weg 4: Gewinn für beide",
+     "text": "Die ersten drei Wege führen zur Unabhängigkeit, Covey nennt das den privaten Sieg. Die nächsten drei betreffen den Umgang mit anderen. Vertrauen beschreibt er als emotionales Bankkonto: Freundlichkeit, gehaltene Versprechen und Ehrlichkeit sind Einzahlungen, Unhöflichkeit und gebrochene Zusagen sind Abhebungen. Auf dieser Grundlage steht Weg 4: Win-Win denken. Statt einer gewinnt und einer verliert sucht man Lösungen, die für beide Seiten gut sind. Gelingt das nicht, ist es manchmal besser, sich gar nicht zu einigen, als einen schlechten Deal zu schließen. Dafür braucht es Mut und Rücksicht zugleich."
+    },
+    {
+     "title": "Weg 5 und 6: Verstehen und Synergie",
+     "text": "Weg 5 lautet: Erst verstehen, dann verstanden werden. Die meisten hören zu, um zu antworten, nicht um zu verstehen. Sie bewerten, beraten oder erzählen von sich. Covey fordert empathisches Zuhören: das Gesagte und das Gefühl dahinter so wiedergeben, dass sich der andere wirklich verstanden fühlt. Erst danach erklärt man den eigenen Standpunkt. Weg 6 heißt Synergie. Wenn Menschen mit Vertrauen und offenem Zuhören zusammenarbeiten, entsteht etwas Drittes, das besser ist als die Ideen beider. Unterschiede sind dabei kein Problem, sondern die eigentliche Quelle. Das Ganze wird mehr als die Summe seiner Teile."
+    },
+    {
+     "title": "Weg 7: Die Säge schärfen",
+     "text": "Covey erzählt von einem Holzfäller, der stundenlang mit stumpfer Säge arbeitet und keine Zeit hat, sie zu schärfen, weil er ja sägen muss. Weg 7 bedeutet, regelmäßig in sich selbst zu investieren, und zwar in vier Bereichen. Körperlich: Bewegung, Ernährung, Erholung. Geistig: lesen, lernen, schreiben, planen. Sozial und emotional: Beziehungen pflegen und anderen dienen. Spirituell: Werte klären, Stille, Natur oder Glaube. Diese Erneuerung gehört in Quadrant zwei, wichtig, aber nie dringend. Sie hält alle anderen Wege lebendig und macht aus den sieben Gewohnheiten eine Aufwärtsspirale."
+    }
+   ],
+   "outro": "Fang mit dem eigenen Einflusskreis an und plane die nächste Woche von deinen Rollen und Zielen her. Hör im nächsten schwierigen Gespräch zuerst zu, bis der andere sich verstanden fühlt, bevor du antwortest."
+  },
+  {
+   "id": "frankl",
+   "title": "… trotzdem Ja zum Leben sagen",
+   "author": "Viktor E. Frankl",
+   "isbn": "9780807014295",
+   "genre": "Persönlichkeit",
+   "tags": [
+    "Sinn",
+    "Resilienz"
+   ],
+   "idea": "Selbst unter schlimmsten Bedingungen bleibt dem Menschen eine letzte Freiheit: die Haltung zu wählen, mit der er dem Schicksal begegnet. Wer einen Sinn sieht, kann fast jedes Leid tragen.",
+   "forWhom": "Für alle, die in schweren Zeiten Halt suchen oder sich fragen, was ihrem Leben Sinn gibt.",
+   "parts": [
+    {
+     "title": "Ein Psychiater im Konzentrationslager",
+     "text": "Viktor Frankl, Wiener Psychiater und Neurologe, wurde 1942 mit seiner Familie deportiert und überlebte mehrere Lager, darunter Theresienstadt und Auschwitz. Seine Eltern, sein Bruder und seine Frau kamen ums Leben. Kurz nach der Befreiung schrieb er dieses Buch in wenigen Tagen. Es ist keine Geschichte der großen Gräuel, sondern eine Beschreibung des Alltags im Lager aus der Sicht eines einfachen Häftlings. Frankl beobachtet als Psychologe, was die Lagerhaft mit der Seele macht, und fragt, warum manche Menschen innerlich zerbrechen und andere ihre Würde bewahren. Daraus entwickelt er seine Lehre vom Sinn."
+    },
+    {
+     "title": "Drei Phasen der Lagerhaft",
+     "text": "Frankl beschreibt drei seelische Phasen. Die erste ist der Aufnahmeschock. Viele klammern sich an die Illusion, im letzten Moment doch begnadigt zu werden, bis alles genommen ist, Kleidung, Haare, Name, und nur noch die nackte Existenz bleibt. Die zweite Phase ist die Apathie. Gefühle stumpfen ab, Ekel und Mitleid verschwinden, das Denken kreist nur noch ums Überleben, um Brot und Suppe. Diese Abstumpfung ist ein Schutzpanzer. Die dritte Phase kommt nach der Befreiung: Die Freude stellt sich zunächst nicht ein, viele fühlen sich fremd, manche werden verbittert, weil die Welt ihr Leid nicht versteht."
+    },
+    {
+     "title": "Die letzte menschliche Freiheit",
+     "text": "Im Lager wird dem Menschen alles genommen. Und doch, so Frankl, bleibt eines, das ihm niemand nehmen kann: die Freiheit, sich so oder so zu seinen Umständen einzustellen. Er erzählt von Häftlingen, die durch die Baracken gingen, Trost spendeten und ihr letztes Stück Brot weggaben. Es waren wenige, aber sie zeigten, dass der Mensch nicht nur ein Produkt seiner Lage ist. Wie jemand sein Schicksal trägt, ist eine innere Entscheidung. Darin liegt die Möglichkeit, auch im Leiden die Würde zu wahren. Für Frankl ist diese Haltung eine Leistung, die dem Leben bis zuletzt Sinn gibt."
+    },
+    {
+     "title": "Liebe und ein Ziel in der Zukunft",
+     "text": "Auf einem Marsch zur Arbeit, in Kälte und Dunkelheit, denkt Frankl an seine Frau. Er weiß nicht, ob sie noch lebt, und spricht in Gedanken mit ihr. Dabei erkennt er, dass die Liebe das Höchste ist, wonach der Mensch streben kann, und dass sie über das körperliche Dasein des anderen hinausreicht. Ein zweiter Halt ist ein Ziel in der Zukunft. Frankl selbst stellte sich vor, nach dem Krieg Vorträge über die Psychologie des Lagers zu halten. Er beobachtete: Wer den Glauben an seine Zukunft verlor, gab sich oft auf. Wer ein Warum zu leben hat, erträgt fast jedes Wie."
+    },
+    {
+     "title": "Was erwartet das Leben von uns?",
+     "text": "Frankl dreht die übliche Frage nach dem Sinn um. Es kommt nicht darauf an, was wir vom Leben erwarten, sondern was das Leben von uns erwartet. Wir sind die Befragten und antworten durch unser Handeln und unsere Haltung, in jeder konkreten Situation neu. Im Lager half er zwei verzweifelten Männern, die sich das Leben nehmen wollten, indem er sie daran erinnerte, was noch auf sie wartete: bei dem einen ein Kind im Ausland, bei dem anderen ein unvollendetes wissenschaftliches Werk. Jeder Mensch ist einzigartig und unersetzlich. Wer das begreift, kann sein Leben nicht einfach wegwerfen."
+    },
+    {
+     "title": "Logotherapie: drei Wege zum Sinn",
+     "text": "Aus seinen Erfahrungen entwickelte Frankl die Logotherapie, die dritte Wiener Schule der Psychotherapie nach Freud und Adler. Ihr Grundgedanke: Der Mensch strebt vor allem nach Sinn, nicht nach Lust oder Macht. Sinn lässt sich auf drei Wegen finden. Erstens, indem man etwas schafft oder eine Tat vollbringt. Zweitens, indem man etwas erlebt oder einem Menschen in Liebe begegnet. Drittens, durch die Haltung gegenüber einem unabänderlichen Leid. Wo man nichts mehr ändern kann, kann man immer noch sich selbst ändern. Fehlt der Sinn, entsteht ein inneres Vakuum, das sich oft in Langeweile, Sucht oder Aggression zeigt."
+    },
+    {
+     "title": "Tragischer Optimismus",
+     "text": "In späteren Auflagen spricht Frankl von einem tragischen Optimismus. Das Leben bringt unvermeidlich Leid, Schuld und Tod mit sich, diese tragische Trias kann niemand umgehen. Optimismus heißt dann nicht, alles schönzureden, sondern auch daraus das Beste zu machen: Leid in eine Leistung verwandeln, aus Schuld die Kraft zur Veränderung ziehen und die Vergänglichkeit als Ansporn verstehen, verantwortlich zu handeln. Glück lässt sich nach Frankl nicht direkt anstreben. Es stellt sich als Nebenwirkung ein, wenn man sich einer Sache oder einem Menschen hingibt. Wer es jagt, verfehlt es."
+    }
+   ],
+   "outro": "Frag dich in schwierigen Momenten nicht, warum dir das passiert, sondern was die Situation jetzt von dir verlangt. Benenne für dich, wofür oder für wen es sich lohnt, durchzuhalten."
+  },
+  {
+   "id": "essentialismus",
+   "title": "Essentialismus",
+   "author": "Greg McKeown",
+   "isbn": "9780804137386",
+   "genre": "Produktivität",
+   "tags": [
+    "Prioritäten",
+    "Fokus"
+   ],
+   "idea": "Weniger, aber besser: Wer nicht alles machen will, sondern gezielt das Wesentliche wählt und den Rest konsequent weglässt, leistet mehr und lebt entspannter.",
+   "forWhom": "Für alle, die sich überlastet fühlen, schwer Nein sagen können und das Gefühl haben, in viele Richtungen ein bisschen voranzukommen.",
+   "parts": [
+    {
+     "title": "Weniger, aber besser",
+     "text": "McKeown beschreibt zwei Haltungen. Der Nicht-Essentialist will alles schaffen, sagt zu fast allem Ja und verteilt seine Energie auf viele Vorhaben. Er kommt in viele Richtungen einen Millimeter voran. Der Essentialist fragt dagegen, was wirklich wichtig ist, und setzt seine Kraft gebündelt darauf. Das Motto stammt vom Designer Dieter Rams: weniger, aber besser. McKeown betont ein Paradox des Erfolgs: Wer gut ist, bekommt mehr Möglichkeiten und Anfragen, verzettelt sich und verliert dadurch genau die Klarheit, die ihn erfolgreich gemacht hat. Essentialismus ist kein Zeitmanagement, sondern eine Denkweise."
+    },
+    {
+     "title": "Du hast immer eine Wahl",
+     "text": "Die erste Einsicht: Wir haben die Fähigkeit zu wählen, auch wenn es sich oft nicht so anfühlt. Wer glaubt, alles tun zu müssen, gibt diese Wahl ab und lässt andere über seine Zeit bestimmen. Zweitens: Fast alles ist unwichtig. Nur wenige Dinge haben eine außerordentliche Wirkung, die meisten sind Rauschen. Drittens: Man muss Kompromisse eingehen. Man kann nicht alles haben. Der Nicht-Essentialist fragt, wie er alles schafft. Der Essentialist fragt, welches Problem er lösen will und worauf er dafür verzichtet. Wer diese Entscheidung nicht selbst trifft, dem wird sie abgenommen."
+    },
+    {
+     "title": "Erkunden: Raum zum Denken",
+     "text": "Um das Wesentliche zu erkennen, braucht man Abstand. McKeown rät, sich bewusst Zeit zum Nachdenken freizuhalten, etwa feste Stunden im Kalender ohne Termine. Wie ein Journalist soll man nach dem Kern einer Sache suchen, nach dem, was die Nachricht wirklich ist, statt sich in Details zu verlieren. Spiel und ausreichend Schlaf gehören ausdrücklich dazu. Wer übermüdet ist, verliert die Fähigkeit, Prioritäten zu setzen. McKeown nennt Schlaf deshalb eine Investition in die eigene Urteilskraft. Erst wer genügend Optionen erkundet hat, kann gut auswählen, und auswählen heißt vor allem verwerfen."
+    },
+    {
+     "title": "Die 90-Prozent-Regel",
+     "text": "Für Entscheidungen empfiehlt McKeown extreme Kriterien. Wenn eine Option auf einer Skala von null bis hundert nicht mindestens neunzig erreicht, wird sie wie null behandelt. Anders gesagt: Wenn es kein klares Ja ist, ist es ein Nein. Das klingt hart, verhindert aber, dass man sich mit vielen mittelmäßigen Zusagen verstopft, und hält Platz frei für die wenigen großartigen Gelegenheiten. Hilfreich ist auch die Umkehrfrage: Wenn ich das noch nicht hätte, wie viel würde ich investieren, um es zu bekommen? Lautet die Antwort wenig oder nichts, ist es Zeit, es loszulassen."
+    },
+    {
+     "title": "Eliminieren: gekonnt Nein sagen",
+     "text": "Das Wesentliche zu erkennen reicht nicht, man muss den Rest auch streichen. Dazu gehört, freundlich, aber bestimmt Nein zu sagen. McKeown trennt die Entscheidung von der Beziehung: Ein Nein zur Anfrage ist kein Nein zur Person. Man kann ein Nein abfedern, etwa mit einem Ja zu einer kleineren Sache oder mit dem Satz, man schaue in den Kalender und melde sich. Auch laufende Verpflichtungen darf man beenden. Die Falle der versunkenen Kosten lässt uns an Projekten festhalten, nur weil wir schon viel investiert haben. Ein Essentialist gibt Fehlentscheidungen zu und schneidet sie ab."
+    },
+    {
+     "title": "Umsetzen: Puffer und kleine Fortschritte",
+     "text": "Die Umsetzung soll möglichst mühelos werden. McKeown rät zu Puffern: Weil fast alles länger dauert als geplant, plant man von vornherein rund die Hälfte mehr Zeit ein. Hindernisse werden systematisch gesucht und beseitigt, vor allem der eine Engpass, der alles aufhält. Statt auf große Durchbrüche setzt man auf kleine, sichtbare Fortschritte, denn Fortschritt motiviert. Und Routinen machen das Wesentliche zum Standard, sodass man nicht täglich neu darüber entscheiden muss. Am Ende steht die Frage, was im Moment gerade das Wichtigste ist. Ein Essentialist richtet seine Aufmerksamkeit auf das Jetzt."
+    }
+   ],
+   "outro": "Prüf diese Woche jede neue Anfrage mit der Frage, ob sie ein klares Ja ist. Streiche eine Verpflichtung, die du nur noch aus Gewohnheit oder wegen bereits investierter Zeit weiterführst."
+  },
+  {
+   "id": "mindset",
+   "title": "Selbstbild (Mindset)",
+   "author": "Carol S. Dweck",
+   "isbn": "9780345472328",
+   "genre": "Psychologie",
+   "tags": [
+    "Lernen",
+    "Erziehung"
+   ],
+   "idea": "Ob wir glauben, dass Fähigkeiten feststehen oder wachsen können, prägt, wie wir mit Herausforderungen, Fehlern und Kritik umgehen und wie weit wir kommen.",
+   "forWhom": "Für Eltern, Lehrende, Führungskräfte und alle, die beim Lernen schnell an sich zweifeln.",
+   "parts": [
+    {
+     "title": "Zwei Selbstbilder",
+     "text": "Die Psychologin Carol Dweck unterscheidet zwei Denkweisen. Wer ein statisches Selbstbild hat, glaubt, Intelligenz, Talent und Persönlichkeit seien weitgehend festgelegt. Dann muss man ständig beweisen, dass man genug davon hat. Wer ein dynamisches Selbstbild hat, glaubt, dass sich Fähigkeiten durch Einsatz, gute Strategien und Hilfe anderer entwickeln lassen. Dann ist jede Aufgabe eine Gelegenheit zu wachsen. Dweck betont, dass niemand nur das eine oder das andere ist. Wir tragen beide Haltungen in uns, und je nach Bereich, etwa Sport, Mathe oder Beziehungen, kann eine von beiden überwiegen."
+    },
+    {
+     "title": "Was Fehler bedeuten",
+     "text": "Das Selbstbild entscheidet, wie wir Misserfolge deuten. Mit statischem Selbstbild ist ein Fehler ein Urteil über die eigene Person: Ich bin eben nicht gut darin. Man meidet daher schwierige Aufgaben, gibt schnell auf und sucht Schuldige oder Ausreden. Mit dynamischem Selbstbild ist ein Fehler eine Information: Ich kann es noch nicht. Man fragt, was man lernen kann, und versucht es anders. Auch Anstrengung wird unterschiedlich gesehen. Für die eine Haltung ist sie ein Zeichen fehlender Begabung, denn wer begabt ist, sollte es nicht nötig haben. Für die andere ist Anstrengung genau das, was Fähigkeiten entstehen lässt."
+    },
+    {
+     "title": "Lob für Einsatz statt für Klugheit",
+     "text": "In einer bekannten Studie lösten Kinder Aufgaben und wurden danach unterschiedlich gelobt. Die einen hörten, sie seien sehr klug. Die anderen wurden für ihre Anstrengung gelobt. Danach durften sie wählen: eine leichte Aufgabe oder eine schwierige, an der man etwas lernt. Die für Klugheit gelobten Kinder wählten häufiger die leichte, um ihr Image nicht zu gefährden. Nach schweren Aufgaben verloren sie die Freude, ihre Leistungen sanken, und ein Teil gab beim Berichten der Ergebnisse sogar bessere Werte an. Die für Einsatz gelobten Kinder suchten Herausforderungen und wurden besser. Lob für Begabung kann also schaden."
+    },
+    {
+     "title": "Sport und Wirtschaft",
+     "text": "Dweck zeigt Beispiele aus dem Sport, wo Talent oft als angeboren gilt. Michael Jordan wurde in der Schule zunächst nicht ins Auswahlteam aufgenommen und galt später als einer der fleißigsten Spieler überhaupt. Wer glaubt, nur auf Talent zu bauen, trainiert oft weniger und kommt mit Niederlagen schlechter zurecht. In Unternehmen beobachtet Dweck Ähnliches. Führungskräfte mit statischem Selbstbild umgeben sich mit Bestätigern, hören Kritik ungern und müssen immer die Klügsten im Raum sein. Eine Kultur, die nur Genies feiert, verleitet zum Verbergen von Fehlern. Gute Führung fördert dagegen Lernen und offenes Feedback."
+    },
+    {
+     "title": "Beziehungen",
+     "text": "Auch in Partnerschaften wirkt das Selbstbild. Wer statisch denkt, glaubt oft, dass es in einer guten Beziehung von selbst laufen muss, wenn man füreinander bestimmt ist. Probleme werden dann als Beweis gelesen, dass etwas grundsätzlich nicht stimmt, und man sucht die Schuld beim Charakter des anderen. Wer dynamisch denkt, erwartet, dass Beziehungen Arbeit brauchen und dass beide Partner wachsen können. Konflikte sind dann Aufgaben, die man gemeinsam lösen kann. Ähnliches gilt für Freundschaften und für den Umgang mit Zurückweisung: Sie wird nicht als endgültiges Urteil über den eigenen Wert verstanden."
+    },
+    {
+     "title": "Eltern, Lehrende und Trainer",
+     "text": "Was Erwachsene sagen, vermittelt Kindern ein Selbstbild. Sätze wie du bist ein Naturtalent oder du bist eben kein Mathe-Typ legen eine feste Eigenschaft nahe. Dweck rät, Prozesse zu loben: die Strategie, die Ausdauer, die Verbesserung. Gute Lehrkräfte stellen hohe Anforderungen und vermitteln zugleich, dass jedes Kind sie mit Einsatz erreichen kann. Wichtig ist auch, wie man auf Fehler reagiert. Statt zu trösten mit dem Hinweis, die Aufgabe sei unfair gewesen, sollte man gemeinsam überlegen, was beim nächsten Mal hilft. Kinder lernen so, dass Schwierigkeit zum Lernen gehört."
+    },
+    {
+     "title": "Das Selbstbild ändern",
+     "text": "Ein Selbstbild ist eine Überzeugung, und Überzeugungen lassen sich ändern. Schon das Wissen, dass das Gehirn durch Lernen wächst und sich verändert, hilft vielen. Dweck empfiehlt, die eigenen Auslöser für das statische Denken zu erkennen, etwa Kritik, ein Rückschlag oder jemand, der besser ist. Man kann dieser inneren Stimme einen Namen geben und ihr bewusst antworten. Das kleine Wort noch wirkt dabei stark: Ich kann das noch nicht. Sie warnt aber vor einem falschen Verständnis. Dynamisches Selbstbild heißt nicht, nur Anstrengung zu loben oder alles positiv zu sehen, sondern wirklich zu lernen und Strategien zu wechseln."
+    }
+   ],
+   "outro": "Achte diese Woche auf die Momente, in denen du denkst, ich bin eben nicht gut darin, und ergänze innerlich ein noch. Lobe bei anderen den Weg und die Strategie statt die Begabung."
+  },
+  {
+   "id": "sapiens",
+   "title": "Eine kurze Geschichte der Menschheit",
+   "author": "Yuval Noah Harari",
+   "isbn": "9780062316097",
+   "genre": "Geschichte",
+   "tags": [
+    "Menschheit",
+    "Gesellschaft"
+   ],
+   "idea": "Der Homo sapiens hat die Welt erobert, weil er als einziges Lebewesen an gemeinsame Erfindungen glauben kann, an Götter, Geld, Staaten und Gesetze. Diese Fähigkeit ermöglicht Zusammenarbeit in riesigen Gruppen.",
+   "forWhom": "Für alle, die den großen Bogen der Menschheitsgeschichte verstehen wollen und Lust auf provokante Thesen haben.",
+   "parts": [
+    {
+     "title": "Ein unbedeutendes Tier",
+     "text": "Vor gut zwei Millionen Jahren lebten mehrere Menschenarten nebeneinander, etwa der Neandertaler in Europa und der Homo erectus in Asien. Der Homo sapiens entstand in Ostafrika und war lange ein Tier ohne besondere Bedeutung, irgendwo in der Mitte der Nahrungskette. Große Gehirne, aufrechter Gang und der Gebrauch des Feuers verschafften ihm Vorteile, machten ihn aber nicht zum Herrscher der Welt. Harari erzählt die Geschichte der Menschheit entlang von drei großen Umbrüchen: der kognitiven Revolution vor etwa 70.000 Jahren, der landwirtschaftlichen Revolution vor rund 12.000 Jahren und der wissenschaftlichen Revolution vor etwa 500 Jahren."
+    },
+    {
+     "title": "Die kognitive Revolution: die Macht der Geschichten",
+     "text": "Vor rund 70.000 Jahren begann der Sapiens, sich über ganz Afrika hinaus auszubreiten, andere Menschenarten verschwanden. Harari erklärt das mit einer neuen Art zu denken und zu sprechen. Sapiens konnte nicht nur über Löwen und Flüsse reden, sondern über Dinge, die es nur in der Vorstellung gibt: Geister, Götter, Stämme. Solche gemeinsamen Fiktionen erlauben es Tausenden oder Millionen Fremden, zusammenzuarbeiten. Ein Unternehmen wie Peugeot existiert nicht als Gegenstand, sondern als rechtliche Fiktion, an die alle glauben. Schimpansen kooperieren in kleinen Gruppen, Menschen in Nationen, Kirchen und Märkten."
+    },
+    {
+     "title": "Die Landwirtschaft als größter Betrug",
+     "text": "Vor etwa 12.000 Jahren begannen Menschen, Pflanzen anzubauen und Tiere zu halten. Üblicherweise gilt das als großer Fortschritt. Harari nennt es provokant den größten Betrug der Geschichte. Der einzelne Bauer arbeitete mehr als der Jäger und Sammler, ernährte sich einseitiger, wurde häufiger krank und war von Missernten abhängig. Nicht der Mensch habe den Weizen gezähmt, sondern der Weizen den Menschen, der ihn nun pflegen musste. Der Gewinn lag bei der Art als Ganzes: Es gab viel mehr Menschen. Mit Vorräten entstanden Dörfer, Städte, Hierarchien und Herrscher, die Überschüsse eintrieben."
+    },
+    {
+     "title": "Die großen Vereiniger: Geld, Reiche, Religionen",
+     "text": "Drei Kräfte haben die Menschheit nach Harari Schritt für Schritt zu einer globalen Gemeinschaft verbunden. Geld ist das universellste Vertrauenssystem, das es gibt: Menschen, die sich nicht kennen und nicht an dieselben Götter glauben, vertrauen derselben Münze. Imperien haben verschiedene Völker unter einer Ordnung vereint und Sprachen, Recht und Kultur über weite Räume verbreitet. Universelle Religionen schließlich versprachen eine Ordnung für alle Menschen, nicht nur für einen Stamm. Harari zählt auch moderne Ideologien wie Liberalismus oder Kommunismus zu solchen Glaubenssystemen."
+    },
+    {
+     "title": "Die wissenschaftliche Revolution",
+     "text": "Vor etwa 500 Jahren geschah etwas Neues: Menschen gaben zu, dass sie vieles nicht wissen. Frühere Kulturen glaubten, alles Wichtige stehe schon in den heiligen Schriften. Die moderne Wissenschaft dagegen sammelt Beobachtungen, nutzt Mathematik und will neue Kräfte gewinnen. Harari zeigt, wie eng sie mit Imperien und Kapitalismus verbunden war. Europäische Mächte finanzierten Forschungsreisen, weil sie sich Macht und Gewinn versprachen. Kredit, also das Vertrauen in eine wachsende Zukunft, ermöglichte Investitionen, und diese brachten Wachstum. So beschleunigte sich die Entwicklung so stark wie nie zuvor."
+    },
+    {
+     "title": "Sind wir glücklicher geworden?",
+     "text": "Trotz allen Fortschritts fragt Harari, ob Menschen heute glücklicher sind als Jäger und Sammler. Die Antwort ist unklar. Wohlstand, Medizin und Frieden haben vieles verbessert, doch Glück hängt stark von Erwartungen ab, und die steigen mit. Zudem bezahlen andere Lebewesen einen hohen Preis, besonders Nutztiere in der Massentierhaltung. Am Ende blickt Harari nach vorn. Mit Gentechnik, künstlicher Intelligenz und der Verbindung von Mensch und Maschine könnte der Sapiens sich selbst so verändern, dass er etwas anderes wird. Die wichtigste Frage sei deshalb nicht, was wir werden können, sondern was wir werden wollen."
+    }
+   ],
+   "outro": "Achte darauf, wie viele Dinge in deinem Alltag gemeinsame Vorstellungen sind, Geld, Firmen, Regeln. Frag dich bei Fortschritten, wem sie wirklich nützen und ob sie dich zufriedener machen."
+  }
+ ]
+}
