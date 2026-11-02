@@ -344,6 +344,326 @@
     }
    ],
    "outro": "Achte darauf, wie viele Dinge in deinem Alltag gemeinsame Vorstellungen sind, Geld, Firmen, Regeln. Frag dich bei Fortschritten, wem sie wirklich nützen und ob sie dich zufriedener machen."
+  },
+  {
+   "id": "warum-wir-schlafen",
+   "title": "Das große Buch vom Schlaf (Why We Sleep)",
+   "author": "Matthew Walker",
+   "isbn": "9781501144318",
+   "genre": "Gesundheit",
+   "tags": [
+    "Schlaf",
+    "Gesundheit"
+   ],
+   "idea": "Schlaf ist kein Luxus und keine verlorene Zeit, sondern die wichtigste Grundlage für Gesundheit, Lernen und Gefühle. Wer dauerhaft zu wenig schläft, schadet Körper und Gehirn mehr, als er ahnt.",
+   "forWhom": "Für alle, die regelmäßig unter sieben Stunden schlafen oder wissen wollen, wie sie besser schlafen.",
+   "parts": [
+    {
+     "title": "Zwei Kräfte steuern den Schlaf",
+     "text": "Walker, Schlafforscher in Berkeley, erklärt zuerst, wann wir müde werden. Zwei Systeme wirken zusammen. Der zirkadiane Rhythmus ist die innere Uhr von ungefähr 24 Stunden, die über Licht gestellt wird und abends das Hormon Melatonin ausschütten lässt. Daneben baut sich im Wachsein der Schlafdruck auf, vor allem durch den Botenstoff Adenosin. Je länger wir wach sind, desto mehr sammelt sich an. Koffein blockiert die Adenosin-Rezeptoren und täuscht Wachheit nur vor. Weil Koffein eine Halbwertszeit von etwa fünf bis sechs Stunden hat, wirkt ein Kaffee am Nachmittag noch spät in der Nacht nach."
+    },
+    {
+     "title": "Tiefschlaf und Traumschlaf",
+     "text": "Eine Nacht besteht aus Zyklen von etwa neunzig Minuten. Darin wechseln sich Non-REM-Schlaf und REM-Schlaf ab, der Traumschlaf. In der ersten Nachthälfte überwiegt der tiefe Non-REM-Schlaf, in der zweiten der REM-Schlaf. Das hat eine wichtige Folge: Wer zwei Stunden zu früh aufsteht, verliert nicht einfach ein Viertel seines Schlafs, sondern einen großen Teil seines REM-Schlafs. Beide Phasen haben unterschiedliche Aufgaben. Tiefschlaf festigt Gelerntes und erholt den Körper. Im REM-Schlaf verknüpft das Gehirn Erinnerungen neu und verarbeitet Gefühle."
+    },
+    {
+     "title": "Schlaf und Gedächtnis",
+     "text": "Schlaf hilft vor dem Lernen und danach. Vorher macht er das Gehirn aufnahmefähig, wie eine geleerte Festplatte. Der Hippocampus, der kurzfristige Speicher, braucht Schlaf, um wieder Platz zu haben. Danach überträgt der Tiefschlaf das Gelernte ins Langzeitgedächtnis. Studien zeigen, dass Menschen nach einer Nacht Schlaf Gelerntes besser abrufen als nach gleich langer Wachzeit. Auch Bewegungsabläufe wie ein Klavierstück werden über Nacht besser. Walker folgert daraus, dass durchgemachte Lernnächte vor Prüfungen eine schlechte Idee sind und dass Kinder und Jugendliche besonders viel Schlaf brauchen."
+    },
+    {
+     "title": "Was Schlafmangel anrichtet",
+     "text": "Walker beschreibt die Folgen von zu wenig Schlaf drastisch. Nach seinen Angaben steigt mit dauerhaft kurzem Schlaf das Risiko für Herz-Kreislauf-Erkrankungen, Diabetes, Übergewicht und Demenz. Das Immunsystem arbeitet schlechter. Wer zu wenig schläft, hat mehr Hunger, besonders auf Süßes und Fettiges, weil sich die Hormone für Sättigung und Hunger verschieben. Auch die Gefühle geraten aus dem Gleichgewicht, man reagiert gereizter und stärker. Gefährlich ist Müdigkeit im Straßenverkehr, weil das Gehirn in Sekundenschlaf fallen kann, ohne dass man es merkt. Und: Wer übermüdet ist, schätzt die eigene Leistung falsch ein."
+    },
+    {
+     "title": "Träume als nächtliche Therapie",
+     "text": "Im REM-Schlaf ist der Botenstoff Noradrenalin, der mit Stress verbunden ist, im Gehirn fast völlig abgeschaltet. Walker beschreibt den Traumschlaf deshalb als eine Art nächtliche Therapie. Das Gehirn kann belastende Erinnerungen noch einmal durchgehen, aber in einer ruhigen chemischen Umgebung. So verlieren sie über Nacht etwas von ihrer emotionalen Wucht. Außerdem verbindet der Traumschlaf Wissen auf neue, manchmal ungewöhnliche Weise. Darum fallen uns morgens oft Lösungen ein, die abends nicht da waren. Der Rat, eine Sache zu überschlafen, hat also eine biologische Grundlage."
+    },
+    {
+     "title": "Besser schlafen: die Regeln",
+     "text": "Walker gibt am Ende praktische Empfehlungen. Die wichtigste: Jeden Tag zur gleichen Zeit ins Bett gehen und aufstehen, auch am Wochenende. Das Schlafzimmer soll kühl sein, etwa um 18 Grad, dunkel und ohne Bildschirme. Helles Licht und blaues Licht von Displays am Abend verzögern das Melatonin. Koffein am Nachmittag und Alkohol am Abend sollte man meiden, denn Alkohol macht zwar müde, zerstückelt aber den Schlaf und unterdrückt den Traumschlaf. Wer nach etwa zwanzig Minuten nicht einschlafen kann, steht besser auf und kehrt erst zurück, wenn er müde ist. Schlaftabletten hält Walker für keine echte Lösung."
+    }
+   ],
+   "outro": "Gönn dir eine feste Aufstehzeit, auch am Wochenende, und mindestens sieben bis acht Stunden Gelegenheit zum Schlafen. Verleg den letzten Kaffee auf die Mittagszeit und dimme abends das Licht."
+  },
+  {
+   "id": "outlive",
+   "title": "Outlive",
+   "author": "Peter Attia",
+   "isbn": "9780593236598",
+   "genre": "Gesundheit",
+   "tags": [
+    "Langlebigkeit",
+    "Training"
+   ],
+   "idea": "Ziel ist nicht nur ein langes Leben, sondern viele gesunde Jahre. Dafür muss man die großen chronischen Krankheiten Jahrzehnte vor ihrem Ausbruch angehen, vor allem mit Training.",
+   "forWhom": "Für alle ab 35, die bis ins hohe Alter fit, beweglich und geistig klar bleiben wollen.",
+   "parts": [
+    {
+     "title": "Lebensspanne und Gesundheitsspanne",
+     "text": "Der Arzt Peter Attia unterscheidet zwei Größen: die Lebensspanne, also wie lange wir leben, und die Gesundheitsspanne, also wie lange wir körperlich, geistig und emotional gut leben. Viele Menschen verbringen ihr letztes Jahrzehnt mit Krankheit und Einschränkungen. Attia will beides verlängern, vor allem aber die gesunden Jahre. Er kritisiert die heutige Medizin, die er Medizin 2.0 nennt: Sie greift oft erst ein, wenn eine Krankheit schon da ist. Seine Medizin 3.0 setzt viel früher an, ist auf den einzelnen Menschen zugeschnitten und legt den Schwerpunkt auf Vorbeugung statt auf Behandlung."
+    },
+    {
+     "title": "Die vier Reiter",
+     "text": "Die meisten Menschen in Industrieländern sterben nicht plötzlich, sondern an einer von vier chronischen Krankheitsgruppen, die Attia die vier Reiter nennt: Herz-Kreislauf-Erkrankungen, Krebs, neurodegenerative Krankheiten wie Alzheimer und Stoffwechselstörungen wie Typ-2-Diabetes. Sie entwickeln sich über Jahrzehnte, lange bevor man etwas spürt. Gemeinsam ist ihnen, dass ein gestörter Stoffwechsel, vor allem Insulinresistenz, das Risiko für fast alle erhöht. Attia rät daher, früh genauer hinzusehen, etwa auf Blutwerte wie ApoB bei den Blutfetten, und Risiken nicht erst ab 60 ernst zu nehmen."
+    },
+    {
+     "title": "Training ist das stärkste Mittel",
+     "text": "Für Attia ist Bewegung das wirksamste Werkzeug für ein langes, gesundes Leben, wirksamer als jedes Medikament. Er unterscheidet mehrere Bausteine. Ausdauer in Zone 2, also lockeres, langes Training, bei dem man sich noch gerade unterhalten kann, stärkt die Mitochondrien und den Stoffwechsel. Dazu kommt intensives Training für die maximale Sauerstoffaufnahme, VO2max, die eng mit der Lebenserwartung zusammenhängt. Krafttraining erhält Muskeln und Knochen, die im Alter schnell schwinden, und auch Griffkraft sagt viel über die Gesundheit aus. Der vierte Baustein ist Stabilität: Gleichgewicht und saubere Bewegung schützen vor Stürzen und Verletzungen."
+    },
+    {
+     "title": "Der Zehnkampf des Alters",
+     "text": "Attia schlägt eine anschauliche Übung vor, den Zehnkampf für die letzten Lebensjahre. Man überlegt, was man mit achtzig oder neunzig noch können will: etwa ein Enkelkind hochheben, einen Koffer ins Gepäckfach wuchten, Treppen steigen, vom Boden aufstehen oder einen Berg wandern. Dann rechnet man zurück. Weil Kraft und Ausdauer mit jedem Jahrzehnt deutlich abnehmen, muss man heute weit mehr können, als man im Alter braucht. Das Training bekommt so ein konkretes Ziel. Es geht nicht um Medaillen, sondern darum, im Alltag selbständig und beweglich zu bleiben."
+    },
+    {
+     "title": "Ernährung, Schlaf und Gefühle",
+     "text": "Bei der Ernährung ist Attia zurückhaltend mit Dogmen. Es gibt nicht die eine richtige Diät. Wichtig sind für ihn die richtige Energiemenge, damit man nicht zu viel isst, und vor allem genug Eiweiß, um Muskeln zu erhalten. Hilfreich sei, den eigenen Blutzucker zu beobachten, etwa mit einem Sensor, um zu sehen, wie man auf Essen reagiert. Schlaf behandelt er als eigenen Grundpfeiler, ohne den Training und Stoffwechsel leiden. Ein besonders persönlicher Teil betrifft die emotionale Gesundheit. Attia erzählt offen von seiner eigenen Therapie und betont: Ein langes Leben nützt wenig, wenn man darin nicht glücklich ist und keine guten Beziehungen hat."
+    },
+    {
+     "title": "Strategie statt Taktik",
+     "text": "Attia unterscheidet zwischen Strategie und Taktik. Die Strategie ist der übergeordnete Plan: die vier Reiter früh bekämpfen und die Gesundheitsspanne verlängern. Taktiken sind die einzelnen Maßnahmen wie ein bestimmtes Training, eine Ernährungsform oder Untersuchungen. Viele springen von Trend zu Trend, ohne eine Strategie zu haben. Attia rät, die eigenen Risiken zu kennen, etwa über die Familiengeschichte und Blutwerte, und daraus Prioritäten abzuleiten. Er versteht sein Buch nicht als festes Rezept, sondern als Denkweise. Jeder muss seine Taktiken anpassen, aber die Richtung ist klar: früh anfangen und konsequent bleiben."
+    }
+   ],
+   "outro": "Schreib dir drei Dinge auf, die du mit 85 noch können willst, und plane dein Training danach. Fang mit zwei bis drei Stunden lockerer Ausdauer und zwei Krafteinheiten pro Woche an."
+  },
+  {
+   "id": "factfulness",
+   "title": "Factfulness",
+   "author": "Hans Rosling",
+   "isbn": "9781250107817",
+   "genre": "Gesellschaft",
+   "tags": [
+    "Statistik",
+    "Weltbild"
+   ],
+   "idea": "Die Welt ist in vielen Bereichen viel besser, als die meisten glauben. Unser Bild ist verzerrt durch zehn Instinkte, die uns dramatisieren lassen. Wer sie kennt, sieht die Welt realistischer.",
+   "forWhom": "Für alle, die Nachrichten verfolgen und ein faktenbasiertes Weltbild haben wollen.",
+   "parts": [
+    {
+     "title": "Schlechter als Schimpansen",
+     "text": "Der schwedische Arzt und Statistiker Hans Rosling stellte Menschen weltweit einfache Fragen über den Zustand der Welt, zum Beispiel, wie viele Mädchen in armen Ländern die Grundschule abschließen oder wie sich der Anteil extremer Armut in den letzten zwanzig Jahren entwickelt hat. Es gab jeweils drei Antwortmöglichkeiten. Die meisten Menschen, auch Fachleute und Entscheider, schnitten schlechter ab als der Zufall, also schlechter als Schimpansen, die zufällig wählen würden. Und sie lagen fast immer in dieselbe Richtung falsch: Sie hielten die Welt für ärmer, gefährlicher und rückständiger, als sie ist. Rosling will erklären, warum."
+    },
+    {
+     "title": "Die Kluft und die vier Einkommensstufen",
+     "text": "Der erste Fehler ist der Instinkt der Kluft. Wir teilen die Welt gern in zwei Gruppen ein, arm und reich, Entwicklungsländer und Industrieländer. Doch die meisten Menschen leben heute in der Mitte. Rosling ersetzt das Zweierbild durch vier Einkommensstufen, von Menschen, die barfuß Wasser holen, bis zu Menschen mit Auto und Urlaub. Die Mehrheit der Menschheit lebt auf den mittleren Stufen. Wer die Welt in zwei Lager teilt, übersieht diese große Mitte. Rosling rät, bei jeder Gegenüberstellung nach der Verteilung zu fragen und nicht nur nach den Durchschnitten zweier Extreme."
+    },
+    {
+     "title": "Negativität und gerade Linien",
+     "text": "Der Negativitätsinstinkt lässt uns schlechte Nachrichten stärker wahrnehmen als gute. Langsame Verbesserungen sind keine Schlagzeile. Rosling betont: Etwas kann schlecht sein und sich trotzdem verbessern. Beides gilt gleichzeitig. Extreme Armut ist weiterhin schlimm, ihr Anteil an der Weltbevölkerung hat sich in den vergangenen zwanzig Jahren aber etwa halbiert. Der Instinkt der geraden Linie lässt uns Trends einfach fortschreiben. Viele glauben, die Weltbevölkerung wachse immer weiter. Tatsächlich bekommen Frauen weltweit im Schnitt deutlich weniger Kinder als früher, und die UN erwartet, dass das Wachstum sich abflacht."
+    },
+    {
+     "title": "Angst, Größe und Verallgemeinerung",
+     "text": "Der Angstinstinkt lenkt unsere Aufmerksamkeit auf das, was uns erschreckt, etwa Flugzeugabstürze oder Terror, statt auf das, was tatsächlich gefährlich ist. Rosling rät, Risiko immer als Gefahr mal Wahrscheinlichkeit zu sehen. Beim Größeninstinkt lassen wir uns von einzelnen großen Zahlen beeindrucken. Er empfiehlt, Zahlen immer zu vergleichen und durch etwas zu teilen, etwa pro Kopf. Beim Verallgemeinerungsinstinkt stecken wir ganze Länder oder Gruppen in eine Schublade. Dagegen hilft, nach Unterschieden innerhalb einer Gruppe und nach Gemeinsamkeiten zwischen Gruppen zu suchen."
+    },
+    {
+     "title": "Schicksal, eine Perspektive, Schuld und Dringlichkeit",
+     "text": "Der Schicksalsinstinkt lässt uns glauben, Länder oder Kulturen würden sich nie ändern. Dabei verändern sich Werte oft langsam, aber stetig. Der Instinkt der einzigen Perspektive verleitet uns, alles mit einer Idee oder einem Fachgebiet zu erklären. Rosling rät, viele Werkzeuge zu nutzen. Der Schuldinstinkt sucht schnell einen Schuldigen statt die Ursachen im System. Und der Dringlichkeitsinstinkt drängt uns zu sofortigen, oft unüberlegten Entscheidungen. Rosling erzählt, wie er selbst als junger Arzt in Mosambik in einer Krise eine vorschnelle Entscheidung traf, die schlimme Folgen hatte. Seine Lehre: Bei Druck erst Luft holen und Daten prüfen."
+    },
+    {
+     "title": "Faktenbasiert denken im Alltag",
+     "text": "Rosling verlangt keinen naiven Optimismus. Er nennt sich einen Possibilisten: jemand, der weder ohne Grund hofft noch ohne Grund fürchtet, sondern sieht, was die Daten zeigen. Für den Alltag gibt er einfache Faustregeln. Bei schlechten Nachrichten fragen, ob über Verbesserungen genauso berichtet würde. Bei Kurven fragen, welche Form sie wirklich haben. Bei großen Zahlen nach Vergleichen suchen. Und das eigene Wissen regelmäßig erneuern, weil sich die Welt schneller verändert als unser Bild von ihr. Das Buch entstand mit seinem Sohn Ola und seiner Schwiegertochter Anna, die die Arbeit nach seinem Tod 2017 fortsetzten."
+    }
+   ],
+   "outro": "Frag bei der nächsten dramatischen Nachricht nach dem langfristigen Trend und nach einer Vergleichszahl. Halte zwei Gedanken zugleich aus: Etwas kann schlecht sein und besser werden."
+  },
+  {
+   "id": "psychologie-des-geldes",
+   "title": "Über die Psychologie des Geldes",
+   "author": "Morgan Housel",
+   "isbn": "9780857197689",
+   "genre": "Finanzen",
+   "tags": [
+    "Geld",
+    "Verhalten"
+   ],
+   "idea": "Beim Umgang mit Geld zählt Verhalten mehr als Wissen. Wer geduldig spart, Zinseszins wirken lässt und Raum für Fehler hat, wird meist wohlhabender als jemand, der klug, aber ungeduldig ist.",
+   "forWhom": "Für alle, die entspannter und klüger mit Geld umgehen wollen, ohne Finanzexperte zu werden.",
+   "parts": [
+    {
+     "title": "Jeder hat seine eigene Geldgeschichte",
+     "text": "Housel beginnt mit einer Beobachtung: Menschen treffen Geldentscheidungen, die anderen verrückt erscheinen, für sie selbst aber Sinn ergeben. Unsere Haltung zu Geld wird stark von unseren eigenen Erfahrungen geprägt, etwa davon, ob wir in einer Zeit hoher Inflation oder eines Börsenbooms aufgewachsen sind. Wer als junger Mensch einen Absturz erlebt hat, investiert oft sein Leben lang vorsichtiger. Niemand ist verrückt, sagt Housel, jeder hat nur einen kleinen Ausschnitt der Welt gesehen. Deshalb gibt es auch keine Geldregeln, die für alle passen. Gute Finanzentscheidungen sind weniger eine Frage der Tabellenkalkulation als des Verhaltens."
+    },
+    {
+     "title": "Glück, Risiko und genug",
+     "text": "Erfolg und Misserfolg hängen stärker vom Zufall ab, als wir zugeben. Housel erzählt, dass Bill Gates eine der ganz wenigen Schulen besuchte, die damals einen Computer hatten, während ein ebenso begabter Freund früh bei einem Unfall starb. Man soll Erfolge daher nicht nur dem eigenen Können und Misserfolge nicht nur dem Versagen anderer zuschreiben. Eine weitere Lehre ist das Wissen um genug. Housel nennt Beispiele von Menschen, die bereits reich waren und trotzdem alles riskierten, um noch reicher zu werden, und dabei Ruf oder Freiheit verloren. Wer nie genug hat, setzt Dinge aufs Spiel, die er nicht braucht, für Dinge, die er nicht hat."
+    },
+    {
+     "title": "Die Macht des Zinseszinses und des Durchhaltens",
+     "text": "Housel zeigt am Beispiel von Warren Buffett, wie wichtig Zeit ist. Der allergrößte Teil von Buffetts Vermögen entstand erst nach seinem 65. Geburtstag. Nicht, weil er plötzlich besser wurde, sondern weil er schon als Kind zu investieren begann und es über Jahrzehnte durchhielt. Zinseszins ist schwer vorstellbar, weil er so lange unauffällig bleibt und dann stark ansteigt. Daraus folgt eine zentrale Regel: Reich werden und reich bleiben sind zwei verschiedene Fähigkeiten. Für das Bleiben braucht es Bescheidenheit, Angst vor dem Verlust und vor allem die Fähigkeit, nicht auszusteigen, wenn es schwierig wird."
+    },
+    {
+     "title": "Freiheit ist die höchste Rendite",
+     "text": "Den größten Wert von Geld sieht Housel darin, dass es uns Kontrolle über unsere Zeit gibt. Die Möglichkeit, morgens aufzuwachen und zu sagen, heute mache ich, was ich will, mit wem ich will, so lange ich will, sei die höchste Dividende. Viele kaufen dagegen Dinge, um Anerkennung zu bekommen. Housel nennt das das Paradox des Mannes im Auto: Wer ein teures Auto fährt, wünscht sich Bewunderung, doch die Leute bewundern das Auto, nicht den Fahrer. Echter Reichtum ist oft unsichtbar. Er besteht aus dem Geld, das man nicht ausgegeben hat, und den Möglichkeiten, die es offen hält."
+    },
+    {
+     "title": "Sparen, Spielraum und Vernunft",
+     "text": "Housel rät zu sparen, auch ohne konkretes Ziel. Ersparnisse sind ein Polster gegen Überraschungen und schaffen Wahlfreiheit. Die eigene Sparquote kann man leichter beeinflussen als die Rendite. Wichtig ist auch Spielraum für Fehler: Pläne sollten so robust sein, dass sie Rückschläge überstehen, denn die Zukunft hält immer Überraschungen bereit. Außerdem empfiehlt er, eher vernünftig als streng rational zu handeln. Eine Strategie, die man durchhält, ist besser als eine theoretisch optimale, die man im ersten Crash aufgibt. Schwankungen an der Börse sind keine Strafe, sondern der Preis für langfristige Rendite, eine Gebühr, die man zahlen muss."
+    },
+    {
+     "title": "Was Housel selbst tut",
+     "text": "Zum Schluss beschreibt Housel seine eigene Strategie. Seine Familie hat ein Haus ohne Hypothek gekauft, obwohl das finanziell nicht optimal war, weil es ihnen Ruhe gibt. Sie halten einen großen Bargeldpuffer und investieren den Rest überwiegend in breite, günstige Indexfonds, langfristig und ohne viel Handeln. Er versucht, sein Konsumniveau nicht mit dem Einkommen steigen zu lassen. Housel betont, dass das kein Rezept für alle ist, sondern zu seinen Zielen passt. Die Botschaft des Buches: Wer sich selbst kennt, geduldig bleibt und seine Erwartungen im Griff hat, kommt mit Geld weit, auch ohne besonderes Fachwissen."
+    }
+   ],
+   "outro": "Leg einen festen Anteil deines Einkommens automatisch zur Seite und lass ihn lange liegen. Frag dich bei großen Ausgaben, ob sie dir Freiheit geben oder nur Eindruck machen sollen."
+  },
+  {
+   "id": "gtd",
+   "title": "Wie ich die Dinge geregelt kriege (Getting Things Done)",
+   "author": "David Allen",
+   "isbn": "9780143126560",
+   "genre": "Produktivität",
+   "tags": [
+    "Organisation",
+    "Aufgaben"
+   ],
+   "idea": "Der Kopf ist zum Denken da, nicht zum Merken. Wer alle offenen Dinge in ein verlässliches System auslagert und für jedes den nächsten konkreten Schritt festlegt, arbeitet entspannt und produktiv.",
+   "forWhom": "Für alle, die viele Aufgaben, Mails und Projekte jonglieren und ständig das Gefühl haben, etwas zu vergessen.",
+   "parts": [
+    {
+     "title": "Ein Kopf wie stilles Wasser",
+     "text": "Allen beobachtet, dass Stress oft nicht von zu viel Arbeit kommt, sondern von unerledigten Vereinbarungen mit uns selbst. Jede offene Sache, die wir uns nur merken, beansprucht im Hintergrund Aufmerksamkeit und meldet sich zur falschen Zeit, etwa die Batterien, an die man im Bett denkt. Allen spricht vom Geist wie Wasser: Ein ruhiger Teich reagiert angemessen auf einen hineingeworfenen Stein und wird dann wieder still. Dieses Ziel erreicht man, wenn alles Offene außerhalb des Kopfes in einem vertrauenswürdigen System steht. Erst dann kann man sich wirklich auf das konzentrieren, was man gerade tut."
+    },
+    {
+     "title": "Fünf Schritte: erfassen und klären",
+     "text": "Das System besteht aus fünf Schritten. Der erste ist Erfassen: Alles, was Aufmerksamkeit verlangt, kommt in einen Eingangskorb, ob auf Papier oder digital, von großen Projekten bis zu kleinen Ideen. Allen empfiehlt zum Start eine gründliche Sammelaktion, bei der man wirklich alles aufschreibt. Der zweite Schritt ist Klären. Für jedes Element fragt man: Was ist das, und muss ich etwas tun? Wenn nein, kommt es in den Müll, in ein Archiv oder auf eine Liste für irgendwann vielleicht. Wenn ja, legt man den nächsten konkreten Schritt fest. Dauert er weniger als zwei Minuten, erledigt man ihn sofort."
+    },
+    {
+     "title": "Der nächste konkrete Schritt",
+     "text": "Die wohl wichtigste Idee des Buches ist der nächste physische Schritt. Viele Aufgaben auf To-do-Listen sind in Wahrheit Projekte, etwa Auto reparieren lassen. So ein Eintrag lähmt, weil unklar ist, womit man anfängt. Allen fragt deshalb immer: Was genau ist das Nächste, was ich sichtbar tun kann? Zum Beispiel: Werkstatt anrufen und Termin vereinbaren. Dieser kleine Perspektivwechsel macht aus vagen Sorgen klare Handlungen. Als Projekt gilt bei Allen alles, was mehr als einen Schritt braucht. Auf der Projektliste steht das gewünschte Ergebnis, auf den Aktionslisten jeweils der nächste Schritt dazu."
+    },
+    {
+     "title": "Organisieren nach Kontext",
+     "text": "Der dritte Schritt ist Organisieren. Allen sortiert die nächsten Schritte nicht nach Wichtigkeit, sondern nach Kontext, also danach, wo oder womit man sie erledigen kann: am Computer, unterwegs, Anrufe, zu Hause, im Gespräch mit einer bestimmten Person. Wer gerade fünfzehn Minuten am Telefon hat, schaut auf die Anrufliste. Dazu kommen eine Projektliste, eine Warten-auf-Liste für Dinge, die andere erledigen sollen, ein Kalender nur für feste Termine und eine Liste für Irgendwann und Vielleicht. Wichtig ist, dass der Kalender heilig bleibt: Dort stehen nur Dinge, die wirklich an genau diesem Tag passieren müssen."
+    },
+    {
+     "title": "Der Wochenrückblick",
+     "text": "Der vierte Schritt ist Durchsehen, und sein Herzstück ist die wöchentliche Durchsicht. Einmal pro Woche nimmt man sich Zeit, alle Eingänge zu leeren, die Listen durchzugehen, jedes Projekt auf einen nächsten Schritt zu prüfen, den Kalender der vergangenen und kommenden Wochen anzusehen und die Irgendwann-Liste zu überfliegen. Allen hält diesen Rückblick für den entscheidenden Faktor, damit das System vertrauenswürdig bleibt. Ohne ihn veralten die Listen, und der Kopf beginnt wieder, sich Dinge selbst zu merken. Danach fühlt man sich, so Allen, wieder klar und hat den Überblick über alles."
+    },
+    {
+     "title": "Erledigen und die sechs Ebenen",
+     "text": "Der fünfte Schritt ist Erledigen. Wenn das System steht, entscheidet man im Moment nach Kontext, verfügbarer Zeit, Energie und Priorität, was man tut. Für die Priorität beschreibt Allen sechs Ebenen, vergleichbar mit Flughöhen: ganz unten die aktuellen Aufgaben, darüber Projekte, Verantwortungsbereiche, Ziele für ein bis zwei Jahre, Visionen für drei bis fünf Jahre und ganz oben Sinn und Werte. Er rät, von unten zu beginnen, weil man oft erst dann den Kopf frei hat für die großen Fragen. Wer den Alltag im Griff hat, kann auch gelassener über Lebensziele nachdenken."
+    }
+   ],
+   "outro": "Schreib heute alles Offene, das dir im Kopf herumgeht, auf eine Liste und notiere bei jedem Punkt den nächsten sichtbaren Schritt. Leg dir einen festen Termin für den Wochenrückblick in den Kalender."
+  },
+  {
+   "id": "freunde-gewinnen",
+   "title": "Wie man Freunde gewinnt",
+   "author": "Dale Carnegie",
+   "isbn": "9780671027032",
+   "genre": "Kommunikation",
+   "tags": [
+    "Beziehungen",
+    "Gespräche"
+   ],
+   "idea": "Menschen wollen sich wichtig und verstanden fühlen. Wer ehrliches Interesse zeigt, anerkennt statt kritisiert und die Sicht des anderen einnimmt, gewinnt Sympathie und Einfluss.",
+   "forWhom": "Für alle, die im Beruf und privat besser mit Menschen umgehen, überzeugen und Konflikte entschärfen wollen.",
+   "parts": [
+    {
+     "title": "Nicht kritisieren",
+     "text": "Carnegies Buch erschien 1936 und gehört zu den meistverkauften Ratgebern überhaupt. Sein erster Grundsatz: nicht kritisieren, verurteilen oder klagen. Kritik macht Menschen nach seiner Beobachtung fast nie einsichtig, sondern defensiv. Selbst Schwerverbrecher sehen sich meist als missverstanden, nicht als schuldig. Carnegie erzählt, dass Abraham Lincoln in jungen Jahren andere öffentlich verspottete und dadurch beinahe in ein Duell geriet. Später sei er sehr zurückhaltend mit Kritik geworden. Statt zu urteilen, soll man versuchen zu verstehen, warum jemand so handelt. Das erzeugt Nachsicht und Verständnis, statt Groll."
+    },
+    {
+     "title": "Ehrliche Anerkennung",
+     "text": "Das tiefste Bedürfnis des Menschen ist nach Carnegie der Wunsch, wichtig zu sein. Wer anderen ehrliche, aufrichtige Anerkennung gibt, erfüllt dieses Bedürfnis und gewinnt ihr Wohlwollen. Carnegie grenzt das scharf von Schmeichelei ab: Schmeichelei ist unaufrichtig, kommt von den Lippen und ist eigennützig, Anerkennung ist ehrlich und kommt von Herzen. Ein dritter Grundsatz lautet: im anderen ein dringendes Verlangen wecken. Wer jemanden zu etwas bewegen will, sollte nicht von den eigenen Wünschen reden, sondern davon, was der andere davon hat. Carnegie vergleicht das mit dem Angeln: Man nimmt den Köder, den der Fisch mag, nicht den, den man selbst mag."
+    },
+    {
+     "title": "Sympathie gewinnen",
+     "text": "Im zweiten Teil geht es darum, dass andere einen mögen. Carnegie nennt sechs Wege. Sich ehrlich für andere Menschen interessieren, denn man gewinnt in zwei Monaten mehr Freunde, wenn man sich für andere interessiert, als in zwei Jahren, wenn man versucht, andere für sich zu interessieren. Lächeln. Sich Namen merken, denn der eigene Name ist für jeden das schönste Wort. Gut zuhören und andere ermutigen, von sich zu erzählen. Über Dinge sprechen, die den anderen interessieren. Und dem anderen das Gefühl geben, wichtig zu sein, und zwar aufrichtig. Viele dieser Ratschläge wirken einfach, werden aber im Alltag selten konsequent befolgt."
+    },
+    {
+     "title": "Streit vermeiden und überzeugen",
+     "text": "Der dritte Teil handelt davon, andere für die eigene Sicht zu gewinnen. Carnegies erster Rat: Einen Streit kann man nicht gewinnen. Selbst wenn man recht behält, hat man den anderen verletzt und nicht überzeugt. Daher soll man Streit vermeiden, die Meinung des anderen respektieren und nie direkt sagen, er liege falsch. Eigene Fehler sollte man schnell und deutlich zugeben. Ein Gespräch beginnt man am besten freundlich und mit Fragen, auf die der andere mit Ja antworten kann. Man lässt ihn viel reden und gibt ihm das Gefühl, die Idee sei seine eigene. So entsteht Zustimmung statt Widerstand."
+    },
+    {
+     "title": "Die Sicht des anderen einnehmen",
+     "text": "Ein zentraler Gedanke zieht sich durch das ganze Buch: Versuche ehrlich, die Dinge aus der Sicht des anderen zu sehen. Carnegie zitiert dazu sinngemäß Henry Ford, nach dem das Geheimnis des Erfolgs darin liegt, den Standpunkt des anderen zu verstehen. Wer verstehen will, warum jemand etwas tut, findet meist einen Grund, der aus dessen Sicht vernünftig ist. Dazu gehört Mitgefühl für die Wünsche und Ideen anderer und der Appell an ihre edleren Motive. Carnegie rät außerdem, Ideen anschaulich zu machen, etwa mit einer kleinen Inszenierung, und Menschen mit einer Herausforderung zu motivieren."
+    },
+    {
+     "title": "Führen ohne Kränkung",
+     "text": "Der letzte Teil richtet sich an alle, die andere führen. Carnegie empfiehlt, mit Lob und ehrlicher Anerkennung zu beginnen, bevor man etwas anspricht. Fehler soll man indirekt ansprechen und zuerst über die eigenen Fehler reden. Statt Befehle zu geben, stellt man Fragen. Der andere soll sein Gesicht wahren können. Jede kleine Verbesserung verdient Lob. Carnegie rät auch, dem anderen einen guten Ruf zu geben, dem er gerecht werden möchte, und Fehler leicht korrigierbar erscheinen zu lassen. So bleibt die Beziehung intakt, und Menschen ändern ihr Verhalten gern statt widerwillig."
+    }
+   ],
+   "outro": "Merk dir beim nächsten Treffen bewusst den Namen deines Gegenübers und stell mehr Fragen, als du von dir erzählst. Ersetze diese Woche eine Kritik durch eine ehrliche Anerkennung und eine Frage."
+  },
+  {
+   "id": "grit",
+   "title": "Grit",
+   "author": "Angela Duckworth",
+   "isbn": "9781501111105",
+   "genre": "Psychologie",
+   "tags": [
+    "Ausdauer",
+    "Erfolg"
+   ],
+   "idea": "Herausragende Leistung kommt weniger von Talent als von Grit: einer Verbindung aus Leidenschaft und Ausdauer für langfristige Ziele. Und Grit lässt sich entwickeln.",
+   "forWhom": "Für alle, die an einem großen Ziel dranbleiben wollen, und für Eltern, Lehrende und Trainer.",
+   "parts": [
+    {
+     "title": "Warum Talent nicht reicht",
+     "text": "Die Psychologin Angela Duckworth untersuchte, wer an der Militärakademie West Point die harte erste Sommerausbildung durchhält. Die Aufnahmepunkte, die Talent und Eignung messen, sagten das kaum voraus. Besser gelang das mit einem kurzen Fragebogen zu Grit, also zu Ausdauer und Leidenschaft für langfristige Ziele. Ähnliche Ergebnisse fand sie bei Verkäufern, Schülern und Teilnehmern eines nationalen Buchstabierwettbewerbs. Duckworth warnt davor, Talent zu überschätzen. Wenn wir Spitzenleistungen als Begabung bewundern, entschuldigen wir uns selbst, weil wir glauben, nicht dazuzugehören, und übersehen die vielen Stunden harter Arbeit dahinter."
+    },
+    {
+     "title": "Anstrengung zählt doppelt",
+     "text": "Duckworth beschreibt zwei einfache Gleichungen. Talent mal Anstrengung ergibt Können. Können mal Anstrengung ergibt Leistung. Anstrengung geht also zweimal in die Rechnung ein. Talent bedeutet, wie schnell man besser wird, wenn man sich anstrengt. Leistung entsteht erst, wenn man das erworbene Können auch einsetzt. Wer talentiert ist, aber nicht dranbleibt, bleibt unter seinen Möglichkeiten. Wer weniger begabt ist, aber jahrelang übt, kann weiter kommen. Das erklärt, warum viele Hochbegabte nicht das erreichen, was man ihnen zutraut, und warum Durchhalten so wichtig ist."
+    },
+    {
+     "title": "Leidenschaft und Zielhierarchie",
+     "text": "Grit bedeutet nicht, sich an irgendetwas festzubeißen. Es geht um ein übergeordnetes Ziel, das einem wirklich wichtig ist. Duckworth beschreibt Ziele als Hierarchie: Ganz oben steht ein Lebensziel, darunter mittlere Ziele, darunter konkrete Alltagsaufgaben. Die unteren Ziele darf man austauschen, wenn sie nicht funktionieren, das oberste bleibt. Leidenschaft entsteht ihrer Forschung nach selten wie ein Blitz. Sie entwickelt sich meist langsam: erst ein Interesse, das man entdeckt, dann vertieft man es durch Übung, dann erkennt man einen Sinn darin, dann wächst die Hoffnung, weiterzukommen."
+    },
+    {
+     "title": "Gezieltes Üben",
+     "text": "Menschen mit viel Grit üben nicht nur mehr, sondern anders. Duckworth stützt sich auf die Forschung zum gezielten Üben von Anders Ericsson. Dabei setzt man sich ein klar umrissenes Ziel knapp über dem aktuellen Können, arbeitet mit voller Konzentration, holt sich unmittelbar Rückmeldung und verbessert sich Schritt für Schritt, auch an den eigenen Schwächen. Das ist anstrengend und oft nicht angenehm. Duckworth weist darauf hin, dass Spitzenleute gezieltes Üben meist nur wenige Stunden am Tag schaffen. Es hilft, daraus eine feste Gewohnheit zu machen, zur gleichen Zeit am gleichen Ort."
+    },
+    {
+     "title": "Sinn und Hoffnung",
+     "text": "Zwei weitere Quellen von Grit sind Sinn und Hoffnung. Menschen mit viel Grit erleben ihre Arbeit häufiger als Berufung, die mit dem Wohl anderer verbunden ist. Duckworth erzählt das Gleichnis von drei Maurern: Der erste legt Ziegel, der zweite baut eine Kirche, der dritte baut ein Gotteshaus. Dieselbe Tätigkeit kann sehr unterschiedlich erlebt werden. Hoffnung meint hier nicht Wunschdenken, sondern die Erwartung, dass die eigenen Anstrengungen die Zukunft verbessern. Sie hängt eng mit einem dynamischen Selbstbild zusammen, wie es Carol Dweck beschreibt: dem Glauben, dass man durch Lernen besser werden kann."
+    },
+    {
+     "title": "Grit von außen fördern",
+     "text": "Grit lässt sich auch von außen stärken. Duckworth beschreibt einen Erziehungsstil, der fordernd und zugleich unterstützend ist: hohe Erwartungen gepaart mit Wärme und Respekt. In ihrer eigenen Familie gilt die Regel der schweren Sache: Jedes Familienmitglied macht etwas, das gezieltes Üben erfordert, darf nicht mitten in einer Saison aufhören und sucht sich die Sache selbst aus. Auch außerschulische Aktivitäten über längere Zeit hängen mit späterem Durchhaltevermögen zusammen. Schließlich wirkt eine Kultur mit Grit ansteckend: Wer in einer Gruppe ist, in der Dranbleiben normal ist, übernimmt diese Haltung."
+    }
+   ],
+   "outro": "Schreib dein wichtigstes langfristiges Ziel auf und darunter, welche kleineren Ziele dazu beitragen. Plane jeden Tag eine feste Zeit für gezieltes Üben an einer Schwäche ein."
+  },
+  {
+   "id": "mark-aurel",
+   "title": "Selbstbetrachtungen",
+   "author": "Marc Aurel",
+   "isbn": "9780812968255",
+   "genre": "Philosophie",
+   "tags": [
+    "Stoizismus",
+    "Gelassenheit"
+   ],
+   "idea": "Wir können nicht beeinflussen, was geschieht, aber wie wir darüber urteilen. Wer sich auf sein eigenes Denken und Handeln konzentriert, lebt gelassen, gerecht und frei.",
+   "forWhom": "Für alle, die unter Druck ruhig bleiben wollen und eine praktische Lebensphilosophie suchen.",
+   "parts": [
+    {
+     "title": "Ein Kaiser schreibt für sich selbst",
+     "text": "Marc Aurel war von 161 bis 180 nach Christus römischer Kaiser, der mächtigste Mann seiner Zeit. In seinen letzten Jahren, oft während Feldzügen an der Donaugrenze, schrieb er Notizen in griechischer Sprache, die nie für eine Veröffentlichung gedacht waren. Es sind Ermahnungen an sich selbst, wie er leben und handeln will. Darum wiederholen sich viele Gedanken, und das Buch hat keine durchgehende Handlung. Marc Aurel folgt der Philosophie der Stoa. Ihre Grundfrage lautet: Was liegt in meiner Macht und was nicht? Aus dieser Unterscheidung folgt fast alles andere in seinem Denken."
+    },
+    {
+     "title": "Nicht die Dinge, sondern unser Urteil",
+     "text": "Ein Kerngedanke: Nicht die Ereignisse beunruhigen uns, sondern unsere Meinungen über sie. Ein Verlust, eine Beleidigung oder ein Rückschlag ist zunächst nur ein Ereignis. Ob wir es als Unglück erleben, hängt von unserem Urteil ab. Marc Aurel rät, dieses Urteil bewusst zu prüfen und zu verwerfen, wenn es nicht hilft. Nimm die Meinung weg, dann ist auch die Klage weg. Dazu gehört, die Dinge nüchtern zu beschreiben, wie sie sind. Ein Festessen ist dann nur totes Tier und Wein nur vergorener Traubensaft. So verliert vieles seinen falschen Glanz, und man sieht klarer, was wirklich zählt."
+    },
+    {
+     "title": "Hindernisse werden zum Weg",
+     "text": "Marc Aurel beschreibt, wie der Geist Hindernisse umwandeln kann. Was dem Handeln im Weg steht, kann selbst zum Anlass werden, eine andere Tugend zu üben: Geduld, Mut, Gerechtigkeit oder Nachsicht. Er vergleicht das mit einem Feuer, das alles, was man hineinwirft, zu seiner Nahrung macht und dadurch heller brennt. Ein Mensch, der sich über Störungen ärgert, gibt ihnen Macht über sich. Wer sie als Übung nimmt, bleibt handlungsfähig. Daraus leitet sich die bekannte stoische Haltung ab: Das Hindernis wird zum Weg. Es geht nicht darum, alles hinzunehmen, sondern das, was man nicht ändern kann, gut zu nutzen."
+    },
+    {
+     "title": "Mit schwierigen Menschen umgehen",
+     "text": "Ein berühmter Abschnitt beginnt mit einer Morgenübung. Marc Aurel nimmt sich vor, dass er heute aufdringlichen, undankbaren, überheblichen und missgünstigen Menschen begegnen wird. Sie handeln so, weil sie nicht wissen, was gut und schlecht ist. Ihn selbst können sie aber nicht schädigen, denn niemand kann ihn zwingen, Unrecht zu tun. Wir sind, schreibt er sinngemäß, für die Zusammenarbeit geboren wie Füße, Hände und Augenlider. Gegeneinander zu arbeiten widerspricht der Natur. Deshalb soll man anderen mit Geduld begegnen, sie belehren, wenn möglich, und sie ertragen, wenn nicht. Ärger schadet am meisten dem, der sich ärgert."
+    },
+    {
+     "title": "Vergänglichkeit und der gegenwärtige Augenblick",
+     "text": "Immer wieder erinnert sich Marc Aurel daran, wie kurz das Leben ist. Ganze Reiche, berühmte Namen und große Taten sind nach kurzer Zeit vergessen. Ruhm ist darum ein schlechtes Ziel. Diese Einsicht soll nicht traurig machen, sondern befreien. Wenn alles vergeht, verliert man nichts als den gegenwärtigen Augenblick, denn nur in ihm lebt man. Vergangenheit und Zukunft besitzt niemand. Daraus folgt der Rat, jede Handlung so zu tun, als wäre sie die letzte des Lebens, mit Ernst, ohne Hast und ohne Selbstgefälligkeit. So bekommt auch eine kleine Aufgabe ihr Gewicht."
+    },
+    {
+     "title": "Die innere Burg",
+     "text": "Marc Aurel spricht von einem Rückzugsort, den man immer bei sich trägt. Viele suchen Erholung auf dem Land, am Meer oder in den Bergen. Doch nirgendwo zieht man sich ruhiger zurück als in die eigene Seele. Er nennt den geordneten, freien Geist eine innere Burg, die keine Leidenschaft erobern kann. Dazu gehört, sich täglich auf die stoischen Tugenden zu besinnen: Weisheit, Gerechtigkeit, Mut und Mäßigung. Und es gehört Dankbarkeit dazu. Das erste Buch der Selbstbetrachtungen ist eine Liste von Menschen, von denen Marc Aurel etwas gelernt hat, und wofür er ihnen dankbar ist."
+    }
+   ],
+   "outro": "Unterscheide bei jedem Ärger kurz, was davon in deiner Macht liegt, und lass den Rest los. Nimm dir morgens eine Minute, um dich auf schwierige Begegnungen vorzubereiten, und abends eine, um Dank zu notieren."
   }
  ]
 }
