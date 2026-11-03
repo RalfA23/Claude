@@ -1009,6 +1009,792 @@
    ],
    "outro": "Schreib für dein wichtigstes Vorhaben in drei Sätzen auf: Was ist die eigentliche Herausforderung, wie willst du ihr begegnen, und welche drei Schritte passen zusammen? Streich alles, was nur Wunsch ist.",
    "audio": "thorsten"
+  },
+  {
+   "id": "rich-dad",
+   "title": "Rich Dad Poor Dad",
+   "author": "Robert T. Kiyosaki",
+   "isbn": "9781612680194",
+   "genre": "Finanzen",
+   "tags": [
+    "Geld",
+    "Vermögen"
+   ],
+   "idea": "Wer wohlhabend werden will, sollte nicht nur für Geld arbeiten, sondern Geld für sich arbeiten lassen. Dafür braucht es Finanzwissen, vor allem den Unterschied zwischen Vermögenswerten und Verbindlichkeiten.",
+   "forWhom": "Für alle, die zum ersten Mal über Geld und Vermögensaufbau nachdenken und eine einfache Denkweise suchen.",
+   "parts": [
+    {
+     "title": "Zwei Väter, zwei Denkweisen",
+     "text": "Kiyosaki erzählt von zwei Vätern. Sein leiblicher Vater war gebildet, hatte einen sicheren Beamtenposten und blieb trotzdem knapp bei Kasse. Der Vater seines besten Freundes Mike hatte die Schule früh verlassen, wurde aber als Unternehmer reich. Der arme Vater sagte: Das kann ich mir nicht leisten. Der reiche Vater fragte: Wie kann ich mir das leisten? Die erste Frage beendet das Denken, die zweite setzt es in Gang. Kiyosaki betont, dass Schulen viel lehren, aber kaum etwas über Geld. Kritiker merken an, dass der reiche Vater wohl eher eine erzählerische Figur ist. Die Grundgedanken wirken trotzdem auf viele Leser."
+    },
+    {
+     "title": "Die Reichen arbeiten nicht für Geld",
+     "text": "Als Jungen arbeiten Robert und Mike für den reichen Vater in einem Laden, für sehr wenig Geld. Robert ist wütend und will mehr. Der reiche Vater erklärt, genau das sei die Lektion: Die meisten Menschen lassen sich ihr Leben lang von Angst vor Geldmangel und Gier nach mehr steuern und arbeiten deshalb immer weiter für ein Gehalt. Die Jungen entdecken bald selbst eine Gelegenheit: Sie sammeln alte Comichefte, die sonst weggeworfen würden, und eröffnen eine kleine Leihbücherei. Sie verdienen Geld, ohne selbst dafür zu arbeiten. Darin liegt der Kern des Buches: Geschäftsideen und Vermögen statt nur Arbeitszeit."
+    },
+    {
+     "title": "Vermögenswert oder Verbindlichkeit",
+     "text": "Die wichtigste Regel des Buches ist einfach. Ein Vermögenswert bringt Geld in die Tasche, eine Verbindlichkeit zieht Geld aus der Tasche. Reiche kaufen Vermögenswerte, etwa vermietete Immobilien, Aktien, Anleihen oder Unternehmen. Die Mittelschicht kauft Verbindlichkeiten, die sie für Vermögenswerte hält. Kiyosaki provoziert mit der Aussage, das selbst bewohnte Haus sei meist kein Vermögenswert, weil es Zinsen, Steuern und Unterhalt kostet. Wer mehr verdient, kauft oft nur ein größeres Haus und ein teureres Auto und bleibt im Hamsterrad. Entscheidend ist nicht das Einkommen, sondern wie viel davon in einkommensbringende Werte fließt."
+    },
+    {
+     "title": "Kümmere dich um dein eigenes Geschäft",
+     "text": "Mit eigenem Geschäft meint Kiyosaki nicht unbedingt eine Firma, sondern die eigene Vermögensspalte. Man kann seinen Job behalten und nebenher Schritt für Schritt Vermögenswerte aufbauen. Dabei hilft, Ausgaben zu kontrollieren und Luxus erst zu kaufen, wenn ein Vermögenswert ihn bezahlt. Kiyosaki erklärt außerdem, dass Reiche Gesetze und Steuern besser nutzen, etwa durch Unternehmensformen, über die sie Ausgaben vor Steuern verbuchen. Das gilt vor allem für das amerikanische Steuerrecht und lässt sich nicht eins zu eins übertragen. Die allgemeine Lehre lautet: Finanzwissen über Buchhaltung, Investieren, Märkte und Recht zahlt sich aus."
+    },
+    {
+     "title": "Mut, Risiko und Lernen",
+     "text": "Viele Menschen kennen gute Gelegenheiten, handeln aber nicht, aus Angst, Zweifel, Faulheit, schlechten Gewohnheiten oder Arroganz. Kiyosaki rät, Verluste als Teil des Lernens zu sehen. Wer nie verliert, hat meist nie etwas gewagt. Zugleich solle man mit kleinen Beträgen anfangen und viel lernen. Ein Rat zieht sich durch das Buch: Arbeite, um zu lernen, nicht nur, um Geld zu verdienen. Er empfiehlt, verschiedene Fähigkeiten zu sammeln, besonders Verkaufen und Kommunikation, weil diese in jedem Beruf und jedem Geschäft gebraucht werden. Ein hervorragender Fachmann, der sich nicht verkaufen kann, verdient oft weniger als ein mittelmäßiger, der es kann."
+    },
+    {
+     "title": "Bezahle dich zuerst selbst",
+     "text": "Zum Schluss gibt Kiyosaki praktische Schritte. Ein zentraler Rat: Bezahle dich zuerst selbst. Bevor Rechnungen bezahlt werden, geht ein Teil des Einkommens in die Vermögensspalte. Der Druck, die Rechnungen dann trotzdem zu bezahlen, spornt an, mehr zu verdienen. Außerdem soll man sich mit Menschen umgeben, die von Geld etwas verstehen, Mentoren suchen und Kurse und Bücher nutzen. Viele Kritiker halten manche Ratschläge für riskant, etwa den Umgang mit Schulden für Immobilien. Als Anstoß, über Geld anders nachzudenken und Finanzbildung ernst zu nehmen, hat das Buch dennoch Millionen Menschen erreicht."
+    }
+   ],
+   "outro": "Schreib dir heute auf, was in deinem Leben Geld bringt und was Geld kostet. Richte einen Dauerauftrag ein, der am Gehaltstag zuerst einen festen Betrag in Vermögenswerte schiebt.",
+   "audio": "thorsten"
+  },
+  {
+   "id": "babylon",
+   "title": "Der reichste Mann von Babylon",
+   "author": "George S. Clason",
+   "genre": "Finanzen",
+   "tags": [
+    "Geld",
+    "Sparen",
+    "Klassiker"
+   ],
+   "idea": "In Gleichnissen aus dem alten Babylon zeigt Clason die Grundregeln des Wohlstands: einen Teil jedes Einkommens behalten, Geld klug arbeiten lassen und Verluste vermeiden.",
+   "forWhom": "Für alle, die einfache, zeitlose Geldregeln suchen, gut verständlich und auch für Jugendliche geeignet.",
+   "parts": [
+    {
+     "title": "Ein Teil von allem, was du verdienst, gehört dir",
+     "text": "Clason schrieb in den 1920er-Jahren kurze Gleichnisse, die im alten Babylon spielen. Im Mittelpunkt steht Arkad, der reichste Mann der Stadt. Zwei Freunde, ein Wagenbauer und ein Musiker, fragen sich, warum sie trotz harter Arbeit arm geblieben sind, und gehen zu ihrem alten Schulfreund. Arkad erzählt, wie er als einfacher Schreiber begann. Ein reicher Geldverleiher verriet ihm das Geheimnis: Ein Teil von allem, was du verdienst, gehört dir, den du behalten sollst. Mindestens ein Zehntel. Wer zuerst sich selbst bezahlt und dann alle anderen, baut mit der Zeit ein Vermögen auf, wie ein Baum aus einem kleinen Samen."
+    },
+    {
+     "title": "Sieben Heilmittel gegen den leeren Beutel",
+     "text": "Der König bittet Arkad, die Bürger in Geldfragen zu unterrichten. Arkad nennt sieben Heilmittel. Erstens: Fang an, deinen Beutel zu füllen, also spare mindestens ein Zehntel. Zweitens: Kontrolliere deine Ausgaben und unterscheide notwendige Ausgaben von bloßen Wünschen. Drittens: Lass dein Gold sich vermehren, also lege es so an, dass es Erträge bringt. Viertens: Schütze deinen Schatz vor Verlust. Fünftens: Mach dein Heim zu einer lohnenden Anlage. Sechstens: Sichere dein künftiges Einkommen für Alter und Familie. Siebtens: Steigere deine Fähigkeit, Geld zu verdienen, durch Lernen und Können."
+    },
+    {
+     "title": "Die fünf Gesetze des Goldes",
+     "text": "In einem weiteren Gleichnis gibt Arkad seinem Sohn eine Tontafel mit fünf Gesetzen des Goldes. Gold kommt gern zu dem, der mindestens ein Zehntel seines Einkommens beiseitelegt. Es arbeitet fleißig für den, der eine gewinnbringende Anlage findet. Es bleibt bei dem, der es unter dem Rat kluger Menschen anlegt. Es entgleitet dem, der es in Geschäfte steckt, die er nicht versteht. Und es flieht vor dem, der unmögliche Gewinne erzwingen will oder den Verlockungen von Betrügern folgt. Der Sohn verliert zunächst alles durch schlechte Ratgeber und lernt erst durch Erfahrung, die Gesetze zu befolgen."
+    },
+    {
+     "title": "Vorsicht vor dem schnellen Gewinn",
+     "text": "Mehrere Geschichten warnen vor Verlusten. Arkad erzählt, wie er seine ersten Ersparnisse einem Ziegelmacher gab, der Edelsteine kaufen sollte. Der Mann wurde betrogen, und das Geld war weg. Die Lehre: Wer Juwelen kaufen will, soll einen Juwelier fragen, keinen Ziegelmacher. Der Geldverleiher Mathon erklärt außerdem, dass er nur gegen Sicherheiten oder an Menschen mit verlässlichem Einkommen verleiht, und zeigt Pfänder von Leuten, die ihr Geld verloren haben. Wer anderen Geld leiht, auch Verwandten, soll die Risiken kennen. Sicherheit des Kapitals kommt zuerst, eine hohe Rendite erst danach."
+    },
+    {
+     "title": "Raus aus den Schulden",
+     "text": "Die Geschichte des Kamelhändlers Dabasir handelt von Schulden. Er lebte über seine Verhältnisse, floh vor seinen Gläubigern und geriet in die Sklaverei. Erst als er sich entschloss, ein Mann mit der Seele eines freien Menschen zu sein, kehrte er zurück, um seine Schulden zu begleichen. Ein anderer Mann aus Babylon findet Tontafeln mit einem Plan, der viele Leser bis heute anspricht: Ein Zehntel des Einkommens sparen, sieben Zehntel zum Leben verwenden und zwei Zehntel nach und nach an die Gläubiger verteilen, offen und ehrlich mit ihnen abgesprochen. So wird er schuldenfrei und baut gleichzeitig Ersparnisse auf."
+    },
+    {
+     "title": "Glück und harte Arbeit",
+     "text": "Eine Geschichte fragt, ob man Glück anziehen kann. Die Männer erkennen, dass Glück meist dort auftaucht, wo jemand eine Gelegenheit ergreift, und dass Zaudern der größte Feind des Erfolgs ist. Ein anderes Gleichnis erzählt von einem Sklaven, der durch Fleiß und Arbeit selbst frei wird. Clason feiert Arbeit als Freund, nicht als Last. Die Sprache ist altmodisch und manchmal predigend, doch die Regeln sind leicht zu merken. Viele Finanzratgeber greifen sie bis heute auf, vor allem den Grundsatz, sich zuerst selbst zu bezahlen, und die Warnung vor Geschäften, die man nicht versteht."
+    }
+   ],
+   "outro": "Leg ab dem nächsten Gehalt mindestens zehn Prozent sofort beiseite und lebe vom Rest. Frag vor jeder Geldanlage, ob du sie verstehst und ob der Ratgeber wirklich etwas davon versteht.",
+   "audio": "thorsten"
+  },
+  {
+   "id": "millionaer-nebenan",
+   "title": "Der Millionär von nebenan",
+   "author": "Thomas J. Stanley, William D. Danko",
+   "genre": "Finanzen",
+   "tags": [
+    "Geld",
+    "Sparen",
+    "Vermögen"
+   ],
+   "idea": "Die meisten Millionäre leben unauffällig, unter ihren Verhältnissen und sparsam. Vermögen entsteht weniger durch hohes Einkommen als durch Disziplin, Planung und bescheidenen Konsum.",
+   "forWhom": "Für alle mit gutem Einkommen, die sich wundern, warum am Monatsende so wenig übrig bleibt.",
+   "parts": [
+    {
+     "title": "Reich aussehen und reich sein",
+     "text": "Die Forscher Thomas Stanley und William Danko befragten über Jahre tausende vermögende Haushalte in den USA. Ihr Ergebnis überraschte viele: Der typische Millionär fährt kein Luxusauto, trägt keine teure Uhr und wohnt in einem ganz normalen Viertel, oft seit Jahrzehnten im selben Haus. Wer dagegen in den reichen Vierteln wohnt und teure Autos fährt, hat häufig ein hohes Einkommen, aber wenig Vermögen. Die Autoren unterscheiden deshalb klar zwischen Einkommen und Vermögen. Ein hohes Gehalt macht nicht reich, wenn es vollständig ausgegeben wird. Reich ist, wer viel behält."
+    },
+    {
+     "title": "Die Formel für das erwartete Vermögen",
+     "text": "Die Autoren bieten eine einfache Faustformel: Multipliziere dein Alter mit deinem jährlichen Bruttoeinkommen und teile durch zehn. Das Ergebnis ist das Vermögen, das man in seinem Alter und mit seinem Einkommen erwarten könnte. Wer deutlich mehr hat, gehört zu den guten Vermögensbildnern, wer deutlich weniger hat, zu den schlechten. So kann ein Lehrer mit mittlerem Einkommen mehr Vermögen aufbauen als ein Arzt mit hohem Einkommen, wenn er sparsam lebt und der Arzt viel ausgibt. Die Formel ist grob, aber sie macht deutlich, worum es geht: um das Verhältnis zwischen Einkommen und dem, was davon übrig bleibt."
+    },
+    {
+     "title": "Sparsamkeit als Lebensstil",
+     "text": "Das wichtigste Merkmal der Millionäre von nebenan ist Sparsamkeit. Sie leben deutlich unter ihren Verhältnissen und finden das nicht schlimm. Sie planen ihr Budget, wissen, wie viel ihre Familie im Jahr für Kleidung, Essen und Wohnen ausgibt, und investieren regelmäßig. Viele kaufen gebrauchte Autos und behalten sie lange. Die Autoren stellen fest, dass diese Menschen deutlich mehr Zeit mit der Planung ihrer Geldanlagen verbringen als gleich gut verdienende Konsumenten. Sparsamkeit ist bei ihnen keine Qual, sondern Ausdruck von Werten: Unabhängigkeit ist ihnen wichtiger als Statussymbole."
+    },
+    {
+     "title": "Unabhängigkeit statt Status",
+     "text": "Für viele Millionäre ist finanzielle Unabhängigkeit das eigentliche Ziel, nicht der Eindruck, den sie auf andere machen. Sie wollen frei entscheiden können und nicht von einem Arbeitgeber oder einem Kredit abhängig sein. Ein großer Teil von ihnen ist selbständig, etwa mit kleinen Betrieben in eher unspektakulären Branchen. Die Autoren warnen vor dem Druck, mit dem Lebensstil von Nachbarn und Kollegen mitzuhalten. Wer ständig zeigt, was er hat, lebt oft von der Hand in den Mund. Ihr Rat: Lieber unauffällig Vermögen aufbauen als sichtbar Einkommen verbrennen. Der Wohlstand anderer, der auf Konsum beruht, ist oft nur geliehen."
+    },
+    {
+     "title": "Die Falle der elterlichen Unterstützung",
+     "text": "Ein besonderes Kapitel behandelt erwachsene Kinder. Die Autoren beobachten, dass Kinder, die von wohlhabenden Eltern regelmäßig Geld bekommen, im Durchschnitt weniger Vermögen aufbauen als Geschwister ohne solche Hilfe. Sie nennen das wirtschaftliche Fürsorge für Erwachsene. Regelmäßige Zuwendungen gewöhnen an einen Lebensstil, den man sich selbst nicht leisten kann, und schwächen den Antrieb, selbst zu sparen. Die Autoren raten Eltern, Kindern eher Bildung und Selbständigkeit mitzugeben und nicht ständig Geld. Wer erwachsene Kinder dauerhaft finanziert, tut ihnen oft keinen Gefallen."
+    },
+    {
+     "title": "Den richtigen Beruf und die richtigen Gewohnheiten",
+     "text": "Zum Schluss geht es um Berufswahl und Chancen. Viele vermögende Menschen haben Nischen gefunden, in denen sie gebraucht werden und wenig Konkurrenz haben. Die Autoren raten auch, sich zu fragen, für wen man arbeitet: Viele Angestellte in Branchen, die Wohlhabenden dienen, versuchen, deren Lebensstil zu kopieren, ohne deren Vermögen zu haben. Die Botschaft des Buches ist ermutigend: Man muss nicht erben oder einen Lottogewinn haben, um wohlhabend zu werden. Es reichen ein solides Einkommen, Planung, Geduld und die Bereitschaft, auf Statussymbole zu verzichten. Disziplin schlägt Einkommen."
+    }
+   ],
+   "outro": "Rechne heute deine Formel aus: Alter mal Jahresbruttoeinkommen durch zehn, und vergleiche mit deinem Vermögen. Prüf deine drei größten Ausgaben darauf, ob sie dir Freiheit oder nur Status bringen.",
+   "audio": "thorsten"
+  },
+  {
+   "id": "kostolany",
+   "title": "Die Kunst, über Geld nachzudenken",
+   "author": "André Kostolany",
+   "genre": "Finanzen",
+   "tags": [
+    "Börse",
+    "Spekulation"
+   ],
+   "idea": "An der Börse entscheidet vor allem die Psychologie. Wer Geduld, eigene Gedanken und Geld ohne Schulden hat, kann von den Stimmungsschwankungen der anderen profitieren.",
+   "forWhom": "Für alle, die an der Börse anlegen oder anlegen wollen und eine unterhaltsame, erfahrene Stimme suchen.",
+   "parts": [
+    {
+     "title": "Ein Spekulant erzählt",
+     "text": "André Kostolany wurde 1906 in Budapest geboren und war über siebzig Jahre an den Börsen der Welt tätig, in Paris, New York und später in Deutschland. Er nannte sich selbst Spekulant und meinte damit keinen Zocker, sondern einen Menschen, der nachdenkt, bevor er handelt, vom lateinischen speculari, also spähen und beobachten. Dieses Buch ist sein Vermächtnis, er schrieb es kurz vor seinem Tod 1999. Es ist voller Anekdoten aus einem langen Leben, mit Erfolgen, Pleiten und Börsenkrachs. Kostolany will keine Formeln vermitteln, sondern eine Haltung: Selbst denken, Geduld haben, gegen den Strom schwimmen, wenn es Gründe gibt."
+    },
+    {
+     "title": "Der Herr und der Hund",
+     "text": "Sein bekanntestes Bild ist das vom Herrn mit dem Hund. Ein Mann geht mit seinem Hund spazieren. Der Hund läuft mal vor, mal zurück, aber am Ende kommen beide am selben Ziel an. Der Herr ist die Wirtschaft, der Hund ist die Börse. Langfristig folgen die Kurse der wirtschaftlichen Entwicklung, kurzfristig springen sie wild hin und her. Wer den Hund beobachtet, wird nervös. Wer den Herrn beobachtet, bleibt ruhig. Darum hält Kostolany wenig von kurzfristigen Prognosen. Er rät, auf die großen Entwicklungen zu achten und sich von den täglichen Ausschlägen nicht verrückt machen zu lassen."
+    },
+    {
+     "title": "Geld plus Psychologie ergibt den Trend",
+     "text": "Kostolany fasst die Börse in eine einfache Gleichung: Geld plus Psychologie ergibt den Trend. Ist viel Geld im Umlauf, etwa durch niedrige Zinsen, und ist die Stimmung positiv, steigen die Kurse. Fehlt eines von beiden, fallen sie. Fakten spielen kurzfristig eine kleinere Rolle, als man denkt. Kostolany schätzte, dass die Börse großteils auf Stimmungen reagiert und weniger auf nüchterne Zahlen. Die Menschen schwanken zwischen Gier und Angst. Wer das versteht, kann mit Abstand beobachten, wie die Masse übertreibt, und daraus Vorteile ziehen, statt selbst mitgerissen zu werden."
+    },
+    {
+     "title": "Zittrige und hartgesottene Hände",
+     "text": "Kostolany teilt die Anleger in zwei Gruppen. Zittrige Hände sind Menschen, die kaufen, wenn alle kaufen, und bei der kleinsten schlechten Nachricht verkaufen. Oft haben sie mit geliehenem Geld gekauft und müssen bei fallenden Kursen verkaufen. Hartgesottene Hände dagegen haben Geld, Geduld, Gedanken und Glück. Sie kaufen, wenn die Stimmung schlecht und die Kurse niedrig sind, und halten durch. Daraus ergibt sich sein Kreislauf: Wenn die Aktien von den zittrigen in die hartgesottenen Hände gewandert sind, ist die Zeit des Aufschwungs nahe. Wenn alle euphorisch kaufen, ist Vorsicht geboten."
+    },
+    {
+     "title": "Das Ei und der Gegenlauf",
+     "text": "Kostolany beschreibt einen Börsenzyklus als Ei. Jede Bewegung hat drei Phasen: eine Korrekturphase, eine Anpassungsphase und eine Übertreibungsphase. Im Aufwärtstrend steigen die Kurse zunächst wieder auf ein vernünftiges Niveau, dann folgen sie den guten Nachrichten, zuletzt übertreiben sie, weil alle kaufen wollen. Im Abwärtstrend läuft es spiegelbildlich. Die Kunst besteht darin, in der Übertreibung nach unten zu kaufen und in der Übertreibung nach oben zu verkaufen, also antizyklisch zu handeln. Kostolany betont aber, dass niemand die Wendepunkte genau trifft und dass man dazu Nerven aus Stahl braucht."
+    },
+    {
+     "title": "Kaufen, Schlaftabletten nehmen, schlafen",
+     "text": "Sein bekanntester Rat für Privatanleger: Kaufen Sie Aktien solider Unternehmen, nehmen Sie Schlaftabletten und schauen Sie sich die Papiere jahrelang nicht an. Wer nach Jahren aufwacht, werde angenehm überrascht sein. Gemeint ist Geduld mit guten Unternehmen und mit der Wirtschaft insgesamt. Außerdem warnt er eindringlich davor, mit Schulden zu spekulieren: Wer kein Geld hat, darf nicht spekulieren, und wer wenig hat, sollte vorsichtig sein. Und er rät, eine eigene Meinung zu bilden, statt Tipps und Gerüchten zu folgen. Börse sei für ihn wie ein Konzert: Man muss die Musik lange hören, um sie zu verstehen."
+    }
+   ],
+   "outro": "Investiere nur Geld, das du lange entbehren kannst, und nie auf Kredit. Schau bei schlechten Börsennachrichten auf den Herrn, die Wirtschaft, nicht auf den Hund, die Tageskurse.",
+   "audio": "thorsten"
+  },
+  {
+   "id": "intelligenter-investor",
+   "title": "Intelligent investieren (The Intelligent Investor)",
+   "author": "Benjamin Graham",
+   "isbn": "9780060555665",
+   "genre": "Finanzen",
+   "tags": [
+    "Börse",
+    "Value Investing",
+    "Klassiker"
+   ],
+   "idea": "Ein intelligenter Investor kauft nicht, was gerade steigt, sondern Werte mit einer Sicherheitsmarge und lässt sich von den Launen des Marktes nicht anstecken. Nicht Intelligenz, sondern Disziplin entscheidet.",
+   "forWhom": "Für alle, die Aktien kaufen und dabei vernünftig statt spekulativ vorgehen wollen.",
+   "parts": [
+    {
+     "title": "Investieren oder spekulieren",
+     "text": "Benjamin Graham gilt als Vater der wertorientierten Geldanlage und war Lehrer von Warren Buffett, der dieses Buch als das beste je über Geldanlage geschriebene bezeichnet hat. Graham beginnt mit einer klaren Unterscheidung. Eine Investition beruht auf gründlicher Analyse, verspricht die Sicherheit des eingesetzten Geldes und eine angemessene Rendite. Alles andere ist Spekulation. Spekulation ist nicht verboten, aber man soll sie als solche erkennen, getrennt halten und nur einen kleinen Teil des Geldes dafür einsetzen. Die größte Gefahr ist nicht die Spekulation selbst, sondern zu glauben, man investiere, während man spekuliert."
+    },
+    {
+     "title": "Der defensive und der unternehmungslustige Anleger",
+     "text": "Graham unterscheidet zwei Arten von Anlegern. Der defensive Anleger will vor allem Fehler und Verluste vermeiden und wenig Zeit aufwenden. Ihm empfiehlt er eine einfache Aufteilung zwischen Anleihen und Aktien, mindestens ein Viertel und höchstens drei Viertel in jedem Bereich, im Normalfall etwa halb und halb, und regelmäßige Anpassung. Bei Aktien soll er breit streuen und solide, große Unternehmen mit langer Dividendengeschichte und vernünftiger Bewertung wählen. Der unternehmungslustige Anleger ist bereit, viel Zeit und Mühe in die Analyse zu stecken, um bessere Ergebnisse zu erzielen. Beides kann klug sein, nur halbherziges Mischen nicht."
+    },
+    {
+     "title": "Mister Market",
+     "text": "Das berühmteste Bild des Buches ist Mister Market. Stell dir vor, du besitzt einen Anteil an einem Unternehmen, und ein Partner namens Mister Market bietet dir jeden Tag einen Preis an, zu dem er dir seinen Anteil verkauft oder deinen kauft. Manchmal ist er euphorisch und nennt einen viel zu hohen Preis, manchmal ist er verzweifelt und bietet viel zu wenig. Du musst ihm nicht folgen. Du kannst seine Stimmungen nutzen, wenn sein Preis günstig ist, und ihn sonst ignorieren. Gefährlich wird es nur, wenn du dich von seiner Laune anstecken lässt. Der Markt ist dein Diener, nicht dein Ratgeber."
+    },
+    {
+     "title": "Die Sicherheitsmarge",
+     "text": "Im letzten Kapitel fasst Graham seine Lehre in zwei Worten zusammen: Sicherheitsmarge. Man soll eine Aktie nur kaufen, wenn ihr Preis deutlich unter dem vorsichtig geschätzten inneren Wert liegt. Der Abstand schützt vor Fehlern in der eigenen Schätzung, vor Pech und vor unvorhersehbaren Entwicklungen. Wie ein Ingenieur eine Brücke für weit mehr Last baut, als sie tragen muss, so soll der Anleger mit Puffer kaufen. Je größer die Marge, desto geringer das Risiko und desto höher die mögliche Rendite. Damit widerspricht Graham der verbreiteten Ansicht, höhere Rendite erfordere immer höheres Risiko."
+    },
+    {
+     "title": "Inflation, Prognosen und Moden",
+     "text": "Graham warnt vor vielen Versuchungen. Niemand kann Kurse zuverlässig vorhersagen, und wer es versucht, landet oft bei Spekulation. Wachstumsaktien, die alle lieben, sind häufig schon zu teuer, weil die Hoffnung bereits im Preis steckt. Neue Emissionen in Boomzeiten bezeichnet er als besonders riskant. Er empfiehlt Aktien als Schutz gegen Inflation, aber nicht blind, denn auch sie schwanken stark. Und er rät zu regelmäßigem Investieren gleicher Beträge, damit man in schwachen Zeiten automatisch mehr Anteile kauft. Spätere Ausgaben wurden von Jason Zweig mit Kommentaren ergänzt, die Grahams Gedanken auf heutige Märkte übertragen."
+    },
+    {
+     "title": "Die Psychologie des Anlegers",
+     "text": "Für Graham liegt das Hauptproblem des Anlegers und sein schlimmster Feind wahrscheinlich in ihm selbst. Wer in Panik verkauft oder in Gier kauft, verliert, auch mit dem besten Wissen. Ein intelligenter Investor braucht kein besonders hohes Maß an Intelligenz, sondern Geduld, Disziplin und die Bereitschaft, gegen die Stimmung der Masse zu handeln. Er hält an einem durchdachten Plan fest, schaut auf die Unternehmen statt auf die Kurse und nimmt Schwankungen in Kauf. Graham will den Lesern helfen, die größten Fehler zu vermeiden und ein Vorgehen zu entwickeln, mit dem sie ruhig schlafen können."
+    }
+   ],
+   "outro": "Leg für dein Depot eine feste Aufteilung zwischen Aktien und sicheren Anlagen fest und passe sie einmal im Jahr an. Kauf einzelne Aktien nur mit deutlichem Abstand zum geschätzten Wert, und lass Mister Market reden.",
+   "audio": "thorsten"
+  },
+  {
+   "id": "bogle",
+   "title": "Das kleine Handbuch des vernünftigen Investierens",
+   "author": "John C. Bogle",
+   "isbn": "9781119404507",
+   "genre": "Finanzen",
+   "tags": [
+    "ETF",
+    "Indexfonds",
+    "Kosten"
+   ],
+   "idea": "Die meisten Anleger schlagen den Markt nicht, vor allem wegen der Kosten. Wer einfach den ganzen Markt kauft, günstig und dauerhaft, schneidet langfristig besser ab als die meisten Profis.",
+   "forWhom": "Für alle, die einfach und günstig für die Zukunft anlegen wollen, etwa mit ETFs.",
+   "parts": [
+    {
+     "title": "Der Erfinder des Indexfonds",
+     "text": "John Bogle gründete 1975 die Fondsgesellschaft Vanguard und brachte bald darauf einen der ersten Indexfonds für Privatanleger auf den Markt. Damals wurde er belächelt, man sprach von Bogles Torheit. Die Idee war einfach: Statt zu versuchen, die besten Aktien auszuwählen, kauft man alle Aktien eines Marktes in ihrem Gewicht und hält sie. Heute sind Indexfonds und ETFs weltweit verbreitet. In diesem Buch erklärt Bogle, warum diese langweilige Strategie für fast alle Anleger die beste ist. Sein Motto lautet sinngemäß: Such nicht nach der Nadel im Heuhaufen, kauf einfach den Heuhaufen."
+    },
+    {
+     "title": "Die unbarmherzige Rechnung",
+     "text": "Bogles Kernargument ist schlichte Mathematik. Alle Anleger zusammen besitzen den gesamten Markt. Deshalb erzielen sie vor Kosten zusammen genau die Rendite des Marktes. Wer besser abschneidet, tut das auf Kosten eines anderen, der schlechter abschneidet. Nach Kosten aber liegen die Anleger als Gruppe zwangsläufig unter dem Markt, und zwar genau um die Summe aus Gebühren, Ausgabeaufschlägen, Handelskosten und Steuern. Bogle nennt das die unbarmherzigen Regeln der einfachen Arithmetik. Ein Indexfonds mit sehr niedrigen Kosten liefert fast die volle Marktrendite und schlägt damit langfristig die Mehrheit der aktiven Fonds."
+    },
+    {
+     "title": "Kosten fressen den Zinseszins",
+     "text": "Kosten erscheinen auf den ersten Blick klein, etwa ein bis zwei Prozent im Jahr. Doch über Jahrzehnte wirken sie wie umgekehrter Zinseszins. Bogle zeigt, dass schon ein Prozentpunkt Kosten im Jahr über ein Anlegerleben einen großen Teil des Endvermögens kosten kann. Zugleich zahlt der Anleger diese Kosten immer, während die zusätzliche Rendite des aktiven Managements unsicher ist. Darum ist für ihn die Kostenquote der verlässlichste Hinweis auf die künftige Rendite eines Fonds. Er rät außerdem, häufiges Umschichten zu vermeiden, weil Handelskosten und Steuern weiter an der Rendite nagen."
+    },
+    {
+     "title": "Warum Gewinner von gestern selten Gewinner von morgen sind",
+     "text": "Viele Anleger kaufen Fonds, die in den letzten Jahren besonders gut gelaufen sind. Bogle zeigt, dass vergangene Spitzenleistungen kaum etwas über die Zukunft aussagen. Erfolgreiche Fonds werden oft groß und teuer, ihre Strategie funktioniert nicht mehr, und es kommt zur Rückkehr zum Mittelwert. Dazu kommt das Verhalten der Anleger selbst: Sie steigen meist ein, wenn ein Fonds schon gestiegen ist, und steigen aus, wenn er gefallen ist. Deshalb erzielen Fondsanleger im Schnitt sogar weniger als die Fonds, in denen sie investiert sind. Ein Indexfonds, den man einfach hält, schützt vor beiden Fehlern."
+    },
+    {
+     "title": "Breit streuen, lange halten",
+     "text": "Bogle empfiehlt einen Fonds auf einen breiten Gesamtmarkt, der Tausende Unternehmen enthält. So ist das Risiko einzelner Firmen ausgeschaltet, übrig bleibt nur das Marktrisiko. Ergänzend soll man Anleihen halten, um Schwankungen zu dämpfen. Eine grobe Faustregel, die er vorschlägt: Der Anteil der Anleihen kann etwa dem eigenen Alter entsprechen, wobei er betont, dass jeder seine Aufteilung an Risikobereitschaft und Lebenslage anpassen soll. Wichtig ist vor allem, an der Aufteilung festzuhalten, auch in Krisen. Auch bei Indexfonds rät er zu Vorsicht vor Spezialprodukten und häufigem Handeln, das den Vorteil wieder zunichtemacht."
+    },
+    {
+     "title": "Einfachheit siegt",
+     "text": "Bogles Botschaft ist bewusst unspektakulär. Wer langfristig Vermögen aufbauen will, braucht keine Tipps, keine Prognosen und keine Börsensendungen, sondern einen einfachen Plan: regelmäßig sparen, breit gestreut und günstig in Indexfonds anlegen, Kosten und Steuern niedrig halten und Geduld haben. Die Wirtschaft wächst langfristig, Unternehmen erwirtschaften Gewinne, und Aktionäre erhalten diesen Ertrag über Dividenden und Kurswachstum. Der Rest ist oft Lärm. Bogle zitiert gern den Rat, nicht einfach etwas zu tun, sondern dazusitzen und auszuhalten. Wer das schafft, schlägt auf Dauer die meisten Profis."
+    }
+   ],
+   "outro": "Prüf die Kosten deiner Fonds und ersetze teure durch breite, günstige Indexfonds oder ETFs. Richte einen Sparplan ein und schau nicht täglich ins Depot.",
+   "audio": "thorsten"
+  },
+  {
+   "id": "random-walk",
+   "title": "Börsenerfolg ist kein Zufall (A Random Walk Down Wall Street)",
+   "author": "Burton G. Malkiel",
+   "genre": "Finanzen",
+   "tags": [
+    "Börse",
+    "Indexfonds",
+    "Blasen"
+   ],
+   "idea": "Kurse bewegen sich kurzfristig weitgehend unvorhersehbar. Darum ist es kaum möglich, den Markt dauerhaft zu schlagen, und ein breit gestreuter, günstiger Indexfonds ist für die meisten die beste Wahl.",
+   "forWhom": "Für alle, die verstehen wollen, wie Börsen funktionieren, und eine vernünftige Anlagestrategie für ihr ganzes Leben suchen.",
+   "parts": [
+    {
+     "title": "Ein Affe mit Dartpfeilen",
+     "text": "Der Ökonom Burton Malkiel lehrte in Princeton und schrieb dieses Buch 1973, seitdem erschien es in vielen überarbeiteten Auflagen. Sein berühmtestes Bild: Ein Affe mit verbundenen Augen, der Dartpfeile auf die Börsenseiten einer Zeitung wirft, könnte ein Depot auswählen, das genauso gut abschneidet wie eines, das von Experten sorgfältig zusammengestellt wurde. Gemeint ist, dass Kursbewegungen kurzfristig einem Zufallspfad ähneln, einem Random Walk. Neue Informationen werden schnell in die Preise eingepreist, und vorhersehbare Muster verschwinden, sobald sie bekannt werden. Das macht es so schwer, den Markt dauerhaft zu schlagen."
+    },
+    {
+     "title": "Fester Boden und Luftschlösser",
+     "text": "Malkiel beschreibt zwei Denkweisen über Kurse. Die Theorie des festen Fundaments sagt: Jede Aktie hat einen inneren Wert, der sich aus künftigen Gewinnen und Dividenden ergibt. Kurse kreisen langfristig um diesen Wert. Die Theorie der Luftschlösser sagt dagegen: Ein Kurs ist so viel wert, wie jemand anderes morgen dafür bezahlt. Man kauft also nicht den Wert, sondern die Hoffnung, dass ein anderer mehr zahlt. Beide Ansätze erklären einen Teil der Wirklichkeit. Wer sich nur auf Luftschlösser verlässt, kann viel Geld verdienen, aber auch alles verlieren, wenn die Stimmung kippt."
+    },
+    {
+     "title": "Von Tulpen bis Internet: Blasen",
+     "text": "Ein großer Teil des Buches erzählt die Geschichte von Spekulationsblasen. In Holland wurden im 17. Jahrhundert Tulpenzwiebeln zu absurden Preisen gehandelt, bis der Markt plötzlich zusammenbrach. Ähnliches geschah bei der englischen Südseeblase, beim Börsenboom vor dem großen Crash 1929, bei den Technologieaktien um das Jahr 2000 und auf dem amerikanischen Immobilienmarkt vor der Finanzkrise 2008. Malkiel zeigt, dass sich die Muster gleichen: eine spannende neue Geschichte, steigende Preise, die immer mehr Menschen anlocken, und am Ende die Ernüchterung. Seine Lehre: Wenn alle glauben, diesmal sei alles anders, ist besondere Vorsicht geboten."
+    },
+    {
+     "title": "Was Analysten können und was nicht",
+     "text": "Malkiel prüft die beliebten Methoden, den Markt zu schlagen. Die technische Analyse, die aus Kurscharts Muster für die Zukunft ableiten will, hält er für weitgehend wirkungslos, zumal Handelskosten anfallen. Die Fundamentalanalyse, die Unternehmen bewertet, ist sinnvoller, stößt aber an Grenzen: Die Zukunft ist schwer vorherzusagen, Analysten irren sich häufig, und gute Nachrichten sind oft schon im Preis enthalten. Die meisten professionell verwalteten Fonds schneiden über lange Zeit schlechter ab als der Index. Malkiel erkennt an, dass Märkte nicht vollkommen effizient sind, aber ausnutzbare Fehler sind selten und kurzlebig."
+    },
+    {
+     "title": "Ein Plan für jedes Lebensalter",
+     "text": "Im praktischen Teil gibt Malkiel Ratschläge, die vom Lebensalter abhängen. Zuerst braucht man einen Notgroschen und eine gute Versicherung. Dann sollte man sich fragen, welche Ziele man hat und wie viel Schwankung man aushält. Junge Menschen können mehr in Aktien anlegen, weil sie Zeit haben, Rückschläge auszusitzen. Mit zunehmendem Alter steigt der Anteil von Anleihen und sicheren Anlagen. Wer regelmäßig gleiche Beträge investiert, kauft automatisch mehr Anteile, wenn die Kurse niedrig sind. Und wer seine Aufteilung einmal im Jahr wieder herstellt, verkauft automatisch etwas teurer und kauft billiger."
+    },
+    {
+     "title": "Die einfachste Lösung",
+     "text": "Am Ende empfiehlt Malkiel für die meisten Menschen breit gestreute Indexfonds mit niedrigen Kosten, auf Aktien aus aller Welt und auf Anleihen. Wer unbedingt selbst Aktien auswählen möchte, kann einen kleinen Teil des Geldes dafür verwenden, sollte aber den Kern seines Vermögens im Index halten. Er warnt vor hohen Gebühren, häufigem Handeln, Modetrends und dem Versuch, den richtigen Zeitpunkt zu erwischen. Seine Botschaft ist beruhigend: Man muss kein Börsenprofi sein, um gut abzuschneiden. Es genügen Geduld, Streuung und niedrige Kosten. Wer das umsetzt, kann sich die meisten Sorgen um die Börse sparen."
+    }
+   ],
+   "outro": "Leg zuerst einen Notgroschen an und investiere dann regelmäßig in breit gestreute, günstige Indexfonds. Werde misstrauisch, wenn alle sagen, diesmal sei alles anders.",
+   "audio": "thorsten"
+  },
+  {
+   "id": "geld-oder-leben",
+   "title": "Geld oder Leben (Your Money or Your Life)",
+   "author": "Vicki Robin, Joe Dominguez",
+   "genre": "Finanzen",
+   "tags": [
+    "Geld",
+    "Freiheit",
+    "Minimalismus"
+   ],
+   "idea": "Geld ist Lebensenergie: Wir tauschen Lebenszeit dagegen. Wer genau weiß, wie viel Leben ihn jede Ausgabe kostet, gibt bewusster aus, findet sein Genug und kann finanziell unabhängig werden.",
+   "forWhom": "Für alle, die mehr Freiheit und weniger Konsumdruck wollen und Geld mit ihren Werten in Einklang bringen möchten.",
+   "parts": [
+    {
+     "title": "Geld ist Lebensenergie",
+     "text": "Joe Dominguez, ein früherer Wall-Street-Analyst, hörte mit etwa dreißig Jahren auf zu arbeiten und lebte von den Erträgen seiner Ersparnisse. Gemeinsam mit Vicki Robin entwickelte er ein Programm in neun Schritten, das sie in diesem Buch beschreiben. Die Grundidee: Geld ist etwas, wofür wir unsere Lebensenergie eintauschen, also unsere begrenzte Lebenszeit. Wer das verinnerlicht, sieht jede Ausgabe anders. Eine Jacke kostet dann nicht hundert Euro, sondern vielleicht acht Stunden Leben. Die Frage ist nicht mehr nur, ob man sich etwas leisten kann, sondern ob es diese Lebenszeit wirklich wert ist."
+    },
+    {
+     "title": "Bestandsaufnahme und echter Stundenlohn",
+     "text": "Der erste Schritt ist ein ehrlicher Rückblick: Wie viel Geld hat man in seinem bisherigen Leben verdient, und was besitzt man heute? Danach berechnet man den echten Stundenlohn. Vom Nettogehalt zieht man alle Kosten ab, die der Beruf verursacht, etwa Fahrten, Kleidung, Essen außer Haus, Erholung vom Stress. Zur Arbeitszeit rechnet man alle Stunden, die man für den Job aufwendet, auch Pendeln und Erholen. Oft ist der echte Stundenlohn viel niedriger als gedacht. Mit dieser Zahl rechnet man künftig jede Ausgabe in Lebensstunden um. Das allein verändert bei vielen schon das Kaufverhalten."
+    },
+    {
+     "title": "Jeden Cent erfassen",
+     "text": "Der nächste Schritt verlangt Disziplin: Man schreibt jeden Cent auf, der hereinkommt oder hinausgeht. Am Monatsende ordnet man die Ausgaben Kategorien zu und rechnet sie in Lebensstunden um. Zu jeder Kategorie stellt man drei Fragen. Habe ich dafür Erfüllung, Zufriedenheit und Wert erhalten, im Verhältnis zur eingesetzten Lebensenergie? Passt diese Ausgabe zu meinen Werten und Zielen? Wie würde sich diese Ausgabe ändern, wenn ich nicht arbeiten müsste? Die Autoren betonen, dass es nicht um Verzicht aus Pflicht geht, sondern um Klarheit. Viele merken, dass sie Geld für Dinge ausgeben, die ihnen wenig bedeuten."
+    },
+    {
+     "title": "Die Kurve der Erfüllung und das Genug",
+     "text": "Ein zentrales Bild ist die Erfüllungskurve. Am Anfang steigert Geld unsere Zufriedenheit stark: Nahrung, Wohnung, Sicherheit. Dann kommen Annehmlichkeiten, die noch etwas mehr Zufriedenheit bringen, später Luxus. Irgendwann flacht die Kurve ab, und mehr Besitz bringt sogar weniger Zufriedenheit, weil er Zeit, Pflege und Sorgen kostet. Den Gipfel nennen die Autoren Genug. Wer sein Genug kennt, hat ausreichend für ein gutes Leben, ohne in Mangel oder Überfluss zu leben. Sie sehen darin auch eine Antwort auf Umweltprobleme, weil weniger Konsum weniger Ressourcen verbraucht."
+    },
+    {
+     "title": "Ausgaben senken, Einkommen schätzen",
+     "text": "Mit der Klarheit über die eigenen Ausgaben werden diese oft wie von selbst kleiner. Das Buch gibt viele Anregungen: Dinge pflegen und reparieren, gebraucht kaufen, nicht shoppen gehen, um sich gut zu fühlen, und vor dem Kauf eine Nacht drüber schlafen. Gleichzeitig soll man die Arbeit selbst neu sehen. Einkommen ist der Tausch von Lebensenergie gegen Geld, nicht der Sinn des Lebens. Man kann einer Arbeit nachgehen, die einem gefällt, und dabei bewusst mehr verdienen, ohne seine Identität darin aufzulösen. Ein großer Wandtafel-Plan, auf dem man Einkommen und Ausgaben jeden Monat einträgt, macht Fortschritte sichtbar."
+    },
+    {
+     "title": "Der Kreuzungspunkt",
+     "text": "Das Ziel des Programms ist der Kreuzungspunkt. Man legt das gesparte Geld sicher an und trägt jeden Monat ein, wie viel Ertrag es bringt. Sobald die monatlichen Erträge die monatlichen Ausgaben übersteigen, kreuzen sich die beiden Linien auf der Wandtafel. Ab diesem Punkt ist man finanziell unabhängig. Arbeit wird dann freiwillig. Die ursprüngliche Ausgabe empfahl vor allem sehr sichere Staatsanleihen, neuere Auflagen gehen auch auf breit gestreute Fonds ein. Das Buch gilt als einer der Wegbereiter der heutigen Bewegung für finanzielle Unabhängigkeit und frühen Ruhestand."
+    }
+   ],
+   "outro": "Berechne deinen echten Stundenlohn und rechne deine fünf größten Ausgaben des letzten Monats in Lebensstunden um. Frag bei jeder, ob sie dir diese Zeit wert war.",
+   "audio": "thorsten"
+  },
+  {
+   "id": "tao-te-king",
+   "title": "Tao te king",
+   "author": "Laozi",
+   "genre": "Fernöstliche Philosophie",
+   "tags": [
+    "Daoismus",
+    "China",
+    "Gelassenheit"
+   ],
+   "idea": "Das Dao ist der Weg, der allem zugrunde liegt und sich nicht in Worte fassen lässt. Wer ihm folgt, handelt ohne Zwang, bleibt bescheiden und weich wie Wasser und erreicht gerade dadurch viel.",
+   "forWhom": "Für alle, die mehr Gelassenheit suchen und sich für eine der ältesten Weisheitslehren der Welt interessieren.",
+   "parts": [
+    {
+     "title": "Ein kleines Buch mit großer Wirkung",
+     "text": "Das Tao te king wird dem Weisen Laozi zugeschrieben, über dessen Leben fast nichts sicher bekannt ist. Der Legende nach schrieb er die Verse, als er China verließ und ein Grenzwächter ihn bat, seine Weisheit aufzuschreiben. Das Werk ist vermutlich etwa zweieinhalbtausend Jahre alt und besteht aus 81 kurzen Abschnitten in poetischer Sprache. Der Titel bedeutet etwa: das Buch vom Weg und von der Tugend oder Wirkkraft. Es gehört zu den meistübersetzten Büchern der Welt. Weil die Sprache so knapp und vieldeutig ist, unterscheiden sich die Übersetzungen stark, und jeder Leser findet etwas anderes darin."
+    },
+    {
+     "title": "Das Dao, das man nicht benennen kann",
+     "text": "Der berühmte Anfang lautet sinngemäß: Das Dao, das man aussprechen kann, ist nicht das ewige Dao. Der Name, den man nennen kann, ist nicht der ewige Name. Das Dao ist der Urgrund, aus dem alles entsteht und in den alles zurückkehrt. Es lässt sich nicht greifen, nicht beschreiben und nicht beherrschen. Man kann es nur erahnen und sich ihm anpassen. Laozi beschreibt es mit Bildern des Leeren: Die Nabe eines Rades ist nützlich durch das Loch in der Mitte, ein Gefäß durch seinen Hohlraum, ein Haus durch seine Türen und Fenster. Das Nichts macht das Etwas erst brauchbar."
+    },
+    {
+     "title": "Wu wei: Handeln ohne Zwang",
+     "text": "Ein Kernbegriff ist wu wei, oft übersetzt als Nicht-Handeln. Gemeint ist kein Nichtstun, sondern ein Handeln ohne Gewalt, ohne Verbissenheit und ohne Eigenwillen, das dem natürlichen Lauf der Dinge folgt. Der Weise tut, aber er drängt nicht. Er vollendet Werke, ohne sich darauf etwas einzubilden. Laozi meint, dass viele Probleme durch zu viel Eingreifen entstehen: Je mehr Verbote, desto ärmer das Volk, je mehr Gesetze, desto mehr Räuber. Ein großes Land solle man regieren, wie man einen kleinen Fisch brät, also ohne ständig darin herumzurühren. Wer loslässt, erreicht oft mehr als der, der festhält."
+    },
+    {
+     "title": "Das Weiche besiegt das Harte",
+     "text": "Laozis liebstes Bild ist das Wasser. Nichts auf der Welt ist weicher und schwächer als Wasser, und doch gibt es nichts, das Hartes und Starkes besser überwindet. Es fließt nach unten, an die Orte, die die Menschen verachten, und gerade darin liegt seine Kraft. Ebenso sind lebende Menschen und Pflanzen weich und biegsam, tote dagegen hart und starr. Wer hart und starr ist, gehört zum Tod, wer weich und biegsam ist, zum Leben. Daraus folgt eine Haltung der Nachgiebigkeit, die keine Schwäche ist, sondern Ausdauer. Ein Baum, der sich im Sturm biegt, bricht nicht."
+    },
+    {
+     "title": "Bescheidenheit, Genügsamkeit, Maß",
+     "text": "Der Weise stellt sich nicht in den Vordergrund und kommt gerade deshalb voran. Er rühmt sich nicht und hat deshalb Verdienst. Laozi warnt vor Gier und Überfluss: Kein Unglück ist größer, als nicht zu wissen, wann man genug hat. Wer weiß, wann es genug ist, ist reich. Er nennt drei Schätze, die er hütet: Güte, Genügsamkeit und den Verzicht darauf, sich in der Welt an die erste Stelle zu stellen. Auch das Wissen um die eigenen Grenzen gehört dazu. Wer andere kennt, ist klug, wer sich selbst kennt, ist weise. Wer andere besiegt, hat Kraft, wer sich selbst besiegt, ist stark."
+    },
+    {
+     "title": "Gegensätze, die sich brauchen",
+     "text": "Laozi betont, dass Gegensätze zusammengehören. Erst durch das Hässliche erkennt man das Schöne, erst durch das Schwere das Leichte, Lang und Kurz, Hoch und Tief bestimmen einander. Daraus folgt ein ständiger Wandel: Was sich voll ausdehnt, zieht sich wieder zusammen, was stark wird, wird wieder schwach. Wer das versteht, klammert sich nicht an Erfolge und verzweifelt nicht an Misserfolgen. Auch die bekannte Weisheit, dass eine Reise von tausend Meilen mit einem ersten Schritt beginnt, stammt aus diesem Buch. Große Dinge entstehen aus kleinen, und Schwieriges geht man an, solange es noch leicht ist."
+    }
+   ],
+   "outro": "Such dir heute eine Situation, in der du loslassen statt drücken kannst, und beobachte, was passiert. Frag dich bei einem Wunsch, ob du nicht schon genug hast.",
+   "audio": "thorsten"
+  },
+  {
+   "id": "konfuzius",
+   "title": "Gespräche (Lunyu)",
+   "author": "Konfuzius",
+   "genre": "Fernöstliche Philosophie",
+   "tags": [
+    "Konfuzianismus",
+    "China",
+    "Ethik"
+   ],
+   "idea": "Ein gutes Leben und eine gute Gesellschaft entstehen durch Menschlichkeit, Lernen, Anstand und Pflichtbewusstsein in den alltäglichen Beziehungen. Jeder kann sich durch beständige Übung zum Edlen bilden.",
+   "forWhom": "Für alle, die sich für Ethik, Führung und die Grundlagen der chinesischen Kultur interessieren.",
+   "parts": [
+    {
+     "title": "Ein Lehrer, kein Prophet",
+     "text": "Konfuzius, chinesisch Kong Fuzi, lebte etwa von 551 bis 479 vor Christus. Er war Beamter und vor allem Lehrer, der viele Schüler um sich sammelte. Zu Lebzeiten hatte er wenig politischen Erfolg, doch nach seinem Tod prägte seine Lehre China und Ostasien über zwei Jahrtausende. Die Gespräche, chinesisch Lunyu, sind keine von ihm geschriebene Abhandlung, sondern eine Sammlung kurzer Aussprüche und Dialoge, die seine Schüler aufgezeichnet haben. Viele beginnen mit den Worten: Der Meister sprach. Konfuzius verstand sich nicht als Erfinder, sondern als Überlieferer der Weisheit der alten Zeit."
+    },
+    {
+     "title": "Lernen als Lebensweg",
+     "text": "Gleich der erste Satz handelt vom Lernen: Lernen und das Gelernte immer wieder üben, ist das nicht eine Freude? Für Konfuzius ist Lernen kein Abschnitt der Jugend, sondern ein lebenslanger Weg der Selbstbildung. Er beschreibt sein eigenes Leben in Stufen: Mit fünfzehn richtete er seinen Willen auf das Lernen, mit dreißig stand er fest, mit vierzig hatte er keine Zweifel mehr, mit fünfzig kannte er den Willen des Himmels, mit sechzig hörte er mit offenem Ohr, und mit siebzig konnte er seinem Herzen folgen, ohne das rechte Maß zu überschreiten. Lernen und Nachdenken gehören zusammen, das eine ohne das andere führt in die Irre."
+    },
+    {
+     "title": "Ren: Menschlichkeit",
+     "text": "Der wichtigste Begriff ist ren, Menschlichkeit oder Mitmenschlichkeit. Gefragt, ob es ein Wort gibt, nach dem man sein ganzes Leben handeln kann, antwortet Konfuzius sinngemäß: Gegenseitigkeit. Was du selbst nicht wünschst, das tue auch anderen nicht an. Diese Regel ähnelt der goldenen Regel in vielen Kulturen. Menschlichkeit zeigt sich nicht in großen Worten, sondern im Umgang mit anderen, besonders in Familie, Freundschaft und Beruf. Konfuzius misstraut glatten Reden und schmeichelndem Auftreten, bei denen selten echte Menschlichkeit dahinterstecke. Wer menschlich ist, liebt die Menschen."
+    },
+    {
+     "title": "Der Edle und der Gemeine",
+     "text": "Konfuzius stellt dem Edlen, junzi, den gewöhnlichen oder kleinen Menschen gegenüber. Edel ist für ihn nicht, wer adlig geboren ist, sondern wer sich durch Bildung und Charakter auszeichnet. Der Edle denkt an das Rechte, der Gemeine an den Vorteil. Der Edle sucht die Fehler bei sich, der Gemeine bei anderen. Der Edle ist umgänglich, aber kein Mitläufer, der Gemeine ist Mitläufer, aber nicht umgänglich. Der Edle ist ruhig und gelassen, der Gemeine voller Sorgen. Damit macht Konfuzius moralische Vortrefflichkeit zu etwas, das jeder durch Anstrengung erreichen kann."
+    },
+    {
+     "title": "Li: Riten und Anstand",
+     "text": "Ein weiterer Kernbegriff ist li, oft übersetzt als Riten, Sitte oder Anstand. Gemeint sind die Formen des respektvollen Umgangs, von religiösen Zeremonien bis zu alltäglicher Höflichkeit. Für Konfuzius sind sie nicht leere Formalität, sondern Ausdruck innerer Haltung. Sie ordnen die Beziehungen zwischen Herrscher und Untertan, Vater und Sohn, älterem und jüngerem Bruder, Ehepartnern und Freunden. Besonders wichtig ist die Ehrfurcht vor den Eltern. Gleichzeitig betont er, dass Form ohne Gefühl wertlos ist. Wer Trauerriten vollzieht, ohne zu trauern, hat nichts verstanden. Haltung und Form sollen übereinstimmen."
+    },
+    {
+     "title": "Führen durch Vorbild",
+     "text": "Konfuzius hat viel über Regierung nachgedacht. Er hält wenig davon, Menschen nur durch Gesetze und Strafen zu lenken. Dann vermeiden sie die Strafe, haben aber kein Schamgefühl. Wer dagegen durch Tugend führt und durch Anstand ordnet, gewinnt Menschen, die sich schämen und sich bessern. Ein Herrscher soll wie der Polarstern sein, um den sich die anderen Sterne von selbst ordnen. Dazu gehört die Richtigstellung der Namen: Ein Fürst soll wirklich Fürst sein, ein Vater wirklich Vater. Wenn die Begriffe nicht stimmen, stimmen auch die Worte nicht, und dann gelingen die Werke nicht. Gute Führung beginnt bei der eigenen Person."
+    }
+   ],
+   "outro": "Frag dich bei einer Entscheidung, ob du das Gleiche gern von anderen erfahren würdest. Führe in deinem Umfeld weniger durch Regeln als durch das eigene Vorbild.",
+   "audio": "thorsten"
+  },
+  {
+   "id": "zhuangzi",
+   "title": "Zhuangzi (Das wahre Buch vom südlichen Blütenland)",
+   "author": "Zhuangzi",
+   "genre": "Fernöstliche Philosophie",
+   "tags": [
+    "Daoismus",
+    "China",
+    "Freiheit"
+   ],
+   "idea": "Mit Witz und Paradoxien zeigt Zhuangzi, dass unsere festen Urteile über richtig und falsch, nützlich und nutzlos oft nur Perspektiven sind. Wer sie loslässt, gewinnt innere Freiheit und Leichtigkeit.",
+   "forWhom": "Für alle, die Philosophie in Geschichten mögen und sich von starren Denkmustern befreien wollen.",
+   "parts": [
+    {
+     "title": "Der Schmetterlingstraum",
+     "text": "Zhuangzi lebte etwa im vierten Jahrhundert vor Christus und gilt neben Laozi als wichtigster Denker des Daoismus. Das nach ihm benannte Buch ist voller Geschichten, Gleichnisse und Witze. Die berühmteste: Zhuangzi träumte, er sei ein Schmetterling, der fröhlich umherflatterte und nichts von Zhuangzi wusste. Als er erwachte, war er wieder Zhuangzi. Nun wusste er nicht, ob er Zhuangzi war, der geträumt hatte, ein Schmetterling zu sein, oder ein Schmetterling, der träumte, Zhuangzi zu sein. Die Geschichte stellt die Grenze zwischen Traum und Wirklichkeit, zwischen Ich und Welt spielerisch in Frage."
+    },
+    {
+     "title": "Alles ist eine Frage der Perspektive",
+     "text": "Zhuangzi zeigt immer wieder, wie relativ unsere Urteile sind. Menschen schlafen gern trocken, doch ein Aal fühlt sich im Schlamm wohl. Wer hat recht? Was für den einen schön ist, finden andere Tiere erschreckend. Ein großer Vogel, der Tausende Meilen fliegt, wird von kleinen Vögeln ausgelacht, die nur von Ast zu Ast hüpfen. Jeder hält seinen eigenen Blick für den richtigen. Zhuangzi will damit nicht sagen, dass alles gleichgültig ist, sondern dass man die Grenzen des eigenen Standpunkts erkennen soll. Wer das tut, streitet weniger verbissen und kann die Welt aus vielen Blickwinkeln betrachten."
+    },
+    {
+     "title": "Der Nutzen des Nutzlosen",
+     "text": "In einer Geschichte sieht ein Zimmermann einen riesigen, uralten Baum, den alle bewundern. Er geht achtlos vorbei, denn das Holz sei völlig nutzlos: Boote daraus würden sinken, Särge faulen, Geräte zerbrechen. In der Nacht erscheint ihm der Baum im Traum und erklärt: Gerade weil ich nutzlos bin, hat man mich nicht gefällt, und darum bin ich so alt und groß geworden. Nützliche Bäume dagegen werden früh geschlagen. Zhuangzi stellt damit die übliche Vorstellung von Nutzen auf den Kopf. Wer immer nur nützlich sein will, wird verbraucht. Manchmal liegt das Wertvollste darin, sich nicht vereinnahmen zu lassen."
+    },
+    {
+     "title": "Der Koch und das Ochsenmesser",
+     "text": "Eine weitere berühmte Geschichte handelt von einem Koch, der für einen Fürsten einen Ochsen zerlegt. Seine Bewegungen sind so harmonisch, dass es aussieht wie ein Tanz. Der Fürst staunt über diese Kunstfertigkeit. Der Koch erklärt, er folge nicht mehr den Augen, sondern dem Geist. Er schneide entlang der natürlichen Fugen und Zwischenräume, ohne gegen Knochen zu stoßen. Ein gewöhnlicher Koch brauche jeden Monat ein neues Messer, weil er hackt, ein guter jedes Jahr, weil er schneidet. Sein eigenes Messer habe er seit neunzehn Jahren und es sei wie frisch geschliffen. Wer dem natürlichen Aufbau der Dinge folgt, arbeitet mühelos und nutzt sich nicht ab."
+    },
+    {
+     "title": "Leben und Tod gelassen sehen",
+     "text": "Als Zhuangzis Frau starb, fand ein Freund ihn, wie er auf einer Schüssel trommelte und sang. Der Freund war empört. Zhuangzi erklärte, auch er sei zuerst traurig gewesen. Dann habe er bedacht, dass sie vor ihrer Geburt kein Leben hatte, dass Leben und Tod wie der Wechsel der Jahreszeiten sind und dass sie nun in Frieden im großen Haus der Welt ruht. Ihr laut nachzuweinen hieße, das Schicksal nicht zu verstehen. Für Zhuangzi sind Leben und Tod Teile eines großen Wandels. Wer sich nicht an das eine klammert und das andere fürchtet, findet Ruhe, auch im Angesicht des Unvermeidlichen."
+    },
+    {
+     "title": "Frei und unbeschwert umherwandern",
+     "text": "Das erste Kapitel trägt den Titel Frei und unbeschwert umherwandern, und dieser Gedanke durchzieht das ganze Buch. Zhuangzi lehnt Ämter und Ehren ab. Als ein König ihm einen hohen Posten anbieten ließ, fragte er die Boten, ob eine heilige Schildkröte, die tot im Tempel verehrt wird, lieber dort liege oder lebendig ihren Schwanz durch den Schlamm ziehe. Die Boten sagten: lieber im Schlamm. Dann, sagte Zhuangzi, geht, ich will meinen Schwanz durch den Schlamm ziehen. Freiheit, Natürlichkeit und Humor waren ihm wichtiger als Ansehen. Diese Leichtigkeit ist bis heute das Besondere an seinem Denken."
+    }
+   ],
+   "outro": "Betrachte einen Streit oder ein Problem einmal bewusst aus drei anderen Blickwinkeln. Frag dich bei einer Pflicht, ob sie dich verbraucht wie den nützlichen Baum, und was dir wirklich Freiheit gibt.",
+   "audio": "thorsten"
+  },
+  {
+   "id": "dhammapada",
+   "title": "Dhammapada",
+   "author": "Überlieferte Lehrreden des Buddha",
+   "genre": "Fernöstliche Philosophie",
+   "tags": [
+    "Buddhismus",
+    "Achtsamkeit",
+    "Indien"
+   ],
+   "idea": "Unser Geist formt unsere Welt. Wer Gier, Hass und Verblendung in sich erkennt und den Geist durch Achtsamkeit schult, befreit sich vom Leiden und findet Frieden.",
+   "forWhom": "Für alle, die die Grundgedanken des Buddhismus in klaren, kurzen Versen kennenlernen wollen.",
+   "parts": [
+    {
+     "title": "Die Sammlung der Verse",
+     "text": "Das Dhammapada ist eine der bekanntesten Schriften des frühen Buddhismus. Es ist Teil des Pali-Kanons, der ältesten erhaltenen Sammlung buddhistischer Texte. Der Name bedeutet etwa Pfad der Lehre oder Worte der Wahrheit. Es besteht aus 423 Versen in 26 Kapiteln, die nach Themen geordnet sind, etwa Achtsamkeit, Geist, Blumen, der Tor, der Weise oder Zorn. Die Verse gelten als Worte des Buddha, also Siddhartha Gautamas, der vor etwa zweieinhalbtausend Jahren in Nordindien lebte. Sie sind knapp, bildreich und leicht zu merken, darum werden sie bis heute auswendig gelernt und rezitiert."
+    },
+    {
+     "title": "Der Geist geht allem voraus",
+     "text": "Das Buch beginnt mit seinem wohl berühmtesten Gedanken: Der Geist geht allen Dingen voraus, der Geist ist ihr Anführer, aus dem Geist sind sie gemacht. Wer mit unreinem Geist spricht oder handelt, dem folgt das Leiden wie das Rad dem Fuß des Zugtiers. Wer mit reinem Geist spricht oder handelt, dem folgt das Glück wie sein Schatten, der ihn nie verlässt. Damit legt das Dhammapada die Verantwortung für unser Erleben in unsere eigenen Hände. Nicht die Umstände allein bestimmen, wie es uns geht, sondern die Haltung, mit der wir ihnen begegnen, und die Absichten, mit denen wir handeln."
+    },
+    {
+     "title": "Hass endet nicht durch Hass",
+     "text": "Einer der bekanntesten Verse lautet sinngemäß: Wer denkt, er hat mich beschimpft, geschlagen, besiegt, beraubt, in dem kommt der Hass nicht zur Ruhe. Wer solche Gedanken loslässt, in dem kommt er zur Ruhe. Denn Hass wird in dieser Welt niemals durch Hass beendet, nur durch Nicht-Hass, das ist ein ewiges Gesetz. Das Dhammapada empfiehlt, Zorn durch Freundlichkeit zu überwinden, Böses durch Gutes, Geiz durch Geben und Lüge durch Wahrheit. Es geht nicht um Schwäche, sondern um die Einsicht, dass Groll vor allem den eigenen Geist vergiftet. Wer festhält, bleibt gefangen."
+    },
+    {
+     "title": "Achtsamkeit als Weg",
+     "text": "Ein eigenes Kapitel ist der Achtsamkeit gewidmet. Achtsamkeit führt zum Todlosen, also zur Befreiung, Unachtsamkeit zum Tod. Die Achtsamen sterben nicht, die Unachtsamen sind wie schon tot. Gemeint ist eine wache, klare Aufmerksamkeit für das, was im eigenen Geist und Körper geschieht. Der Geist wird mit einem Fisch verglichen, der auf dem Trockenen zappelt, oder mit einem Pfeil, den ein Pfeilmacher gerade richtet. Wer den unruhigen, schwer zu bändigenden Geist zügelt, findet Glück. Ein bezwungener Geist bringt mehr Gutes als Vater, Mutter und alle Verwandten zusammen."
+    },
+    {
+     "title": "Sich selbst besiegen",
+     "text": "Das Dhammapada betont immer wieder die Arbeit an sich selbst. Wer tausendmal tausend Menschen in der Schlacht besiegt, ist nicht der größte Sieger. Wer sich selbst besiegt, ist der größte Sieger. Man soll zuerst selbst tun, was man anderen beibringt. Die Fehler anderer sieht man leicht, die eigenen schwer. Niemand kann einen anderen reinigen, jeder ist sein eigener Schutz. Ein Kapitel über den Toren beschreibt, wie ein Dummkopf, der sein Leben lang bei einem Weisen ist, die Lehre so wenig erkennt wie ein Löffel den Geschmack der Suppe. Ein Aufmerksamer dagegen versteht sie schnell, wie die Zunge."
+    },
+    {
+     "title": "Vergänglichkeit und Freiheit",
+     "text": "Mehrere Verse erinnern an die Vergänglichkeit. Alles Bedingte ist vergänglich, alles Bedingte ist leidvoll, wer das mit Weisheit sieht, wendet sich vom Leiden ab. Der Körper wird mit einer Schaumblase oder einer Luftspiegelung verglichen. Daraus folgt nicht Verzweiflung, sondern Gelassenheit. Wer nicht an Dingen haftet, lebt leicht, wie die Götter, die sich von Freude nähren. Das Ziel ist Nirwana, das Erlöschen von Gier, Hass und Verblendung, beschrieben als höchstes Glück. Der Weg dorthin ist der Edle Achtfache Pfad, der rechte Ansichten, rechtes Handeln, rechte Achtsamkeit und Sammlung umfasst."
+    }
+   ],
+   "outro": "Achte heute dreimal bewusst darauf, mit welcher Absicht du sprichst oder handelst. Lass einen alten Groll los, nicht für den anderen, sondern für deinen eigenen Frieden.",
+   "audio": "thorsten"
+  },
+  {
+   "id": "bhagavad-gita",
+   "title": "Bhagavad Gita",
+   "author": "Überliefert, Teil des Mahabharata",
+   "genre": "Fernöstliche Philosophie",
+   "tags": [
+    "Indien",
+    "Pflicht",
+    "Yoga"
+   ],
+   "idea": "Handle nach deiner Pflicht, aber ohne an den Früchten deines Handelns zu haften. Wer gelassen, hingebungsvoll und mit Einsicht handelt, findet inneren Frieden, auch mitten im Kampf.",
+   "forWhom": "Für alle, die vor schweren Entscheidungen stehen und sich für indische Philosophie und Yoga interessieren.",
+   "parts": [
+    {
+     "title": "Ein Gespräch auf dem Schlachtfeld",
+     "text": "Die Bhagavad Gita, der Gesang des Erhabenen, ist ein Teil des großen indischen Epos Mahabharata und wohl über zweitausend Jahre alt. Sie umfasst 700 Verse in 18 Kapiteln. Die Szene: Zwei verwandte Fürstenfamilien stehen sich auf dem Schlachtfeld von Kurukshetra gegenüber. Der Krieger Arjuna sieht in den Reihen der Gegner seine Lehrer, Onkel und Vettern. Er verliert den Mut, lässt den Bogen sinken und will nicht kämpfen. Sein Wagenlenker ist Krishna, der sich als göttlich offenbart. Das Gespräch der beiden ist die Gita. Sie handelt also von einer zutiefst menschlichen Frage: Was soll ich tun, wenn jede Wahl schmerzt?"
+    },
+    {
+     "title": "Die Seele ist unsterblich",
+     "text": "Krishna tröstet Arjuna zuerst mit einer Lehre über das Selbst. Der Körper vergeht, doch das wahre Selbst, atman, ist ewig. Es wird nicht geboren und stirbt nicht. Es kann nicht verwundet, nicht verbrannt, nicht benetzt und nicht ausgetrocknet werden. So wie ein Mensch abgenutzte Kleider ablegt und neue anzieht, so legt das Selbst abgenutzte Körper ab und nimmt neue an. Wer das versteht, wird von Tod und Verlust nicht überwältigt. Krishna will Arjuna nicht zur Gleichgültigkeit erziehen, sondern zu einem tieferen Blick, der über das Vergängliche hinausgeht und ihm die lähmende Angst nimmt."
+    },
+    {
+     "title": "Handeln ohne Anhaften an den Früchten",
+     "text": "Der bekannteste Gedanke der Gita ist das selbstlose Handeln, Karma Yoga. Krishna sagt sinngemäß: Du hast ein Recht auf das Handeln, aber niemals auf seine Früchte. Lass nicht den Lohn das Motiv deines Handelns sein, und hänge auch nicht am Nichthandeln. Man soll seine Pflicht, dharma, erfüllen, mit ganzer Hingabe, aber ohne sich vom Erfolg oder Misserfolg abhängig zu machen. Gleichmut in Gewinn und Verlust nennt Krishna Yoga. Er warnt auch davor, die Pflicht eines anderen zu erfüllen: Besser ist die eigene Pflicht, selbst unvollkommen getan, als die fremde, gut ausgeführt."
+    },
+    {
+     "title": "Der Mensch mit festem Geist",
+     "text": "Arjuna fragt, woran man einen Menschen mit gefestigter Weisheit erkennt. Krishna beschreibt ihn: Er ist nicht aufgewühlt im Leid und gierig nicht nach Freude, frei von Anhaften, Furcht und Zorn. Er zieht seine Sinne von den Sinnesobjekten zurück wie eine Schildkröte ihre Glieder. Krishna erklärt auch, wie Verstrickung entsteht: Wer an Sinnesdinge denkt, entwickelt Anhaften, aus Anhaften entsteht Begierde, aus Begierde Zorn, aus Zorn Verwirrung, aus Verwirrung der Verlust des Gedächtnisses und der Vernunft, und damit geht der Mensch zugrunde. Ein ruhiger Geist ist deshalb die Grundlage klugen Handelns."
+    },
+    {
+     "title": "Drei Wege: Tat, Erkenntnis, Hingabe",
+     "text": "Die Gita beschreibt mehrere Wege, die zum selben Ziel führen. Der Weg der selbstlosen Tat, Karma Yoga. Der Weg der Erkenntnis, Jnana Yoga, durch Einsicht in das wahre Wesen des Selbst. Der Weg der Meditation, bei dem man den Geist sammelt wie eine Flamme an einem windstillen Ort. Und besonders der Weg der liebenden Hingabe, Bhakti Yoga, an das Göttliche. Krishna betont, dass jeder Mensch den Weg gehen kann, der zu ihm passt. Im elften Kapitel offenbart er Arjuna seine kosmische Gestalt, ein gewaltiges Bild, das zeigt, wie das Göttliche alles umfasst, Schöpfung und Zerstörung zugleich."
+    },
+    {
+     "title": "Arjuna steht wieder auf",
+     "text": "Am Ende des Gesprächs sind Arjunas Zweifel verflogen. Er sagt, seine Verwirrung sei vergangen, er habe seine Erinnerung zurückgewonnen und werde nun handeln. Die Gita endet damit nicht als Aufruf zum Krieg, sondern als Lehre, wie man auch in schwersten Lagen klar und mit innerem Frieden handeln kann. Viele haben sie so verstanden, darunter Mahatma Gandhi, der den Kampf als inneren Kampf deutete und die Gita als sein geistiges Wörterbuch bezeichnete. Für den Alltag bleibt vor allem ein Gedanke: Gib dein Bestes in dem, was deine Aufgabe ist, und lass das Ergebnis los."
+    }
+   ],
+   "outro": "Konzentrier dich bei deiner nächsten wichtigen Aufgabe ganz auf das Tun und weniger auf das Ergebnis. Frag dich, was wirklich deine eigene Pflicht ist und nicht die eines anderen.",
+   "audio": "thorsten"
+  },
+  {
+   "id": "ikigai",
+   "title": "Ikigai",
+   "author": "Héctor García, Francesc Miralles",
+   "isbn": "9780143130727",
+   "genre": "Japanische Weisheit",
+   "tags": [
+    "Japan",
+    "Sinn",
+    "Langlebigkeit"
+   ],
+   "idea": "Ikigai ist das, wofür es sich lohnt, morgens aufzustehen. Die Menschen in Okinawa, wo besonders viele sehr alt werden, zeigen, wie Sinn, Gemeinschaft, Bewegung und Maß ein langes, erfülltes Leben tragen.",
+   "forWhom": "Für alle, die einen Sinn im Alltag suchen und wissen wollen, was die Langlebigen in Japan anders machen.",
+   "parts": [
+    {
+     "title": "Der Grund, morgens aufzustehen",
+     "text": "Das japanische Wort Ikigai lässt sich etwa übersetzen als das, wofür es sich zu leben lohnt. Die Autoren Héctor García und Francesc Miralles reisten nach Ogimi, einem Dorf im Norden der Insel Okinawa, das für die vielen Hundertjährigen bekannt ist. Sie befragten die alten Menschen nach ihrem Leben. Fast alle hatten etwas, das sie jeden Tag beschäftigt und ihnen Freude macht: ihren Garten, ihr Handwerk, ihre Freunde, ihre Enkel. Viele kennen kein Wort für Ruhestand im Sinne von Aufhören. Sie bleiben aktiv, solange es geht. Das Ikigai gibt ihnen Halt und Richtung, gerade im Alter."
+    },
+    {
+     "title": "Hara hachi bu: zu achtzig Prozent satt",
+     "text": "Eine Regel, die die Autoren in Okinawa immer wieder hören, heißt hara hachi bu: Iss nur, bis du zu etwa achtzig Prozent satt bist. Man hört auf, bevor man sich voll fühlt. Dazu kommt eine abwechslungsreiche Ernährung mit viel Gemüse, Tofu, Süßkartoffeln, Fisch und wenig Zucker. Die Mahlzeiten werden in vielen kleinen Schälchen serviert, was die Menge begrenzt und Vielfalt fördert. Beliebt ist auch Grüntee. Die Autoren betonen, dass nicht ein einzelnes Wundermittel wirkt, sondern das Zusammenspiel aus maßvollem Essen, Bewegung, Gemeinschaft und einer ruhigen Lebensweise."
+    },
+    {
+     "title": "Bewegung ohne Leistungsdruck",
+     "text": "Die Alten in Ogimi treiben kaum Sport im westlichen Sinn, aber sie bewegen sich ständig: Sie arbeiten im Garten, gehen zu Fuß, tanzen bei Festen und machen jeden Morgen leichte Übungen. Die Autoren stellen einige sanfte Bewegungsformen vor, etwa die japanische Radiogymnastik, Tai-Chi, Qigong und Yoga. Entscheidend ist, dass Bewegung in den Alltag eingebaut ist und Freude macht. Es geht nicht um Höchstleistung, sondern um Regelmäßigkeit. Wer lange beweglich bleiben will, sollte jeden Tag etwas tun, statt sich einmal pro Woche zu verausgaben und sonst zu sitzen."
+    },
+    {
+     "title": "Moai: die Kraft der Gemeinschaft",
+     "text": "Ein wichtiger Grund für das lange Leben in Okinawa ist die enge Gemeinschaft. Viele Menschen gehören einem moai an, einer kleinen Gruppe, die sich ein Leben lang regelmäßig trifft, sich gegenseitig unterstützt und gemeinsam feiert. Ursprünglich legten die Mitglieder auch Geld zusammen, um einander in Notlagen zu helfen. Niemand ist allein, wenn er krank wird oder Sorgen hat. Die Autoren beschreiben fröhliche Feste, Lieder und viel Lachen. Einsamkeit dagegen gilt als großes Gesundheitsrisiko. Die Botschaft: Pflege deine Freundschaften, sie sind so wichtig wie Ernährung und Bewegung."
+    },
+    {
+     "title": "Flow: im Tun aufgehen",
+     "text": "Die Autoren verbinden Ikigai mit dem Begriff Flow, den der Psychologe Mihály Csíkszentmihályi geprägt hat. Flow ist der Zustand, in dem man ganz in einer Tätigkeit aufgeht, die Zeit vergisst und Freude empfindet. Er entsteht, wenn eine Aufgabe weder zu leicht noch zu schwer ist, wenn man ein klares Ziel hat und sich ohne Ablenkung darauf konzentriert. Viele japanische Handwerker, die ihr Leben lang dasselbe tun und immer besser werden, erleben diesen Zustand. Die Autoren raten, Ablenkungen wie das Handy auszuschalten, eine Sache nach der anderen zu tun und Tätigkeiten zu suchen, in denen man ganz aufgeht."
+    },
+    {
+     "title": "Gelassenheit und Widerstandskraft",
+     "text": "Zum Schluss geht es um Resilienz. Die Alten in Okinawa haben schwere Zeiten erlebt, etwa den Zweiten Weltkrieg, und sind trotzdem heiter geblieben. Die Autoren sehen Parallelen zum Stoizismus und zu buddhistischen Gedanken: Man soll sich auf das konzentrieren, was man beeinflussen kann, das Vergängliche annehmen und nicht in Sorgen versinken. Ein japanisches Sprichwort sagt sinngemäß: Siebenmal fallen, achtmal aufstehen. Wer sein Ikigai kennt, findet auch nach Rückschlägen einen Grund weiterzumachen. Der Weg dorthin beginnt mit der einfachen Frage, was einen wirklich erfüllt und wem man damit etwas gibt."
+    }
+   ],
+   "outro": "Schreib auf, wobei du die Zeit vergisst und wem du damit etwas gibst, das ist dein Ikigai-Kandidat. Hör beim nächsten Essen auf, wenn du zu achtzig Prozent satt bist, und ruf einen alten Freund an.",
+   "audio": "thorsten"
+  },
+  {
+   "id": "zen-anfaenger",
+   "title": "Zen-Geist, Anfänger-Geist",
+   "author": "Shunryu Suzuki",
+   "isbn": "9781590308493",
+   "genre": "Japanische Weisheit",
+   "tags": [
+    "Zen",
+    "Meditation",
+    "Japan"
+   ],
+   "idea": "Im Geist des Anfängers gibt es viele Möglichkeiten, im Geist des Experten nur wenige. Zen heißt, mit offenem Geist zu sitzen, zu atmen und jeden Moment frisch zu erleben, ohne Ziel und ohne Gewinnstreben.",
+   "forWhom": "Für alle, die mit Meditation beginnen oder ihre Praxis vertiefen wollen, ganz ohne Vorwissen.",
+   "parts": [
+    {
+     "title": "Der Anfänger-Geist",
+     "text": "Shunryu Suzuki war ein japanischer Zen-Meister, der 1959 nach San Francisco kam und dort eines der ersten Zen-Zentren im Westen gründete. Dieses Buch besteht aus seinen Vorträgen, die Schüler aufgeschrieben haben. Es beginnt mit dem berühmten Satz: Im Geist des Anfängers gibt es viele Möglichkeiten, im Geist des Experten gibt es nur wenige. Ein Anfänger ist offen, neugierig und frei von Vorurteilen. Ein Experte glaubt dagegen oft, schon alles zu wissen, und sieht nichts Neues mehr. Das Ziel der Zen-Praxis ist, diesen Anfänger-Geist zu bewahren, auch nach vielen Jahren Übung."
+    },
+    {
+     "title": "Einfach sitzen",
+     "text": "Im Zentrum steht zazen, die Sitzmeditation. Suzuki beschreibt die Haltung genau: aufrecht sitzen, die Wirbelsäule gerade, das Kinn leicht zurück, die Hände in einer bestimmten Haltung vor dem Bauch. Die richtige Haltung ist für ihn nicht nur Mittel zum Zweck. Wenn man richtig sitzt, ist das bereits Erleuchtung. Man soll nicht sitzen, um etwas zu erreichen, sondern um zu sitzen. Dabei achtet man auf den Atem, ohne ihn zu kontrollieren. Die Luft kommt herein und geht hinaus wie durch eine Schwingtür. Es gibt kein Ich, das atmet, nur das Atmen selbst."
+    },
+    {
+     "title": "Gedanken kommen und gehen lassen",
+     "text": "Viele Anfänger glauben, Meditation bedeute, keine Gedanken zu haben. Suzuki widerspricht. Gedanken kommen ganz natürlich, man soll sie weder bekämpfen noch ihnen folgen. Man lässt sie kommen und gehen wie Wellen auf dem Wasser. Er empfiehlt, die Gedanken wie ein großzügiger Hirte seine Schafe zu behandeln: Man gibt ihnen eine große, weite Weide, dann bleiben sie ruhig. Wer versucht, den Geist mit Gewalt zu kontrollieren, macht ihn unruhiger. Wer ihn gewähren lässt und dabei aufmerksam bleibt, findet nach und nach zu einer tiefen Ruhe. Die Wellen gehören zum Wasser."
+    },
+    {
+     "title": "Ohne Gewinnstreben üben",
+     "text": "Suzuki betont immer wieder, dass man nicht üben soll, um etwas zu gewinnen, etwa Erleuchtung, Ruhe oder besondere Erfahrungen. Wer mit einem Ziel übt, macht die Praxis zum Mittel und verfehlt sie. Er erzählt, dass der schlechteste Pferd oft der beste Schüler wird: Wer Schwierigkeiten hat und trotzdem weitermacht, versteht Zen tiefer als der, dem alles leichtfällt. Auch Fortschritt ist kein Maßstab. Es ist wie Gehen im Nebel: Man merkt nicht, dass man nass wird, aber nach einer Weile ist man durchnässt. Die Wirkung der Übung zeigt sich langsam und unmerklich."
+    },
+    {
+     "title": "Zen im Alltag",
+     "text": "Zen ist nicht nur das Sitzen auf dem Kissen. Suzuki beschreibt, wie man jede Tätigkeit mit voller Aufmerksamkeit tun kann, etwa Essen, Abwaschen oder Gehen. Er spricht davon, sich bei jeder Handlung vollständig zu verbrennen, wie ein gutes Feuer, das keine Asche hinterlässt. Wer eine Sache ganz tut, hinterlässt keine Spuren von Bedauern oder Unerledigtem. Wer halbherzig handelt, trägt die Reste mit sich. Auch Einfachheit gehört dazu: Er rät, das Leben zu vereinfachen, nicht zu viel zu planen und nicht zu viel zu besitzen. So entsteht Raum für Gegenwart."
+    },
+    {
+     "title": "Nichts Besonderes",
+     "text": "Zum Schluss spricht Suzuki über das Verständnis von Leere und Vergänglichkeit. Alles verändert sich ständig, und wer das annimmt, kann in Frieden leben. Leere bedeutet nicht Nichts, sondern dass nichts für sich allein und unveränderlich besteht. Er warnt davor, Zen zu etwas Besonderem oder Geheimnisvollem zu machen. Echte Praxis ist ganz gewöhnlich: aufstehen, sitzen, atmen, arbeiten, essen. Ein Schüler sagte einmal, Zen sei nichts Besonderes, und Suzuki stimmte zu. Gerade in diesem Gewöhnlichen liegt das Wertvolle. Der Anfänger-Geist sieht auch das Alltägliche jeden Tag neu."
+    }
+   ],
+   "outro": "Setz dich morgen früh fünf Minuten aufrecht hin und beobachte nur den Atem, ohne etwas erreichen zu wollen. Mach eine alltägliche Tätigkeit heute einmal so, als würdest du sie zum ersten Mal tun.",
+   "audio": "thorsten"
+  },
+  {
+   "id": "buch-vom-tee",
+   "title": "Das Buch vom Tee",
+   "author": "Kakuzo Okakura",
+   "genre": "Japanische Weisheit",
+   "tags": [
+    "Japan",
+    "Tee",
+    "Ästhetik"
+   ],
+   "idea": "Die Teezeremonie ist mehr als ein Getränk: Sie ist eine Kunst des Lebens, die Schönheit im Unvollkommenen und Schlichten sucht und den Alltag in einen Moment der Achtsamkeit verwandelt.",
+   "forWhom": "Für alle, die sich für japanische Kultur, Ästhetik und eine ruhige Lebenskunst interessieren.",
+   "parts": [
+    {
+     "title": "Ein Brückenbuch zwischen Ost und West",
+     "text": "Kakuzo Okakura, auch Okakura Tenshin genannt, war ein japanischer Kunstgelehrter, der lange in den USA lebte und am Museum of Fine Arts in Boston arbeitete. 1906 veröffentlichte er auf Englisch The Book of Tea. Er wollte dem Westen, der Japan damals vor allem als militärische Macht wahrnahm, die Tiefe der japanischen Kultur zeigen. Mit leiser Ironie bemerkt er, man habe Japan als unzivilisiert betrachtet, solange es friedliche Künste pflegte, und erst als zivilisiert, als es auf Schlachtfeldern siegte. Das Buch nimmt den Tee als Ausgangspunkt, um über Kunst, Natur und Lebenshaltung nachzudenken."
+    },
+    {
+     "title": "Teeismus: die Verehrung des Unvollkommenen",
+     "text": "Okakura prägt den Begriff Teeismus. Er beschreibt ihn als eine Verehrung des Schönen inmitten der schmutzigen Tatsachen des Alltags, als Lehre von Reinheit und Harmonie und als zärtlichen Versuch, im unmöglichen Ding, dem Leben, etwas Mögliches zu vollbringen. Im Kern ist der Teeismus die Verehrung des Unvollkommenen. Vollkommenheit ist starr und abgeschlossen, das Unvollkommene lässt Raum für Wachstum und für die Vorstellungskraft des Betrachters. Diese Haltung prägt die japanische Ästhetik, die man heute oft mit wabi-sabi verbindet, der Schönheit des Schlichten, Alternden und Vergänglichen."
+    },
+    {
+     "title": "Vom Kuchentee zum Schaumtee",
+     "text": "Okakura erzählt die Geschichte des Tees in drei Stufen, die für ihn drei Kulturepochen Chinas spiegeln. In der Tang-Zeit wurde Tee in Kuchenform gepresst und gekocht, der Dichter Lu Yu schrieb darüber ein klassisches Buch. In der Song-Zeit wurde pulverisierter Tee mit einem Bambusbesen schaumig geschlagen, diese Form gelangte mit Zen-Mönchen nach Japan und lebt im heutigen Matcha weiter. In der Ming-Zeit setzte sich der aufgegossene Blatttee durch. Japan bewahrte die Song-Tradition und entwickelte daraus die Teezeremonie, chanoyu, als eigene Kunstform."
+    },
+    {
+     "title": "Daoismus und Zen im Tee",
+     "text": "Für Okakura ist der Teeismus ein verkleideter Daoismus. Er erinnert an Laozis Gedanken, dass das Wesentliche eines Gefäßes der leere Raum ist. Auch Zen hat den Tee geprägt. Zen-Mönche tranken Tee vor einem Bild des Bodhidharma aus einer gemeinsamen Schale, und daraus entstand das Ritual. Zen betont, dass das Große im Kleinen liegt und dass auch die einfachsten Tätigkeiten des Alltags heilig sein können. Okakura erzählt die Geschichte eines Teemeisters, der einen Garten fegte und, nachdem alles sauber war, einen Baum schüttelte, damit ein paar Blätter natürlich auf dem Weg lagen. Sauberkeit ohne Leben ist keine Schönheit."
+    },
+    {
+     "title": "Der Teeraum: das Haus der Leere",
+     "text": "Ein eigenes Kapitel beschreibt den Teeraum. Er ist klein, schlicht und bewusst unscheinbar, oft wie eine einfache Hütte. Man betritt ihn durch einen niedrigen Eingang, durch den sich jeder bücken muss, auch ein Fürst. So sind alle Gäste gleich. Der Raum ist fast leer, er enthält nur wenige Dinge, etwa eine Schriftrolle und ein Blumenarrangement, die für den Anlass ausgewählt werden. Okakura nennt ihn das Haus der Phantasie, das Haus der Leere und das Haus des Asymmetrischen. Wiederholung wird vermieden, nichts soll zweimal vorkommen, damit die Aufmerksamkeit frisch bleibt."
+    },
+    {
+     "title": "Kunst, Blumen und Rikyus letzte Zeremonie",
+     "text": "Okakura schreibt auch über Kunstverständnis: Ein Kunstwerk spricht nur zu dem, der sich ihm öffnet, wie eine Saite, die mitschwingt. Ein Kapitel ist den Blumen gewidmet und kritisiert, wie achtlos Menschen Blumen abschneiden und wegwerfen, während japanische Meister sie mit großer Sorgfalt arrangieren. Das Buch endet mit dem Tod des großen Teemeisters Sen no Rikyu, der vom Herrscher Hideyoshi zum Selbstmord gezwungen wurde. Rikyu lud seine Schüler zu einer letzten Teezeremonie, verschenkte die Geräte und zerbrach seine Teeschale. Er ging mit vollkommener Ruhe. Für Okakura zeigt das, dass die Teekunst auch eine Kunst des Abschieds ist."
+    }
+   ],
+   "outro": "Mach dir heute eine Tasse Tee und trink sie ohne Handy, ganz aufmerksam. Such in deiner Wohnung eine Ecke, in der weniger Dinge mehr Ruhe schaffen könnten.",
+   "audio": "thorsten"
+  },
+  {
+   "id": "bushido",
+   "title": "Bushido. Die Seele Japans",
+   "author": "Inazo Nitobe",
+   "genre": "Japanische Weisheit",
+   "tags": [
+    "Japan",
+    "Samurai",
+    "Ethik"
+   ],
+   "idea": "Bushido, der Weg des Kriegers, ist ein ungeschriebener Ehrenkodex aus Gerechtigkeit, Mut, Güte, Höflichkeit, Wahrhaftigkeit, Ehre und Loyalität, der den Charakter Japans tief geprägt hat.",
+   "forWhom": "Für alle, die sich für Samurai, Kampfkunst und die Werte hinter der japanischen Kultur interessieren.",
+   "parts": [
+    {
+     "title": "Ein Ehrenkodex ohne Gesetzbuch",
+     "text": "Inazo Nitobe war ein japanischer Gelehrter und Diplomat, später stellvertretender Generalsekretär des Völkerbunds. 1899 schrieb er auf Englisch Bushido, The Soul of Japan. Anlass war die Frage eines belgischen Juristen, wie man in Japan ohne Religionsunterricht in den Schulen Moral vermittle. Nitobe antwortete: durch Bushido. Gemeint ist der Weg des Kriegers, die Ethik der Samurai, die nie als Gesetzbuch aufgeschrieben wurde, sondern über Jahrhunderte durch Vorbilder, Erziehung und Überlieferung entstand. Nitobe vergleicht sie mit der europäischen Ritterlichkeit und will sie dem Westen verständlich machen."
+    },
+    {
+     "title": "Die Quellen: Zen, Shinto, Konfuzius",
+     "text": "Nitobe nennt drei Wurzeln des Bushido. Der Buddhismus, vor allem Zen, brachte Gelassenheit gegenüber dem Schicksal, ruhiges Vertrauen und eine Vertrautheit mit dem Tod. Der Shinto gab Loyalität gegenüber dem Herrscher, Verehrung der Ahnen und Liebe zur Heimat. Die Lehren des Konfuzius lieferten die Ordnung der Beziehungen, zwischen Herr und Diener, Vater und Sohn, Mann und Frau, älterem und jüngerem Bruder und unter Freunden. Dazu kam der chinesische Denker Wang Yangming mit der Lehre, dass Wissen und Handeln eins sein müssen. Bushido verlangte nicht nur Wissen, sondern Taten."
+    },
+    {
+     "title": "Gerechtigkeit und Mut",
+     "text": "Die erste Tugend ist Gerechtigkeit oder Rechtschaffenheit. Ein Samurai beschreibt sie als die Kraft, sich ohne Zögern für das Richtige zu entscheiden: zu sterben, wenn es recht ist zu sterben, zu kämpfen, wenn es recht ist zu kämpfen. Mut ist für Nitobe nur dann eine Tugend, wenn er im Dienst der Gerechtigkeit steht. Zu wissen, was richtig ist, und es nicht zu tun, zeigt einen Mangel an Mut. Echter Mut ist nicht Tollkühnheit, sondern ruhige Gelassenheit. Ein wirklich tapferer Mensch bleibt gefasst, auch in Gefahr. Zu sterben für eine unwürdige Sache nannte man den Tod eines Hundes."
+    },
+    {
+     "title": "Güte und Höflichkeit",
+     "text": "Ein Krieger soll nicht nur stark, sondern auch gütig sein. Güte und Mitgefühl galten als höchste Eigenschaften eines Anführers, besonders gegenüber Schwachen und Besiegten. Nitobe erzählt die Geschichte eines Kriegers, der einen jungen Feind im Kampf besiegte, ihn verschonen wollte und am Ende zutiefst erschüttert war, ihn töten zu müssen. Viele Samurai pflegten Dichtung und Musik, um ihre Gefühle zu verfeinern. Höflichkeit war mehr als Etikette, sie sollte Ausdruck echter Rücksicht auf die Gefühle anderer sein. Als Beispiel nennt Nitobe, dass man unter einer Sonne leidet, wenn ein anderer ohne Schirm danebensteht."
+    },
+    {
+     "title": "Wahrhaftigkeit, Ehre, Loyalität",
+     "text": "Das Wort eines Samurai galt als verlässlich. Er brauchte keinen Eid, sein Wort genügte, und Lügen galt als feige. Ehre war ein tiefes Bewusstsein für die eigene Würde und das Gefühl der Scham, wenn man ihr nicht gerecht wurde. Nitobe zeigt aber auch die Kehrseite: Ein übersteigertes Ehrgefühl konnte zu Streit und Gewalt um Kleinigkeiten führen, und darum betonte Bushido zugleich Geduld und Nachsicht. Loyalität gegenüber dem Herrn stand sehr hoch. Doch Loyalität bedeutete nicht blinden Gehorsam: Ein Samurai sollte seinen Herrn auch warnen, wenn dieser im Unrecht war, notfalls unter Einsatz seines Lebens."
+    },
+    {
+     "title": "Selbstbeherrschung, Schwert und Erbe",
+     "text": "Ein Samurai sollte seine Gefühle nicht zur Schau stellen, weder Freude noch Schmerz. Nitobe erklärt das nicht als Gefühllosigkeit, sondern als Rücksicht und innere Stärke. Er beschreibt auch das Schwert als Seele des Samurai, das Symbol von Ehre und Verantwortung, das man nicht leichtfertig zieht. Ein Meister ist, wer sein Schwert nie benutzen muss. Nitobe spricht auch über das rituelle Selbsttöten, über die Erziehung der Frauen und über die Frage, was vom Bushido in der modernen Zeit bleibt. Er glaubte, dass die Samurai als Stand verschwinden, ihre Tugenden aber weiterleben, wie der Duft einer Kirschblüte, die schon gefallen ist."
+    }
+   ],
+   "outro": "Prüf, ob du eine Zusage einhalten musst, die du gegeben hast, und halte sie. Frag dich bei einem Konflikt, ob Mut hier heißt zu kämpfen oder geduldig zu bleiben.",
+   "audio": "thorsten"
+  },
+  {
+   "id": "hagakure",
+   "title": "Hagakure",
+   "author": "Yamamoto Tsunetomo",
+   "genre": "Japanische Weisheit",
+   "tags": [
+    "Japan",
+    "Samurai",
+    "Haltung"
+   ],
+   "idea": "Der Weg des Samurai bedeutet, jeden Tag so zu leben, als sei man schon gestorben. Wer die Angst vor dem Tod loslässt, handelt entschlossen, mit ganzer Hingabe und ohne Zögern.",
+   "forWhom": "Für alle, die sich für Samurai-Denken und Entschlossenheit interessieren. Ein radikales Buch, das man kritisch lesen sollte.",
+   "parts": [
+    {
+     "title": "Verborgen unter den Blättern",
+     "text": "Hagakure bedeutet etwa im Schatten der Blätter oder verborgen unter den Blättern. Das Werk entstand Anfang des 18. Jahrhunderts. Yamamoto Tsunetomo war ein Samurai im Dienst des Fürstenhauses Nabeshima in Saga auf der Insel Kyushu. Als sein Herr starb, durfte er ihm nicht in den Tod folgen, weil dies verboten war. Er wurde Mönch und lebte zurückgezogen. Ein junger Samurai, Tashiro Tsuramoto, besuchte ihn über Jahre und schrieb seine Gespräche und Anekdoten auf. Die Sammlung war lange nur innerhalb des Fürstenhauses bekannt und sollte ursprünglich verbrannt werden. Erst später wurde sie in ganz Japan berühmt."
+    },
+    {
+     "title": "Der Weg des Samurai ist im Sterben zu finden",
+     "text": "Der berühmteste Satz des Buches lautet: Ich habe herausgefunden, dass der Weg des Samurai im Sterben liegt. Gemeint ist keine Todessehnsucht, sondern eine Haltung. Wer jeden Morgen innerlich bereit ist zu sterben, hat keine Angst mehr und kann ohne Zögern das Richtige tun. Yamamoto rät, sich jeden Tag den eigenen Tod vorzustellen, durch Pfeile, Speere, Feuer oder Krankheit. Wer so lebt, als sei er schon tot, gewinnt Freiheit im Weg und kann seine Pflicht ohne Fehler erfüllen. Wer zögert und an seinem Leben hängt, wird im entscheidenden Moment feige oder unentschlossen."
+    },
+    {
+     "title": "Entschlossenheit in sieben Atemzügen",
+     "text": "Das Hagakure legt großen Wert auf schnelles, entschlossenes Handeln. Eine Entscheidung soll innerhalb von sieben Atemzügen fallen. Wer zu lange überlegt, verliert den Moment und meist auch den Mut. Yamamoto meint, dass kluge Menschen oft zögern, weil sie zu viel abwägen, und dass Rechnen und Berechnen einen feige machen. Lieber solle man mit ganzer Kraft handeln, auch auf die Gefahr hin, falsch zu liegen, als halbherzig richtig. Ein Mensch, der mit voller Hingabe handelt, könne selbst eine Wand durchbrechen. Diese Haltung ist kraftvoll, aber auch gefährlich, wenn man sie ohne Nachdenken anwendet."
+    },
+    {
+     "title": "Hingabe an den Herrn und Selbstvervollkommnung",
+     "text": "Im Mittelpunkt steht die bedingungslose Hingabe an den Herrn und das Fürstenhaus. Ein Samurai soll sich ganz seinem Dienst widmen, nicht für Lohn, sondern aus Treue. Zugleich fordert Yamamoto ständige Selbstverbesserung. Man soll sich nie für vollkommen halten. Er beschreibt Stufen des Lernens: Zuerst ist man ungeschickt und weiß es, dann wird man brauchbar, dann erkennt man die eigenen Grenzen und die anderer. Doch selbst der Meister soll sein Leben lang weiterlernen. Wer glaubt, das Ziel erreicht zu haben, hat den Weg schon verlassen. Ein Leben reicht nicht aus, um fertig zu werden."
+    },
+    {
+     "title": "Alltagsweisheit eines Samurai",
+     "text": "Neben den radikalen Gedanken enthält das Hagakure viele kleine, praktische Ratschläge. Man soll auf sein Äußeres achten und stets gepflegt sein, sogar Rouge in der Tasche tragen, falls man blass aussieht, damit man auch im Tod würdevoll wirkt. Man soll freundlich zu anderen sein und Kritik so äußern, dass der andere sie annehmen kann, im Vertrauen und zum richtigen Zeitpunkt, nicht vor allen. Man soll Gespräche mit Bedacht führen und nicht gähnen, wenn andere zusehen. Auch Bescheidenheit zählt: Ein Samurai prahlt nicht. Viele dieser Ratschläge zeigen ein feines Gespür für Menschen."
+    },
+    {
+     "title": "Wie man das Hagakure liest",
+     "text": "Das Hagakure ist ein zwiespältiges Buch. Es preist Entschlossenheit, Treue und Mut, aber auch eine Bereitschaft zum Tod, die im 20. Jahrhundert für Militarismus missbraucht wurde, etwa bei der Ausbildung junger Soldaten im Zweiten Weltkrieg. Der Schriftsteller Yukio Mishima verehrte es und schrieb ein eigenes Buch darüber. Heute lesen es viele eher als Spiegel einer vergangenen Welt und als Anregung zu innerer Haltung, nicht als Handlungsanweisung. Was bleibt, ist ein starker Gedanke: Wer die Angst vor dem Scheitern und dem Ende annimmt, kann im Hier und Jetzt mit voller Kraft und ohne Zögern leben."
+    }
+   ],
+   "outro": "Triff eine Entscheidung, die du schon lange vor dir herschiebst, innerhalb weniger Atemzüge. Und nimm dir die Haltung ganzer Hingabe, aber prüf kritisch, wem und wofür.",
+   "audio": "thorsten"
+  },
+  {
+   "id": "36-strategeme",
+   "title": "Die 36 Strategeme im Überblick",
+   "author": "Altchinesische Sammlung, nach Harro von Senger",
+   "genre": "Strategie",
+   "tags": [
+    "Strategeme",
+    "List",
+    "China"
+   ],
+   "idea": "Die 36 Strategeme sind in sechs Gruppen zu je sechs geordnet, von Listen für die überlegene Lage bis zu Listen für verzweifelte Lagen. Hier stehen alle 36 mit kurzer Erklärung.",
+   "forWhom": "Für alle, die die Strategeme vollständig kennen und im Alltag wiedererkennen wollen.",
+   "parts": [
+    {
+     "title": "Strategeme bei Überlegenheit: 1 bis 6",
+     "text": "Eins: Den Himmel täuschen und das Meer überqueren. Eine Absicht wird so alltäglich getarnt, dass niemand mehr hinsieht. Zwei: Wei belagern, um Zhao zu retten. Man greift nicht den starken Angreifer an, sondern eine empfindliche Stelle, die er schützen muss. Drei: Mit dem Messer eines anderen töten. Ein Dritter erledigt die Arbeit gegen den Gegner. Vier: Ausgeruht den erschöpften Feind erwarten. Man schont die eigenen Kräfte und lässt den anderen sich verausgaben. Fünf: Eine Feuersbrunst für einen Raub ausnutzen. Man nutzt das Unglück oder die Unordnung beim anderen. Sechs: Im Osten lärmen, im Westen angreifen. Man lenkt die Aufmerksamkeit auf einen Ort und handelt an einem anderen."
+    },
+    {
+     "title": "Strategeme für die Auseinandersetzung: 7 bis 12",
+     "text": "Sieben: Aus einem Nichts etwas erzeugen. Eine Täuschung wird so lange wiederholt, bis der Gegner sie nicht mehr ernst nimmt, dann folgt Echtes. Acht: Sichtbar die Holzstege instand setzen, insgeheim nach Chencang marschieren. Man zeigt offen einen Weg und geht heimlich einen anderen. Neun: Die Feuersbrunst am gegenüberliegenden Ufer beobachten. Man hält sich aus fremdem Streit heraus, bis die Gegner geschwächt sind. Zehn: Hinter dem Lächeln den Dolch verbergen. Freundlichkeit verdeckt eine feindliche Absicht. Elf: Den Pflaumenbaum an Stelle des Pfirsichbaums verdorren lassen. Man opfert etwas Geringeres, um Wichtigeres zu retten. Zwölf: Mit leichter Hand das Schaf wegführen. Man nutzt jede kleine Gelegenheit, die sich nebenbei bietet."
+    },
+    {
+     "title": "Strategeme für den Angriff: 13 bis 18",
+     "text": "Dreizehn: Auf das Gras schlagen, um die Schlange aufzuscheuchen. Man provoziert eine Reaktion, um die Absichten des anderen zu erkennen. Vierzehn: Für die Rückkehr der Seele einen Leichnam ausleihen. Man belebt etwas Altes oder Vergessenes für die eigenen Zwecke neu. Fünfzehn: Den Tiger vom Berg in die Ebene locken. Man lockt einen starken Gegner von seinem vorteilhaften Gelände weg. Sechzehn: Will man etwas fangen, muss man es zunächst loslassen. Wer nicht zu sehr drängt, gewinnt leichter. Siebzehn: Einen Ziegelstein hinwerfen, um einen Jadestein zu erlangen. Man gibt etwas Kleines, um etwas Wertvolles zu bekommen. Achtzehn: Will man eine Räuberbande unschädlich machen, muss man den Anführer fangen. Man trifft den entscheidenden Kopf statt der vielen Glieder."
+    },
+    {
+     "title": "Strategeme für verworrene Lagen: 19 bis 24",
+     "text": "Neunzehn: Unter dem Kessel das Brennholz wegziehen. Man nimmt dem Gegner die Quelle seiner Kraft, statt das Symptom zu bekämpfen. Zwanzig: Das Wasser trüben, um die Fische zu fangen. Man stiftet Verwirrung und erntet darin Vorteile. Einundzwanzig: Die Zikade entschlüpft ihrer goldglänzenden Hülle. Man zieht sich zurück und lässt eine Fassade stehen, die Anwesenheit vortäuscht. Zweiundzwanzig: Die Tür schließen und den Dieb fangen. Man schneidet dem Gegner den Rückweg ab. Dreiundzwanzig: Sich mit dem Fernen verbünden, um den Nachbarn anzugreifen. Man sucht Verbündete weit weg gegen die nahe Bedrohung. Vierundzwanzig: Einen Weg für einen Angriff gegen Guo ausleihen. Man nutzt die Erlaubnis zum Durchzug, um am Ende auch den Gastgeber zu übernehmen."
+    },
+    {
+     "title": "Strategeme zur Gewinnung von Boden: 25 bis 30",
+     "text": "Fünfundzwanzig: Die Tragbalken stehlen und die Stützpfosten austauschen. Man verändert heimlich die Grundlagen, während die Fassade gleich bleibt. Sechsundzwanzig: Die Akazie schelten, dabei aber auf den Maulbeerbaum zeigen. Man kritisiert jemand anderen, damit der Gemeinte die Botschaft versteht. Siebenundzwanzig: Verrücktheit mimen, ohne das Gleichgewicht zu verlieren. Man stellt sich dumm oder harmlos, um unterschätzt zu werden. Achtundzwanzig: Auf das Dach locken, um dann die Leiter wegzuziehen. Man bringt jemanden in eine Lage ohne Rückweg. Neunundzwanzig: Einen dürren Baum mit Blumen schmücken. Man lässt etwas Schwaches größer und stärker erscheinen. Dreißig: Die Rolle des Gastes in die des Gastgebers umkehren. Man beginnt als Gast und übernimmt nach und nach die Führung."
+    },
+    {
+     "title": "Strategeme für verzweifelte Lagen: 31 bis 36",
+     "text": "Einunddreißig: Das Strategem der schönen Frau. Man lenkt den Gegner mit Verlockungen ab und schwächt seinen Willen. Zweiunddreißig: Das Strategem der leeren Stadt. Bei eigener Schwäche zeigt man demonstrativ Gelassenheit, sodass der Gegner eine Falle vermutet. Dreiunddreißig: Das Strategem des Zwietrachtsäens. Man spielt die Spione oder Verbündeten des Gegners gegen ihn aus. Vierunddreißig: Das Strategem des leidenden Fleisches. Man fügt sich selbst einen Schaden zu, um glaubwürdig zu wirken. Fünfunddreißig: Das Kettenstrategem. Man verbindet mehrere Listen, damit eine die andere verstärkt. Sechsunddreißig: Weglaufen ist das Beste. Ist die Lage aussichtslos, ist ein rechtzeitiger Rückzug klüger als eine Niederlage, denn wer sich zurückzieht, kann später wieder antreten."
+    },
+    {
+     "title": "Listkompetenz im Alltag",
+     "text": "Harro von Senger betont, dass man die Strategeme zuerst zum Erkennen lernen sollte, nicht zum Täuschen. Wer sie kennt, bemerkt schneller, wenn jemand ablenkt, ködert, Verwirrung stiftet oder einen auf das Dach lockt. Er spricht von Listkompetenz. Zur Übung kann man bei Nachrichten, Werbung, Verhandlungen oder Bürokonflikten fragen: Welches Strategem könnte hier im Spiel sein? Oft wirken auch mehrere zugleich, wie beim Kettenstrategem. Und manchmal hilft ein Strategem, ein festgefahrenes Problem kreativ zu lösen, etwa durch einen Umweg, durch Abwarten oder durch das Loslassen einer Position. Entscheidend ist, sie mit klaren eigenen Werten zu verbinden."
+    }
+   ],
+   "outro": "Nimm dir eine Woche lang jeden Tag ein Strategem vor und such es in Nachrichten oder im Büro. Prüf bei einem eigenen Problem, ob Umweg, Abwarten oder Loslassen besser wirkt als der direkte Weg.",
+   "audio": "thorsten"
   }
  ]
 }
