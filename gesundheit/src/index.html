@@ -149,6 +149,10 @@ footer{margin-top:40px;color:var(--muted);font-size:.85rem;max-width:70ch}
 .prog td{padding:8px 8px 8px 0;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums;vertical-align:top}
 .prog td.up{color:var(--ok);font-weight:700}
 .tablewrap{overflow-x:auto}
+.programme{margin-top:14px}
+.prog-link{text-decoration:none;color:inherit}
+.prog-link .btn{align-self:flex-start;margin-top:auto}
+.prog-link:hover{border-color:var(--day)}
 </style>
 <div class="wrap">
   <a class="back" href="../">← Portal</a>
@@ -178,6 +182,21 @@ footer{margin-top:40px;color:var(--muted);font-size:.85rem;max-width:70ch}
     </section>
   </div>
   <p class="store" id="store"></p>
+
+  <div class="today programme" aria-label="Trainingsprogramme">
+    <a class="card prog-link" href="starting-strength/">
+      <div class="ic" aria-hidden="true">🏋️‍♂️</div>
+      <h2>Starting Strength</h2>
+      <p class="muted">Langhantel-Programm nach Mark Rippetoe: Training A und B, Steigerung pro Einheit, Aufwärmsätze, Pausenuhr und Protokoll.</p>
+      <span class="btn primary">Öffnen →</span>
+    </a>
+    <a class="card prog-link" href="workouts/">
+      <div class="ic" aria-hidden="true">⏱️</div>
+      <h2>Workouts</h2>
+      <p class="muted">Geführte Körpergewicht-Workouts nach Kategorien, mit Wiederholungen, Intervall-Timer, Ansagen und Bestzeiten.</p>
+      <span class="btn primary">Öffnen →</span>
+    </a>
+  </div>
 
   <div class="tabs" role="tablist">
     <button role="tab" id="tab-kraft" aria-selected="true" aria-controls="view-kraft">Krafttraining</button>
@@ -235,7 +254,7 @@ footer{margin-top:40px;color:var(--muted);font-size:.85rem;max-width:70ch}
     <p class="care">Kein Ersatz für ärztlichen Rat. Supplements nur nach ärztlicher Rücksprache. Befunde und Rohdaten (Apple Health, Oura) bleiben in deinem iCloud-Ordner Claude/Gesundheit und kommen nicht auf diese Seite.</p>
   </section>
 
-  <footer>Gespeichert in deinem Konto: Krafttraining unter gesundheit/kraft.&lt;Datum&gt;, Häkchen unter gesundheit/training.&lt;Datum&gt;, dein Plan unter gesundheit/einstellungen. Die Huberman-Häkchen bleiben, wo sie sind (huberman/tag.&lt;Datum&gt;).</footer>
+  <footer>Gespeichert in deinem Konto: Krafttraining unter gesundheit/kraft.&lt;Datum&gt;, Häkchen unter gesundheit/training.&lt;Datum&gt;, dein Plan unter gesundheit/einstellungen. Die Huberman-Häkchen bleiben, wo sie sind (huberman/tag.&lt;Datum&gt;). Starting Strength speichert unter gesundheit/ss.…, die Workouts unter gesundheit/wo.…; beide haken den Tag in der Woche ab.</footer>
 </div>
 <script>
 "use strict";

@@ -1,0 +1,504 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#14232b">
+<title>Starting Strength</title>
+<link rel="icon" href="../icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap">
+<link rel="stylesheet" href="../training.css">
+<script src="../../config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="../konto.js"></script>
+<script src="../ton.js"></script>
+<script src="logik.js"></script>
+<style>
+.next h2{font-size:1.35rem}
+.next .meta{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:4px 0 12px}
+.plan{list-style:none;margin:0 0 14px;padding:0}
+.plan li{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid var(--line);font-size:1.05rem}
+.plan li:last-child{border-bottom:0}
+.plan li b{font-variant-numeric:tabular-nums;white-space:nowrap}
+.ex{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px 16px;margin-top:12px}
+.ex.done{border-color:color-mix(in srgb,var(--ok) 60%,var(--line))}
+.ex .kopf{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.kg{display:flex;align-items:center;gap:6px}
+.kg button{width:40px;height:40px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--fg);font:700 1.2rem var(--body);cursor:pointer}
+.kg output{font-family:var(--display);font-size:1.45rem;font-weight:700;min-width:5.5ch;text-align:center;font-variant-numeric:tabular-nums}
+.platten{color:var(--muted);font-size:.85rem;margin-top:4px}
+.warm{margin-top:10px;display:flex;flex-wrap:wrap;gap:6px}
+.warm button{font:600 .85rem var(--body);border:1px dashed var(--line);background:transparent;color:var(--muted);border-radius:10px;padding:6px 10px;cursor:pointer;font-variant-numeric:tabular-nums;min-height:36px}
+.warm button[aria-pressed="true"]{border-style:solid;color:var(--ok);border-color:var(--ok);background:color-mix(in srgb,var(--ok) 10%,transparent)}
+.saetze{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
+.satz{width:62px;height:62px;border-radius:50%;border:2px solid var(--line);background:var(--bg);color:var(--muted);font:700 1.3rem var(--display);cursor:pointer;display:flex;align-items:center;justify-content:center;font-variant-numeric:tabular-nums}
+.satz.voll{background:var(--ok);border-color:var(--ok);color:#fff}
+.satz.teil{background:var(--acc);border-color:var(--acc);color:#fff}
+.satzinfo{font-size:.8rem;color:var(--muted);margin-top:6px}
+.kz input{width:72px}
+.ergebnis li{padding:6px 0}
+.log h3{font-size:1rem}
+.log .lifts{margin-top:6px;display:grid;grid-template-columns:auto 1fr;gap:2px 12px;font-variant-numeric:tabular-nums;font-size:.95rem}
+.log .lifts span:nth-child(odd){color:var(--muted)}
+.statgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:12px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.stat b{display:block;font-family:var(--display);font-size:1.3rem;font-variant-numeric:tabular-nums}
+.kgrow{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}
+.kgrow:last-child{border-bottom:0}
+.kgrow input{width:96px;text-align:right}
+.plates{display:flex;flex-wrap:wrap;gap:6px}
+.plates button{font:700 .85rem var(--body);padding:7px 10px;border-radius:999px;border:1px solid var(--line);background:var(--bg);color:var(--muted);cursor:pointer}
+.plates button[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="../">← Gesundheit</a>
+  <p class="eyebrow">Gesundheit · Krafttraining</p>
+  <h1>Starting Strength</h1>
+  <p class="lede">Lineare Anfängerprogression nach Mark Rippetoe: drei Grundübungen pro Training, A und B im Wechsel, und jedes Mal ein bisschen mehr Gewicht.</p>
+  <div class="gate" id="gate" hidden><p>Melde dich im <a href="../../">Portal</a> an, dann wird dein Training im Konto gespeichert. Ohne Anmeldung bleibt es nur in diesem Browser.</p></div>
+  <p class="store" id="store"></p>
+
+  <div class="tabs" role="tablist">
+    <button role="tab" id="tab-training" aria-selected="true" aria-controls="view-training">Training</button>
+    <button role="tab" id="tab-protokoll" aria-selected="false" aria-controls="view-protokoll">Protokoll</button>
+    <button role="tab" id="tab-fortschritt" aria-selected="false" aria-controls="view-fortschritt">Fortschritt</button>
+    <button role="tab" id="tab-einstellungen" aria-selected="false" aria-controls="view-einstellungen">Einstellungen</button>
+    <button role="tab" id="tab-programm" aria-selected="false" aria-controls="view-programm">Programm</button>
+  </div>
+
+  <!-- Training: nächstes Training oder laufende Einheit -->
+  <section id="view-training" role="tabpanel" aria-labelledby="tab-training">
+    <div id="ergebnis" hidden></div>
+    <div id="naechstes"></div>
+    <div id="laufend" hidden></div>
+  </section>
+
+  <section id="view-protokoll" role="tabpanel" aria-labelledby="tab-protokoll" hidden>
+    <div class="between" style="margin-bottom:12px">
+      <h2 id="logTitel">Trainingsprotokoll</h2>
+      <button type="button" class="btn small" id="nachtragen">+ Früheres Training nachtragen</button>
+    </div>
+    <input type="text" id="suche" placeholder="Suchen: Datum, Übung, Notiz" style="width:100%;margin-bottom:12px" aria-label="Protokoll durchsuchen">
+    <div id="logListe"></div>
+  </section>
+
+  <section id="view-fortschritt" role="tabpanel" aria-labelledby="tab-fortschritt" hidden>
+    <div class="row" style="margin-bottom:12px"><span class="muted">Zeitraum</span>
+      <div class="seg" id="zeitraum">
+        <button type="button" data-v="1">1 Monat</button><button type="button" data-v="3" aria-pressed="true">3 Monate</button><button type="button" data-v="6">6 Monate</button><button type="button" data-v="12">1 Jahr</button><button type="button" data-v="0">Alles</button>
+      </div>
+    </div>
+    <div class="statgrid" id="stats"></div>
+    <div id="charts"></div>
+  </section>
+
+  <section id="view-einstellungen" role="tabpanel" aria-labelledby="tab-einstellungen" hidden>
+    <div class="card">
+      <h2>Programm</h2>
+      <div class="grid2" style="margin-top:12px">
+        <div class="field">Phase<div class="seg" data-k="phase"><button type="button" data-v="1">1</button><button type="button" data-v="2">2</button><button type="button" data-v="3">3</button></div><span class="muted small" id="phaseTxt"></span></div>
+        <div class="field">Nächstes Training<div class="seg" data-k="naechstes"><button type="button" data-v="A">A</button><button type="button" data-v="B">B</button></div></div>
+        <label class="field">Körpergewicht (kg)<input type="number" id="kgKoerper" inputmode="decimal" step="0.1" min="30" max="250"></label>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Arbeitsgewichte</h2>
+      <p class="muted small" style="margin:4px 0 8px">Damit startet das nächste Training. Nach jedem Training rechnet die Seite sie selbst weiter, hier kannst du jederzeit korrigieren.</p>
+      <div id="gewichte"></div>
+    </div>
+    <div class="card">
+      <h2>Steigerung pro Training</h2>
+      <p class="muted small" style="margin:4px 0 8px">Am Anfang Kreuzheben 5 kg, sonst 2,5 kg. Wenn es zäh wird, auf die halbe Steigerung gehen statt zurückzufallen.</p>
+      <div id="steigerung"></div>
+    </div>
+    <div class="card">
+      <h2>Ausrüstung</h2>
+      <div class="grid2" style="margin-top:10px">
+        <label class="field">Langhantelstange (kg)<input type="number" id="stange" inputmode="decimal" step="0.5" min="5" max="30"></label>
+      </div>
+      <p class="field" style="margin-top:12px">Scheiben im Studio (je Paar)</p>
+      <div class="plates" id="scheiben"></div>
+    </div>
+    <div class="card">
+      <h2>Pausen</h2>
+      <div class="grid2" style="margin-top:10px">
+        <div class="field">Drücken, Bankdrücken, Umsetzen<div class="seg" data-p="leicht"><button type="button" data-v="90">1:30</button><button type="button" data-v="120">2:00</button><button type="button" data-v="180">3:00</button></div></div>
+        <div class="field">Kniebeuge, Kreuzheben<div class="seg" data-p="schwer"><button type="button" data-v="120">2:00</button><button type="button" data-v="180">3:00</button><button type="button" data-v="300">5:00</button></div></div>
+        <div class="field">Nach einem verpassten Satz<div class="seg" data-p="nachFehl"><button type="button" data-v="180">3:00</button><button type="button" data-v="300">5:00</button><button type="button" data-v="420">7:00</button></div></div>
+        <div class="field">Ton und Sprache<div class="seg" id="tonSeg"><button type="button" data-v="an">An</button><button type="button" data-v="aus">Aus</button></div></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Neu anfangen</h2>
+      <p class="muted small" style="margin:4px 0 10px">Setzt Gewichte, Phase und Fehlversuche auf die Startwerte zurück. Das Protokoll bleibt.</p>
+      <button type="button" class="btn" id="reset">Auf Startwerte zurücksetzen</button>
+    </div>
+  </section>
+
+  <section id="view-programm" role="tabpanel" aria-labelledby="tab-programm" hidden>
+    <div id="wissen"></div>
+    <p class="care">Technik zuerst: Lieber mit leichtem Gewicht sauber anfangen, als Wiederholungen zu erzwingen. Bei Schmerzen abbrechen und ärztlich abklären.</p>
+  </section>
+</div>
+
+<div class="timerbar" id="timer" hidden role="status" aria-live="polite">
+  <span class="t" id="tZeit">0:00</span>
+  <span class="l" id="tLabel">Pause</span>
+  <button type="button" id="tPlus">+30 s</button>
+  <button type="button" id="tStop">Fertig</button>
+</div>
+
+<dialog id="dlg"><form method="dialog" id="dlgForm"></form></dialog>
+
+<script>
+"use strict";
+const $ = id => document.getElementById(id);
+const pad = n => String(n).padStart(2, "0");
+const isoDay = d => d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
+const parseDay = s => { const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d); };
+const fmtDatum = s => parseDay(s).toLocaleDateString("de-DE", {weekday: "short", day: "numeric", month: "long", year: "numeric"});
+const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
+const {UEBUNGEN, PHASEN, fmt} = SS;
+
+const P_STAND = "gesundheit/ss.stand", P_AKTIV = "gesundheit/ss.aktiv", P_EIN = "gesundheit/ss.e.";
+let stand = SS.neuerStand(), aktiv = null, einheiten = {}, letzteMeldung = null, zeitraum = 3;
+
+/* ---------- Speicher ---------- */
+Konto.onState(s => { const el = $("store"); el.dataset.state = s; el.textContent = s === "db" ? "Im Konto gespeichert" : "Gerade nur auf diesem Gerät gespeichert"; });
+const speichereStand = () => Konto.put(P_STAND, stand);
+const speichereAktiv = () => aktiv ? Konto.put(P_AKTIV, aktiv) : Konto.del(P_AKTIV);
+const sortierteEinheiten = () => Object.entries(einheiten).map(([p, e]) => Object.assign({pfad: p}, e)).sort((a, b) => (b.datum + (b.zeit || "")).localeCompare(a.datum + (a.zeit || "")));
+
+/* ---------- Training: nächstes ---------- */
+function planZeile(id, kg) {
+  const u = UEBUNGEN[id];
+  return "<li><span>" + esc(u.k) + "</span><b>" + (u.kg ? u.saetze + " Sätze, so viele wie sauber gehen" : u.saetze + " × " + u.wdh + " @ " + fmt(kg) + " kg") + "</b></li>";
+}
+function renderNaechstes() {
+  const w = stand.naechstes || "A";
+  const tr = SS.neuesTraining(stand, w, isoDay(new Date()));
+  const zuletzt = sortierteEinheiten()[0];
+  const status = zuletzt ? "Zuletzt: " + fmtDatum(zuletzt.datum) + ", Training " + zuletzt.workout : "Bereit für dein erstes Training";
+  const anders = w === "A" ? "B" : "A";
+  $("naechstes").innerHTML =
+    '<div class="card next"><p class="eyebrow">Dein nächstes Training</p>' +
+    "<h2>" + esc(PHASEN[stand.phase].n) + " · Training " + w + "</h2>" +
+    '<div class="meta"><span class="chip ok">' + esc(status) + '</span><span class="muted">Körpergewicht: ' + (stand.koerpergewicht ? fmt(stand.koerpergewicht) + " kg" : "–") + "</span></div>" +
+    '<ul class="plan">' + tr.uebungen.map(u => planZeile(u.id, u.kg)).join("") + "</ul>" +
+    '<button type="button" class="btn acc wide" id="start">Training starten →</button>' +
+    '<div class="row" style="margin-top:10px;justify-content:space-between"><button type="button" class="btn small" id="startAnders">Stattdessen Training ' + anders + '</button><span class="muted small">' + esc(PHASEN[stand.phase].t) + "</span></div></div>";
+  $("start").onclick = () => starte(w);
+  $("startAnders").onclick = () => starte(anders);
+}
+
+function starte(w, datum) {
+  Ton.entsperren();
+  aktiv = SS.neuesTraining(stand, w, datum || isoDay(new Date()));
+  aktiv.zeit = pad(new Date().getHours()) + pad(new Date().getMinutes()) + pad(new Date().getSeconds());
+  aktiv.nachtrag = !!datum;
+  letzteMeldung = null;
+  speichereAktiv(); renderTraining(); Ton._wachGewuenscht = true; Ton.wach(true);
+  window.scrollTo({top: $("view-training").offsetTop - 10, behavior: "smooth"});
+}
+
+/* ---------- Training: laufend ---------- */
+function renderLaufend() {
+  const tr = aktiv;
+  let h = '<div class="card"><div class="between"><div><p class="eyebrow">' + (tr.nachtrag ? "Nachtrag" : "Läuft") + '</p><h2>' + esc(PHASEN[tr.phase].n) + " · Training " + tr.workout + "</h2></div>" +
+    '<span class="muted small">Übung ' + Math.min(tr.uebungen.length, tr.uebungen.filter(SS.geschafft).length + 1) + " von " + tr.uebungen.length + "</span></div>" +
+    '<div class="grid2" style="margin-top:10px"><label class="field">Datum<input type="date" id="trDatum" value="' + esc(tr.datum) + '"></label>' +
+    '<label class="field">Körpergewicht (kg)<input type="number" id="trKoerper" inputmode="decimal" step="0.1" value="' + esc(tr.koerpergewicht || "") + '"></label></div></div>';
+  tr.uebungen.forEach((ue, i) => {
+    const u = UEBUNGEN[ue.id];
+    const warm = SS.aufwaermen(ue.id, ue.kg, stand);
+    const pl = SS.scheibenProSeite(ue.kg, stand);
+    h += '<div class="ex' + (SS.geschafft(ue) ? " done" : "") + '" data-i="' + i + '"><div class="kopf"><h3>' + esc(u.n) + '</h3>';
+    if (!u.kg) h += '<div class="kg"><button type="button" data-a="minus" aria-label="Gewicht runter">−</button><output>' + fmt(ue.kg) + ' kg</output><button type="button" data-a="plus" aria-label="Gewicht hoch">+</button></div>';
+    h += "</div>";
+    if (!u.kg) {
+      h += '<p class="platten">' + (pl.length ? "Pro Seite: " + pl.map(fmt).join(" + ") + " kg" : "Leere Stange") + "</p>";
+      h += warm.length ? '<div class="warm" aria-label="Aufwärmsätze">' + warm.map((w, j) => '<button type="button" data-w="' + j + '" aria-pressed="' + (ue.warm[j] ? "true" : "false") + '">' + (w.anzahl > 1 ? w.anzahl + " × " : "") + w.wdh + " @ " + fmt(w.kg) + "</button>").join("") + "</div>"
+        : '<p class="satzinfo">' + (ue.kg <= stand.stange ? "Mit leerer Stange gibt es keine Aufwärmsätze." : "") + "</p>";
+      h += '<div class="saetze">' + ue.saetze.map((s, j) => '<button type="button" class="satz' + (s === null ? "" : s >= ue.ziel ? " voll" : " teil") + '" data-s="' + j + '" aria-label="Satz ' + (j + 1) + (s === null ? ", offen" : ", " + s + " Wiederholungen") + '">' + (s === null ? ue.ziel : s) + "</button>").join("") + "</div>";
+      h += '<p class="satzinfo">' + ue.saetze.length + " × " + ue.ziel + " Arbeitssätze. Tippen = geschafft, nochmal tippen zählt herunter.</p>";
+    } else {
+      h += '<div class="saetze kz">' + ue.saetze.map((s, j) => '<label class="field small">Satz ' + (j + 1) + '<input type="number" min="0" max="50" inputmode="numeric" data-k="' + j + '" value="' + (s === null ? "" : s) + '"></label>').join("") + "</div>";
+      h += '<p class="satzinfo">Bis kurz vor dem Versagen, Pause nach Gefühl.</p>';
+    }
+    h += "</div>";
+  });
+  h += '<div class="card" style="margin-top:12px"><label class="field">Notiz<textarea id="trNotiz" placeholder="Wie lief es? Technik, Schlaf, Gefühl">' + esc(tr.notiz) + "</textarea></label>" +
+    '<div class="row" style="margin-top:12px"><button type="button" class="btn acc" id="fertig">Training abschließen</button><button type="button" class="btn" id="abbruch">Abbrechen</button></div></div>';
+  $("laufend").innerHTML = h;
+
+  $("trDatum").onchange = e => { tr.datum = e.target.value || tr.datum; speichereAktiv(); };
+  $("trKoerper").onchange = e => { const v = parseFloat(String(e.target.value).replace(",", ".")); tr.koerpergewicht = v > 0 ? v : null; speichereAktiv(); };
+  $("trNotiz").onchange = e => { tr.notiz = e.target.value; speichereAktiv(); };
+  $("fertig").onclick = abschliessen;
+  $("abbruch").onclick = () => frage("Training abbrechen?", "Die eingetragenen Sätze dieser Einheit gehen verloren.", "Abbrechen", () => { aktiv = null; speichereAktiv(); stopTimer(); Ton._wachGewuenscht = false; Ton.wach(false); renderTraining(); });
+  $("laufend").querySelectorAll(".ex").forEach(el => {
+    const ue = tr.uebungen[Number(el.dataset.i)];
+    el.addEventListener("click", ev => {
+      const b = ev.target.closest("button"); if (!b) return;
+      Ton.entsperren();
+      if (b.dataset.a) {
+        const st = 2.5;
+        ue.kg = Math.max(stand.stange, Math.round((ue.kg + (b.dataset.a === "plus" ? st : -st)) * 100) / 100);
+        ue.warm = SS.aufwaermen(ue.id, ue.kg, stand).map(() => false);
+      } else if (b.dataset.w !== undefined) {
+        const j = Number(b.dataset.w); ue.warm[j] = !ue.warm[j];
+      } else if (b.dataset.s !== undefined) {
+        const j = Number(b.dataset.s), s = ue.saetze[j];
+        ue.saetze[j] = s === null ? ue.ziel : s > 0 ? s - 1 : null;
+        if (s === null) {
+          const rest = ue.saetze.slice(j + 1).some(x => x === null) || tr.uebungen.slice(Number(el.dataset.i) + 1).some(x => !SS.geschafft(x));
+          if (rest) startTimer(SS.pauseFuer(ue, ue.saetze[j], stand), UEBUNGEN[ue.id].k + ", Satz " + (j + 1) + " geschafft");
+        } else if (ue.saetze[j] !== null && timerLaeuft()) startTimer(SS.pauseFuer(ue, ue.saetze[j], stand), UEBUNGEN[ue.id].k + ", Satz " + (j + 1) + ": " + ue.saetze[j] + " Wdh.");
+      } else return;
+      speichereAktiv(); renderLaufend();
+    });
+    el.querySelectorAll("input[data-k]").forEach(inp => inp.addEventListener("change", () => {
+      const v = parseInt(inp.value, 10); ue.saetze[Number(inp.dataset.k)] = Number.isFinite(v) && v >= 0 ? v : null; speichereAktiv();
+    }));
+  });
+}
+
+async function abschliessen() {
+  const tr = aktiv;
+  const offen = tr.uebungen.some(u => u.saetze.some(s => s === null));
+  const weiter = async () => {
+    const neuester = sortierteEinheiten()[0];
+    const nachtrag = neuester && (tr.datum < neuester.datum);
+    const eintrag = {datum: tr.datum, zeit: tr.zeit, workout: tr.workout, phase: tr.phase, koerpergewicht: tr.koerpergewicht, notiz: tr.notiz,
+      uebungen: tr.uebungen.map(u => ({id: u.id, kg: u.kg, ziel: u.ziel, saetze: u.saetze, geschafft: SS.geschafft(u)}))};
+    const pfad = P_EIN + tr.datum + "-" + tr.zeit;
+    einheiten[pfad] = eintrag;
+    let meldungen;
+    if (nachtrag) meldungen = ["Nachgetragen für " + fmtDatum(tr.datum) + ". Deine aktuellen Gewichte bleiben, wie sie sind."];
+    else { const r = SS.abschliessen(stand, tr); stand = r.stand; meldungen = r.meldungen; }
+    letzteMeldung = {titel: "Training " + tr.workout + " gespeichert", meldungen, naechstes: stand.naechstes};
+    aktiv = null; stopTimer(); Ton._wachGewuenscht = false; Ton.wach(false);
+    renderAlles();
+    Konto.put(pfad, eintrag);
+    if (!nachtrag) speichereStand();
+    speichereAktiv();
+    /* Tag auch in der Trainingswoche der Gesundheitsseite abhaken. */
+    Konto.put("gesundheit/training." + tr.datum, {done: true});
+  };
+  if (offen) frage("Training abschließen?", "Nicht alle Sätze sind eingetragen. Offene Sätze zählen als nicht geschafft, das Gewicht bleibt dann beim nächsten Mal gleich.", "Abschließen", weiter);
+  else weiter();
+}
+
+function renderErgebnis() {
+  const m = letzteMeldung;
+  $("ergebnis").hidden = !m;
+  if (!m) return;
+  $("ergebnis").innerHTML = '<div class="ok-box" style="margin-bottom:12px"><h3>' + esc(m.titel) + '</h3><ul class="ergebnis" style="margin:6px 0 0;padding-left:18px">' + m.meldungen.map(x => "<li>" + esc(x) + "</li>").join("") + "</ul></div>";
+}
+
+function renderTraining() {
+  $("naechstes").hidden = !!aktiv; $("laufend").hidden = !aktiv;
+  if (aktiv) { $("ergebnis").hidden = true; renderLaufend(); } else { renderErgebnis(); renderNaechstes(); }
+}
+
+/* ---------- Pausen-Timer ---------- */
+let tEnde = 0, tIv = null, tGemeldet = false;
+const timerLaeuft = () => !!tIv;
+function startTimer(sek, label) {
+  tEnde = Date.now() + sek * 1000; tGemeldet = false;
+  $("tLabel").textContent = label + " · Pause"; $("timer").hidden = false; $("timer").classList.remove("fertig");
+  clearInterval(tIv); tIv = setInterval(tick, 250); tick();
+}
+function tick() {
+  const rest = Math.round((tEnde - Date.now()) / 1000);
+  const a = Math.abs(rest);
+  $("tZeit").textContent = (rest < 0 ? "+" : "") + Math.floor(a / 60) + ":" + pad(a % 60);
+  if (rest === 10 && !tGemeldet) Ton.piep(false);
+  if (rest <= 0 && !tGemeldet) { tGemeldet = true; $("timer").classList.add("fertig"); $("tLabel").textContent = "Pause vorbei, nächster Satz"; Ton.piep(true, true); Ton.vibrier([200, 100, 200]); Ton.sag("Pause vorbei. Nächster Satz."); }
+}
+function stopTimer() { clearInterval(tIv); tIv = null; $("timer").hidden = true; }
+$("tPlus").onclick = () => { tEnde += 30000; if (tEnde > Date.now()) { tGemeldet = false; $("timer").classList.remove("fertig"); } tick(); };
+$("tStop").onclick = stopTimer;
+
+/* ---------- Dialog statt confirm() ---------- */
+function frage(titel, text, ja, fn) {
+  const f = $("dlgForm");
+  f.innerHTML = "<h2>" + esc(titel) + '</h2><p class="muted" style="margin:8px 0 16px">' + esc(text) + '</p><div class="row" style="justify-content:flex-end"><button value="nein" class="btn">Zurück</button><button value="ja" class="btn acc">' + esc(ja) + "</button></div>";
+  const d = $("dlg");
+  d.onclose = () => { if (d.returnValue === "ja") fn(); };
+  d.returnValue = ""; d.showModal();
+}
+
+/* ---------- Protokoll ---------- */
+function satzText(u) {
+  const def = UEBUNGEN[u.id];
+  const s = u.saetze.map(x => x === null ? "–" : x);
+  if (def.kg) return s.join(" / ") + " Wdh.";
+  const alle = u.saetze.every(x => x === u.ziel);
+  return fmt(u.kg) + " kg · " + (alle ? u.saetze.length + " × " + u.ziel : s.join(" / ")) + (u.geschafft ? " ✓" : "");
+}
+function renderProtokoll() {
+  const q = $("suche").value.trim().toLowerCase();
+  const alle = sortierteEinheiten();
+  $("logTitel").textContent = "Trainingsprotokoll (" + alle.length + ")";
+  const liste = alle.filter(e => !q || (e.datum + " " + fmtDatum(e.datum) + " training " + e.workout + " " + (e.notiz || "") + " " + e.uebungen.map(u => UEBUNGEN[u.id].k).join(" ")).toLowerCase().includes(q));
+  if (!liste.length) { $("logListe").innerHTML = '<div class="card empty">' + (alle.length ? "Nichts gefunden." : "Noch kein Training eingetragen.") + "</div>"; return; }
+  $("logListe").innerHTML = liste.map(e => '<div class="card log"><div class="between"><h3>' + esc(fmtDatum(e.datum)) + '</h3><span class="chip">' + esc((PHASEN[e.phase] || PHASEN[1]).n) + " · " + esc(e.workout) + "</span></div>" +
+    '<div class="lifts">' + e.uebungen.map(u => "<span>" + esc(UEBUNGEN[u.id].k) + "</span><span>" + esc(satzText(u)) + "</span>").join("") + "</div>" +
+    (e.koerpergewicht ? '<p class="muted small" style="margin-top:6px">Körpergewicht ' + fmt(e.koerpergewicht) + " kg</p>" : "") +
+    (e.notiz ? '<p style="margin-top:6px">' + esc(e.notiz) + "</p>" : "") +
+    '<div class="row" style="justify-content:flex-end;margin-top:8px"><button type="button" class="btn small" data-del="' + esc(e.pfad) + '">Löschen</button></div></div>').join("");
+  $("logListe").querySelectorAll("[data-del]").forEach(b => b.onclick = () => frage("Eintrag löschen?", "Das Training vom " + fmtDatum(einheiten[b.dataset.del].datum) + " wird aus dem Protokoll entfernt. Deine aktuellen Gewichte ändern sich nicht.", "Löschen", () => { delete einheiten[b.dataset.del]; Konto.del(b.dataset.del); renderAlles(); }));
+}
+$("suche").addEventListener("input", renderProtokoll);
+$("nachtragen").onclick = () => {
+  if (aktiv) { show("training"); return; }
+  const gestern = new Date(); gestern.setDate(gestern.getDate() - 1);
+  starte(stand.naechstes === "A" ? "B" : "A", isoDay(gestern)); show("training");
+};
+
+/* ---------- Fortschritt ---------- */
+function chart(punkte, einheit) {
+  if (punkte.length < 2) return '<p class="muted small">' + (punkte.length ? "Ab dem zweiten Training siehst du hier eine Kurve. Bisher: " + fmt(punkte[0].y) + " " + einheit : "Noch keine Daten.") + "</p>";
+  const W = 640, H = 200, L = 40, R = 10, T = 10, B = 26;
+  const xs = punkte.map(p => p.x), ys = punkte.map(p => p.y);
+  const x0 = Math.min(...xs), x1 = Math.max(...xs) || x0 + 1;
+  let y0 = Math.min(...ys), y1 = Math.max(...ys); if (y0 === y1) { y0 -= 5; y1 += 5; }
+  const pad5 = (y1 - y0) * 0.1; y0 = Math.max(0, y0 - pad5); y1 += pad5;
+  const X = x => L + (x - x0) / ((x1 - x0) || 1) * (W - L - R), Y = y => T + (1 - (y - y0) / (y1 - y0)) * (H - T - B);
+  let g = "";
+  for (let i = 0; i <= 3; i++) { const v = y0 + (y1 - y0) * i / 3; g += '<line class="grid" x1="' + L + '" x2="' + (W - R) + '" y1="' + Y(v) + '" y2="' + Y(v) + '"/><text x="' + (L - 6) + '" y="' + (Y(v) + 4) + '" text-anchor="end">' + Math.round(v) + "</text>"; }
+  const d0 = new Date(x0), d1 = new Date(x1);
+  g += '<text x="' + L + '" y="' + (H - 6) + '">' + d0.toLocaleDateString("de-DE", {day: "numeric", month: "short"}) + '</text><text x="' + (W - R) + '" y="' + (H - 6) + '" text-anchor="end">' + d1.toLocaleDateString("de-DE", {day: "numeric", month: "short"}) + "</text>";
+  const path = punkte.map((p, i) => (i ? "L" : "M") + X(p.x).toFixed(1) + " " + Y(p.y).toFixed(1)).join(" ");
+  return '<svg class="chart" viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="Verlauf in ' + einheit + '">' + g + '<path class="line" d="' + path + '"/>' + punkte.map(p => '<circle class="dot" cx="' + X(p.x).toFixed(1) + '" cy="' + Y(p.y).toFixed(1) + '" r="3"><title>' + new Date(p.x).toLocaleDateString("de-DE") + ": " + fmt(p.y) + " " + einheit + "</title></circle>").join("") + "</svg>";
+}
+function renderFortschritt() {
+  const ab = zeitraum ? (() => { const d = new Date(); d.setMonth(d.getMonth() - zeitraum); return isoDay(d); })() : "0000";
+  const liste = sortierteEinheiten().filter(e => e.datum >= ab).reverse();
+  const wochen = Math.max(1, zeitraum ? zeitraum * 4.345 : liste.length ? (Date.now() - parseDay(liste[0].datum)) / 6048e5 : 1);
+  const stats = [["Trainings", liste.length], ["Pro Woche", (liste.length / wochen).toFixed(1).replace(".", ",")], ["Zuletzt", liste.length ? parseDay(liste[liste.length - 1].datum).toLocaleDateString("de-DE", {day: "numeric", month: "short"}) : "–"]];
+  const kgs = liste.filter(e => e.koerpergewicht);
+  stats.push(["Körpergewicht", kgs.length ? fmt(kgs[kgs.length - 1].koerpergewicht) + " kg" : "–"]);
+  $("stats").innerHTML = stats.map(([t, v]) => '<div class="stat"><span class="muted small">' + t + "</span><b>" + v + "</b></div>").join("");
+  if (!liste.length) { $("charts").innerHTML = '<div class="card empty"><b>Noch keine Trainingsdaten</b><br>Schließ ein Training ab, dann siehst du hier deine Kraftkurven.</div>'; return; }
+  let h = "";
+  for (const id of ["kniebeuge", "druecken", "bank", "kreuzheben", "umsetzen"]) {
+    const p = []; let best = 0;
+    for (const e of liste) for (const u of e.uebungen) if (u.id === id && u.saetze.some(s => s !== null)) { p.push({x: parseDay(e.datum).getTime(), y: u.kg}); if (u.geschafft) best = Math.max(best, u.kg); }
+    if (!p.length) continue;
+    const diff = p[p.length - 1].y - p[0].y;
+    h += '<div class="card"><div class="between"><h3>' + esc(UEBUNGEN[id].k) + '</h3><span class="muted small">Bestes geschafftes Gewicht: <b>' + (best ? fmt(best) + " kg" : "–") + "</b>" + (diff ? " · " + (diff > 0 ? "+" : "") + fmt(diff) + " kg" : "") + "</span></div>" + chart(p, "kg") + "</div>";
+  }
+  if (kgs.length) h += '<div class="card"><h3>Körpergewicht</h3>' + chart(kgs.map(e => ({x: parseDay(e.datum).getTime(), y: e.koerpergewicht})), "kg") + "</div>";
+  $("charts").innerHTML = h;
+}
+$("zeitraum").addEventListener("click", ev => { const b = ev.target.closest("button"); if (!b) return; zeitraum = Number(b.dataset.v); $("zeitraum").querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x === b ? "true" : "false")); renderFortschritt(); });
+
+/* ---------- Einstellungen ---------- */
+const ALLE_SCHEIBEN = [25, 20, 15, 10, 5, 2.5, 1.25, 0.5];
+const LIFTS = ["kniebeuge", "druecken", "bank", "kreuzheben", "umsetzen"];
+function renderEinstellungen() {
+  document.querySelectorAll(".seg[data-k]").forEach(s => s.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(stand[s.dataset.k]) === b.dataset.v ? "true" : "false")));
+  document.querySelectorAll(".seg[data-p]").forEach(s => s.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(stand.pause[s.dataset.p]) === b.dataset.v ? "true" : "false")));
+  $("tonSeg").querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", (Ton.an ? "an" : "aus") === b.dataset.v ? "true" : "false"));
+  $("phaseTxt").textContent = PHASEN[stand.phase].t;
+  $("kgKoerper").value = stand.koerpergewicht || "";
+  $("stange").value = stand.stange;
+  $("gewichte").innerHTML = LIFTS.map(id => '<div class="kgrow"><span>' + esc(UEBUNGEN[id].k) + (stand.fehl[id] ? ' <span class="chip acc">' + stand.fehl[id] + ". Fehlversuch</span>" : "") + '</span><span class="row"><input type="number" inputmode="decimal" step="0.5" min="0" data-g="' + id + '" value="' + stand.gewichte[id] + '"> kg</span></div>').join("");
+  $("steigerung").innerHTML = LIFTS.map(id => '<div class="kgrow"><span>' + esc(UEBUNGEN[id].k) + '</span><div class="seg" data-st="' + id + '">' + [1.25, 2.5, 5].map(v => '<button type="button" data-v="' + v + '" aria-pressed="' + (Number(stand.steig[id]) === v ? "true" : "false") + '">' + fmt(v) + "</button>").join("") + "</div></div>").join("");
+  $("scheiben").innerHTML = ALLE_SCHEIBEN.map(v => '<button type="button" data-v="' + v + '" aria-pressed="' + (stand.scheiben.includes(v) ? "true" : "false") + '">' + fmt(v) + " kg</button>").join("");
+  $("gewichte").querySelectorAll("input").forEach(i => i.onchange = () => { const v = parseFloat(String(i.value).replace(",", ".")); if (v >= 0) { stand.gewichte[i.dataset.g] = v; stand.fehl[i.dataset.g] = 0; aenderung(); } });
+  $("steigerung").querySelectorAll(".seg").forEach(s => s.onclick = ev => { const b = ev.target.closest("button"); if (!b) return; stand.steig[s.dataset.st] = Number(b.dataset.v); aenderung(); });
+  $("scheiben").onclick = ev => { const b = ev.target.closest("button"); if (!b) return; const v = Number(b.dataset.v); stand.scheiben = stand.scheiben.includes(v) ? stand.scheiben.filter(x => x !== v) : stand.scheiben.concat(v).sort((a, c) => c - a); if (!stand.scheiben.length) stand.scheiben = [2.5]; aenderung(); };
+}
+function aenderung() { speichereStand(); renderAlles(); }
+document.querySelectorAll(".seg[data-k]").forEach(s => s.addEventListener("click", ev => { const b = ev.target.closest("button"); if (!b) return; stand[s.dataset.k] = s.dataset.k === "phase" ? Number(b.dataset.v) : b.dataset.v; aenderung(); }));
+document.querySelectorAll(".seg[data-p]").forEach(s => s.addEventListener("click", ev => { const b = ev.target.closest("button"); if (!b) return; stand.pause[s.dataset.p] = Number(b.dataset.v); aenderung(); }));
+$("tonSeg").addEventListener("click", ev => { const b = ev.target.closest("button"); if (!b) return; Ton.an = b.dataset.v === "an"; Ton.entsperren(); if (Ton.an) Ton.piep(true); renderEinstellungen(); });
+$("kgKoerper").onchange = () => { const v = parseFloat(String($("kgKoerper").value).replace(",", ".")); stand.koerpergewicht = v > 0 ? v : null; aenderung(); };
+$("stange").onchange = () => { const v = parseFloat(String($("stange").value).replace(",", ".")); if (v > 0) { stand.stange = v; aenderung(); } };
+$("reset").onclick = () => frage("Auf Startwerte zurücksetzen?", "Gewichte: Kniebeuge 20, Drücken 20, Bankdrücken 25, Kreuzheben 60, Umsetzen 40 kg. Phase 1, Training A. Dein Protokoll bleibt.", "Zurücksetzen", () => { stand = SS.neuerStand({koerpergewicht: stand.koerpergewicht, scheiben: stand.scheiben, stange: stand.stange}); aenderung(); });
+
+/* ---------- Programm (Wissen) ---------- */
+const WISSEN = [
+  {t: "Die Idee", s: "Jedes Training ein bisschen schwerer", p: [
+    "Als Anfänger erholst du dich innerhalb von 48 bis 72 Stunden vom Training und bist danach stärker. Deshalb steigt das Gewicht bei jeder Einheit, nicht jede Woche.",
+    "Drei Trainings pro Woche mit einem Tag Pause dazwischen, zum Beispiel Montag, Mittwoch, Freitag. Training A und B wechseln sich ab.",
+    "Wenige Grundübungen mit der Langhantel, die viel Muskelmasse über einen großen Bewegungsweg bewegen: Kniebeuge, Drücken, Bankdrücken, Kreuzheben, später Umsetzen.",
+    "Das Programm läuft, solange die Steigerung klappt. Wenn sie trotz Essen, Schlaf und kleineren Sprüngen nicht mehr klappt, ist die Anfängerphase vorbei."]},
+  {t: "Ablauf der Phasen", s: "So baut sich das Programm auf", p: [
+    "Phase 1: A = Kniebeuge 3×5, Drücken 3×5, Kreuzheben 1×5. B = Kniebeuge 3×5, Bankdrücken 3×5, Kreuzheben 1×5.",
+    "Phase 2: Kreuzheben wird schwer und braucht Erholung. In B ersetzt Umsetzen 5×3 das Kreuzheben.",
+    "Phase 3: Klimmzüge kommen in B dazu, Kreuzheben und Umsetzen wechseln sich in A ab.",
+    "Kniebeuge ist bei jedem Training dabei, sie treibt den ganzen Fortschritt."]},
+  {t: "Steigerung und Fehlversuche", s: "Was tun, wenn es nicht klappt", p: [
+    "Alle Sätze mit allen Wiederholungen geschafft: Beim nächsten Mal mehr. Startwerte hier: Kreuzheben 5 kg, sonst 2,5 kg.",
+    "Nicht geschafft: Gleiches Gewicht noch einmal. Ursachen prüfen: zu wenig gegessen, zu wenig geschlafen, zu kurze Pausen.",
+    "Dreimal am selben Gewicht gescheitert: Etwa 10 Prozent leichter und wieder hocharbeiten. Die Seite rechnet das automatisch.",
+    "Wenn die großen Sprünge nicht mehr gehen, auf die halbe Steigerung umstellen (Einstellungen). Kleine Scheiben (1,25 kg) helfen dabei sehr."]},
+  {t: "Aufwärmen", s: "Leere Stange, dann in Stufen hoch", p: [
+    "Zwei Sätze mit leerer Stange, dann zwei bis drei Stufen mit weniger Wiederholungen bis zum Arbeitsgewicht. Die Seite schlägt die Stufen vor.",
+    "Aufwärmsätze sollen nicht ermüden. Je schwerer das Arbeitsgewicht, desto mehr Stufen.",
+    "Kreuzheben und Umsetzen starten mit Scheiben, weil die Stange vom Boden kommt."]},
+  {t: "Pausen", s: "Lang genug für den nächsten Satz", p: [
+    "Zwischen schweren Sätzen 3 bis 5 Minuten, bei Drücken und Bankdrücken oft 2 bis 3 Minuten reichen.",
+    "Nach einem verpassten Satz länger pausieren. Die Pausenuhr startet automatisch, sobald du einen Satz abhakst."]},
+  {t: "Kniebeuge", s: "Hüfte nach hinten, tief, Rücken fest", p: [
+    "Stange tief auf dem Rücken, unter der Schulterblattgräte. Füße etwa schulterbreit, Fußspitzen leicht nach außen.",
+    "Hüfte nach hinten und unten, Knie zeigen in Richtung der Fußspitzen, Blick leicht nach unten.",
+    "Tief genug: Hüftbeuge knapp unter der Oberkante der Knie. Aus der Tiefe die Hüfte gerade nach oben treiben."]},
+  {t: "Drücken (stehend)", s: "Über Kopf, Körper bleibt fest", p: [
+    "Griff knapp schulterbreit, Unterarme senkrecht, Ellbogen leicht vor der Stange.",
+    "Bauch und Gesäß fest, Stange nah am Gesicht vorbei nach oben, dann unter die Stange schieben.",
+    "Oben Ellbogen gestreckt, Schultern hochziehen, Stange über der Mitte des Fußes."]},
+  {t: "Bankdrücken", s: "Schulterblätter zusammen, Stange kontrolliert", p: [
+    "Augen unter der Stange, Füße fest am Boden, Schulterblätter zusammen und unten.",
+    "Stange kontrolliert auf die untere Brust, kurz berühren, dann in einer leichten Kurve nach oben über die Schultern.",
+    "Handgelenke gerade, Daumen um die Stange."]},
+  {t: "Kreuzheben", s: "Stange über der Fußmitte, Rücken gerade", p: [
+    "Stange über der Mitte des Fußes, Schienbeine berühren sie beim Greifen.",
+    "Griff knapp außerhalb der Beine, Rücken gestreckt, Brust hoch, dann die Stange am Bein entlang hochschieben.",
+    "Jede Wiederholung beginnt am Boden, nicht federn. Oben aufrecht stehen, nicht nach hinten lehnen."]},
+  {t: "Umsetzen (Power Clean)", s: "Explosiv vom Boden auf die Schultern", p: [
+    "Start wie beim Kreuzheben, Stange bis Mitte Oberschenkel ziehen, dann Hüfte und Knie explosiv strecken.",
+    "Ellbogen schnell nach vorn drehen und die Stange vorne auf den Schultern fangen.",
+    "Es geht um Geschwindigkeit, nicht um Maximalgewicht. Lieber mit leichtem Gewicht sauber üben."]},
+  {t: "Essen und Schlaf", s: "Ohne Erholung kein Fortschritt", p: [
+    "Genug Kalorien und viel Protein, sonst stockt die Steigerung früh. Abgleich mit deinem Ernährungsplan.",
+    "Sieben bis neun Stunden Schlaf. Das ist der häufigste Grund für verpasste Wiederholungen.",
+    "Körpergewicht im Protokoll mitschreiben, dann siehst du in Fortschritt beides nebeneinander."]}
+];
+function renderWissen() {
+  $("wissen").innerHTML = WISSEN.map(w => '<details class="wis"><summary>' + esc(w.t) + "<span>" + esc(w.s) + '</span></summary><div class="body"><ul>' + w.p.map(x => "<li>" + esc(x) + "</li>").join("") + "</ul></div></details>").join("") +
+    '<p class="muted small" style="margin-top:12px">Zusammengefasst in eigenen Worten nach „Starting Strength“ von Mark Rippetoe (3. Auflage). Für Technikdetails lohnt sich das Buch.</p>';
+}
+
+/* ---------- Reiter ---------- */
+const VIEWS = ["training", "protokoll", "fortschritt", "einstellungen", "programm"];
+function show(v) { for (const x of VIEWS) { $("tab-" + x).setAttribute("aria-selected", x === v ? "true" : "false"); $("view-" + x).hidden = x !== v; } try { history.replaceState(null, "", v === "training" ? location.pathname : "#" + v); } catch (e) {} }
+for (const v of VIEWS) $("tab-" + v).addEventListener("click", () => show(v));
+if (VIEWS.includes(location.hash.slice(1))) show(location.hash.slice(1));
+
+function renderAlles() { renderTraining(); renderProtokoll(); renderFortschritt(); renderEinstellungen(); }
+renderWissen();
+
+(async () => {
+  const u = await Konto.init();
+  if (!u) $("gate").hidden = false;
+  const docs = await Konto.list("gesundheit/ss.");
+  if (docs[P_STAND]) stand = SS.neuerStand(docs[P_STAND]);
+  if (docs[P_AKTIV]) aktiv = docs[P_AKTIV];
+  einheiten = {};
+  for (const [p, v] of Object.entries(docs)) if (p.startsWith(P_EIN) && v && v.datum) einheiten[p] = v;
+  renderAlles();
+  if (aktiv) { Ton._wachGewuenscht = true; Ton.wach(true); }
+})();
+renderAlles();
+</script>
+</body>
+</html>
