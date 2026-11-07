@@ -1,16 +1,21 @@
 # Murmelbahn
 
-Eine Murmelbahn zum Zuschauen und Abschalten. Läuft auf derselben GitHub-Pages-Seite wie die Trainer, unter `/murmelbahn/`, und braucht keine Anmeldung und keine Bibliotheken.
+Eine Murmelbahn als Design-Skulptur zum Zuschauen und Abschalten, angelehnt an die Art von Designer-Murmelbahnen wie Marbolous (eigene Umsetzung, keine fremden Grafiken). Läuft unter `/murmelbahn/`, ohne Anmeldung und ohne Bibliotheken.
 
-- Bei jedem Start wird die Bahn neu gebaut: Zufallsfolge aus Rampen (Zickzack), Stiftfeldern (Galton-Brett), Schaufelrädern mit Trichter und Pilzen (Flipper-Bumper), dazu eine von sechs Farbwelten (Holz, Neon, Pastell, Wald, Nachtgold, Glut) und eine eigene Murmelfarbfamilie.
-- Die Murmeln sind Glas, Wirbel, Metall oder Katzenauge und rollen unten in einen Aufzug, der sie oben wieder auf den Zulauf setzt. Die Bahn läuft also endlos.
-- Tipp auf die Bahn setzt eine Murmel, der Regler stellt die Anzahl ein (1 bis 60, Start mit 8, im Browser gemerkt), „Neue Bahn“ baut um, Zeitlupe, Klang (Stifte klingen pentatonisch) und Pause.
-- Die Adresse trägt `?bahn=12345`; mit derselben Nummer entsteht dieselbe Bahn wieder, auch auf einem anderen Gerät.
+- Aufbau: zwei Edelstahldrähte als Bahn, 10-mm-Murmeln, in der Mitte ein gläserner Lift mit Stahlkappe, unten ein gedrechselter Holzsockel (Birke, Nussbaum, Weiß, Schwarz). Speichen halten die Bahn am Lift, einige Messing-Klangstäbe klingen, wenn eine Murmel vorbeirollt.
+- Jede Bahn wird neu gebogen: Folge aus Spirale, Blüte (Radius schwingt in Blättern), Welle (Gefälle wechselt) und Schnecke (wandert nach innen oder außen). Pro Umdrehung fällt die Bahn mindestens 38 mm, so berühren sich die Windungen nie.
+- Lift-Modi: Dauerlauf, Intervall (Murmeln sammeln sich 20 s unten, dann fährt der Lift eine Runde) und Hebel (Lift läuft nur, solange man den Hebel drückt oder die Leertaste hält).
+- Bedienung: Ziehen dreht und kippt die Skulptur, Mausrad oder zwei Finger zoomen, Doppelklick setzt zurück. Regler für die Anzahl (1 bis 60, Start mit 8), Hell/Dunkel, langsames Drehen, Zeitlupe, Klang (Rollen auf Stahl, Klicken, Klangstäbe) und Pause. Einstellungen merkt sich der Browser.
+- Die Adresse trägt `?bahn=12345`; mit derselben Nummer entsteht dieselbe Bahn wieder.
+
+## Physik
+
+Jede Murmel hat nur eine Lage `s` entlang der Bahn und ein Tempo `v`. Beschleunigung aus dem Gefälle für eine Kugel, die auf zwei Schienen rollt (Faktor 0,565), dazu Luft- und Rollwiderstand. Murmeln stoßen sich entlang der Bahn und stauen sich vor dem Lift.
 
 ## Aufbau
 
 | Pfad | Inhalt |
 |---|---|
-| `src/index.html` | Die ganze Bahn: Generator, Physik (Kreis gegen Strecke, Kreis gegen Kreis, bewegte Radarme), Zeichnen auf Canvas, Klang über WebAudio. |
+| `src/index.html` | Die ganze Skulptur: Bahngenerator, Physik, eigene 3D-Projektion auf Canvas, Klang über WebAudio. |
 | `public/` | Manifest und Icon. |
 | `build.mjs` | Kopiert alles nach `dist/`. |
