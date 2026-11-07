@@ -1,0 +1,432 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#14232b">
+<title>Workouts</title>
+<link rel="icon" href="../icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap">
+<link rel="stylesheet" href="../training.css">
+<script src="../../config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="../konto.js"></script>
+<script src="../ton.js"></script>
+<script src="logik.js"></script>
+<style>
+.heute{background:var(--fg);color:var(--bg);border-radius:18px;padding:18px;display:flex;flex-direction:column;gap:8px}
+.heute .eyebrow{color:color-mix(in srgb,var(--bg) 70%,transparent)}
+.heute h2{font-size:1.6rem}
+.heute .btn{background:var(--acc);border-color:var(--acc);color:#fff;align-self:flex-start;margin-top:6px}
+.ziel{display:flex;align-items:center;gap:10px;margin-top:4px;font-size:.92rem}
+.ziel .dots{display:flex;gap:5px}
+.ziel .dots span{width:14px;height:14px;border-radius:50%;border:2px solid color-mix(in srgb,var(--bg) 60%,transparent)}
+.ziel .dots span.voll{background:var(--ok);border-color:var(--ok)}
+.chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:16px 0 10px;padding-bottom:2px}
+.chips::-webkit-scrollbar{display:none}
+.chips button{flex:none;font:700 .85rem var(--body);padding:7px 13px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer}
+.chips button[aria-pressed="true"]{background:var(--acc);border-color:var(--acc);color:#fff}
+.wgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+.wk{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px;text-align:left;font:inherit;color:inherit;cursor:pointer;display:flex;flex-direction:column;gap:6px;min-height:150px;position:relative;overflow:hidden}
+.wk::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--kc)}
+.wk h3{font-size:1.25rem}
+.wk .meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:auto}
+.wk .pb{font-size:.82rem;color:var(--muted)}
+.lv{display:inline-flex;gap:2px;vertical-align:middle}
+.lv i{width:6px;height:12px;border-radius:2px;background:var(--line)}
+.lv i.an{background:var(--acc)}
+.k-Ganzkörper{--kc:#b8423f}.k-Oberkörper{--kc:#6b4fa0}.k-Beine{--kc:#2f7f8c}.k-Rumpf{--kc:#d9822b}.k-Cardio{--kc:#c2457a}.k-Mobilität{--kc:#2e7d4f}
+.detail h2{font-size:1.8rem}
+.ueliste{list-style:none;margin:10px 0 0;padding:0}
+.ueliste li{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.ueliste li:last-child{border-bottom:0}
+.ueliste b{font-variant-numeric:tabular-nums;white-space:nowrap}
+.ueliste button{background:none;border:0;padding:0;font:inherit;color:inherit;text-align:left;cursor:pointer;text-decoration:underline dotted;text-underline-offset:3px}
+.optionen{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-top:14px}
+.schalter{display:flex;align-items:center;gap:8px;font-weight:700;font-size:.92rem;cursor:pointer}
+.schalter input{width:20px;height:20px;accent-color:var(--acc)}
+/* Spieler */
+.spieler{position:fixed;inset:0;background:var(--bg);z-index:30;display:flex;flex-direction:column;padding:calc(14px + env(safe-area-inset-top,0px)) max(16px, env(safe-area-inset-right,0px)) calc(16px + env(safe-area-inset-bottom,0px)) max(16px, env(safe-area-inset-left,0px))}
+.spieler .oben{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.spieler .gesamt{font-family:var(--display);font-weight:700;font-size:1.2rem;font-variant-numeric:tabular-nums}
+.balken{height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin:10px 0 0}
+.balken div{height:100%;background:var(--acc);width:0;transition:width .3s}
+.mitte{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:10px;min-height:0}
+.mitte .abschnitt{font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.mitte .gross{font-family:var(--display);font-weight:700;font-size:clamp(4rem,22vw,9rem);line-height:1;font-variant-numeric:tabular-nums}
+.mitte .name{font-family:var(--display);font-weight:700;font-size:clamp(1.6rem,7vw,2.6rem);line-height:1.15}
+.mitte .tipp{color:var(--muted);max-width:42ch;font-size:.95rem}
+.mitte.pause .gross{color:var(--acc2)}
+.ring{width:min(62vw,300px);aspect-ratio:1;position:relative;display:flex;align-items:center;justify-content:center}
+.ring svg{position:absolute;inset:0;transform:rotate(-90deg)}
+.ring circle{fill:none;stroke-width:8}
+.ring .bg{stroke:var(--line)}
+.ring .vg{stroke:var(--acc);stroke-linecap:round;transition:stroke-dashoffset .25s linear}
+.mitte.pause .ring .vg{stroke:var(--acc2)}
+.ring .gross{font-size:clamp(3.4rem,16vw,6rem)}
+.naechste{color:var(--muted);font-size:.95rem;text-align:center;min-height:1.4em}
+.unten{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;margin-top:12px}
+.unten .btn.haupt{min-height:64px;font-size:1.2rem}
+.rund{width:52px;height:52px;border-radius:50%;padding:0}
+.ende{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:12px}
+.ende .gross{font-family:var(--display);font-weight:700;font-size:clamp(3.2rem,16vw,6rem);font-variant-numeric:tabular-nums}
+.verlauf li .w{font-weight:700}
+.wochen{display:flex;gap:6px;align-items:flex-end;height:80px;margin:10px 0 4px}
+.wochen div{flex:1;background:color-mix(in srgb,var(--acc) 70%,var(--surface));border-radius:4px 4px 0 0;min-height:3px;position:relative}
+.wochen div.leer{background:var(--line)}
+.wochenl{display:flex;gap:6px;font-size:.7rem;color:var(--muted)}
+.wochenl span{flex:1;text-align:center}
+.uebkarte{display:flex;justify-content:space-between;gap:10px;padding:12px 0;border-bottom:1px solid var(--line);cursor:pointer;background:none;border-left:0;border-right:0;border-top:0;width:100%;font:inherit;color:inherit;text-align:left}
+</style>
+</head>
+<body>
+<div class="wrap" id="seite">
+  <a class="back" href="../">← Gesundheit</a>
+  <p class="eyebrow">Gesundheit · Workouts</p>
+  <h1>Workouts</h1>
+  <p class="lede">Geführte Workouts mit dem eigenen Körpergewicht: Übungen mit Wiederholungen, Stoppuhr, Intervall-Timer und Ansagen. Auf Zeit trainieren und die eigene Bestzeit schlagen.</p>
+  <div class="gate" id="gate" hidden><p>Melde dich im <a href="../../">Portal</a> an, dann werden deine Zeiten im Konto gespeichert. Ohne Anmeldung bleiben sie nur in diesem Browser.</p></div>
+  <p class="store" id="store"></p>
+
+  <div class="tabs" role="tablist">
+    <button role="tab" id="tab-entdecken" aria-selected="true" aria-controls="view-entdecken">Workouts</button>
+    <button role="tab" id="tab-uebungen" aria-selected="false" aria-controls="view-uebungen">Übungen</button>
+    <button role="tab" id="tab-verlauf" aria-selected="false" aria-controls="view-verlauf">Verlauf</button>
+  </div>
+
+  <section id="view-entdecken" role="tabpanel" aria-labelledby="tab-entdecken">
+    <div id="heute"></div>
+    <div class="chips" id="kats" aria-label="Kategorie"></div>
+    <div class="row" style="margin-bottom:12px;gap:14px">
+      <div class="seg" id="lvFilter" aria-label="Level"><button type="button" data-v="0" aria-pressed="true">Alle Level</button><button type="button" data-v="1">Einsteiger</button><button type="button" data-v="2">Fortgeschritten</button><button type="button" data-v="3">Profi</button></div>
+      <div class="seg" id="dauerFilter" aria-label="Dauer"><button type="button" data-v="0" aria-pressed="true">Jede Dauer</button><button type="button" data-v="10">bis 10 Min</button><button type="button" data-v="20">bis 20 Min</button></div>
+    </div>
+    <div class="wgrid" id="liste"></div>
+  </section>
+
+  <section id="view-detail" hidden></section>
+
+  <section id="view-uebungen" role="tabpanel" aria-labelledby="tab-uebungen" hidden>
+    <input type="text" id="ueSuche" placeholder="Übung suchen" style="width:100%" aria-label="Übung suchen">
+    <div class="chips" id="ueKats"></div>
+    <div class="card" id="ueListe"></div>
+  </section>
+
+  <section id="view-verlauf" role="tabpanel" aria-labelledby="tab-verlauf" hidden>
+    <div class="card">
+      <div class="between"><h2>Wochenziel</h2><div class="seg" id="zielSeg"><button type="button" data-v="2">2</button><button type="button" data-v="3">3</button><button type="button" data-v="4">4</button><button type="button" data-v="5">5</button></div></div>
+      <p class="muted small" id="zielTxt" style="margin-top:6px"></p>
+      <div class="wochen" id="wochen" aria-hidden="true"></div>
+      <div class="wochenl" id="wochenl" aria-hidden="true"></div>
+    </div>
+    <div class="card">
+      <h2>Bestzeiten</h2>
+      <ul class="liste" id="bestzeiten"></ul>
+    </div>
+    <div class="card">
+      <div class="between"><h2 id="vTitel">Verlauf</h2><div class="seg" id="tonSeg" aria-label="Ton"><button type="button" data-v="an">Ton an</button><button type="button" data-v="aus">Ton aus</button></div></div>
+      <ul class="liste verlauf" id="verlauf"></ul>
+    </div>
+  </section>
+</div>
+
+<div class="spieler" id="spieler" hidden role="dialog" aria-modal="true" aria-labelledby="spName"></div>
+<dialog id="dlg"><form method="dialog" id="dlgForm"></form></dialog>
+
+<script>
+"use strict";
+const $ = id => document.getElementById(id);
+const pad = n => String(n).padStart(2, "0");
+const isoDay = d => d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
+const parseDay = s => { const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d); };
+const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
+const {UEBUNGEN, WORKOUTS, KATEGORIEN, LEVEL, zeitText} = WO;
+const STUFEN = {1: "Leichter", 2: "Normal", 3: "Härter"};
+
+const P_EIN = "gesundheit/wo.e.", P_SET = "gesundheit/wo.einstellungen";
+let verlauf = {}, einst = {ziel: 3, stufe: {}, aufwaermen: true, dehnen: true}, kat = "Alle", lvF = 0, dauerF = 0, ueKat = "Alle", detailId = null;
+
+Konto.onState(s => { const el = $("store"); el.dataset.state = s; el.textContent = s === "db" ? "Im Konto gespeichert" : "Gerade nur auf diesem Gerät gespeichert"; });
+const liste = () => Object.entries(verlauf).map(([p, v]) => Object.assign({pfad: p}, v)).sort((a, b) => (b.datum + b.zeit).localeCompare(a.datum + a.zeit));
+const wById = id => WORKOUTS.find(w => w.id === id);
+function bestzeit(id, stufe) { let b = null; for (const v of liste()) if (v.id === id && (stufe == null || v.stufe === stufe) && v.komplett !== false && (b === null || v.sek < b)) b = v.sek; return b; }
+const lvHtml = l => '<span class="lv" aria-label="' + LEVEL[l] + '">' + [1, 2, 3].map(i => "<i" + (i <= l ? ' class="an"' : "") + "></i>").join("") + "</span>";
+const minuten = sek => Math.max(1, Math.round(sek / 60));
+const formatText = w => w.typ === "intervall" ? (w.runden > 1 ? w.runden + " Runden, " : "") + "je " + w.arbeit + " s Arbeit, " + w.ruhe + " s Pause" : w.leiter ? "Leiter auf Zeit" : w.runden + " Runden auf Zeit";
+
+/* ---------- Woche ---------- */
+function wochenStart(d) { const x = new Date(d.getFullYear(), d.getMonth(), d.getDate()); x.setDate(x.getDate() - (x.getDay() + 6) % 7); return x; }
+function dieseWoche() { const ab = isoDay(wochenStart(new Date())); return liste().filter(v => v.datum >= ab).length; }
+
+/* ---------- Entdecken ---------- */
+function renderHeute() {
+  const w = WO.vorschlag(liste(), isoDay(new Date()));
+  const n = dieseWoche(), z = einst.ziel;
+  $("heute").innerHTML = '<div class="heute"><p class="eyebrow">Vorschlag für heute</p><h2>' + esc(w.n) + '</h2><p>' + esc(w.k) + " · " + LEVEL[w.l] + " · ca. " + minuten(WO.dauerSek(w, optFuer(w))) + " Min · " + esc(formatText(w)) + "</p>" +
+    '<div class="ziel"><span>Diese Woche ' + n + " von " + z + '</span><span class="dots">' + Array.from({length: z}, (_, i) => "<span" + (i < n ? ' class="voll"' : "") + "></span>").join("") + "</span></div>" +
+    '<button type="button" class="btn" id="heuteGo">Ansehen →</button></div>';
+  $("heuteGo").onclick = () => zeigeDetail(w.id);
+}
+function renderKats() {
+  $("kats").innerHTML = ["Alle"].concat(KATEGORIEN).map(k => '<button type="button" aria-pressed="' + (k === kat) + '">' + k + "</button>").join("");
+}
+$("kats").onclick = ev => { const b = ev.target.closest("button"); if (!b) return; kat = b.textContent; renderKats(); renderListe(); };
+function segFilter(id, setze) { $(id).onclick = ev => { const b = ev.target.closest("button"); if (!b) return; $(id).querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x === b ? "true" : "false")); setze(Number(b.dataset.v)); renderListe(); }; }
+segFilter("lvFilter", v => { lvF = v; });
+segFilter("dauerFilter", v => { dauerF = v; });
+function optFuer(w) { return {stufe: einst.stufe[w.id] || 2, aufwaermen: false, dehnen: false}; }
+function renderListe() {
+  const ws = WORKOUTS.filter(w => (kat === "Alle" || w.k === kat) && (!lvF || w.l === lvF) && (!dauerF || WO.dauerSek(w, optFuer(w)) <= dauerF * 60));
+  $("liste").innerHTML = ws.length ? ws.map(w => {
+    const b = bestzeit(w.id);
+    return '<button type="button" class="wk k-' + w.k + '" data-id="' + w.id + '"><span class="eyebrow">' + esc(w.k) + "</span><h3>" + esc(w.n) + '</h3><span class="muted small">' + esc(formatText(w)) + '</span><span class="meta"><span class="chip">' + lvHtml(w.l) + " " + LEVEL[w.l] + '</span><span class="chip">ca. ' + minuten(WO.dauerSek(w, optFuer(w))) + " Min</span></span>" +
+      (b !== null ? '<span class="pb">Bestzeit ' + zeitText(b) + "</span>" : "") + "</button>";
+  }).join("") : '<p class="empty">Kein Workout passt zu diesem Filter.</p>';
+  $("liste").querySelectorAll(".wk").forEach(el => el.onclick = () => zeigeDetail(el.dataset.id));
+}
+
+/* ---------- Detail ---------- */
+function zeigeDetail(id) {
+  detailId = id;
+  const w = wById(id);
+  const st = einst.stufe[id] || 2;
+  const opt = {stufe: st, aufwaermen: einst.aufwaermen, dehnen: einst.dehnen};
+  const R = WO.rundenFuer(w, st);
+  const probe = WO.schritte(w, {stufe: st}).filter(s => s.runde === 1 && s.typ !== "pause");
+  const zeilen = [];
+  for (const s of probe) {
+    const u = UEBUNGEN[s.ue];
+    const wert = s.typ === "wdh" ? (w.leiter ? w.ue.find(x => x[0] === s.ue)[1].map(x => Math.max(1, Math.round(x * (st === 1 ? 0.7 : st === 3 ? 1.3 : 1)))).join("-") : s.wdh + (u.einheit ? " m" : "×")) : s.sek + " s" + (s.seite ? " " + s.seite : "");
+    zeilen.push('<li><button type="button" data-ue="' + s.ue + '">' + esc(u.n) + "</button><b>" + esc(wert) + "</b></li>");
+  }
+  const b = bestzeit(id, st), bAlle = bestzeit(id);
+  const v = $("view-detail");
+  v.innerHTML = '<button type="button" class="back" id="zurueck" style="background:none;border:0;padding:0;cursor:pointer;font:inherit">← Alle Workouts</button>' +
+    '<div class="card detail k-' + w.k + '"><p class="eyebrow">' + esc(w.k) + " · " + LEVEL[w.l] + "</p><h2>" + esc(w.n) + '</h2><p class="lede">' + esc(w.t) + "</p>" +
+    '<div class="row" style="margin-top:10px"><span class="chip">' + esc(formatText(Object.assign({}, w, {runden: R}))) + '</span><span class="chip">ca. ' + minuten(WO.dauerSek(w, opt)) + " Min mit Aufwärmen und Dehnen nach Auswahl</span>" + (bAlle !== null ? '<span class="chip ok">Bestzeit ' + zeitText(bAlle) + "</span>" : "") + "</div>" +
+    '<h3 style="margin-top:16px">' + (w.leiter ? "Wiederholungen je Runde" : R > 1 ? "Pro Runde (" + R + " Runden)" : "Ablauf") + '</h3><ul class="ueliste">' + zeilen.join("") + "</ul>" +
+    (w.typ === "runden" && w.pause ? '<p class="muted small" style="margin-top:6px">Zwischen den Runden ' + w.pause + " s Pause.</p>" : "") +
+    '<div class="optionen"><div class="field">Stufe<div class="seg" id="stufeSeg">' + [1, 2, 3].map(i => '<button type="button" data-v="' + i + '" aria-pressed="' + (i === st) + '">' + STUFEN[i] + "</button>").join("") + "</div>" + (b !== null ? '<span class="muted small">Bestzeit auf dieser Stufe: ' + zeitText(b) + "</span>" : "") + "</div>" +
+    '<div class="field">Extras<label class="schalter"><input type="checkbox" id="optWarm"' + (einst.aufwaermen ? " checked" : "") + "> Aufwärmen (2,5 Min)</label>" +
+    '<label class="schalter"><input type="checkbox" id="optDehn"' + (einst.dehnen ? " checked" : "") + "> Dehnen danach (2 Min)</label></div></div>" +
+    '<button type="button" class="btn acc wide" id="los" style="margin-top:16px;min-height:56px;font-size:1.1rem">Workout starten</button></div>';
+  $("view-entdecken").hidden = true; v.hidden = false;
+  document.querySelectorAll('[role="tab"]').forEach(t => t.setAttribute("aria-selected", t.id === "tab-entdecken" ? "true" : "false"));
+  $("zurueck").onclick = () => { detailId = null; v.hidden = true; $("view-entdecken").hidden = false; };
+  $("stufeSeg").onclick = ev => { const x = ev.target.closest("button"); if (!x) return; einst.stufe[id] = Number(x.dataset.v); Konto.put(P_SET, einst); zeigeDetail(id); };
+  $("optWarm").onchange = e => { einst.aufwaermen = e.target.checked; Konto.put(P_SET, einst); zeigeDetail(id); };
+  $("optDehn").onchange = e => { einst.dehnen = e.target.checked; Konto.put(P_SET, einst); zeigeDetail(id); };
+  v.querySelectorAll("[data-ue]").forEach(x => x.onclick = () => zeigeUebung(x.dataset.ue));
+  $("los").onclick = () => starte(w, {stufe: st, aufwaermen: einst.aufwaermen, dehnen: einst.dehnen});
+  window.scrollTo({top: 0});
+}
+
+function zeigeUebung(id) {
+  const u = UEBUNGEN[id];
+  $("dlgForm").innerHTML = '<p class="eyebrow">' + esc(u.g) + "</p><h2>" + esc(u.n) + '</h2><p style="margin:10px 0">' + esc(u.h) + "</p>" + (u.e ? '<p class="muted small"><b>Leichter:</b> ' + esc(u.e) + "</p>" : "") +
+    '<p class="muted small" style="margin-top:6px">' + (u.zeit ? "Wird auf Zeit gemacht" : "Wird in Wiederholungen gezählt") + (u.seite ? ", beide Seiten." : ".") + '</p><div class="row" style="justify-content:flex-end;margin-top:14px"><button class="btn" value="ok">Schließen</button></div>';
+  $("dlg").onclose = null; $("dlg").showModal();
+}
+
+/* ---------- Übungen ---------- */
+function renderUebungen() {
+  const q = $("ueSuche").value.trim().toLowerCase();
+  const gruppen = ["Alle"].concat([...new Set(Object.values(UEBUNGEN).map(u => u.g))]);
+  $("ueKats").innerHTML = gruppen.map(g => '<button type="button" aria-pressed="' + (g === ueKat) + '">' + g + "</button>").join("");
+  const ids = Object.keys(UEBUNGEN).filter(id => { const u = UEBUNGEN[id]; return (ueKat === "Alle" || u.g === ueKat) && (!q || (u.n + " " + u.h + " " + u.g).toLowerCase().includes(q)); }).sort((a, b) => UEBUNGEN[a].n.localeCompare(UEBUNGEN[b].n, "de"));
+  $("ueListe").innerHTML = ids.length ? ids.map(id => { const u = UEBUNGEN[id]; const inW = WORKOUTS.filter(w => w.ue.some(x => x[0] === id)).map(w => w.n);
+    return '<button type="button" class="uebkarte" data-ue="' + id + '"><span><b>' + esc(u.n) + '</b><br><span class="muted small">' + esc(u.h) + "</span>" + (inW.length ? '<br><span class="muted small">In: ' + esc(inW.join(", ")) + "</span>" : "") + '</span><span class="chip">' + esc(u.g) + "</span></button>"; }).join("") : '<p class="empty">Keine Übung gefunden.</p>';
+  $("ueListe").querySelectorAll("[data-ue]").forEach(x => x.onclick = () => zeigeUebung(x.dataset.ue));
+}
+$("ueSuche").addEventListener("input", renderUebungen);
+$("ueKats").onclick = ev => { const b = ev.target.closest("button"); if (!b) return; ueKat = b.textContent; renderUebungen(); };
+
+/* ---------- Spieler ---------- */
+let sp = null;
+function starte(w, opt) {
+  Ton.entsperren();
+  sp = {w, opt, schritte: WO.schritte(w, opt), i: -1, start: 0, pausiertSeit: 0, pausiertSumme: 0, schrittEnde: 0, schrittStart: 0, iv: null, vorlauf: 3};
+  $("spieler").hidden = false; document.body.style.overflow = "hidden";
+  Ton._wachGewuenscht = true; Ton.wach(true);
+  try { history.pushState({spieler: 1}, ""); } catch (e) {}
+  vorlauf();
+}
+function vorlauf() {
+  const erster = sp.schritte[0];
+  let n = 3;
+  const zeichne = () => {
+    $("spieler").innerHTML = '<div class="oben"><b id="spName">' + esc(sp.w.n) + '</b><button type="button" class="btn small" id="spAbbr">Abbrechen</button></div>' +
+      '<div class="mitte"><p class="abschnitt">Gleich geht es los</p><p class="gross">' + n + '</p><p class="name">' + esc(UEBUNGEN[erster.ue] ? UEBUNGEN[erster.ue].n : "") + '</p><p class="tipp">' + esc(WO.ansage(erster)) + "</p></div>";
+    $("spAbbr").onclick = schliessen;
+  };
+  zeichne(); Ton.sag("Los geht's mit " + sp.w.n + ". Zuerst " + WO.ansage(erster) + ".");
+  sp.iv = setInterval(() => {
+    n--;
+    if (n <= 0) { clearInterval(sp.iv); Ton.piep(true, true); sp.start = Date.now(); naechster(); return; }
+    Ton.piep(false); zeichne();
+  }, 1000);
+}
+function laufzeit() { const jetzt = sp.pausiertSeit || Date.now(); return (jetzt - sp.start - sp.pausiertSumme) / 1000; }
+function naechster(richtung) {
+  sp.i += richtung || 1;
+  if (sp.i < 0) sp.i = 0;
+  if (sp.i >= sp.schritte.length) return fertig();
+  const s = sp.schritte[sp.i];
+  if (s.typ !== "wdh") { sp.schrittEnde = Date.now() + s.sek * 1000; sp.schrittStart = Date.now(); }
+  sp.letzteSek = null;
+  zeichneSchritt();
+  const nach = sp.schritte[sp.i + 1];
+  Ton.sag(WO.ansage(s) + (s.typ === "pause" && nach ? ". Als Nächstes " + WO.ansage(nach) + "." : ""));
+  clearInterval(sp.iv); sp.iv = setInterval(tick, 200);
+}
+function zeichneSchritt() {
+  const s = sp.schritte[sp.i], u = UEBUNGEN[s.ue], nach = sp.schritte[sp.i + 1];
+  const pause = s.typ === "pause";
+  const titel = s.abschnitt === "Workout" ? (s.runden > 1 ? "Runde " + s.runde + " von " + s.runden : "Workout") : s.abschnitt;
+  let mitte;
+  if (s.typ === "wdh") mitte = '<p class="gross">' + s.wdh + (u.einheit ? '<span style="font-size:.35em"> m</span>' : "×") + '</p><p class="name">' + esc(u.n) + '</p><p class="tipp">' + esc(u.h) + "</p>";
+  else {
+    const C = 2 * Math.PI * 46;
+    mitte = '<div class="ring"><svg viewBox="0 0 100 100"><circle class="bg" cx="50" cy="50" r="46"/><circle class="vg" id="ringVg" cx="50" cy="50" r="46" stroke-dasharray="' + C.toFixed(1) + '" stroke-dashoffset="0"/></svg><p class="gross" id="countdown">' + s.sek + "</p></div>" +
+      '<p class="name">' + (pause ? "Pause" : esc(u.n) + (s.seite ? " · " + s.seite : "")) + '</p><p class="tipp">' + (pause ? "Durchatmen, locker bleiben." : esc(u.h)) + "</p>";
+  }
+  $("spieler").innerHTML = '<div class="oben"><div><b id="spName">' + esc(sp.w.n) + '</b><br><span class="muted small">' + esc(titel) + '</span></div><span class="gesamt" id="gesamt">' + zeitText(laufzeit()) + "</span></div>" +
+    '<div class="balken"><div style="width:' + (sp.i / sp.schritte.length * 100).toFixed(1) + '%"></div></div>' +
+    '<div class="mitte' + (pause ? " pause" : "") + '">' + '<p class="abschnitt">' + (pause ? "Pause" : s.typ === "wdh" ? "Wiederholungen" : "Auf Zeit") + "</p>" + mitte + "</div>" +
+    '<p class="naechste">' + (nach ? "Als Nächstes: " + esc(nach.typ === "pause" ? "Pause " + nach.sek + " s" : WO.ansage(nach)) : "Letzte Übung") + "</p>" +
+    '<div class="unten"><button type="button" class="btn rund" id="spZur" aria-label="Zurück">‹</button>' +
+    (s.typ === "wdh" ? '<button type="button" class="btn acc haupt" id="spWeiter">Fertig ✓</button>' : '<button type="button" class="btn haupt" id="spPause">' + (sp.pausiertSeit ? "Weiter" : "Anhalten") + "</button>") +
+    '<button type="button" class="btn rund" id="spSkip" aria-label="Überspringen">›</button></div>' +
+    '<div class="row" style="justify-content:space-between;margin-top:10px"><button type="button" class="btn small" id="spAbbr">Beenden</button>' + (s.typ === "wdh" ? '<button type="button" class="btn small" id="spPause">' + (sp.pausiertSeit ? "Weiter" : "Anhalten") + "</button>" : "") + "</div>";
+  $("spZur").onclick = () => naechster(-1);
+  $("spSkip").onclick = () => { if (s.typ !== "pause" && s.abschnitt === "Workout") sp.uebersprungen = (sp.uebersprungen || 0) + 1; naechster(1); };
+  if ($("spWeiter")) $("spWeiter").onclick = () => { Ton.piep(true); naechster(1); };
+  $("spPause").onclick = anhalten;
+  $("spAbbr").onclick = () => frage("Workout beenden?", "Du kannst es als nicht komplett speichern oder verwerfen.", [["weg", "Verwerfen"], ["speichern", "Speichern"]], a => { if (a === "speichern") fertig(true); else if (a === "weg") schliessen(); }, true);
+  tick();
+}
+function anhalten() {
+  if (!sp.pausiertSeit) { sp.pausiertSeit = Date.now(); Ton.sag("Angehalten."); }
+  else { const d = Date.now() - sp.pausiertSeit; sp.pausiertSumme += d; sp.schrittEnde += d; sp.pausiertSeit = 0; }
+  zeichneSchritt();
+}
+function tick() {
+  if (!sp || sp.i < 0 || sp.i >= sp.schritte.length) return;
+  const g = $("gesamt"); if (g) g.textContent = zeitText(laufzeit());
+  const s = sp.schritte[sp.i];
+  if (s.typ === "wdh" || sp.pausiertSeit) return;
+  const rest = Math.max(0, (sp.schrittEnde - Date.now()) / 1000);
+  const sek = Math.ceil(rest);
+  const cd = $("countdown"); if (cd) cd.textContent = sek;
+  const vg = $("ringVg"); if (vg) { const C = 2 * Math.PI * 46; vg.setAttribute("stroke-dashoffset", (C * (1 - rest / s.sek)).toFixed(1)); }
+  if (sek !== sp.letzteSek) {
+    sp.letzteSek = sek;
+    if (sek > 0 && sek <= 3) Ton.piep(false);
+    if (s.typ !== "pause" && sek === Math.floor(s.sek / 2) && s.sek >= 30) Ton.sag("Halbzeit");
+  }
+  if (rest <= 0) { Ton.piep(true, true); Ton.vibrier(150); naechster(1); }
+}
+function fertig(abgebrochen) {
+  clearInterval(sp.iv);
+  if (sp.pausiertSeit) anhaltenStumm();
+  const sek = Math.round(laufzeit());
+  const komplett = !abgebrochen && !sp.uebersprungen;
+  const vorher = bestzeit(sp.w.id, sp.opt.stufe);
+  const neu = komplett && (vorher === null || sek < vorher);
+  const jetzt = new Date();
+  const eintrag = {id: sp.w.id, name: sp.w.n, stufe: sp.opt.stufe, sek, datum: isoDay(jetzt), zeit: pad(jetzt.getHours()) + pad(jetzt.getMinutes()) + pad(jetzt.getSeconds()), komplett, aufwaermen: !!sp.opt.aufwaermen, dehnen: !!sp.opt.dehnen};
+  const pfad = P_EIN + eintrag.datum + "-" + eintrag.zeit;
+  verlauf[pfad] = eintrag;
+  Konto.put(pfad, eintrag);
+  Konto.put("gesundheit/training." + eintrag.datum, {done: true});
+  Ton.sag(komplett ? "Geschafft! Deine Zeit: " + Math.floor(sek / 60) + " Minuten " + (sek % 60) + " Sekunden." + (neu && vorher !== null ? " Neue Bestzeit!" : "") : "Gespeichert.");
+  Ton._wachGewuenscht = false; Ton.wach(false);
+  $("spieler").innerHTML = '<div class="ende"><p class="eyebrow">' + (komplett ? "Geschafft" : abgebrochen ? "Beendet" : "Geschafft, mit übersprungenen Übungen") + "</p><h2>" + esc(sp.w.n) + " · " + STUFEN[sp.opt.stufe] + '</h2><p class="gross">' + zeitText(sek) + "</p>" +
+    (neu ? '<p class="chip ok" style="font-size:.95rem">' + (vorher === null ? "Erste Zeit auf dieser Stufe" : "Neue Bestzeit, " + zeitText(vorher - sek) + " schneller") + "</p>" : vorher !== null && komplett ? '<p class="muted">Bestzeit: ' + zeitText(vorher) + "</p>" : "") +
+    '<p class="muted" style="margin-top:8px">Wie war es?</p><div class="seg" id="gefuehl"><button type="button" data-v="leicht">Zu leicht</button><button type="button" data-v="gut">Genau richtig</button><button type="button" data-v="hart">Zu hart</button></div>' +
+    '<p class="muted small" id="gefTxt" style="min-height:1.3em"></p><button type="button" class="btn primary" id="spZu">Fertig</button></div>';
+  $("gefuehl").onclick = ev => { const b = ev.target.closest("button"); if (!b) return; eintrag.gefuehl = b.dataset.v; Konto.put(pfad, eintrag);
+    $("gefuehl").querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x === b ? "true" : "false"));
+    const st = sp.opt.stufe; let tip = "";
+    if (b.dataset.v === "leicht" && st < 3) { einst.stufe[sp.w.id] = st + 1; tip = "Beim nächsten Mal Stufe „" + STUFEN[st + 1] + "“."; }
+    else if (b.dataset.v === "hart" && st > 1) { einst.stufe[sp.w.id] = st - 1; tip = "Beim nächsten Mal Stufe „" + STUFEN[st - 1] + "“."; }
+    else tip = "Gespeichert.";
+    Konto.put(P_SET, einst); $("gefTxt").textContent = tip; };
+  $("spZu").onclick = schliessen;
+  renderAlles();
+}
+function anhaltenStumm() { const d = Date.now() - sp.pausiertSeit; sp.pausiertSumme += d; sp.pausiertSeit = 0; }
+function schliessen() {
+  if (sp) clearInterval(sp.iv);
+  try { if ("speechSynthesis" in window) speechSynthesis.cancel(); } catch (e) {}
+  sp = null; $("spieler").hidden = true; $("spieler").innerHTML = ""; document.body.style.overflow = "";
+  Ton._wachGewuenscht = false; Ton.wach(false);
+  if (detailId) zeigeDetail(detailId);
+}
+window.addEventListener("popstate", () => { if (sp) schliessen(); });
+document.addEventListener("keydown", e => {
+  if (!sp || sp.i < 0 || $("dlg").open) return;
+  if (e.key === " " || e.key === "Enter") { e.preventDefault(); const s = sp.schritte[sp.i]; if (s && s.typ === "wdh") naechster(1); else anhalten(); }
+  if (e.key === "ArrowRight") naechster(1);
+  if (e.key === "ArrowLeft") naechster(-1);
+});
+
+/* ---------- Dialog ---------- */
+function frage(titel, text, knoepfe, fn) {
+  $("dlgForm").innerHTML = "<h2>" + esc(titel) + '</h2><p class="muted" style="margin:8px 0 16px">' + esc(text) + '</p><div class="row" style="justify-content:flex-end"><button value="nein" class="btn">Weitermachen</button>' + knoepfe.map(([v, t], i) => '<button value="' + v + '" class="btn' + (i === knoepfe.length - 1 ? " acc" : "") + '">' + esc(t) + "</button>").join("") + "</div>";
+  const d = $("dlg"); d.returnValue = ""; d.onclose = () => fn(d.returnValue); d.showModal();
+}
+
+/* ---------- Verlauf ---------- */
+function renderVerlauf() {
+  const l = liste();
+  $("zielSeg").querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", Number(b.dataset.v) === einst.ziel ? "true" : "false"));
+  $("tonSeg").querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", (Ton.an ? "an" : "aus") === b.dataset.v ? "true" : "false"));
+  const n = dieseWoche();
+  $("zielTxt").textContent = "Diese Woche " + n + " von " + einst.ziel + " Workouts." + (n >= einst.ziel ? " Ziel erreicht." : "");
+  const ws = wochenStart(new Date()); const balken = [], namen = [];
+  for (let i = 7; i >= 0; i--) {
+    const a = new Date(ws); a.setDate(a.getDate() - i * 7); const e = new Date(a); e.setDate(e.getDate() + 7);
+    const c = l.filter(v => v.datum >= isoDay(a) && v.datum < isoDay(e)).length;
+    balken.push(c); namen.push(i === 0 ? "jetzt" : a.getDate() + "." + (a.getMonth() + 1) + ".");
+  }
+  const mx = Math.max(einst.ziel, ...balken);
+  $("wochen").innerHTML = balken.map(c => '<div class="' + (c ? "" : "leer") + '" style="height:' + Math.max(4, c / mx * 100) + '%" title="' + c + ' Workouts"></div>').join("");
+  $("wochenl").innerHTML = namen.map(x => "<span>" + x + "</span>").join("");
+  const best = WORKOUTS.map(w => [w, bestzeit(w.id)]).filter(x => x[1] !== null);
+  $("bestzeiten").innerHTML = best.length ? best.map(([w, b]) => "<li><span>" + esc(w.n) + ' <span class="muted small">' + esc(w.k) + '</span></span><b class="num">' + zeitText(b) + "</b></li>").join("") : '<li class="empty" style="display:block">Noch keine Bestzeiten.</li>';
+  $("vTitel").textContent = "Verlauf (" + l.length + ")";
+  $("verlauf").innerHTML = l.length ? l.slice(0, 100).map(v => '<li><span><span class="w">' + esc(v.name) + '</span> <span class="muted small">' + STUFEN[v.stufe || 2] + (v.komplett === false ? ", nicht komplett" : "") + "</span><br>" +
+    '<span class="muted small">' + parseDay(v.datum).toLocaleDateString("de-DE", {weekday: "short", day: "numeric", month: "short"}) + (v.gefuehl ? " · " + {leicht: "zu leicht", gut: "genau richtig", hart: "zu hart"}[v.gefuehl] : "") + '</span></span><span class="row"><b class="num">' + zeitText(v.sek) + '</b><button type="button" class="btn small" data-del="' + esc(v.pfad) + '" aria-label="Eintrag löschen">✕</button></span></li>').join("") : '<li class="empty" style="display:block">Noch kein Workout gemacht.</li>';
+  $("verlauf").querySelectorAll("[data-del]").forEach(b => b.onclick = () => frage("Eintrag löschen?", "Das Workout wird aus deinem Verlauf entfernt.", [["ja", "Löschen"]], a => { if (a !== "ja") return; delete verlauf[b.dataset.del]; Konto.del(b.dataset.del); renderAlles(); }));
+}
+$("zielSeg").onclick = ev => { const b = ev.target.closest("button"); if (!b) return; einst.ziel = Number(b.dataset.v); Konto.put(P_SET, einst); renderAlles(); };
+$("tonSeg").onclick = ev => { const b = ev.target.closest("button"); if (!b) return; Ton.an = b.dataset.v === "an"; Ton.entsperren(); if (Ton.an) Ton.sag("Ton ist an."); renderVerlauf(); };
+
+/* ---------- Reiter ---------- */
+const VIEWS = ["entdecken", "uebungen", "verlauf"];
+function show(v) {
+  $("view-detail").hidden = true; detailId = null;
+  for (const x of VIEWS) { $("tab-" + x).setAttribute("aria-selected", x === v ? "true" : "false"); $("view-" + x).hidden = x !== v; }
+}
+for (const v of VIEWS) $("tab-" + v).addEventListener("click", () => show(v));
+
+function renderAlles() { renderHeute(); renderKats(); renderListe(); renderUebungen(); renderVerlauf(); }
+renderAlles();
+const h = location.hash.slice(1);
+if (wById(h)) zeigeDetail(h); else if (VIEWS.includes(h)) show(h);
+
+(async () => {
+  const u = await Konto.init();
+  if (!u) $("gate").hidden = false;
+  const docs = await Konto.list("gesundheit/wo.");
+  if (docs[P_SET]) einst = Object.assign(einst, docs[P_SET], {stufe: Object.assign({}, (docs[P_SET] || {}).stufe)});
+  verlauf = {};
+  for (const [p, v] of Object.entries(docs)) if (p.startsWith(P_EIN) && v && v.id) verlauf[p] = v;
+  if (!sp) { renderAlles(); if (detailId) zeigeDetail(detailId); }
+})();
+</script>
+</body>
+</html>
