@@ -10,7 +10,7 @@ Wissensplattform für Bücher als Kurs der Lebensplattform, unter `/buecher/`. J
   - „In Claude fragen“ öffnet claude.ai mit fertiger Frage, „Antwort einfügen“ übernimmt die Antwort.
   - „Im Chat anfragen“ setzt `requested`, dann trägt Claude die Zusammenfassung im Chat ein.
 - „⚡ Kurz gelesen“ (Reiter oben, direkt per `#kurz`, Karte „Kurz gelesen“ unter Lernen): Kurzfassungen wie bei Blinkist. Kernidee, für wen, 5 bis 8 Häppchen, Fazit, Lesezeit, Leser mit Wischen, Schriftgröße und Vorlesen, das Häppchen für Häppchen weiterliest. Am Ende ein Learning notieren.
-  - Katalog „Entdecken“: `public/kurz-katalog.json`, von Claude geschriebene Kurzfassungen. Ein Katalogbuch lässt sich auf die eigene Liste setzen (`book.katalog`, `book.kurz.source = "katalog"`).
+  - Katalog „Entdecken“: `public/kurz-katalog.json`, von Claude geschriebene Kurzfassungen. Ein Katalogbuch lässt sich auf die eigene Liste setzen (`book.katalog`, `book.kurz.source = "katalog"`). Genre „Huberman Lab“: 28 Folgen des Huberman-Podcasts (IDs `huberman-*`), genau die Folgen, die die Huberman-Checkliste unter `/huberman/` verlinkt; Feld `link` führt zur Originalfolge.
   - Zu eigenen Büchern: `buch-zusammenfassung` mit `format: "kurz"`, „In Claude fragen“ mit Einfügen (Format KERNIDEE, FÜR WEN, ## Häppchen, FAZIT) oder im Chat (`requestedKurz`).
   - `book.kurz = {idea, forWhom, parts: [{title, text}], outro, unknown, source, date}`, Lesestand in `buecher/kurz` als `{"b:<id>"|"k:<katalogId>": {pos, done, date}}`.
 - Speicherung: Supabase `schach_docs`, Pfad `buecher/buch.<id>` (nur ein Schrägstrich erlaubt), zusätzlich im Browser.

@@ -941,7 +941,7 @@ function adoptKatalog(k) {
   var now = new Date().toISOString();
   var b = {id: uid(), title: k.title, author: k.author || "", isbn: k.isbn || "", genre: k.genre || "", tags: (k.tags || []).slice(0, 12), status: "will", rating: 0,
     cover: k.isbn ? "https://covers.openlibrary.org/b/isbn/" + k.isbn + "-M.jpg?default=false" : "", summary: null, requested: false, learnings: [], created: now,
-    katalog: k.id, kurz: {idea: k.idea, forWhom: k.forWhom, parts: k.parts, outro: k.outro, unknown: false, source: "katalog", date: today()}};
+    katalog: k.id, kurz: {idea: k.idea, forWhom: k.forWhom, parts: k.parts, outro: k.outro, link: k.link || "", unknown: false, source: "katalog", date: today()}};
   if (kurzStand["k:" + k.id]) { kurzStand["b:" + b.id] = kurzStand["k:" + k.id]; delete kurzStand["k:" + k.id]; saveKurzStand(); }
   saveBook(b); return b;
 }
@@ -1034,6 +1034,7 @@ function drawReader() {
   if (i === 0) {
     h += '<p class="num">Die Kernidee</p><p class="idea">' + esc(k.idea || "") + '</p>';
     if (k.forWhom) h += '<div class="box"><p class="num" style="margin-bottom:4px">Für wen</p><p>' + esc(k.forWhom) + '</p></div>';
+    if (/^https:\/\//.test(k.link || "")) h += '<p class="hint"><a href="' + esc(k.link) + '" target="_blank" rel="noopener">🎧 Zur Originalfolge</a></p>';
     h += '<p class="num" style="margin-top:8px">' + k.parts.length + ' Häppchen · ' + kurzMin(k) + ' Minuten</p><ol>' + k.parts.map(function (p) { return '<li>' + esc(p.title) + '</li>'; }).join("") + '</ol>';
   } else if (i <= k.parts.length) {
     var p = k.parts[i - 1];

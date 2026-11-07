@@ -2241,6 +2241,1182 @@
    ],
    "outro": "Wenn du ein schwieriges Ziel verfolgst, nimm dir drei Dinge aus dem Buch mit: ein klares Ziel, einen langen Atem und Bescheidenheit gegenüber dem Gegner. Hochmut ist oft der größte Fehler der Starken.",
    "audio": "thorsten"
+  },
+  {
+   "id": "huberman-schlaf-werkzeugkasten",
+   "title": "Werkzeugkasten Schlaf (Sleep Toolkit)",
+   "author": "Andrew Huberman",
+   "genre": "Huberman Lab",
+   "tags": [
+    "Schlaf",
+    "Licht",
+    "Routine"
+   ],
+   "idea": "Guter Schlaf ist kein Zufall. Mit einer Handvoll fester Gewohnheiten rund um Licht, Temperatur, Koffein und Bildschirme bringt jeder seinen Schlaf in Ordnung, Nahrungsergänzungen kommen erst ganz am Schluss.",
+   "forWhom": "Für alle, die schlecht einschlafen, nachts aufwachen oder morgens nicht wach werden.",
+   "parts": [
+    {
+     "title": "Feste Aufstehzeit und Morgenlicht",
+     "text": "Die innere Uhr lernt durch Wiederholung. Huberman rät deshalb, lieber eine feste Aufstehzeit zu wählen als eine feste Bettzeit, die Bettzeit pendelt sich danach von selbst ein. Am Wochenende höchstens etwa eine Stunde später aufstehen, sonst entsteht am Montag ein kleiner Jetlag. Gleich nach dem Aufstehen gehört helles Licht in die Augen, am besten draußen. Wer schlecht geschlafen hat, steht trotzdem zur gewohnten Zeit auf und holt den Schlaf lieber mit einer Tiefenentspannung oder einem kurzen Nickerchen am frühen Nachmittag nach."
+    },
+    {
+     "title": "Koffein mit Abstand",
+     "text": "Beim Aufwachen ist noch etwas Adenosin im Körper, der Stoff, der müde macht. Wer die erste Tasse erst sechzig bis neunzig Minuten nach dem Aufstehen trinkt, lässt den Körper das selbst abbauen, und bei vielen fällt das Tief am Nachmittag schwächer aus. Ebenso wichtig ist der Stopp: etwa acht bis zehn Stunden vor dem Schlafen kein Koffein mehr. Koffein bleibt lange im Körper und stört den Tiefschlaf, auch wenn man trotzdem einschlafen kann."
+    },
+    {
+     "title": "Abends Licht und Bildschirme zurückfahren",
+     "text": "Abends sind die Augen besonders empfindlich für Licht. Helles Deckenlicht unterdrückt das Melatonin und schiebt die innere Uhr nach hinten. Ab etwa drei Stunden vor dem Schlafen also Lampen tief im Raum, warmes oder rötliches Licht, nachts im Bad nur gedimmt. Mindestens eine Stunde vor dem Bett kommen alle Bildschirme weg, wegen des Lichts und wegen der Inhalte, die aufregen. Das Handy lädt am besten außerhalb des Schlafzimmers. Stattdessen lesen, reden, dehnen."
+    },
+    {
+     "title": "Kühl schlafen, warm aufwachen",
+     "text": "Zum Einschlafen muss die Körpertemperatur um ein bis drei Grad sinken, gegen Morgen steigt sie wieder und weckt uns. Daraus folgen einfache Regeln: Schlafzimmer kühl, etwa sechzehn bis neunzehn Grad, eine leichte Decke, die Füße dürfen rausschauen. Ein warmes Bad oder eine heiße Dusche ein bis zwei Stunden vor dem Schlafen hilft, weil der Körper danach schnell Wärme abgibt. Den Thermostat so stellen, dass es ein bis zwei Stunden vor dem Wecker wärmer wird."
+    },
+    {
+     "title": "Tiefenentspannung und Nickerchen",
+     "text": "Huberman empfiehlt NSDR, englisch für Non-Sleep Deep Rest, eine tiefe Ruhe ohne Schlaf, etwa Yoga Nidra oder eine geführte Aufnahme. Zehn bis zwanzig Minuten liegend mit Körper-Scan und langen Ausatmungen füllen Energie auf und gleichen Schlafmangel teilweise aus. Das hilft auch, wenn man nachts aufwacht und nicht wieder einschläft: lieber NSDR im Bett als das Handy. Ein Nickerchen bleibt kurz, etwa zwanzig Minuten, und liegt nicht zu spät am Tag."
+    },
+    {
+     "title": "Nahrungsergänzung nur als Ergänzung",
+     "text": "Erst wenn Licht, Temperatur und feste Zeiten stimmen, kommen Mittel ins Spiel. Huberman nennt Magnesium als Threonat oder Bisglycinat, Apigenin und L-Theanin, jeweils dreißig bis sechzig Minuten vor dem Schlafen, und zwar einzeln ausprobiert, nicht alles auf einmal. L-Theanin lässt weg, wer sehr lebhaft träumt oder schlafwandelt. Melatonin sieht er für den Dauergebrauch kritisch. Vorher ärztlich abklären, besonders mit Medikamenten oder in der Schwangerschaft."
+    }
+   ],
+   "outro": "Der beste Schlafhelfer ist kein Mittel, sondern ein Tagesablauf: morgens Licht, Koffein mit Abstand, abends dunkel und kühl. Fang mit der festen Aufstehzeit und dem Morgenlicht an, der Rest wird danach leichter.",
+   "audio": "thorsten",
+   "link": "https://www.hubermanlab.com/episode/sleep-toolkit-tools-for-optimizing-sleep-and-sleep-wake-timing"
+  },
+  {
+   "id": "huberman-schlaf-meistern",
+   "title": "Den Schlaf meistern und wacher sein (Master Your Sleep & Be More Alert When Awake)",
+   "author": "Andrew Huberman",
+   "genre": "Huberman Lab",
+   "tags": [
+    "Schlaf",
+    "Innere Uhr",
+    "Jetlag"
+   ],
+   "idea": "Wie wach wir am Tag sind und wie gut wir nachts schlafen, hängt an denselben zwei Kräften: dem Schlafdruck und der inneren Uhr. Wer sie versteht, kann beides gezielt steuern, auch auf Reisen.",
+   "forWhom": "Für alle, die verstehen wollen, warum sie müde oder wach werden, und für Vielreisende mit Jetlag.",
+   "parts": [
+    {
+     "title": "Zwei Kräfte steuern den Schlaf",
+     "text": "In dieser frühen Folge legt Huberman die Grundlagen. Die erste Kraft ist der Schlafdruck: Je länger wir wach sind, desto mehr Adenosin sammelt sich an, und desto müder werden wir. Die zweite Kraft ist die innere Uhr, ein Rhythmus von ungefähr vierundzwanzig Stunden, der Wachheit und Müdigkeit zeitlich verteilt. Gestellt wird diese Uhr vor allem über Licht, das die Augen aufnehmen. Gut geschlafen wird, wenn beide Kräfte zur gleichen Zeit in Richtung Schlaf zeigen."
+    },
+    {
+     "title": "Der Tag beginnt mit Licht",
+     "text": "Helles Licht kurz nach dem Aufwachen setzt den Startpunkt der inneren Uhr. Es löst den natürlichen Anstieg des Cortisols aus, der wach macht, und stellt gleichzeitig einen Zeitzünder: Etwa vierzehn bis sechzehn Stunden später kommt das Melatonin, und man wird müde. Deshalb ist das Licht am Morgen der wichtigste Hebel. Draußen ist es auch bei Wolken viel heller als drinnen, Fensterglas schluckt einen großen Teil."
+    },
+    {
+     "title": "Feste Zeiten und die erste Müdigkeitswelle",
+     "text": "Die innere Uhr lernt durch Wiederholung. Wer jeden Tag zur ähnlichen Zeit aufsteht, wird abends zuverlässig zur ähnlichen Zeit müde. Huberman rät, ins Bett zu gehen, wenn die natürliche Müdigkeit kommt, und nicht dagegen anzuarbeiten. Wer die erste Müdigkeitswelle verpasst, liegt oft lange wach. Für die meisten Erwachsenen sind sieben bis neun Stunden Schlaf das Ziel, nach Tagen mit viel Lernen ist eine volle Nacht besonders wichtig."
+    },
+    {
+     "title": "Die Körpertemperatur als Taktgeber",
+     "text": "Mit der inneren Uhr schwankt auch die Körpertemperatur. Ihren tiefsten Punkt erreicht sie in der zweiten Nachthälfte, etwa zwei Stunden vor dem gewohnten Aufwachen. Danach steigt sie und macht wach. Huberman nutzt das als Werkzeug: Licht, Bewegung und Wärme nach diesem Tiefpunkt verschieben die Uhr nach vorn, also zu früherem Aufwachen. Dieselben Reize kurz davor verschieben sie nach hinten. Kälte und Bewegung am Morgen heben die Temperatur zusätzlich an."
+    },
+    {
+     "title": "Jetlag und Schichtarbeit",
+     "text": "Aus diesem Wissen folgt ein Plan für Reisen. Schon vor der Reise die Schlafzeiten schrittweise in Richtung der Zielzeit verschieben. Am Ziel sofort nach Ortszeit leben: morgens ins Licht, Essen und Bewegung zu den dortigen Zeiten. Wer tagsüber durchhängt, macht nachmittags ein kurzes Nickerchen statt eines langen Schlafs und setzt Koffein gezielt ein. Abends wieder dunkel und kühl. So stellt sich die Uhr in wenigen Tagen um."
+    },
+    {
+     "title": "Wacher am Tag",
+     "text": "Wach sein ist die andere Seite guten Schlafs. Wer morgens Licht tankt, sich bewegt und den Kaffee etwas aufschiebt, ist tagsüber klarer und wird abends rechtzeitig müde. Tagsüber hilft es, die Umgebung hell zu halten und lange Sitzphasen zu unterbrechen. Wer schlecht geschlafen hat, sollte trotzdem zur gewohnten Zeit aufstehen und eher mit kurzer Tiefenentspannung nachhelfen, statt am Morgen lange liegen zu bleiben."
+    }
+   ],
+   "outro": "Schlaf beginnt am Morgen. Feste Aufstehzeit, Licht in den ersten Stunden und abends Dunkelheit halten die innere Uhr im Takt, zu Hause wie auf Reisen.",
+   "audio": "thorsten",
+   "link": "https://www.hubermanlab.com/episode/master-your-sleep-and-be-more-alert-when-awake"
+  },
+  {
+   "id": "huberman-licht",
+   "title": "Licht für die Gesundheit nutzen (Using Light to Optimize Health)",
+   "author": "Andrew Huberman",
+   "genre": "Huberman Lab",
+   "tags": [
+    "Licht",
+    "Schlaf",
+    "Stimmung"
+   ],
+   "idea": "Licht ist ein Signal, kein Hintergrund. Sonnenlicht, blaues Licht und rotes Licht wirken über Augen und Haut auf innere Uhr, Stimmung, Hormone und Schlaf, je nachdem, wann wir ihnen begegnen.",
+   "forWhom": "Für alle, die viel drinnen sind, im Winter durchhängen oder abends nicht abschalten können.",
+   "parts": [
+    {
+     "title": "Die Augen als Uhr",
+     "text": "In der Netzhaut gibt es besondere Zellen, die nicht zum Sehen da sind, sondern der inneren Uhr melden, wie hell es ist. Sie reagieren besonders auf das Licht des Himmels am Morgen und am Abend. Deshalb wirkt Tageslicht draußen so viel stärker als jede Lampe drinnen. Wenn diese Zellen morgens viel Licht bekommen, stellt das die Uhr für den ganzen Tag: Wach werden, Leistungshoch und Müdigkeit am Abend kommen dann zur richtigen Zeit."
+    },
+    {
+     "title": "Morgens raus",
+     "text": "Huberman empfiehlt, in der ersten Stunde nach dem Aufwachen nach draußen zu gehen, ohne Sonnenbrille, aber ohne direkt in die Sonne zu schauen. Als Faustregel gelten an sonnigen Tagen fünf bis zehn Minuten, bei Wolken zehn bis zwanzig, bei sehr trübem Himmel bis zu dreißig. Durch Fenster oder Autoscheibe kommt viel weniger an. Ist es noch dunkel, drinnen alles hell machen und raus, sobald es hell wird. Im Winter hilft eine Tageslichtlampe mit etwa zehntausend Lux."
+    },
+    {
+     "title": "Licht am späten Nachmittag",
+     "text": "Ein zweiter Lichttermin ist der späte Nachmittag, wenn die Sonne tief steht. Zehn bis zwanzig Minuten draußen sagen der inneren Uhr, dass der Tag zu Ende geht. Huberman beschreibt, dass dieses Abendlicht die Augen weniger empfindlich für Lampen und Bildschirme am Abend macht, es puffert also das Kunstlicht ab. Das lässt sich gut mit einem Spaziergang oder Training verbinden."
+    },
+    {
+     "title": "Licht auf der Haut",
+     "text": "Auch die Haut reagiert auf Sonnenlicht. Huberman berichtet von Untersuchungen, nach denen Sonne auf der Haut Stimmung und Wohlbefinden hebt und in Hormonsysteme hineinwirkt. Seine Empfehlung ist, tagsüber Arme und Beine ans Licht zu lassen, etwa zwanzig bis dreißig Minuten beim Spaziergang oder Sport im Freien. Sonnenbrand ist dabei unbedingt zu vermeiden, Hauttyp und UV-Index entscheiden, wie lange das sinnvoll ist."
+    },
+    {
+     "title": "Nachts dunkel",
+     "text": "Nachts kehrt sich alles um. Etwa zwischen zweiundzwanzig und vier Uhr sollte möglichst kein helles Licht in die Augen fallen, auch nicht im Bad. Schon kurzes helles Licht in der Nacht unterdrückt Melatonin und kann die innere Uhr verschieben, auf Dauer drückt das auch auf die Stimmung. Abends also Lampen tief im Raum, warmes oder rötliches Licht, für nächtliche Wege ein schwaches rotes Nachtlicht."
+    },
+    {
+     "title": "Rotes Licht",
+     "text": "Langwelliges Licht, also Rot, Nahinfrarot und Infrarot, ist ein eigenes Kapitel. Abends ist rötliches Licht die schlaffreundlichste Beleuchtung, weil es die innere Uhr kaum stört. Morgens wird kurzes tiefrotes Licht in Studien für die Netzhaut bei Menschen über vierzig untersucht, außerdem für die Haut. Huberman stellt das als vielversprechende Forschung vor, nicht als Pflicht. Geräte sollte man mit Bedacht wählen."
+    }
+   ],
+   "outro": "Licht ist der günstigste Gesundheitshebel überhaupt: morgens und am späten Nachmittag viel davon, abends wenig und warm, nachts gar keins. Wer das umsetzt, schläft besser und fühlt sich tagsüber wacher.",
+   "audio": "thorsten",
+   "link": "https://www.hubermanlab.com/episode/using-light-sunlight-blue-light-and-red-light-to-optimize-health"
+  },
+  {
+   "id": "huberman-hattar",
+   "title": "Dr. Samer Hattar: Licht, Essen und Bewegung richtig timen (Timing Light, Food & Exercise)",
+   "author": "Andrew Huberman mit Dr. Samer Hattar",
+   "genre": "Huberman Lab",
+   "tags": [
+    "Licht",
+    "Innere Uhr",
+    "Gast"
+   ],
+   "idea": "Der Lichtforscher Samer Hattar zeigt, dass Licht nicht nur Sehen ermöglicht, sondern Uhr, Stimmung und Schlaf direkt steuert. Wer Licht, Essen und Bewegung zur richtigen Tageszeit bekommt, lebt im Einklang mit seiner Biologie.",
+   "forWhom": "Für alle, die verstehen wollen, warum Tageslicht und feste Rhythmen so wichtig sind.",
+   "parts": [
+    {
+     "title": "Der Gast",
+     "text": "Samer Hattar leitet an den amerikanischen National Institutes of Health eine Forschungsgruppe zu Licht und Rhythmen. Er hat wesentlich dazu beigetragen, die besonderen lichtempfindlichen Zellen in der Netzhaut zu verstehen, die nicht zum Sehen dienen, sondern der inneren Uhr und anderen Hirnbereichen melden, wie hell es ist. Im Gespräch mit Huberman geht es darum, was das für den Alltag bedeutet."
+    },
+    {
+     "title": "Licht wirkt direkt auf die Stimmung",
+     "text": "Eine zentrale Botschaft: Licht beeinflusst die Stimmung nicht nur über den Umweg Schlaf, sondern auch direkt über eigene Verbindungen ins Gehirn. Hattar beschreibt Versuche, in denen Licht zur falschen Zeit die Stimmung verschlechterte, auch wenn der Schlaf nicht gestört war. Für Menschen heißt das: Helles Licht am Tag und Dunkelheit in der Nacht sind wichtig für das seelische Gleichgewicht, nicht nur für die Nachtruhe."
+    },
+    {
+     "title": "Draußen sein",
+     "text": "Hattar und Huberman sind sich einig, dass Innenräume viel zu dunkel sind. Selbst ein bewölkter Himmel liefert ein Vielfaches des Lichts eines hellen Büros. Daraus folgt der Rat, so viel Zeit wie möglich draußen zu verbringen, vor allem morgens. Sonnig fünf bis zehn Minuten, bewölkt länger, ohne Sonnenbrille und ohne in die Sonne zu schauen. Am späten Nachmittag noch einmal Licht, das macht die Augen abends weniger empfindlich."
+    },
+    {
+     "title": "Essen und Bewegung als Zeitgeber",
+     "text": "Neben Licht stellen auch Mahlzeiten und Bewegung die inneren Uhren, besonders die Uhren in Organen wie Leber und Darm. Wer jeden Tag zu ähnlichen Zeiten isst und sich bewegt, hilft dem Körper, alle Uhren im gleichen Takt zu halten. Spätes, schweres Essen und Training spät am Abend können den Rhythmus verschieben. Regelmäßigkeit ist dabei wichtiger als jede einzelne Uhrzeit."
+    },
+    {
+     "title": "Dunkle Nächte",
+     "text": "Für den Abend und die Nacht gilt das Gegenteil. Hattar rät, abends Licht zu dimmen und nachts möglichst im Dunkeln zu bleiben. Licht von oben wirkt stärker als Licht von unten, weil die empfindlichen Zellen vor allem im unteren Teil der Netzhaut liegen und auf Licht von oben reagieren. Deshalb abends Lampen tief im Raum und kein kaltweißes Deckenlicht."
+    },
+    {
+     "title": "Mit der Biologie leben",
+     "text": "Hattars Grundhaltung ist einfach: Der Mensch hat sich mit hellen Tagen und dunklen Nächten entwickelt. Viele Probleme mit Schlaf, Stimmung und Stoffwechsel hängen damit zusammen, dass das moderne Leben diesen Kontrast verwischt. Man muss nicht perfekt sein, aber jeder Schritt zurück zu klarem Tag und klarer Nacht hilft."
+    }
+   ],
+   "outro": "Viel Licht am Tag, Dunkelheit in der Nacht, Essen und Bewegung zu festen Zeiten: Mehr braucht die innere Uhr nicht, und sie dankt es mit besserer Stimmung und besserem Schlaf.",
+   "audio": "thorsten",
+   "link": "https://www.hubermanlab.com/episode/dr-samer-hattar-timing-light-food-exercise-for-better-sleep-energy-mood"
+  },
+  {
+   "id": "huberman-koffein",
+   "title": "Koffein gezielt nutzen (Using Caffeine to Optimize Mental & Physical Performance)",
+   "author": "Andrew Huberman",
+   "genre": "Huberman Lab",
+   "tags": [
+    "Koffein",
+    "Leistung",
+    "Schlaf"
+   ],
+   "idea": "Koffein ist ein wirksames Werkzeug für Kopf und Körper, wenn man Zeitpunkt und Menge kennt. Falsch eingesetzt verschiebt es Müdigkeit nur nach hinten und kostet Tiefschlaf.",
+   "forWhom": "Für alle, die täglich Kaffee oder Tee trinken und mehr davon haben wollen, ohne den Schlaf zu stören.",
+   "parts": [
+    {
+     "title": "Wie Koffein wirkt",
+     "text": "Koffein blockiert die Andockstellen für Adenosin, den Stoff, der sich über den Tag ansammelt und müde macht. Das Adenosin ist aber noch da. Lässt die Wirkung nach, schlägt die Müdigkeit oft umso stärker zu. Huberman erklärt außerdem, dass Koffein das Dopaminsystem unterstützt, was Motivation und Stimmung leicht hebt, und dass es die Leistung bei Sport und Konzentration messbar verbessern kann."
+    },
+    {
+     "title": "Die erste Tasse später",
+     "text": "Seine bekannteste Empfehlung: die erste Tasse etwa sechzig bis neunzig Minuten nach dem Aufwachen. Morgens ist noch Adenosin im System, das der Körper ohne Koffein abbaut. Wer sofort Kaffee trinkt, blockiert es nur und erlebt bei vielen am frühen Nachmittag ein Tief. Wer direkt morgens trainiert, darf den Kaffee auch früher trinken. Erst Licht und Bewegung, dann Koffein, so lautet die Reihenfolge."
+    },
+    {
+     "title": "Die richtige Menge",
+     "text": "Als sinnvollen Bereich nennt Huberman etwa ein bis drei Milligramm Koffein pro Kilogramm Körpergewicht. Wie empfindlich jemand ist, unterscheidet sich stark. Wer nach Kaffee nervös wird, Herzklopfen bekommt oder schlecht schläft, nimmt weniger. Koffein ist kein Ersatz für Schlaf. Wer dauerhaft viel braucht, um zu funktionieren, sollte eher den Schlaf in Ordnung bringen."
+    },
+    {
+     "title": "Der Koffein-Stopp",
+     "text": "Koffein hat eine Halbwertszeit von etwa fünf bis sechs Stunden. Nach zehn Stunden ist noch etwa ein Viertel aktiv und stört den Tiefschlaf, auch wenn man trotzdem einschlafen kann. Deshalb rät Huberman, acht bis zehn Stunden vor dem Schlafen kein Koffein mehr zu nehmen. Das gilt auch für Cola, Mate, grünen und schwarzen Tee, Energydrinks und Schokolade. Danach Kräutertee oder entkoffeinierten Kaffee."
+    },
+    {
+     "title": "Für Frauen",
+     "text": "Hormonelle Verhütung wie die Pille verlangsamt den Abbau von Koffein deutlich. Dann wirkt dieselbe Tasse länger nach, und der Koffein-Stopp sollte eher ein bis zwei Stunden früher liegen. Auch in der Schwangerschaft gelten eigene, niedrigere Grenzen, die man ärztlich besprechen sollte."
+    },
+    {
+     "title": "Koffein als Werkzeug",
+     "text": "Am Ende steht ein bewusster Umgang. Koffein kann gezielt vor einer anspruchsvollen Arbeit oder vor dem Training helfen. Wer es dagegen den ganzen Tag nebenbei trinkt, gewöhnt sich daran und verliert den Effekt. Huberman beschreibt, dass gelegentliche Pausen die Wirkung wiederherstellen können. Wichtig bleibt: Koffein verstärkt einen guten Tag, es rettet keinen schlechten Schlaf."
+    }
+   ],
+   "outro": "Später anfangen, maßvoll dosieren, früh aufhören: So bleibt Koffein ein Leistungshelfer, ohne den Schlaf zu kosten.",
+   "audio": "thorsten",
+   "link": "https://www.hubermanlab.com/episode/using-caffeine-to-optimize-mental-and-physical-performance"
+  },
+  {
+   "id": "huberman-alkohol",
+   "title": "Was Alkohol mit Körper und Gehirn macht (What Alcohol Does to Your Body, Brain & Health)",
+   "author": "Andrew Huberman",
+   "genre": "Huberman Lab",
+   "tags": [
+    "Alkohol",
+    "Schlaf",
+    "Gehirn"
+   ],
+   "idea": "Alkohol ist auch in kleinen Mengen nicht harmlos. Er stört Schlaf, Stresshormone, Darm und Gehirn, und schon wenige Getränke pro Woche sind messbar. Wer weniger trinkt, gewinnt fast immer.",
+   "forWhom": "Für alle, die regelmäßig ein Glas trinken und wissen wollen, was das im Körper bewirkt.",
+   "parts": [
+    {
+     "title": "Alkohol ist ein Gift",
+     "text": "Huberman erklärt nüchtern: Der Alkohol in Getränken, das Ethanol, wird im Körper zu Acetaldehyd abgebaut, einem giftigen Stoff, der Zellen schädigt. Die Leber arbeitet daran, ihn unschädlich zu machen. Die angenehme, entspannende Wirkung entsteht, weil Alkohol die Aktivität in Teilen des Gehirns dämpft, die für Planung und Hemmung zuständig sind. Deshalb fühlt man sich lockerer, entscheidet aber schlechter."
+    },
+    {
+     "title": "Schlaf wird schlechter",
+     "text": "Alkohol macht schläfrig, verschlechtert aber den Schlaf deutlich. Er stört vor allem den Tiefschlaf und den Traumschlaf, man wacht öfter auf und ist morgens weniger erholt. Deshalb lautet eine klare Regel aus Hubermans Protokollen: keinen Alkohol in den letzten acht Stunden vor dem Schlafen. Das Glas Wein zum Runterkommen ist also eine schlechte Einschlafhilfe."
+    },
+    {
+     "title": "Stress und Stimmung",
+     "text": "Viele trinken, um Stress abzubauen. Huberman beschreibt, dass regelmäßiger Alkohol auf Dauer das Gegenteil bewirkt: Das Stresssystem wird empfindlicher, und wenn der Alkohol abgebaut ist, fühlen sich Menschen oft unruhiger und gereizter als vorher. So entsteht leicht ein Kreislauf, in dem man trinkt, um die Folgen des letzten Trinkens zu dämpfen."
+    },
+    {
+     "title": "Darm, Leber und Gehirn",
+     "text": "Alkohol greift die Darmschleimhaut und die Darmflora an, das fördert Entzündungen im ganzen Körper. Die Leber wird belastet. Huberman verweist außerdem auf große Studien, nach denen schon moderates regelmäßiges Trinken mit messbaren Veränderungen im Gehirn verbunden ist. Er betont, dass die frühere Vorstellung, ein Glas am Tag sei gesund, nach heutigem Wissen nicht haltbar ist."
+    },
+    {
+     "title": "Wie viel ist zu viel",
+     "text": "Huberman sieht bereits ein bis zwei Getränke pro Woche als Grenze, ab der Nachteile messbar werden. Er verbietet nichts, aber er rät, so selten und so wenig wie möglich zu trinken. Wer trinkt, sollte es nicht spät am Abend tun und nicht als Mittel gegen Stress oder Schlaflosigkeit. Bei Menschen mit Alkoholproblemen in der Familie ist besondere Vorsicht angebracht."
+    },
+    {
+     "title": "Die gute Nachricht",
+     "text": "Der Körper erholt sich. Wer weniger trinkt oder ganz aufhört, merkt oft schon nach kurzer Zeit besseren Schlaf, mehr Energie und eine ruhigere Stimmung. Auch Leber und Darm können sich zu einem großen Teil regenerieren. Der Verzicht auf Alkohol ist damit einer der einfachsten Schritte für mehr Gesundheit."
+    }
+   ],
+   "outro": "Weniger Alkohol ist fast immer besser, und keiner am Abend ist am besten. Wer Entspannung sucht, findet sie mit Atmung, Bewegung und Licht ohne den Preis eines schlechten Schlafs.",
+   "audio": "thorsten",
+   "link": "https://www.hubermanlab.com/episode/what-alcohol-does-to-your-body-brain-health"
+  },
+  {
+   "id": "huberman-cannabis",
+   "title": "Dr. Matthew Hill: Wie Cannabis die Gesundheit beeinflusst (How Cannabis Impacts Health)",
+   "author": "Andrew Huberman mit Dr. Matthew Hill",
+   "genre": "Huberman Lab",
+   "tags": [
+    "Cannabis",
+    "Schlaf",
+    "Gast"
+   ],
+   "idea": "Cannabis greift in ein körpereigenes System ein, das Stress, Appetit und Schlaf mitregelt. Es kann kurzfristig beruhigen, unterdrückt aber den Traumschlaf, macht schnell Gewöhnung und birgt besonders für junge Menschen echte Risiken.",
+   "forWhom": "Für alle, die Cannabis nutzen oder darüber nachdenken, auch als Einschlafhilfe.",
+   "parts": [
+    {
+     "title": "Der Gast und das System",
+     "text": "Matthew Hill ist Neurowissenschaftler an der Universität Calgary und erforscht das Endocannabinoid-System. Das ist ein körpereigenes Botenstoffsystem, das unter anderem Stress, Appetit, Schmerz und Stimmung mitregelt. Die Wirkstoffe der Cannabispflanze docken an genau diesen Stellen an. Deshalb wirkt Cannabis so vielfältig, und deshalb sind die Folgen nicht auf das Gefühl des Rauschs beschränkt."
+    },
+    {
+     "title": "THC und CBD",
+     "text": "Hill unterscheidet die beiden bekanntesten Wirkstoffe. THC ist für den Rausch verantwortlich und wirkt stark auf das Gehirn. CBD berauscht nicht und wird für verschiedene Zwecke untersucht, die Forschung ist aber weniger eindeutig, als die Werbung behauptet. Moderne Sorten enthalten oft viel mehr THC als früher, was die Wirkung und die Risiken deutlich verstärkt."
+    },
+    {
+     "title": "Cannabis und Schlaf",
+     "text": "Viele nutzen Cannabis zum Einschlafen. Tatsächlich kann es das Einschlafen erleichtern, es unterdrückt aber den Traumschlaf. Dazu tritt schnell Gewöhnung ein, und die Wirkung auf den Schlaf lässt nach. Beim Absetzen folgen oft unruhige Nächte mit sehr lebhaften Träumen. Deshalb steht in Hubermans Protokollen: kein Cannabis als Einschlafhilfe."
+    },
+    {
+     "title": "Risiken für junge Menschen",
+     "text": "Hill betont, dass das Gehirn bis Mitte zwanzig reift und in dieser Zeit besonders empfindlich ist. Regelmäßiger Konsum in Jugend und jungem Erwachsenenalter, vor allem von THC-reichen Produkten, wird mit einem höheren Risiko für Psychosen in Verbindung gebracht, besonders bei Menschen mit familiärer Belastung. Auch Angst kann bei manchen durch Cannabis zunehmen statt abnehmen."
+    },
+    {
+     "title": "Abhängigkeit und Absetzen",
+     "text": "Cannabis kann abhängig machen, auch wenn es oft als harmlos gilt. Typische Anzeichen sind, dass man immer mehr braucht oder ohne nicht mehr schlafen oder entspannen kann. Beim Absetzen sind Schlafprobleme, Gereiztheit und Appetitverlust häufig, sie gehen aber nach einiger Zeit vorbei. Wer aufhören will, plant diese Übergangszeit am besten ein."
+    },
+    {
+     "title": "Eine sachliche Sicht",
+     "text": "Hill und Huberman sprechen ohne Moralpredigt. Es gibt medizinische Einsatzgebiete, über die man mit Ärzten sprechen kann. Für Gesunde, die Schlaf und Stimmung verbessern wollen, gibt es aber bessere Wege: Licht, feste Zeiten, Bewegung und Atemübungen wirken ohne Gewöhnung und ohne Nebenwirkungen."
+    }
+   ],
+   "outro": "Cannabis ist keine gute Einschlafhilfe und für junge Menschen besonders riskant. Wer es nutzt, sollte es bewusst, selten und mit Wissen um die Folgen tun.",
+   "audio": "thorsten",
+   "link": "https://www.hubermanlab.com/episode/dr-matthew-hill-how-cannabis-impacts-health-the-potential-risks"
+  },
+  {
+   "id": "huberman-stress",
+   "title": "Werkzeuge gegen Stress und Angst (Tools for Managing Stress & Anxiety)",
+   "author": "Andrew Huberman",
+   "genre": "Huberman Lab",
+   "tags": [
+    "Stress",
+    "Atmung",
+    "Angst"
+   ],
+   "idea": "Stress ist nicht der Feind, langer Stress schon. Mit einfachen Werkzeugen lässt sich akuter Stress in Sekunden senken und die Widerstandskraft auf Dauer steigern.",
+   "forWhom": "Für alle, die oft angespannt sind, schlecht abschalten oder in Stressmomenten ruhiger bleiben wollen.",
+   "parts": [
+    {
+     "title": "Guter und schlechter Stress",
+     "text": "Huberman beginnt mit einer Unterscheidung. Kurzer Stress ist eine nützliche Reaktion: Er macht wach, mobilisiert Energie und stärkt sogar kurzfristig das Immunsystem. Problematisch wird Stress, wenn er über Wochen und Monate anhält. Dann schadet er Schlaf, Stimmung, Gesundheit und Leistung. Das Ziel ist also nicht, Stress zu vermeiden, sondern ihn schnell wieder abschalten zu können."
+    },
+    {
+     "title": "Der physiologische Seufzer",
+     "text": "Das bekannteste Werkzeug ist der physiologische Seufzer. Man atmet tief durch die Nase ein und setzt oben einen zweiten kurzen Atemzug durch die Nase nach, dann atmet man lang und langsam durch den Mund aus, bis die Lunge leer ist. Ein bis drei Wiederholungen reichen. Der doppelte Einatemzug öffnet kollabierte Lungenbläschen wieder, die lange Ausatmung entfernt viel Kohlendioxid. Für Huberman ist das der schnellste bekannte Weg, Stress in Echtzeit zu senken."
+    },
+    {
+     "title": "Den Blick weiten",
+     "text": "Ein zweites Werkzeug betrifft die Augen. Unter Stress verengt sich der Blick auf einen Punkt. Wer bewusst in die Weite schaut und den ganzen Horizont wahrnimmt, also einen panoramischen Blick einnimmt, beruhigt das Nervensystem. Das funktioniert gut bei einem Spaziergang, bei dem die Umgebung am Auge vorbeizieht."
+    },
+    {
+     "title": "Widerstandskraft aufbauen",
+     "text": "Für längere Belastungsphasen nennt Huberman Gewohnheiten, die das Nervensystem robuster machen: guten Schlaf, Bewegung, Zeit mit vertrauten Menschen und Tiefenentspannung, etwa zehn bis zwanzig Minuten NSDR am Nachmittag. Auch bewusste Kälte trainiert, in einer unangenehmen Lage ruhig zu bleiben. Als tägliche Übung empfiehlt er fünf Minuten zyklisches Seufzen am Stück."
+    },
+    {
+     "title": "Nahrungsergänzung bei Dauerstress",
+     "text": "Erst wenn Atmung, Schlaf und Bewegung stimmen, kommen Mittel in Betracht. Huberman nennt unter anderem Ashwagandha und L-Theanin. Ashwagandha sollte nur zeitlich begrenzt und mit Pausen genommen werden, nicht in der Schwangerschaft, bei Schilddrüsenproblemen nur nach ärztlicher Rücksprache. Supplements ersetzen keine der Grundlagen."
+    },
+    {
+     "title": "Üben, bevor es eskaliert",
+     "text": "Ein häufiger Fehler ist, die Werkzeuge erst auszuprobieren, wenn der Stress schon überkocht. Besser ist, den Seufzer und den weiten Blick in ruhigen Momenten zu üben, damit sie im Ernstfall selbstverständlich sind. Wer sich angewöhnt, mehrmals am Tag bewusst durchzuatmen, senkt auch seine Grundanspannung."
+    }
+   ],
+   "outro": "Ein, zwei Seufzer und ein Blick in die Weite holen dich in Sekunden runter. Wer das täglich übt und gut schläft, wird insgesamt gelassener.",
+   "audio": "thorsten",
+   "link": "https://www.hubermanlab.com/episode/tools-for-managing-stress-and-anxiety"
+  },
+  {
+   "id": "huberman-atmung",
+   "title": "Richtig atmen (How to Breathe Correctly)",
+   "author": "Andrew Huberman",
+   "genre": "Huberman Lab",
+   "tags": [
+    "Atmung",
+    "Stress",
+    "Leistung"
+   ],
+   "idea": "Atmung ist der einzige Teil des Nervensystems, den wir direkt steuern können. Wer durch die Nase atmet und gezielte Atemmuster nutzt, beeinflusst Stress, Konzentration, Schlaf und Leistung.",
+   "forWhom": "Für alle, die mit einfachen Übungen ruhiger, konzentrierter oder belastbarer werden wollen.",
+   "parts": [
+    {
+     "title": "Atmung als Fernbedienung",
+     "text": "Huberman erklärt, dass Atmung normalerweise automatisch läuft, wir sie aber jederzeit bewusst übernehmen können. Damit wird sie zur Fernbedienung für das Nervensystem. Einatmen aktiviert eher, langes Ausatmen beruhigt eher. Wer das weiß, kann seinen Zustand in Minuten verändern, ohne Hilfsmittel und überall."
+    },
+    {
+     "title": "Durch die Nase",
+     "text": "Eine Grundregel: im Alltag und bei lockerer Belastung durch die Nase atmen. Die Nase filtert, wärmt und befeuchtet die Luft, und die Nasenatmung ist auf Dauer gesünder für Gesicht, Zähne und Schlaf. Durch den Mund zu atmen ist bei hoher Belastung normal, sollte aber nicht zur Gewohnheit im Ruhezustand werden."
+    },
+    {
+     "title": "Der doppelte Seufzer",
+     "text": "Der physiologische Seufzer ist auch hier das zentrale Werkzeug. Zweimal durch die Nase einatmen, wobei der zweite kurze Zug die Lunge ganz füllt, dann lang durch den Mund ausatmen. Das öffnet zusammengefallene Lungenbläschen und entfernt Kohlendioxid. Ein bis drei Seufzer senken akuten Stress schnell."
+    },
+    {
+     "title": "Fünf Minuten am Tag",
+     "text": "Huberman berichtet von einer Stanford-Studie, die er mit dem Psychiater David Spiegel durchgeführt hat. Fünf Minuten täglich zyklisches Seufzen, also wiederholte physiologische Seufzer mit betont langer Ausatmung, verbesserten die Stimmung und senkten die Grundanspannung, in dieser Studie sogar etwas stärker als eine Achtsamkeitsmeditation gleicher Länge."
+    },
+    {
+     "title": "Kohlendioxid vertragen",
+     "text": "Wer schnell außer Atem kommt oder in Stress hektisch atmet, verträgt Kohlendioxid oft schlecht. Ruhiges, langsames Atmen trainiert diese Toleranz. Huberman stellt auch andere Muster vor, etwa gleichmäßige Kastenatmung mit gleich langen Phasen. Wichtig ist nicht das perfekte Muster, sondern regelmäßiges Üben."
+    },
+    {
+     "title": "Atmen in den Alltag bringen",
+     "text": "Die Übungen wirken am besten, wenn sie selbstverständlich werden. Ein paar Seufzer vor einem schwierigen Gespräch, Nasenatmung beim Spaziergang, fünf Minuten am Abend zum Runterfahren. Hektisches Atmen und das Üben erst im Ernstfall sind die häufigsten Fehler."
+    }
+   ],
+   "outro": "Durch die Nase atmen, bei Stress seufzen, täglich fünf Minuten üben: Mit der Atmung hast du das schnellste Werkzeug für Ruhe immer dabei.",
+   "audio": "thorsten",
+   "link": "https://www.hubermanlab.com/episode/how-to-breathe-correctly-for-optimal-health-mood-learning-and-performance"
+  },
+  {
+   "id": "huberman-cortisol",
+   "title": "Cortisol steuern und Burnout überwinden (How to Control Your Cortisol & Overcome Burnout)",
+   "author": "Andrew Huberman",
+   "genre": "Huberman Lab",
+   "tags": [
+    "Stress",
+    "Hormone",
+    "Burnout"
+   ],
+   "idea": "Cortisol ist kein Bösewicht. Entscheidend ist sein Tagesverlauf: hoch am Morgen, niedrig am Abend. Wer diesen Rhythmus mit Licht, Bewegung und Koffein richtig setzt, schützt sich vor Erschöpfung.",
+   "forWhom": "Für alle, die sich ausgebrannt fühlen, morgens schlecht in Gang kommen oder abends nicht abschalten.",
+   "parts": [
+    {
+     "title": "Was Cortisol tut",
+     "text": "Cortisol ist ein Stresshormon, aber auch ein Wachmacher. Es mobilisiert Energie, hält uns aufmerksam und hilft dem Immunsystem. Huberman betont, dass der Spiegel im Tagesverlauf schwanken soll. Ein kräftiger Anstieg kurz nach dem Aufwachen ist gesund. Problematisch wird es, wenn der Spiegel abends hoch bleibt oder der Rhythmus flach wird."
+    },
+    {
+     "title": "Den Morgen-Peak setzen",
+     "text": "Ein hoher Cortisolwert am Morgen sorgt dafür, dass der Spiegel am Abend niedriger ist. Die Hebel dafür sind einfach: helles Licht in der ersten Stunde, Bewegung, gegebenenfalls Kälte und Koffein etwas später. Diese Reize legen den Höhepunkt an den Anfang des Tages, wo er hingehört."
+    },
+    {
+     "title": "Abends runter",
+     "text": "Abends soll das Cortisol niedrig sein, damit Schlaf gelingt. Helles Licht spät am Abend, aufregende Inhalte, späte harte Trainings und Koffein am Nachmittag können den Spiegel oben halten. Gedimmtes Licht, ein ruhiger Abend und eine warme Dusche helfen, herunterzufahren."
+    },
+    {
+     "title": "Burnout als gestörter Rhythmus",
+     "text": "Huberman beschreibt Erschöpfung nach langer Belastung so, dass der gesunde Cortisolrhythmus verloren geht. Man ist morgens müde und abends aufgedreht. Der Weg zurück führt nicht über Durchhalten, sondern über das Wiederherstellen des Rhythmus: feste Aufstehzeit, Licht am Morgen, Bewegung, Pausen und ausreichend Schlaf."
+    },
+    {
+     "title": "Erholung einbauen",
+     "text": "Zum Ausgleich gehören Tiefenentspannung am Nachmittag, Atemübungen wie der physiologische Seufzer und echte Pausen ohne Bildschirm. Soziale Kontakte wirken ebenfalls gegen Dauerstress. Bei Bedarf nennt Huberman Ashwagandha, das in Studien Cortisol senken kann, aber nur zeitlich begrenzt und nach ärztlicher Rücksprache."
+    },
+    {
+     "title": "Wann Hilfe nötig ist",
+     "text": "Nicht jede Erschöpfung lässt sich mit Gewohnheiten lösen. Wer über längere Zeit kaum noch Freude empfindet, dauerhaft schlecht schläft oder körperliche Beschwerden hat, sollte ärztliche Hilfe suchen. Die Werkzeuge der Folge sind dann eine Ergänzung, kein Ersatz."
+    }
+   ],
+   "outro": "Cortisol morgens hoch, abends tief: Diesen Rhythmus kannst du mit Licht, Bewegung und klugem Koffein selbst setzen. Das ist das Fundament gegen Erschöpfung.",
+   "audio": "thorsten",
+   "link": "https://www.hubermanlab.com/episode/how-to-control-your-cortisol-overcome-burnout"
+  },
+  {
+   "id": "huberman-meditation",
+   "title": "Wie Meditation wirkt (How Meditation Works & Science-Based Effective Meditations)",
+   "author": "Andrew Huberman",
+   "genre": "Huberman Lab",
+   "tags": [
+    "Meditation",
+    "Fokus",
+    "Stimmung"
+   ],
+   "idea": "Meditation ist Training für die Aufmerksamkeit. Schon wenige Minuten am Tag verbessern Stimmung, Konzentration und Gedächtnis, und je nach Ziel gibt es unterschiedliche Arten zu meditieren.",
+   "forWhom": "Für alle, die mit Meditation anfangen wollen oder wissen möchten, welche Form zu ihnen passt.",
+   "parts": [
+    {
+     "title": "Aufmerksamkeit wie ein Scheinwerfer",
+     "text": "Huberman beschreibt Aufmerksamkeit als Scheinwerfer, den wir nach innen oder außen richten können. Nach innen, auf Atem, Herzschlag oder Körpergefühl, oder nach außen, auf Geräusche und Dinge um uns herum. Meditation heißt, diesen Scheinwerfer bewusst zu lenken und zurückzuholen, wenn er wandert."
+    },
+    {
+     "title": "Die richtige Richtung wählen",
+     "text": "Wer ohnehin stark nach innen gerichtet ist und viel grübelt, profitiert eher von Meditationen mit äußerem Fokus. Wer dagegen von außen ständig abgelenkt ist, übt eher nach innen. Huberman rät, ehrlich zu prüfen, wohin die eigene Aufmerksamkeit von selbst neigt, und dann bewusst gegenzusteuern."
+    },
+    {
+     "title": "Wenige Minuten reichen",
+     "text": "Huberman verweist auf eine Studie, in der Menschen ohne Vorerfahrung acht Wochen lang täglich etwa dreizehn Minuten meditierten. Danach waren Stimmung, Aufmerksamkeit und Gedächtnis messbar besser. Für den Einstieg reichen drei Minuten, über Wochen kann man auf zehn bis dreizehn steigern. Regelmäßigkeit zählt mehr als Länge."
+    },
+    {
+     "title": "Wie es praktisch geht",
+     "text": "Aufrecht sitzen, Augen zu, die Aufmerksamkeit auf den Atem oder auf einen Punkt hinter der Stirn richten. Jedes Mal, wenn die Gedanken abschweifen, freundlich zurückkommen. Genau dieses Zurückholen ist das Training, nicht ein leerer Kopf. Morgens gelingt es oft am besten, weil der Tag noch ruhig ist, am besten noch vor E-Mails und Nachrichten."
+    },
+    {
+     "title": "Zeitpunkt beachten",
+     "text": "Manche Meditationen machen wach und konzentriert. Wer sie kurz vor dem Schlafen macht, kann schlechter einschlafen. Für den Abend eignen sich eher entspannende Formen wie Körper-Scan oder Tiefenentspannung. Morgens und tagsüber passen konzentrierende Formen."
+    },
+    {
+     "title": "Im Hier und Jetzt",
+     "text": "Meditation wirkt auch außerhalb der Übung. Wer mehrmals am Tag kurz innehält und wahrnimmt, was er gerade sieht, hört und spürt, ist zufriedener. Untersuchungen zeigen, dass ein abschweifender Geist mit weniger Zufriedenheit einhergeht. Zurückholen ist die Fähigkeit, die man trainiert."
+    }
+   ],
+   "outro": "Drei bis dreizehn Minuten täglich, die Aufmerksamkeit immer wieder freundlich zurückholen, und die Richtung passend zum eigenen Kopf wählen: So wird Meditation zum wirksamen Training.",
+   "audio": "thorsten",
+   "link": "https://www.hubermanlab.com/episode/how-meditation-works-and-science-based-effective-meditations"
+  },
+  {
+   "id": "huberman-kaelte",
+   "title": "Bewusst Kälte nutzen (Using Deliberate Cold Exposure for Health & Performance)",
+   "author": "Andrew Huberman",
+   "genre": "Huberman Lab",
+   "tags": [
+    "Kälte",
+    "Stress",
+    "Dopamin"
+   ],
+   "idea": "Kurze, gezielte Kälte macht wach, hebt über Stunden die Stimmung und trainiert, in Stress ruhig zu bleiben. Es braucht dafür nur etwa elf Minuten pro Woche.",
+   "forWhom": "Für alle, die kalt duschen oder Eisbaden ausprobieren und es richtig machen wollen.",
+   "parts": [
+    {
+     "title": "Was Kälte im Körper auslöst",
+     "text": "Kälte setzt Adrenalin und Dopamin frei. Huberman berichtet von einer Studie, in der der Dopaminspiegel nach einem Bad in kaltem Wasser deutlich anstieg und über Stunden erhöht blieb. Das erklärt, warum sich viele nach einer kalten Dusche wach, klar und gut gelaunt fühlen, und zwar länger als nach Kaffee."
+    },
+    {
+     "title": "Wie kalt und wie lange",
+     "text": "Die Temperatur soll so kalt sein, dass man raus will, aber sicher bleiben kann. Als Orientierung nennt Huberman insgesamt etwa elf Minuten pro Woche, verteilt auf zwei bis vier Einheiten von einer bis fünf Minuten. Das geht mit einer kalten Dusche ebenso wie mit einem Kaltwasserbad. Mehr ist nicht automatisch besser."
+    },
+    {
+     "title": "Morgens statt abends",
+     "text": "Der beste Zeitpunkt ist der Morgen. Kälte hebt die Körpertemperatur danach an und macht wach, abends kann sie das Einschlafen erschweren. Huberman empfiehlt außerdem, sich danach nicht sofort warm zu duschen, sondern den Körper selbst aufwärmen zu lassen. So wird der Stoffwechsel stärker angeregt."
+    },
+    {
+     "title": "Nicht direkt nach dem Krafttraining",
+     "text": "Ein wichtiger Hinweis für alle, die Muskeln aufbauen wollen: Kälte direkt nach dem Krafttraining kann den Muskelaufbau bremsen. Zwischen Krafttraining und Kälte sollten mindestens vier bis sechs Stunden liegen, oder man legt die Kälte auf trainingsfreie Tage. Nach Ausdauertraining ist das weniger kritisch."
+    },
+    {
+     "title": "Kälte als Stresstraining",
+     "text": "Kälte ist auch ein Training für den Kopf. Wer im kalten Wasser bewusst ruhig atmet und sich entspannt, übt, in einer unangenehmen Lage Kontrolle zu behalten. Diese Fähigkeit überträgt sich auf andere Stressmomente. Deshalb führt Huberman Kälte auch bei den Werkzeugen für Stresstoleranz auf."
+    },
+    {
+     "title": "Sicherheit geht vor",
+     "text": "Wer Herzprobleme oder Bluthochdruck hat, klärt Kälte vorher ärztlich ab. Niemals allein in offenes kaltes Wasser gehen, und keine Atemübungen mit Luftanhalten im Wasser. Frauen frieren oft schneller, für sie reichen laut der Forscherin Susanna Søberg kürzere und etwas weniger kalte Einheiten."
+    }
+   ],
+   "outro": "Elf Minuten Kälte pro Woche, am besten morgens und mit Abstand zum Krafttraining, bringen Wachheit, gute Laune und mehr Gelassenheit. Sicher anfangen, langsam steigern.",
+   "audio": "thorsten",
+   "link": "https://www.hubermanlab.com/episode/using-deliberate-cold-exposure-for-health-and-performance"
+  },
+  {
+   "id": "huberman-soberg",
+   "title": "Dr. Susanna Søberg: Kälte und Wärme für die Gesundheit (How to Use Cold & Heat Exposure)",
+   "author": "Andrew Huberman mit Dr. Susanna Søberg",
+   "genre": "Huberman Lab",
+   "tags": [
+    "Kälte",
+    "Sauna",
+    "Gast"
+   ],
+   "idea": "Die dänische Forscherin Susanna Søberg hat untersucht, was Kälte und Sauna im Körper bewirken. Ihr Ergebnis: Schon moderate Mengen pro Woche verbessern Stoffwechsel und Wohlbefinden, wenn man es richtig macht.",
+   "forWhom": "Für alle, die Sauna und Kälte kombinieren wollen, und für Frauen, die eigene Hinweise suchen.",
+   "parts": [
+    {
+     "title": "Die Forscherin",
+     "text": "Susanna Søberg ist Stoffwechselforscherin in Kopenhagen und hat Winterschwimmer untersucht, die regelmäßig ins kalte Meer gehen und in die Sauna. Sie hat ihr Wissen auch in einem Buch zusammengefasst. Im Gespräch mit Huberman erklärt sie, welche Mengen sinnvoll sind und warum die Reihenfolge eine Rolle spielt."
+    },
+    {
+     "title": "Elf Minuten Kälte, siebenundfünfzig Minuten Wärme",
+     "text": "Aus ihrer Studie stammt die Faustregel, die Huberman oft zitiert: etwa elf Minuten Kälte und rund siebenundfünfzig Minuten Sauna pro Woche, verteilt auf mehrere Einheiten. Mit diesen Mengen zeigten die Winterschwimmer günstige Effekte auf den Stoffwechsel. Es braucht also keine extremen Mengen."
+    },
+    {
+     "title": "Braunes Fett",
+     "text": "Ein Thema ist das braune Fettgewebe. Es verbrennt Energie, um Wärme zu erzeugen. Regelmäßige Kälte kann es aktivieren und vermehren. Das verbessert die Fähigkeit, die Körpertemperatur zu halten, und unterstützt den Stoffwechsel. Wunder für die Figur sollte man aber nicht erwarten."
+    },
+    {
+     "title": "Mit Kälte enden",
+     "text": "Søberg empfiehlt, mit Kälte zu enden und sich danach nicht sofort warm abzuduschen. Der Körper muss sich dann selbst aufwärmen, und genau das trainiert den Stoffwechsel. Huberman nennt das inzwischen das Søberg-Prinzip. Wer abends schlafen will, kann umgekehrt mit Wärme enden, weil das Abkühlen danach müde macht."
+    },
+    {
+     "title": "Hinweise für Frauen",
+     "text": "Frauen frieren oft schneller und reagieren empfindlicher auf Kälte. Laut Søberg reichen für sie kürzere und etwas weniger kalte Einheiten, um die gleichen Effekte zu erreichen. Niemand muss sich mit anderen messen. Entscheidend ist, dass es sich unangenehm, aber sicher anfühlt."
+    },
+    {
+     "title": "Sicher und mit Freude",
+     "text": "Søberg betont die Gemeinschaft: Viele Winterschwimmer gehen gemeinsam, und das soziale Erlebnis gehört zur Wirkung dazu. Sicherheit steht vorn: nie allein in offenes kaltes Wasser, bei Herz-Kreislauf-Problemen vorher ärztlich abklären, langsam anfangen."
+    }
+   ],
+   "outro": "Etwa elf Minuten Kälte und knapp eine Stunde Sauna pro Woche, am besten mit Kälte am Ende: So nutzt du beide Reize, ohne es zu übertreiben.",
+   "audio": "thorsten",
+   "link": "https://www.hubermanlab.com/episode/dr-susanna-soberg-how-to-use-cold-and-heat-exposure-to-improve-your-health"
+  },
+  {
+   "id": "huberman-norton",
+   "title": "Layne Norton: Essen für Gesundheit, Fettabbau und Muskeln (Eating for Health, Fat Loss & Lean Muscle)",
+   "author": "Andrew Huberman mit Dr. Layne Norton",
+   "genre": "Huberman Lab",
+   "tags": [
+    "Ernährung",
+    "Protein",
+    "Gast"
+   ],
+   "idea": "Der Ernährungswissenschaftler Layne Norton räumt mit Diätmythen auf. Für Fettabbau zählt am Ende die Energiebilanz, für Muskeln genug Protein, und die beste Ernährung ist die, die man dauerhaft durchhält.",
+   "forWhom": "Für alle, die abnehmen, Muskeln erhalten oder sich im Diätdschungel orientieren wollen.",
+   "parts": [
+    {
+     "title": "Der Gast",
+     "text": "Layne Norton ist promovierter Ernährungswissenschaftler und war selbst Kraftsportler. Er ist bekannt dafür, Behauptungen an Studien zu prüfen. In dieser Folge geht es um die Frage, was beim Essen wirklich zählt, wenn man gesund bleiben, Fett verlieren und Muskeln behalten will."
+    },
+    {
+     "title": "Die Energiebilanz entscheidet",
+     "text": "Norton erklärt, dass Fettabbau nur gelingt, wenn man über längere Zeit weniger Energie aufnimmt, als man verbraucht. Ob man das mit wenig Kohlenhydraten, wenig Fett oder Intervallfasten erreicht, ist für den Fettverlust zweitrangig. Diese Methoden helfen manchen Menschen, weniger zu essen, sie wirken aber nicht durch Magie."
+    },
+    {
+     "title": "Protein zuerst",
+     "text": "Protein ist der wichtigste Baustein für Muskelerhalt, besonders beim Abnehmen und im Alter. Als Orientierung bei Training gelten oft 1,6 bis 2,2 Gramm pro Kilogramm Körpergewicht am Tag. Protein sättigt am stärksten und stabilisiert den Blutzucker. In Hubermans Protokollen heißt das: dreißig bis vierzig Gramm Protein in der ersten Mahlzeit, über den Tag verteilt statt alles am Abend."
+    },
+    {
+     "title": "Unverarbeitet und ballaststoffreich",
+     "text": "Lebensmittel, die man als Zutat erkennt, sättigen bei weniger Kalorien. Hubermans Teller daraus: etwa ein Viertel Protein, die Hälfte Gemüse mit Hülsenfrüchten oder Vollkorn, dazu Olivenöl, Avocado oder Nüsse. Mindestens neunzig Prozent sollten unverarbeitete oder wenig verarbeitete Lebensmittel sein. Süßes und Fertigprodukte bleiben die Ausnahme."
+    },
+    {
+     "title": "Durchhalten schlägt Perfektion",
+     "text": "Nortons wichtigster Punkt ist die Beständigkeit. Die beste Ernährung ist die, die zum eigenen Leben passt und die man über Jahre durchhält. Strenge Verbote führen oft zu Rückfällen. Besser sind kleine, dauerhafte Änderungen, regelmäßiges Krafttraining und Geduld."
+    },
+    {
+     "title": "Omega-3 und Fisch",
+     "text": "Zur gesunden Ernährung gehören auch Omega-3-Fettsäuren. Zwei- bis dreimal pro Woche fetter Seefisch wie Lachs, Hering, Makrele oder Sardinen, sonst ein Fisch- oder Algenöl. Wer blutverdünnende Medikamente nimmt, klärt ein Präparat vorher ärztlich ab."
+    }
+   ],
+   "outro": "Energiebilanz für den Fettabbau, Protein für die Muskeln, unverarbeitete Lebensmittel für die Gesundheit und vor allem eine Ernährung, die du durchhältst.",
+   "audio": "thorsten",
+   "link": "https://www.hubermanlab.com/episode/essentials-the-science-of-eating-for-health-fat-loss-and-lean-muscle-layne-norton"
+  },
+  {
+   "id": "huberman-darm",
+   "title": "Dr. Justin Sonnenburg: Die Darmgesundheit aufbauen und erhalten (How to Build, Maintain & Repair Gut Health)",
+   "author": "Andrew Huberman mit Dr. Justin Sonnenburg",
+   "genre": "Huberman Lab",
+   "tags": [
+    "Darm",
+    "Ernährung",
+    "Gast"
+   ],
+   "idea": "Die Billionen Mikroben im Darm beeinflussen Immunsystem, Entzündungen und Wohlbefinden. Fermentierte Lebensmittel und Ballaststoffe sind die einfachsten Mittel, um diese Gemeinschaft zu stärken.",
+   "forWhom": "Für alle, die etwas für ihren Darm und ihr Immunsystem tun wollen.",
+   "parts": [
+    {
+     "title": "Der Gast",
+     "text": "Justin Sonnenburg forscht an der Stanford University über das Mikrobiom, also die Gemeinschaft von Bakterien und anderen Mikroben im Darm. Er erklärt, dass diese Mikroben nicht nur verdauen helfen, sondern eng mit dem Immunsystem zusammenarbeiten und so auf Entzündungen im ganzen Körper wirken."
+    },
+    {
+     "title": "Vielfalt zählt",
+     "text": "Ein gesundes Mikrobiom ist vielfältig. Sonnenburg beschreibt, dass die moderne westliche Ernährung mit wenig Ballaststoffen und vielen verarbeiteten Lebensmitteln diese Vielfalt verringert hat, im Vergleich zu Menschen, die traditionell leben. Weniger Vielfalt wird mit mehr Entzündungen in Verbindung gebracht."
+    },
+    {
+     "title": "Die Studie mit fermentierten Lebensmitteln",
+     "text": "In einer Stanford-Studie seiner Gruppe aßen Teilnehmer über mehrere Wochen täglich mehrere Portionen fermentierte Lebensmittel. Die Vielfalt der Darmflora stieg, und Entzündungsmarker im Blut sanken. Eine Vergleichsgruppe, die mehr Ballaststoffe aß, zeigte diesen Anstieg der Vielfalt in der kurzen Zeit nicht. Fermentiertes wirkte also besonders schnell."
+    },
+    {
+     "title": "Fermentiertes im Alltag",
+     "text": "Huberman hat daraus sein Protokoll gemacht: täglich zwei bis vier kleine Portionen fermentierte Lebensmittel, in der Studie waren es vier bis sechs. Geeignet sind Naturjoghurt, Kefir, Sauerkraut und Kimchi. Wichtig ist, dass sie ungezuckert sind und lebende Kulturen enthalten, Sauerkraut also aus dem Kühlregal, da Konserven meist pasteurisiert sind."
+    },
+    {
+     "title": "Ballaststoffe als Futter",
+     "text": "Ballaststoffe aus Gemüse, Hülsenfrüchten, Vollkorn und Obst sind das Futter der Darmmikroben. Sonnenburg rät, sie nicht zu vernachlässigen, auch wenn ihr Effekt in der Studie langsamer kam. Fermentiertes bringt neue Mikroben mit, Ballaststoffe ernähren sie. Beides zusammen ist ideal."
+    },
+    {
+     "title": "Den Darm schützen",
+     "text": "Antibiotika können das Mikrobiom stark verändern und sollten nur genommen werden, wenn sie wirklich nötig sind. Stark verarbeitete Lebensmittel mit viel Zucker schaden der Vielfalt. Gezuckerte Fruchtjoghurts oder süßer Kombucha zählen nicht als gutes Fermentiertes."
+    }
+   ],
+   "outro": "Täglich ein paar kleine Portionen Fermentiertes, viel Gemüse und Hülsenfrüchte, wenig Verarbeitetes: So fütterst du die Mikroben, die dich gesund halten.",
+   "audio": "thorsten",
+   "link": "https://www.hubermanlab.com/episode/dr-justin-sonnenburg-how-to-build-maintain-and-repair-gut-health"
+  },
+  {
+   "id": "huberman-zucker",
+   "title": "Heißhunger auf Zucker und Stoffwechsel steuern (Controlling Sugar Cravings & Metabolism)",
+   "author": "Andrew Huberman",
+   "genre": "Huberman Lab",
+   "tags": [
+    "Ernährung",
+    "Blutzucker",
+    "Gewohnheiten"
+   ],
+   "idea": "Heißhunger auf Süßes ist kein Mangel an Willenskraft. Der Darm meldet Zucker direkt ans Gehirn, und das Belohnungssystem lernt mit. Mit einfachen Gewohnheiten lassen sich Blutzucker und Lust auf Süßes zähmen.",
+   "forWhom": "Für alle, die mit Lust auf Süßes kämpfen oder ihren Blutzucker stabiler halten wollen.",
+   "parts": [
+    {
+     "title": "Warum Zucker so lockt",
+     "text": "Huberman erklärt, dass Zucker nicht nur über die Zunge wirkt. Im Darm gibt es Zellen, die Zucker erkennen und das unmittelbar über Nerven ans Gehirn melden. Dort wird Dopamin ausgeschüttet, das Belohnungssignal. Das Gehirn lernt so, Lebensmittel mit Zucker zu bevorzugen, auch wenn man den Zucker gar nicht schmeckt, etwa in verarbeiteten Produkten."
+    },
+    {
+     "title": "Verarbeitete Lebensmittel verstärken das",
+     "text": "Viele Fertigprodukte kombinieren Zucker mit Fett und Geschmacksverstärkern. Diese Mischung kommt in der Natur kaum vor und spricht das Belohnungssystem besonders stark an. Deshalb lautet ein Grundsatz: mindestens neunzig Prozent unverarbeitete Lebensmittel. Wer weniger Verarbeitetes isst, verliert mit der Zeit auch etwas von der Lust darauf."
+    },
+    {
+     "title": "Die Reihenfolge auf dem Teller",
+     "text": "Wie stark der Blutzucker nach dem Essen steigt, hängt auch von der Reihenfolge ab. Protein und Gemüse zuerst, Kohlenhydrate zum Schluss dämpfen den Anstieg. Ballaststoffreiches Gemüse, Hülsenfrüchte und Beeren als Hauptquelle für Kohlenhydrate halten länger satt als Weißmehl und Zucker."
+    },
+    {
+     "title": "Nach dem Essen gehen",
+     "text": "Ein besonders einfaches Werkzeug: zehn bis zwanzig Minuten locker gehen direkt nach der Mahlzeit. Die Muskeln nehmen beim Gehen Zucker aus dem Blut auf, der Anstieg fällt deutlich kleiner aus. Wer nicht gehen kann, macht im Sitzen Wadenheben. Auch über den Tag sollte langes Sitzen regelmäßig unterbrochen werden."
+    },
+    {
+     "title": "Den Kreislauf durchbrechen",
+     "text": "Große Mengen schneller Kohlenhydrate mittags führen oft zu einem Leistungstief und neuem Hunger. Wer stattdessen Protein, Gemüse und gesunde Fette isst, hat stabilere Energie am Nachmittag. Süßes gelegentlich nach einer vollwertigen Mahlzeit statt allein auf leeren Magen wirkt weniger stark auf den Blutzucker."
+    },
+    {
+     "title": "Geduld mit dem Gehirn",
+     "text": "Weil das Belohnungssystem gelernt hat, dauert es, bis es umlernt. Die Lust auf Süßes lässt bei vielen nach einigen Wochen mit weniger Zucker merklich nach. Huberman rät, nicht auf Willenskraft allein zu setzen, sondern die Umgebung zu ändern: weniger Süßes im Haus, bessere Alternativen griffbereit."
+    }
+   ],
+   "outro": "Weniger Verarbeitetes, Protein und Gemüse zuerst, nach dem Essen gehen: So stabilisierst du den Blutzucker und gibst dem Gehirn Zeit, den Heißhunger zu verlernen.",
+   "audio": "thorsten",
+   "link": "https://www.hubermanlab.com/episode/controlling-sugar-cravings-and-metabolism-with-science-based-tools"
+  },
+  {
+   "id": "huberman-supplements",
+   "title": "Ein vernünftiger Umgang mit Nahrungsergänzung (A Rational Approach to Supplementation)",
+   "author": "Andrew Huberman",
+   "genre": "Huberman Lab",
+   "tags": [
+    "Supplements",
+    "Ernährung",
+    "Schlaf"
+   ],
+   "idea": "Nahrungsergänzungen können Lücken schließen, aber nie die Grundlagen ersetzen. Wer sie nutzt, sollte Schritt für Schritt vorgehen, auf Qualität achten und mit der Basis anfangen.",
+   "forWhom": "Für alle, die Supplements nehmen oder überlegen, welche davon überhaupt sinnvoll sind.",
+   "parts": [
+    {
+     "title": "Erst die Grundlagen",
+     "text": "Huberman stellt klar: Schlaf, Ernährung, Bewegung, Licht und Beziehungen sind die Basis. Kein Supplement gleicht einen schlechten Lebensstil aus. Nahrungsergänzungen sind Werkzeuge für bestimmte Ziele oder Lücken, und sie sollten erst kommen, wenn die Grundlagen stehen."
+    },
+    {
+     "title": "Grundversorgung",
+     "text": "Als Basis nennt Huberman Mittel, die viele Menschen nicht ausreichend über die Ernährung bekommen. Dazu gehören Omega-3-Fettsäuren, wobei er mindestens ein Gramm EPA pro Tag nennt, außerdem Vitamin D, besonders bei wenig Sonne, und gegebenenfalls ein Präparat, das Vitamine und Mineralien breit abdeckt. Ob man etwas davon braucht, klärt am besten eine Blutuntersuchung."
+    },
+    {
+     "title": "Für den Schlaf",
+     "text": "Für den Schlaf nennt Huberman Magnesium als Threonat oder Bisglycinat, Apigenin und L-Theanin, dreißig bis sechzig Minuten vor dem Schlafen. Er rät, sie einzeln auszuprobieren, nicht alle gleichzeitig. Melatonin sieht er für den Dauergebrauch kritisch. Erst Licht, Temperatur und feste Zeiten, dann gegebenenfalls Supplements."
+    },
+    {
+     "title": "Eins nach dem anderen",
+     "text": "Ein wichtiger Grundsatz: immer nur ein neues Mittel zur Zeit anfangen und eine Weile beobachten. Nur so merkt man, was wirkt und was nicht verträgt. Huberman empfiehlt außerdem, die niedrigste wirksame Dosis zu nutzen und Mittel nicht ohne Grund dauerhaft zu nehmen."
+    },
+    {
+     "title": "Auf Qualität achten",
+     "text": "Nahrungsergänzungen sind nicht so streng kontrolliert wie Medikamente. Inhalt und Reinheit schwanken. Huberman rät zu Produkten, die von unabhängigen Stellen geprüft werden. Billige Fischöle, die stark fischig riechen, sind oft ranzig."
+    },
+    {
+     "title": "Ärztlich abklären",
+     "text": "Auch frei verkäufliche Mittel können Nebenwirkungen haben und mit Medikamenten zusammenwirken, etwa Omega-3 mit Blutverdünnern. In Schwangerschaft und Stillzeit, bei Vorerkrankungen oder regelmäßiger Medikamenteneinnahme gehört jede Ergänzung vorher in ein ärztliches Gespräch."
+    }
+   ],
+   "outro": "Erst Schlaf, Essen und Bewegung, dann gezielt und einzeln ergänzen, auf geprüfte Qualität achten und ärztlich abklären. So bleibt Nahrungsergänzung ein Werkzeug statt einer Ausrede.",
+   "audio": "thorsten",
+   "link": "https://www.hubermanlab.com/episode/developing-a-rational-approach-to-supplementation-for-health-and-performance"
+  },
+  {
+   "id": "huberman-fitness",
+   "title": "Werkzeugkasten Fitness (Fitness Toolkit: Protocol & Tools to Optimize Physical Health)",
+   "author": "Andrew Huberman",
+   "genre": "Huberman Lab",
+   "tags": [
+    "Sport",
+    "Kraft",
+    "Ausdauer"
+   ],
+   "idea": "Ein guter Trainingsplan verbindet Kraft, Ausdauer, Intervalle und Beweglichkeit über die Woche. Dazu kommt viel Alltagsbewegung. Huberman stellt seinen eigenen Wochenplan vor und erklärt, warum er funktioniert.",
+   "forWhom": "Für alle, die einen ausgewogenen Trainingsplan suchen, der in ein normales Leben passt.",
+   "parts": [
+    {
+     "title": "Warum alles zusammengehört",
+     "text": "Kraft erhält Muskeln, Knochen und Stoffwechsel. Ausdauer stärkt Herz und Gefäße. Intensive Intervalle verbessern die maximale Sauerstoffaufnahme, einen der stärksten Marker für ein langes Leben. Beweglichkeit hält den Körper geschmeidig. Huberman will keinen dieser Bereiche auslassen und verteilt sie deshalb über die Woche."
+    },
+    {
+     "title": "Hubermans Woche",
+     "text": "Sein eigener Plan sieht etwa so aus: Sonntag eine lange, lockere Ausdauereinheit, Montag Beine, Dienstag Erholung mit Wärme und Kälte, Mittwoch Oberkörper, Donnerstag moderate Ausdauer, Freitag intensive Intervalle, Samstag Arme und Nacken. Die Einheiten dauern meist nicht länger als etwa eine Stunde. Er betont, dass man den Plan an das eigene Leben anpassen kann."
+    },
+    {
+     "title": "Krafttraining",
+     "text": "Für die Kraft empfiehlt er große Grundübungen wie Kniebeuge, Kreuzheben, Drücken und Ziehen, etwa dreimal pro Woche fünfundvierzig bis sechzig Minuten. Pro Satz nah an die Grenze gehen und Gewicht oder Wiederholungen langsam steigern. Kälte nicht direkt nach dem Krafttraining, sie kann den Muskelaufbau bremsen."
+    },
+    {
+     "title": "Ausdauer und Intervalle",
+     "text": "Der größte Teil der Ausdauer ist locker, in der sogenannten Zone zwei, in der man noch sprechen kann, dreißig bis fünfundvierzig Minuten oder länger. Einmal pro Woche kommt eine harte Einheit dazu, zum Beispiel vier mal vier Minuten intensiv mit drei bis vier Minuten Pause. Der häufigste Fehler ist, immer nur mittelhart zu trainieren."
+    },
+    {
+     "title": "Gehen und Beweglichkeit",
+     "text": "Neben dem Training zählt die Alltagsbewegung. Sieben- bis zehntausend Schritte sind eine Orientierung, mehr ist besser. Zehn bis zwanzig Minuten Gehen nach dem Essen senken den Blutzucker. Für die Beweglichkeit reichen zwei- bis viermal pro Woche etwa zehn Minuten, Dehnungen dreißig bis sechzig Sekunden halten, sanft, eher mit einem Drittel der möglichen Intensität, nie in den Schmerz."
+    },
+    {
+     "title": "Dranbleiben",
+     "text": "Training am Abend ist keine Ausrede, den Rest des Tages zu sitzen. Fortschritt entsteht über Wochen, wer sich nicht steigert, stagniert. Huberman rät, den Plan so zu bauen, dass er sich über Jahre durchhalten lässt, mit Abwechslung, ausreichend Erholung und Freude an der Bewegung."
+    }
+   ],
+   "outro": "Kraft, lockere Ausdauer, ein harter Intervalltag, etwas Beweglichkeit und viel Gehen: Mit diesem Mix über die Woche deckst du alles ab, was dein Körper braucht.",
+   "audio": "thorsten",
+   "link": "https://www.hubermanlab.com/episode/fitness-toolkit-protocol-and-tools-to-optimize-physical-health"
+  },
+  {
+   "id": "huberman-galpin-kraft",
+   "title": "Dr. Andy Galpin: Kraft aufbauen und Muskeln wachsen lassen (Optimal Protocols to Build Strength & Grow Muscles)",
+   "author": "Andrew Huberman mit Dr. Andy Galpin",
+   "genre": "Huberman Lab",
+   "tags": [
+    "Kraft",
+    "Muskeln",
+    "Gast"
+   ],
+   "idea": "Kraft und Muskelwachstum sind verschiedene Ziele mit verschiedenen Rezepten. Der Sportwissenschaftler Andy Galpin erklärt, wie man je nach Ziel Gewicht, Wiederholungen, Sätze und Pausen wählt.",
+   "forWhom": "Für alle, die mit Gewichten trainieren und wissen wollen, wie sie gezielter vorgehen.",
+   "parts": [
+    {
+     "title": "Der Gast",
+     "text": "Andy Galpin ist Professor für Sportwissenschaft und forscht über Muskeln und Training. In einer ganzen Serie mit Huberman erklärt er die Grundlagen. Diese Folge dreht sich um Kraft und Muskelaufbau, zwei Ziele, die sich überschneiden, aber nicht dasselbe sind."
+    },
+    {
+     "title": "Erst das Ziel festlegen",
+     "text": "Galpin unterscheidet mehrere Anpassungen: Kraft, also möglichst viel Gewicht bewegen, Muskelwachstum, also mehr Muskelmasse, und Schnellkraft, also Kraft in kurzer Zeit. Jedes Ziel braucht etwas andere Reize. Wer weiß, was er will, kann sein Training danach ausrichten, statt planlos zu trainieren."
+    },
+    {
+     "title": "Für mehr Kraft",
+     "text": "Für Kraft gilt: schwere Gewichte, wenige Wiederholungen, etwa drei bis fünf pro Satz, und lange Pausen von mehreren Minuten, damit jeder Satz mit voller Kraft gelingt. Die Sätze müssen nicht bis zum völligen Versagen gehen. Wichtig sind saubere Technik und große Grundübungen."
+    },
+    {
+     "title": "Für mehr Muskeln",
+     "text": "Für Muskelwachstum funktioniert eine große Spanne an Wiederholungen, von etwa fünf bis zu dreißig, solange die Sätze nah an die Grenze gehen. Entscheidend ist die Menge harter Sätze pro Muskelgruppe und Woche. Galpin nennt grob zehn bis zwanzig Sätze pro Muskel und Woche als guten Bereich."
+    },
+    {
+     "title": "Langsam steigern",
+     "text": "In beiden Fällen braucht der Körper einen wachsenden Reiz. Gewicht oder Wiederholungen werden über Wochen langsam erhöht. Wer immer das Gleiche macht, stagniert. Gleichzeitig ist Erholung Teil des Trainings: Schlaf, genug Protein und Pausen zwischen Einheiten für dieselbe Muskelgruppe."
+    },
+    {
+     "title": "Für alle Altersgruppen",
+     "text": "Galpin betont, dass Krafttraining in jedem Alter wirkt und mit den Jahren immer wichtiger wird, weil Muskelmasse und Kraft sonst abnehmen. Anfänger machen schnell Fortschritte. Dreimal pro Woche Ganzkörpertraining mit Grundübungen ist für die meisten ein sehr guter Start."
+    }
+   ],
+   "outro": "Ziel festlegen, passend Gewicht und Wiederholungen wählen, nah an die Grenze gehen und langsam steigern. Mit Erholung und Protein wächst so Kraft und Muskel in jedem Alter.",
+   "audio": "thorsten",
+   "link": "https://www.hubermanlab.com/episode/dr-andy-galpin-optimal-protocols-to-build-strength-and-grow-muscles"
+  },
+  {
+   "id": "huberman-galpin-ausdauer",
+   "title": "Dr. Andy Galpin: Ausdauer aufbauen und Fett verlieren (How to Build Physical Endurance & Lose Fat)",
+   "author": "Andrew Huberman mit Dr. Andy Galpin",
+   "genre": "Huberman Lab",
+   "tags": [
+    "Ausdauer",
+    "Fettabbau",
+    "Gast"
+   ],
+   "idea": "Ausdauer ist nicht eine Fähigkeit, sondern mehrere. Andy Galpin erklärt, wie man lockere Grundlagenausdauer, harte Intervalle und Muskelausdauer trainiert, und was beim Fettabbau wirklich passiert.",
+   "forWhom": "Für alle, die fitter werden, mehr Ausdauer aufbauen oder Fett verlieren wollen.",
+   "parts": [
+    {
+     "title": "Viele Arten von Ausdauer",
+     "text": "Galpin unterscheidet verschiedene Formen: die Ausdauer eines Muskels, viele Wiederholungen zu schaffen, die Fähigkeit, kurze harte Belastungen zu wiederholen, die maximale Sauerstoffaufnahme und die lange, gleichmäßige Ausdauer. Jede wird anders trainiert. Ein guter Plan enthält mehrere davon."
+    },
+    {
+     "title": "Locker und lang",
+     "text": "Die Grundlage ist lockeres Ausdauertraining, bei dem man sich noch unterhalten kann, die sogenannte Zone zwei. Es stärkt Herz und Gefäße und die Fähigkeit der Muskeln, Fett als Energie zu nutzen. In Hubermans Protokollen sind das zwei Einheiten pro Woche von dreißig bis fünfundvierzig Minuten oder länger."
+    },
+    {
+     "title": "Hart und kurz",
+     "text": "Dazu kommen intensive Intervalle, die die maximale Sauerstoffaufnahme verbessern. Ein bewährtes Muster ist vier mal vier Minuten hart mit drei bis vier Minuten lockerer Pause, einmal pro Woche. Diese Einheiten sind anstrengend, aber besonders wirksam für die Fitness im Alter."
+    },
+    {
+     "title": "Wohin das Fett geht",
+     "text": "Galpin erklärt, dass abgebautes Fett den Körper zum größten Teil als Kohlendioxid über die Atmung verlässt, ein kleiner Teil als Wasser. Training verbrennt Energie, aber entscheidend für den Fettverlust bleibt die Bilanz über Essen und Bewegung insgesamt. Sport allein gleicht zu viel Essen kaum aus."
+    },
+    {
+     "title": "Training und Ernährung verbinden",
+     "text": "Für Fettabbau empfiehlt sich eine Kombination: Krafttraining, um Muskeln zu erhalten, Ausdauer für Herz und Energieverbrauch, viel Alltagsbewegung und eine Ernährung mit genug Protein und leicht verringerter Energiemenge. Zu harte Diäten kosten Muskeln und Leistung."
+    },
+    {
+     "title": "Erholung und Atmung",
+     "text": "Ausdauer lebt auch von Erholung. Galpin spricht über die Bedeutung von Schlaf, ausreichend Flüssigkeit und Salz bei starkem Schwitzen. Auch die Atmung lässt sich trainieren: Wer bei lockerer Belastung durch die Nase atmet, schult eine ruhige, effiziente Atmung."
+    }
+   ],
+   "outro": "Viel lockere Ausdauer, einmal pro Woche hart, dazu Krafttraining und eine maßvolle Ernährung: So wird Ausdauer besser und Fett verschwindet nachhaltig.",
+   "audio": "thorsten",
+   "link": "https://www.hubermanlab.com/episode/dr-andy-galpin-how-to-build-physical-endurance-and-lose-fat"
+  },
+  {
+   "id": "huberman-sims",
+   "title": "Dr. Stacy Sims: Training und Ernährung für Frauen (Female-Specific Exercise & Nutrition)",
+   "author": "Andrew Huberman mit Dr. Stacy Sims",
+   "genre": "Huberman Lab",
+   "tags": [
+    "Frauen",
+    "Sport",
+    "Gast"
+   ],
+   "idea": "Frauen sind keine kleinen Männer. Die Sportwissenschaftlerin Stacy Sims zeigt, wie Zyklus, Hormone und Wechseljahre Training und Ernährung verändern und was Frauen davon konkret haben.",
+   "forWhom": "Für Frauen, die gezielter trainieren und essen wollen, und für alle, die Frauen dabei begleiten.",
+   "parts": [
+    {
+     "title": "Die Gästin",
+     "text": "Stacy Sims ist Sportphysiologin und Ernährungswissenschaftlerin. Ihr bekanntester Satz lautet sinngemäß: Frauen sind keine kleinen Männer. Viele Empfehlungen zu Training und Ernährung beruhen auf Studien mit Männern. Sims erklärt, warum sich das nicht einfach übertragen lässt."
+    },
+    {
+     "title": "Nicht nüchtern trainieren",
+     "text": "Ein klarer Rat: Frauen sollten nicht nüchtern intensiv trainieren. Der weibliche Körper reagiert empfindlicher auf Energiemangel, Stresshormone steigen, Leistung und Erholung leiden. Vor einer harten Einheit ein kleiner Snack mit Protein und etwas Kohlenhydraten, danach bald eine Mahlzeit mit Protein."
+    },
+    {
+     "title": "Schwer heben",
+     "text": "Frauen profitieren besonders von schwerem Krafttraining. Es erhält Muskeln und Knochen, und das wird mit den Jahren immer wichtiger. Sims ermutigt ausdrücklich, keine Angst vor schweren Gewichten zu haben. Leichte Hanteln mit vielen Wiederholungen allein reichen für diese Effekte nicht."
+    },
+    {
+     "title": "Kurz und sehr intensiv",
+     "text": "Neben Kraft empfiehlt sie kurze, sehr intensive Sprints oder Intervalle mit vollständiger Erholung dazwischen, statt viel mittelhartem Ausdauertraining. Auch Sprünge sind gut für die Knochen. Sehr lange, mittelharte Einheiten erhöhen eher die Belastung, ohne viel zusätzlichen Nutzen."
+    },
+    {
+     "title": "Zyklus und Wechseljahre",
+     "text": "Im Zyklus schwanken Hormone, Körpertemperatur und Erholung. Intensive Einheiten lassen sich an das eigene Befinden im Zyklus anpassen. In und nach den Wechseljahren werden schweres Krafttraining, Sprints und Sprünge noch wichtiger, weil der Schutz durch Östrogen nachlässt. In der zweiten Zyklushälfte und in den Wechseljahren ist der Schlaf oft unruhiger, ein kühleres Schlafzimmer hilft."
+    },
+    {
+     "title": "Kälte und Koffein",
+     "text": "Sims und die Forscherin Susanna Søberg weisen darauf hin, dass Frauen bei Kälte oft kürzere und weniger kalte Einheiten brauchen, um dieselben Effekte zu haben. Hormonelle Verhütung verlangsamt außerdem den Abbau von Koffein, der Koffein-Stopp am Nachmittag sollte dann früher liegen."
+    }
+   ],
+   "outro": "Nicht nüchtern hart trainieren, schwer heben, kurz und intensiv sprinten, bald nach dem Training Protein essen und den eigenen Zyklus ernst nehmen. Das sind die Kernregeln für Frauen.",
+   "audio": "thorsten",
+   "link": "https://www.hubermanlab.com/episode/dr-stacy-sims-female-specific-exercise-nutrition-for-health-performance-longevity"
+  },
+  {
+   "id": "huberman-fokus",
+   "title": "Werkzeugkasten Fokus (Focus Toolkit)",
+   "author": "Andrew Huberman",
+   "genre": "Huberman Lab",
+   "tags": [
+    "Fokus",
+    "Arbeit",
+    "Lernen"
+   ],
+   "idea": "Konzentration lässt sich gezielt herstellen. Sie beginnt bei den Augen, läuft in Wellen von etwa neunzig Minuten und wird durch eine gute Umgebung, kluge Pausen und den richtigen Umgang mit Frust stärker.",
+   "forWhom": "Für alle, die konzentrierter arbeiten oder lernen wollen und sich leicht ablenken lassen.",
+   "parts": [
+    {
+     "title": "Fokus beginnt bei den Augen",
+     "text": "Huberman erklärt, dass geistiger Fokus dem visuellen Fokus folgt. Wenn der Blick eng auf einen Punkt gerichtet ist, schaltet das Gehirn auf Konzentration. Daraus folgt ein einfacher Trick: vor dem Start dreißig bis sechzig Sekunden bewusst auf einen Punkt schauen, zum Beispiel auf dem Bildschirm. Das bereitet den Kopf auf konzentrierte Arbeit vor."
+    },
+    {
+     "title": "Die Umgebung einrichten",
+     "text": "Der Bildschirm steht am besten auf Augenhöhe oder leicht darüber, das hält wacher, als nach unten zu schauen. Das Handy kommt in einen anderen Raum, Benachrichtigungen sind aus. Huberman spricht auch über Hintergrundgeräusche wie weißes Rauschen oder bestimmte Klänge, die manchen Menschen helfen, sich zu konzentrieren."
+    },
+    {
+     "title": "Arbeiten in Wellen",
+     "text": "Die Leistungsfähigkeit läuft über den Tag in Wellen von etwa neunzig Minuten. Huberman empfiehlt Arbeitsblöcke bis zu dieser Länge. Die ersten fünf bis zehn Minuten fühlen sich oft zäh an, das ist normal, danach kommt der Fokus. Nach dem Block eine echte Pause: aufstehen, in die Ferne schauen, kein Handy."
+    },
+    {
+     "title": "Frust ist ein Signal",
+     "text": "Wer sich anstrengt und dabei Fehler macht, fühlt Frust. Huberman deutet das um: Dieser Frust ist das Signal, dass das Gehirn umbauen muss. Wer am Rand seines Könnens arbeitet und Fehler aushält, lernt am meisten. Das ist kein Zeichen von Versagen, sondern von Fortschritt."
+    },
+    {
+     "title": "Wachheit unterstützen",
+     "text": "Fokus braucht Wachheit. Guter Schlaf ist die Grundlage, dazu kommen Licht am Morgen, Bewegung und gezielt eingesetztes Koffein. Nach einer intensiven Lernphase hilft eine kurze Tiefenentspannung, das Gelernte zu festigen. Mehrere Dinge gleichzeitig zu tun, schwächt dagegen jede einzelne Aufgabe."
+    },
+    {
+     "title": "Die häufigsten Fehler",
+     "text": "In der Pause aufs Handy zu schauen, ist der typische Fehler, denn dann bekommt das Gehirn keine Erholung. Ebenso ungünstig: ohne klares Ziel in einen Arbeitsblock gehen oder ständig zwischen Aufgaben wechseln. Ein Ziel, ein Block, eine Pause, das ist das Grundmuster."
+    }
+   ],
+   "outro": "Kurz auf einen Punkt schauen, Handy weg, bis zu neunzig Minuten am Stück, dann eine echte Pause. Frust gehört dazu und zeigt, dass du gerade lernst.",
+   "audio": "thorsten",
+   "link": "https://www.hubermanlab.com/episode/focus-toolkit-tools-to-improve-your-focus-and-concentration"
+  },
+  {
+   "id": "huberman-lernen",
+   "title": "Optimal lernen und studieren (Optimal Protocols for Studying & Learning)",
+   "author": "Andrew Huberman",
+   "genre": "Huberman Lab",
+   "tags": [
+    "Lernen",
+    "Gedächtnis",
+    "Schlaf"
+   ],
+   "idea": "Wiederlesen fühlt sich nach Lernen an, bringt aber wenig. Wer sich selbst abfragt, kurze Pausen einbaut und gut schläft, behält deutlich mehr.",
+   "forWhom": "Für Schüler, Studierende und alle, die als Erwachsene noch etwas Neues lernen wollen.",
+   "parts": [
+    {
+     "title": "Abfragen statt wiederlesen",
+     "text": "Die wichtigste Botschaft der Folge: Sich selbst zu testen ist eine der wirksamsten Lernmethoden überhaupt. Wer Gelerntes aus dem Gedächtnis abruft, festigt es stärker als durch erneutes Lesen. Huberman empfiehlt, sich möglichst bald nach dem Lernen abzufragen und das in Abständen zu wiederholen."
+    },
+    {
+     "title": "Tests sind Lernwerkzeuge",
+     "text": "Tests werden oft nur als Prüfung gesehen. Huberman beschreibt sie als Lernwerkzeug. Schon der Versuch, sich an etwas zu erinnern, auch wenn er misslingt, verbessert das spätere Behalten. Fehler beim Abfragen sind also nützlich, solange man danach die richtige Antwort nachschaut."
+    },
+    {
+     "title": "Kurze Pausen beim Üben",
+     "text": "Studien zeigen: In kurzen Pausen von etwa zehn Sekunden wiederholt das Gehirn das gerade Geübte, und zwar viel schneller als in Echtzeit. Wer beim Üben einer Fähigkeit oder beim Lernen ab und zu zehn Sekunden nichts tut, lernt besser. Das funktioniert besonders bei Bewegungsabläufen wie einem Instrument oder Sport und beim Auswendiglernen."
+    },
+    {
+     "title": "Abends im Kopf wiederholen",
+     "text": "Was abends noch einmal durchgegangen wird, verarbeitet das Gehirn im Schlaf. Huberman empfiehlt, ohne Unterlagen durchzugehen, was man gelernt hat, oder Bewegungsabläufe vor dem inneren Auge durchzuspielen. Das ergänzt echtes Üben, ersetzt es aber nicht."
+    },
+    {
+     "title": "Schlaf festigt das Gelernte",
+     "text": "Im Schlaf wird das Gelernte gefestigt. Nach intensivem Lernen ist eine volle Nacht besonders wichtig. Eine kurze Tiefenentspannung direkt nach dem Lernen kann zusätzlich helfen. Wer vor einer Prüfung die Nacht durchlernt, schadet sich meist mehr, als er gewinnt."
+    },
+    {
+     "title": "Zustand vor Methode",
+     "text": "Damit Lernen gelingt, braucht es Wachheit und Konzentration. Licht am Morgen, Bewegung, Arbeitsblöcke von bis zu neunzig Minuten und ein aufgeräumter Arbeitsplatz ohne Handy schaffen den richtigen Zustand. Dann wirken die Lernmethoden am besten."
+    }
+   ],
+   "outro": "Weniger wiederlesen, mehr abfragen, zwischendurch kurz innehalten, abends im Kopf wiederholen und gut schlafen. So bleibt das Gelernte wirklich hängen.",
+   "audio": "thorsten",
+   "link": "https://www.hubermanlab.com/episode/optimal-protocols-for-studying-learning"
+  },
+  {
+   "id": "huberman-fehler",
+   "title": "Mit Fehlern schneller lernen (Using Failures, Movement & Balance to Learn Faster)",
+   "author": "Andrew Huberman",
+   "genre": "Huberman Lab",
+   "tags": [
+    "Lernen",
+    "Neuroplastizität",
+    "Bewegung"
+   ],
+   "idea": "Das erwachsene Gehirn kann sich verändern, aber es braucht ein Signal. Fehler und Frust sind genau dieses Signal. Wer am Rand seines Könnens übt, kurze Pausen einlegt und auch das Gleichgewicht fordert, lernt schneller.",
+   "forWhom": "Für alle, die eine neue Fähigkeit lernen wollen, ob Sport, Instrument oder Sprache.",
+   "parts": [
+    {
+     "title": "Das Gehirn baut um",
+     "text": "Huberman erklärt, dass das Gehirn auch im Erwachsenenalter lernfähig bleibt, diese Fähigkeit heißt Neuroplastizität. Bei Kindern geschieht das fast von selbst, bei Erwachsenen braucht das Gehirn einen Anlass. Es muss merken, dass etwas wichtig ist und dass das bisherige Können nicht ausreicht."
+    },
+    {
+     "title": "Fehler als Startsignal",
+     "text": "Genau diesen Anlass liefern Fehler. Wenn wir etwas falsch machen, schüttet das Gehirn Botenstoffe aus, die Aufmerksamkeit erhöhen und das Umbauen vorbereiten. Der Frust, den wir dabei fühlen, ist also kein schlechtes Zeichen, sondern das Startsignal fürs Lernen."
+    },
+    {
+     "title": "Am Rand des Könnens üben",
+     "text": "Daraus folgt eine Übungsregel: so üben, dass man nicht alles schafft. Huberman beschreibt, dass man am meisten lernt, wenn etwa jeder sechste bis siebte Versuch misslingt. Wer nur übt, was er schon kann, lernt wenig. Wer ständig scheitert, verliert die Motivation."
+    },
+    {
+     "title": "Zehn Sekunden Pause",
+     "text": "Ein besonders einfaches Werkzeug sind kurze Pausen. Studien zeigen, dass das Gehirn in Pausen von etwa zehn Sekunden das gerade Geübte sehr schnell im Kopf wiederholt. Wer beim Üben ab und zu zehn Sekunden nichts tut, ohne nachzudenken und ohne Handy, lernt messbar besser."
+    },
+    {
+     "title": "Gleichgewicht und Bewegung",
+     "text": "Huberman spricht auch über das Gleichgewicht. Wenn der Körper aus seiner gewohnten Lage gebracht wird, etwa durch Übungen mit Schräglage, Drehen oder Balance, wird das Gehirn besonders aufmerksam. Er beschreibt, dass solche Bewegungen bei Erwachsenen das Lernen von Bewegungsabläufen unterstützen können."
+    },
+    {
+     "title": "Danach schlafen",
+     "text": "Das eigentliche Umbauen geschieht nicht beim Üben, sondern in der Erholung, vor allem im Schlaf. Nach einer intensiven Übungsrunde braucht das Gehirn eine gute Nacht. Eine kurze Tiefenentspannung nach dem Üben kann zusätzlich helfen."
+    }
+   ],
+   "outro": "Fehler sind kein Rückschlag, sondern der Anfang des Lernens. Am Rand des Könnens üben, kurz innehalten, gut schlafen: So lernt auch ein erwachsenes Gehirn schnell.",
+   "audio": "thorsten",
+   "link": "https://www.hubermanlab.com/episode/using-failures-movement-and-balance-to-learn-faster"
+  },
+  {
+   "id": "huberman-ziele",
+   "title": "Werkzeugkasten Ziele (Goals Toolkit: How to Set & Achieve Your Goals)",
+   "author": "Andrew Huberman",
+   "genre": "Huberman Lab",
+   "tags": [
+    "Ziele",
+    "Motivation",
+    "Gewohnheiten"
+   ],
+   "idea": "Ziele erreicht man nicht durch reines Wunschdenken. Wer neben dem Ziel auch die Hindernisse und die Folgen des Nichtstuns sieht, einen klaren Plan macht und den Blick bündelt, kommt eher ins Handeln.",
+   "forWhom": "Für alle, die sich Ziele setzen und sie diesmal wirklich erreichen wollen.",
+   "parts": [
+    {
+     "title": "Positives Denken allein bremst",
+     "text": "Huberman beginnt mit einer überraschenden Erkenntnis aus der Forschung: Wer sich nur das erreichte Ziel ausmalt, fühlt sich schon ein wenig belohnt und tut danach weniger. Reines positives Visualisieren kann also die Motivation senken. Es braucht zusätzlich einen Blick auf die Schwierigkeiten."
+    },
+    {
+     "title": "Mentales Kontrastieren",
+     "text": "Die Methode der Psychologin Gabriele Oettingen heißt mentales Kontrastieren, bekannt als WOOP. Wunsch: Was will ich erreichen? Ergebnis: Wie fühlt es sich an, wenn es geschafft ist? Hindernis: Was in mir hält mich am ehesten ab? Plan: Wenn Hindernis X auftaucht, dann mache ich Y. Diese Wenn-dann-Pläne helfen, im entscheidenden Moment richtig zu handeln."
+    },
+    {
+     "title": "Auch das Scheitern sehen",
+     "text": "Huberman ergänzt einen Schritt: sich auch kurz vorzustellen, was passiert, wenn man es nicht tut. Die Vorstellung der Folgen des Nichtstuns erzeugt einen gesunden Druck. Ziel und mögliches Scheitern zusammen schaffen ein Gefühl der Dringlichkeit, das ins Handeln bringt."
+    },
+    {
+     "title": "Den Blick bündeln",
+     "text": "Ein weiteres Werkzeug betrifft die Augen. Huberman berichtet von Studien, in denen Menschen, die ihren Blick auf ein Ziel bündelten, etwa auf die Ziellinie, die Strecke als kürzer empfanden und schneller vorankamen. Wer vor einer Aufgabe kurz bewusst auf einen Punkt schaut, mobilisiert Energie und Fokus."
+    },
+    {
+     "title": "Wenige Ziele, klare Schritte",
+     "text": "Zu viele Ziele gleichzeitig verteilen die Kraft. Besser ist ein Hauptziel, das in konkrete Schritte zerlegt wird. Regelmäßige kurze Überprüfungen, etwa wöchentlich, zeigen, ob man auf Kurs ist. Kleine Etappenerfolge halten die Motivation hoch."
+    },
+    {
+     "title": "Jeden Morgen zwei Minuten",
+     "text": "In Hubermans Tagesprotokoll wird daraus eine kurze Morgenübung: zwei Minuten das Tagesziel mental kontrastieren. Ziel und Gewinn vorstellen, dann das größte Hindernis, dann einen Wenn-dann-Plan festlegen. So beginnt jeder Tag mit Richtung."
+    }
+   ],
+   "outro": "Ziel vorstellen, Hindernis benennen, Wenn-dann-Plan machen und an die Folgen des Nichtstuns denken. Ein Ziel, klare Schritte und jeden Morgen zwei Minuten.",
+   "audio": "thorsten",
+   "link": "https://www.hubermanlab.com/episode/goals-toolkit-how-to-set-achieve-your-goals"
+  },
+  {
+   "id": "huberman-hollis",
+   "title": "Dr. James Hollis: Den eigenen Weg finden und das beste Leben gestalten (How to Find Your True Purpose)",
+   "author": "Andrew Huberman mit Dr. James Hollis",
+   "genre": "Huberman Lab",
+   "tags": [
+    "Sinn",
+    "Psychologie",
+    "Gast"
+   ],
+   "idea": "Der Psychoanalytiker James Hollis lädt ein, das eigene Leben bewusst zu führen statt von alten Mustern geführt zu werden. Seine Leitfrage lautet: Macht mich das größer oder kleiner?",
+   "forWhom": "Für alle, die an einem Wendepunkt stehen oder sich fragen, ob sie ihr eigenes Leben leben.",
+   "parts": [
+    {
+     "title": "Der Gast",
+     "text": "James Hollis ist Psychoanalytiker in der Tradition von Carl Gustav Jung und Autor vieler Bücher über Sinn und die zweite Lebenshälfte. Im Gespräch mit Huberman geht es darum, wie man herausfindet, was einem wirklich wichtig ist, und warum das oft erst im Erwachsenenalter beginnt."
+    },
+    {
+     "title": "Größer oder kleiner",
+     "text": "Hollis' bekannteste Frage für Entscheidungen lautet: Macht mich das größer oder kleiner? Gemeint ist nicht Erfolg oder Ansehen, sondern ob eine Wahl uns wachsen lässt oder uns klein hält, aus Angst oder Gewohnheit. Diese Frage hilft, bei großen und kleinen Entscheidungen ehrlich zu sich selbst zu sein."
+    },
+    {
+     "title": "Alte Muster erkennen",
+     "text": "Viele unserer Reaktionen stammen aus früheren Erfahrungen, oft aus der Kindheit. Hollis beschreibt, wie solche Muster uns unbemerkt steuern, etwa immer wieder die gleichen Konflikte oder Rückzüge. Der erste Schritt ist, sie zu erkennen. Dann kann man bewusst anders handeln."
+    },
+    {
+     "title": "Verantwortung übernehmen",
+     "text": "Hollis betont, dass Erwachsensein bedeutet, Verantwortung für das eigene Leben zu übernehmen, statt andere oder die Umstände verantwortlich zu machen. Das ist unbequem, aber befreiend. Man fragt nicht mehr, wer schuld ist, sondern was man selbst tun kann."
+    },
+    {
+     "title": "Die zweite Lebenshälfte",
+     "text": "Für Hollis beginnt in der Lebensmitte oft eine neue Aufgabe. Die Rollen, die man in der ersten Hälfte übernommen hat, tragen nicht mehr. Krisen in dieser Zeit sind häufig Einladungen, das eigene Leben neu auszurichten und zu fragen, was die Seele eigentlich will."
+    },
+    {
+     "title": "Ein täglicher Rückblick",
+     "text": "In Hubermans Protokoll wird daraus eine kurze Abendübung. Zwei Minuten aufschreiben: Wann habe ich mich heute groß, wann klein gefühlt? Welches Muster aus meiner Geschichte hat heute gesteuert? Was will ich morgen anders machen? Wichtig ist Neugier statt Selbstkritik."
+    }
+   ],
+   "outro": "Frag dich bei Entscheidungen, ob sie dich größer oder kleiner machen, erkenne deine alten Muster und übernimm Verantwortung. Ein kurzer Rückblick am Abend hält die Frage lebendig.",
+   "audio": "thorsten",
+   "link": "https://www.hubermanlab.com/episode/dr-james-hollis-how-to-find-your-true-purpose-create-your-best-life"
+  },
+  {
+   "id": "huberman-trauer-oconnor",
+   "title": "Dr. Mary-Frances O'Connor: Heilung von Trauer und Verlust (Healing From Grief & Loss)",
+   "author": "Andrew Huberman mit Dr. Mary-Frances O'Connor",
+   "genre": "Huberman Lab",
+   "tags": [
+    "Trauer",
+    "Psychologie",
+    "Gast"
+   ],
+   "idea": "Trauer ist ein Lernprozess. Das Gehirn muss begreifen, dass ein geliebter Mensch nicht mehr erreichbar ist. Die Forscherin Mary-Frances O'Connor erklärt, was dabei geschieht und was hilft.",
+   "forWhom": "Für alle, die einen Verlust erlebt haben oder einen trauernden Menschen begleiten.",
+   "parts": [
+    {
+     "title": "Die Forscherin",
+     "text": "Mary-Frances O'Connor ist Psychologin an der Universität von Arizona und erforscht Trauer mit Methoden der Hirnforschung. Sie hat darüber das Buch Das trauernde Gehirn geschrieben. Im Gespräch mit Huberman erklärt sie, warum Trauer so schmerzt und warum sie Zeit braucht."
+    },
+    {
+     "title": "Trauer ist Lernen",
+     "text": "Das Gehirn hat eine innere Landkarte unserer Bindungen. Ein geliebter Mensch ist darin fest eingetragen, als jemand, der da ist und erreichbar ist. Nach einem Verlust passt diese Karte nicht mehr zur Wirklichkeit. Trauer ist der Prozess, in dem das Gehirn lernt, dass der Mensch nicht mehr hier und nicht mehr erreichbar ist. Dieses Lernen braucht Zeit und Wiederholung."
+    },
+    {
+     "title": "Hin und her pendeln",
+     "text": "O'Connor beschreibt, dass Trauernde zwischen zwei Zuständen pendeln: der Beschäftigung mit dem Verlust und der Hinwendung zum weiteren Leben. Beides ist normal und gesund. Wer einen Tag weint und am nächsten lacht, macht nichts falsch. Dieses Pendeln ist Teil der Heilung."
+    },
+    {
+     "title": "Die Beziehung verändert sich",
+     "text": "Die Beziehung zu einem verstorbenen Menschen endet nicht einfach, sie verändert ihre Form. Sie lebt in Erinnerungen, Werten und Gewohnheiten weiter. O'Connor betont, dass es nicht darum geht zu vergessen, sondern einen neuen Platz für den Menschen im eigenen Leben zu finden."
+    },
+    {
+     "title": "Wenn Trauer nicht nachlässt",
+     "text": "Bei den meisten Menschen wird der Schmerz mit der Zeit milder. Bei einem Teil bleibt die Trauer aber über lange Zeit so stark, dass das Leben kaum weitergeht. Dafür gibt es eine eigene Diagnose, die anhaltende Trauerstörung, und wirksame Hilfe. Wer davon betroffen ist, sollte professionelle Unterstützung suchen."
+    },
+    {
+     "title": "Was hilft",
+     "text": "Hilfreich sind Menschen, die zuhören, ohne zu drängen, ein geregelter Alltag mit Schlaf und Bewegung und die Erlaubnis, zu trauern, wie es eben kommt. Auch Schreiben über das Erlebte kann helfen. Trauer hat keinen festen Fahrplan, aber sie ist ein natürlicher Prozess, den das Gehirn bewältigen kann."
+    }
+   ],
+   "outro": "Trauer ist das Gehirn, das einen Verlust lernt. Das Pendeln zwischen Schmerz und Leben ist normal, die Beziehung bleibt in neuer Form. Bei sehr schwerer, anhaltender Trauer gibt es Hilfe.",
+   "audio": "thorsten",
+   "link": "https://www.hubermanlab.com/episode/healing-from-grief-loss-dr-mary-frances-oconnor"
+  },
+  {
+   "id": "huberman-trauer-wissenschaft",
+   "title": "Die Wissenschaft der Trauer und wie Heilung gelingt (The Science & Process of Healing from Grief)",
+   "author": "Andrew Huberman",
+   "genre": "Huberman Lab",
+   "tags": [
+    "Trauer",
+    "Gehirn",
+    "Gefühle"
+   ],
+   "idea": "Huberman erklärt in dieser Solofolge, was im Gehirn bei Trauer passiert. Trauer ist eng mit den Motivations- und Bindungssystemen verbunden. Wer das versteht, kann einen Verlust neu betrachten und Wege durch den Schmerz finden.",
+   "forWhom": "Für alle, die mit einem Verlust ringen oder verstehen wollen, warum Trauer so tief geht.",
+   "parts": [
+    {
+     "title": "Trauer als Sehnsucht",
+     "text": "Huberman beschreibt Trauer nicht nur als Traurigkeit, sondern als einen Zustand der Sehnsucht. Das Gehirn will den verlorenen Menschen zurück, so wie es ein Ziel anstrebt. Darum ist Trauer so anstrengend: Ein Teil von uns sucht ständig nach jemandem, der nicht mehr erreichbar ist."
+    },
+    {
+     "title": "Bindung im Gehirn",
+     "text": "Bindungen sind im Gehirn tief verankert, in Systemen für Belohnung, Motivation und Gedächtnis. Der Verlust eines nahen Menschen stört all diese Systeme gleichzeitig. Deshalb wirkt Trauer auch körperlich, auf Schlaf, Appetit, Konzentration und Energie."
+    },
+    {
+     "title": "Wenn Trauer stecken bleibt",
+     "text": "Huberman berichtet von Forschung, nach der bei Menschen mit sehr lang anhaltender Trauer Belohnungsbereiche des Gehirns beim Gedanken an den Verstorbenen stark reagieren, als würde die Suche weitergehen. Das erklärt, warum manche nicht loskommen, und warum diese Form der Trauer gezielte Hilfe braucht."
+    },
+    {
+     "title": "Den Verlust neu betrachten",
+     "text": "Ein zentraler Schritt ist, den Verlust neu einzuordnen. Die Beziehung bleibt bestehen, aber in neuer Form, in Erinnerungen, Werten und dem, was der Mensch uns mitgegeben hat. Huberman rät, sich bewusst an konkrete Erinnerungen zu wenden und sie als bleibenden Teil des eigenen Lebens anzunehmen."
+    },
+    {
+     "title": "Den Körper versorgen",
+     "text": "Weil Trauer den ganzen Körper betrifft, helfen auch die Grundlagen: Licht am Morgen, feste Schlafzeiten, Bewegung und regelmäßige Mahlzeiten. Atemübungen wie der physiologische Seufzer können akute Wellen des Schmerzes etwas abmildern. Auch expressives Schreiben über den Verlust kann entlasten."
+    },
+    {
+     "title": "Nicht allein bleiben",
+     "text": "Trauer braucht Verbindung. Zeit mit vertrauten Menschen, Gespräche über den Verstorbenen und gemeinsame Rituale helfen. Wer merkt, dass die Trauer über lange Zeit nicht leichter wird oder das Leben lähmt, sollte professionelle Hilfe holen. Das ist kein Zeichen von Schwäche."
+    }
+   ],
+   "outro": "Trauer ist Sehnsucht, die das Gehirn umlernen muss. Den Verlust neu einordnen, den Körper versorgen und Verbindung suchen hilft, und bei stecken gebliebener Trauer gibt es gezielte Unterstützung.",
+   "audio": "thorsten",
+   "link": "https://www.hubermanlab.com/episode/the-science-and-process-of-healing-from-grief"
   }
  ]
 }
