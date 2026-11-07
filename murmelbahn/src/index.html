@@ -4,33 +4,38 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
-<meta name="theme-color" content="#1D1712">
-<meta name="description" content="Murmelbahn: bei jedem Start eine neue, zufällig gebaute Bahn mit Rampen, Stiften, Schaufelrädern und Pilzen. Zum Zuschauen und Abschalten.">
+<meta name="theme-color" content="#E9E5DE">
+<meta name="description" content="Murmelbahn als Design-Skulptur: gebogene Edelstahlbahn um einen gläsernen Lift auf einem Holzsockel. Drehen, zuschauen, abschalten.">
 <title>Murmelbahn</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <style>
-:root{--bg:#1D1712;--panel:rgba(0,0,0,.35);--ink:#F3E9DC;--muted:#C7B49C;--accent:#E2B07A;--line:rgba(255,255,255,.18)}
+:root{--bg:#E9E5DE;--panel:rgba(255,255,255,.62);--ink:#26231F;--muted:#6E675E;--accent:#26231F;--accentInk:#F4F1EC;--line:rgba(0,0,0,.14)}
+:root[data-raum="abend"]{--bg:#141210;--panel:rgba(0,0,0,.4);--ink:#EDE8E0;--muted:#A79E92;--accent:#E3D9CA;--accentInk:#141210;--line:rgba(255,255,255,.16)}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font:15px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif;overflow:hidden;overscroll-behavior:none}
 body{display:flex;flex-direction:column;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
-header{display:flex;align-items:center;gap:8px;padding:8px 12px;flex-wrap:wrap;background:var(--panel);border-bottom:1px solid var(--line);position:relative;z-index:2}
+header{display:flex;align-items:center;gap:8px;padding:8px 12px;flex-wrap:wrap;background:var(--panel);border-bottom:1px solid var(--line);position:relative;z-index:2;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
 header a.back{color:var(--muted);text-decoration:none;font-size:.9rem;white-space:nowrap}
-header h1{margin:0;font-size:1.15rem;color:var(--accent);white-space:nowrap}
+header h1{margin:0;font-size:1.1rem;font-weight:600;letter-spacing:.02em;white-space:nowrap}
 header .info{color:var(--muted);font-size:.8rem;flex:1;min-width:90px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .btns{display:flex;gap:6px;flex-wrap:wrap}
-button{font:inherit;color:var(--ink);background:transparent;border:1px solid var(--line);border-radius:10px;min-height:38px;min-width:40px;padding:6px 10px;cursor:pointer;white-space:nowrap}
+button{font:inherit;color:var(--ink);background:transparent;border:1px solid var(--line);border-radius:999px;min-height:38px;min-width:40px;padding:6px 12px;cursor:pointer;white-space:nowrap}
 button:hover{border-color:var(--muted)}
-button.on{background:var(--accent);color:var(--bg);border-color:var(--accent);font-weight:600}
-button.primary{background:var(--accent);color:var(--bg);border-color:var(--accent);font-weight:700}
+button.on{background:var(--accent);color:var(--accentInk);border-color:var(--accent)}
+button.primary{background:var(--accent);color:var(--accentInk);border-color:var(--accent);font-weight:600}
 #stage{flex:1;position:relative;min-height:0}
-canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:manipulation;cursor:crosshair}
-#toast{position:absolute;left:50%;top:14px;transform:translateX(-50%);max-width:min(92%,440px);background:var(--panel);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border:1px solid var(--line);border-radius:12px;padding:10px 14px;text-align:center;font-size:.9rem;transition:opacity .8s;pointer-events:none}
+canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab}
+canvas.drag{cursor:grabbing}
+#toast{position:absolute;left:50%;top:14px;transform:translateX(-50%);max-width:min(92%,460px);background:var(--panel);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border:1px solid var(--line);border-radius:14px;padding:10px 14px;text-align:center;font-size:.9rem;transition:opacity .8s;pointer-events:none}
 #toast.off{opacity:0}
-.anz{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:10px;padding:0 10px;min-height:38px}
-.anz input{width:110px;accent-color:var(--accent)}
+.anz{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:0 12px;min-height:38px}
+.anz input{width:100px;accent-color:var(--accent)}
 .anz b{min-width:2ch;text-align:right;font-variant-numeric:tabular-nums}
-@media (max-width:560px){.anz input{width:80px}header .lbl{display:none}header .info{order:5;flex-basis:100%}}
+#hebel{position:absolute;left:50%;bottom:max(18px,env(safe-area-inset-bottom));transform:translateX(-50%);min-height:64px;padding:10px 26px;font-size:1.05rem;font-weight:600;background:var(--accent);color:var(--accentInk);border:0;box-shadow:0 6px 20px rgba(0,0,0,.25);user-select:none;-webkit-user-select:none;touch-action:none;display:none}
+#hebel.show{display:block}
+#hebel.down{transform:translateX(-50%) translateY(3px) scale(.97);box-shadow:0 2px 8px rgba(0,0,0,.25)}
+@media (max-width:620px){.anz input{width:76px}header .lbl{display:none}header .info{order:5;flex-basis:100%}}
 </style>
 </head>
 <body>
@@ -39,409 +44,517 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
   <h1>Murmelbahn</h1>
   <span class="info" id="info"></span>
   <div class="btns">
-    <button class="primary" id="neu" type="button" title="Neue Bahn bauen">🔀<span class="lbl"> Neue Bahn</span></button>
+    <button class="primary" id="neu" type="button" title="Neue Bahn biegen">🔀<span class="lbl"> Neue Bahn</span></button>
     <label class="anz" title="Anzahl der Murmeln">🔮<input id="anz" type="range" min="1" max="60" step="1" aria-label="Anzahl der Murmeln"><b id="anzv"></b></label>
-    <button id="slow" type="button" title="Zeitlupe">🐢<span class="lbl"> Zeitlupe</span></button>
+    <button id="modus" type="button" title="Lift: Dauerlauf, Intervall oder von Hand mit dem Hebel"></button>
+    <button id="holz" type="button" title="Holz des Sockels"></button>
+    <button id="raum" type="button" title="Hell oder dunkel">🌗</button>
+    <button id="dreh" type="button" title="Skulptur langsam drehen">🔄<span class="lbl"> Drehen</span></button>
+    <button id="slow" type="button" title="Zeitlupe">🐢</button>
     <button id="ton" type="button" title="Klang an oder aus">🔇</button>
     <button id="pause" type="button" title="Anhalten">⏸</button>
   </div>
 </header>
 <div id="stage">
-  <canvas id="cv" aria-label="Murmelbahn"></canvas>
-  <div id="toast">Jede Bahn wird beim Start neu gebaut. Tippe auf die Bahn, um eine Murmel fallen zu lassen. Mit dem Regler oben stellst du die Anzahl ein.</div>
+  <canvas id="cv" aria-label="Murmelbahn-Skulptur"></canvas>
+  <div id="toast">Jede Bahn wird neu gebogen. Ziehen dreht die Skulptur, Mausrad oder zwei Finger zoomen. Oben stellst du Anzahl, Lift-Modus und Holz ein.</div>
+  <button id="hebel" type="button">✋ Hebel drücken</button>
 </div>
 <script>
 (function () {
   "use strict";
-  // Welt: 1000 Einheiten breit, Höhe passt sich dem Bildschirm an. Die Physik rechnet nur in Welt-Einheiten.
-  var W = 1000, H = 1600, L = 12, RW = 905, PW = RW - L, G = 1250, MAXM = 60;
-  var cv = document.getElementById("cv"), ctx = cv.getContext("2d");
-  var stage = document.getElementById("stage");
-  var segs = [], pegs = [], bumpers = [], wheels = [], marbles = [], pending = 0, spawnT = 0;
-  var seed = 0, rng = Math.random, theme = null, palette = [], chute = null;
-  var scale = 1, ox = 0, oy = 0, dpr = 1, staticCv = document.createElement("canvas");
-  var target = 8;
-  try { var st = parseInt(localStorage.getItem("murmelbahn-anzahl"), 10); if (st >= 1 && st <= 60) target = st; } catch (e) {}
-  var T = 0, paused = false, slow = false, soundOn = false;
-  var stats = {lifted: 0, respawned: 0, nudged: 0};
+  // Welt in Millimetern, z zeigt nach oben. Murmeln 10 mm, Bahn aus zwei Edelstahldrähten,
+  // in der Mitte ein gläserner Lift, darunter ein gedrechselter Holzsockel.
+  var RM = 5, RAILW = 3.3, LIFT = Math.sqrt(RM * RM - RAILW * RAILW), WIRE = 0.85;
+  var BASE_R = 150, BASE_H = 34, TUBE_R = 9.5, ZTOP = BASE_H + 330, Z0 = ZTOP - 16, ZEND = BASE_H + 15;
+  var PITCH = 38, DS = 2, G = 9810, KROLL = 0.565, DRAG = 0.55, MU = 0.004, LIFT_V = 150, MAXM = 60;
+  var cv = document.getElementById("cv"), ctx = cv.getContext("2d"), stage = document.getElementById("stage");
+  var X, Y, Z, NX, NY, N = 0, LEN = 0, spokes = [], chimes = [], sections = [];
+  var LX, LY, RX, RY, PLX, PLY, PRX, PRY, PD, PF;
+  var marbles = [], seed = 0, rng = Math.random, palette = null;
+  var target = 8, mode = "dauer", wood = 0, raum = "hell", spin = true;
+  function load(k) { try { return localStorage.getItem("murmelbahn-" + k); } catch (e) { return null; } }
+  function save(k, v) { try { localStorage.setItem("murmelbahn-" + k, String(v)); } catch (e) {} }
+  (function () {
+    var a = parseInt(load("anzahl"), 10); if (a >= 1 && a <= MAXM) target = a;
+    var m = load("modus"); if (m === "dauer" || m === "intervall" || m === "hebel") mode = m;
+    var h = parseInt(load("holz"), 10); if (h >= 0 && h < 4) wood = h;
+    if (load("raum") === "abend") raum = "abend";
+    if (load("drehen") === "0") spin = false;
+  })();
+  var T = 0, paused = false, slow = false, soundOn = false, lever = false;
+  var iv = {phase: "pause", t: 6, count: 0, run: 0};
+  var stats = {lifted: 0, released: 0, clicks: 0, chimes: 0};
+  var cam = {yaw: .6, tilt: .36, zoom: 1, idle: 0};
 
   function mulberry(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; var t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
   function rr(a, b) { return a + rng() * (b - a); }
-  function pick(a) { return a[Math.floor(rng() * a.length)]; }
+  function smooth(u) { u = u < 0 ? 0 : u > 1 ? 1 : u; return u * u * (3 - 2 * u); }
 
-  var THEMES = [
-    {name: "Holz", bg: ["#2B2119", "#15100C"], rail: "#B9824A", hi: "#EBC08C", sh: "rgba(0,0,0,.45)", peg: "#D8AE55", bump: "#C8553D", bumpHi: "#FFB199", wheel: "#9A6838", ink: "#F3E9DC", muted: "#C7B49C", accent: "#E2B07A", glass: "rgba(255,240,220,", dots: "rgba(255,255,255,.035)"},
-    {name: "Neon", bg: ["#16123E", "#07051A"], rail: "#2FD9FF", hi: "#C9F6FF", sh: "rgba(0,0,0,0)", peg: "#FF4FD8", bump: "#FFE14F", bumpHi: "#FFFBD0", wheel: "#7CFF6B", ink: "#EDEBFF", muted: "#A7A2E0", accent: "#2FD9FF", glass: "rgba(180,240,255,", dots: "rgba(120,140,255,.06)", glow: true, trails: true},
-    {name: "Pastell", bg: ["#F7F1E8", "#E7E0F0"], rail: "#86AEDB", hi: "#E3F0FF", sh: "rgba(60,50,90,.18)", peg: "#E39AB2", bump: "#F2C063", bumpHi: "#FFF1C9", wheel: "#9BCB9B", ink: "#2E2A3A", muted: "#6D6780", accent: "#7B6CC4", glass: "rgba(90,80,140,", dots: "rgba(90,80,140,.06)", light: true},
-    {name: "Wald", bg: ["#1D3B2D", "#0C1C15"], rail: "#D9C79C", hi: "#FFF6DC", sh: "rgba(0,0,0,.4)", peg: "#9FD18B", bump: "#F29E38", bumpHi: "#FFD9A8", wheel: "#C49A6C", ink: "#EEF2EA", muted: "#A9C2B3", accent: "#F2C46B", glass: "rgba(220,255,230,", dots: "rgba(255,255,255,.035)"},
-    {name: "Nachtgold", bg: ["#1C2744", "#0A0F1E"], rail: "#C9A34E", hi: "#FFE7A8", sh: "rgba(0,0,0,.45)", peg: "#E8E1CF", bump: "#5E9BFF", bumpHi: "#D2E3FF", wheel: "#C9A34E", ink: "#ECEFF7", muted: "#9FA9C4", accent: "#E6C36A", glass: "rgba(220,230,255,", dots: "rgba(255,255,255,.03)"},
-    {name: "Glut", bg: ["#3A1414", "#120606"], rail: "#FF8A3D", hi: "#FFD2A8", sh: "rgba(0,0,0,.45)", peg: "#FFD45E", bump: "#FF4F6D", bumpHi: "#FFC2CC", wheel: "#FFB03D", ink: "#FFEDE3", muted: "#E0A99A", accent: "#FF9F5A", glass: "rgba(255,220,200,", dots: "rgba(255,200,150,.04)", glow: true}
+  var WOODS = [
+    {name: "Birke", top: ["#F0DFC2", "#D9BF96"], side: ["#C9A97C", "#9C7C55"], grain: "rgba(120,80,40,.10)"},
+    {name: "Nussbaum", top: ["#8A6446", "#5E4029"], side: ["#5A3C26", "#36230F"], grain: "rgba(20,10,0,.18)"},
+    {name: "Weiß", top: ["#FBFAF7", "#E6E2DA"], side: ["#DCD7CE", "#B9B3A8"], grain: "rgba(0,0,0,.035)"},
+    {name: "Schwarz", top: ["#3A3836", "#232120"], side: ["#252322", "#121110"], grain: "rgba(255,255,255,.04)"}
   ];
+  var RAUM = {
+    hell: {bg: ["#F3F0EB", "#DCD6CC"], floor: "rgba(60,45,30,.20)", steel: "#8E969F", steelHi: "rgba(255,255,255,.9)", steelLo: "#5C636B", glass: "rgba(255,255,255,", ink: "#26231F"},
+    abend: {bg: ["#2A2622", "#0F0E0C"], floor: "rgba(0,0,0,.55)", steel: "#9AA2AB", steelHi: "rgba(255,248,235,.85)", steelLo: "#4C535B", glass: "rgba(255,245,230,", ink: "#EDE8E0"}
+  };
+  var MODES = {dauer: "♾ Dauerlauf", intervall: "⏱ Intervall", hebel: "✋ Hebel"};
+  var NAMES = {spirale: "Spirale", bluete: "Blüte", welle: "Welle", schnecke: "Schnecke"};
 
   // Murmelfarben: jede Bahn bekommt eine eigene Farbfamilie.
   function hsl(h, s, l, a) { return "hsla(" + ((h % 360 + 360) % 360).toFixed(0) + "," + s + "%," + l + "%," + (a == null ? 1 : a) + ")"; }
   function makePalette() {
-    var scheme = pick(["bunt", "bunt", "verwandt", "zwei"]), base = rr(0, 360), out = [], n = 7;
-    for (var i = 0; i < n; i++) {
-      var h = scheme === "bunt" ? base + i * 137.5 : scheme === "verwandt" ? base + rr(-45, 45) : base + (i % 2) * 180 + rr(-15, 15);
+    var scheme = rng() < .5 ? "bunt" : rng() < .5 ? "verwandt" : "zwei", base = rr(0, 360), out = [];
+    for (var i = 0; i < 7; i++) {
+      var h = scheme === "bunt" ? base + i * 137.5 : scheme === "verwandt" ? base + rr(-40, 40) : base + (i % 2) * 180 + rr(-15, 15);
       out.push({h: h, s: Math.round(rr(65, 90)), l: Math.round(rr(46, 60)), h2: h + rr(30, 200)});
     }
-    return {scheme: scheme, list: out};
+    return out;
   }
-  function newMarble(x, y) {
-    var p = palette.list[Math.floor(Math.random() * palette.list.length)], k = Math.random();
-    return {x: x, y: y, vx: 0, vy: 0, r: 16 + Math.random() * 5, rot: Math.random() * 6.28, still: 0, lift: false, trail: [],
-      type: k < .74 ? "swirl" : k < .86 ? "glass" : k < .94 ? "metal" : "auge", h: p.h, s: p.s, l: p.l, h2: p.h2};
+  function newMarble() {
+    var p = palette[Math.floor(Math.random() * palette.length)], k = Math.random();
+    return {st: "track", s: 0, v: 0, z: 0, rot: Math.random() * 6.28, pz: 0, type: k < .62 ? "swirl" : k < .84 ? "glass" : k < .93 ? "metal" : "auge", h: p.h, sat: p.s, lig: p.l, h2: p.h2};
   }
 
-  function addSeg(ax, ay, bx, by, o) { o = o || {}; segs.push({ax: ax, ay: ay, bx: bx, by: by, t: o.t || 8, e: o.e == null ? .22 : o.e, draw: o.draw !== false}); }
-
-  // Abschnitte der Bahn. Jeder bekommt eine Oberkante und eine Höhe.
-  function secZigzag(y0, h) {
-    var n = Math.max(2, Math.floor(h / 125)), sp = h / n, dir = rng() < .5 ? 0 : 1;
-    for (var i = 0; i < n; i++) {
-      var y = y0 + i * sp, len = PW * rr(.64, .8), d = Math.min(sp - 60, rr(48, 78));
-      if (dir === 0) addSeg(L, y, L + len, y + d); else addSeg(RW, y, RW - len, y + d);
-      dir = 1 - dir;
-    }
-  }
-  function secPegs(y0, h) {
-    var rows = Math.max(3, Math.floor(h / 66)), sp = h / rows, dx = 84, sh = rr(0, 35);
-    for (var r = 0; r < rows; r++) {
-      var y = y0 + sp * (r + .5);
-      for (var x = L + 26 + sh + (r % 2) * 42; x <= RW - 40; x += dx) if (x - L >= 40) pegs.push({x: x, y: y, r: 8, e: .45, last: 0, glow: 0});
-    }
-  }
-  function funnel(y0, cx, g) {
-    var k = .21, sl = cx - g / 2 - L, sr = RW - (cx + g / 2), yb = y0 + k * Math.max(sl, sr);
-    addSeg(L, yb - k * sl, cx - g / 2, yb); addSeg(RW, yb - k * sr, cx + g / 2, yb);
-    addSeg(cx - g / 2, yb, cx - g / 2, yb + 16, {t: 5}); addSeg(cx + g / 2, yb, cx + g / 2, yb + 16, {t: 5});
-    return yb + 16;
-  }
-  function secWheel(y0, h) {
-    var len = rr(80, 100), cx = rr(L + len + 70, RW - len - 70), yb = funnel(y0, cx, 76);
-    var side = rng() < .5 ? -1 : 1, w = side * rr(1.3, 2.3);
-    wheels.push({x: cx + side * -28, y: Math.min(yb + len + 22, y0 + h - len - 6), len: len, n: 4 + Math.floor(rng() * 3), ang: rr(0, 6.28), w: w, arms: []});
-  }
-  function secBumpers(y0, h) {
-    var n = 3 + Math.floor(rng() * 3), tries = 0;
-    while (bumpers.filter(function (b) { return b.sec === y0; }).length < n && tries++ < 300) {
-      var r = rr(28, 42), x = rr(L + r + 48, RW - r - 48), y = rr(y0 + r + 6, y0 + h - r - 6), ok = true;
-      bumpers.forEach(function (b) { if (Math.hypot(b.x - x, b.y - y) < b.r + r + 46) ok = false; });
-      if (ok) bumpers.push({x: x, y: y, r: r, e: .95, kick: 230, flash: 0, sec: y0});
-    }
-  }
-  var TYPES = [
-    {id: "zigzag", min: 230, max: 380, fn: secZigzag},
-    {id: "pegs", min: 200, max: 330, fn: secPegs},
-    {id: "wheel", min: 400, max: 420, fn: secWheel},
-    {id: "bumpers", min: 220, max: 300, fn: secBumpers}
-  ];
-
+  // ---------- Bahn biegen ----------
+  // Die Bahn läuft in Polarkoordinaten um den Lift. Pro Umdrehung fällt sie mindestens PITCH mm,
+  // damit übereinanderliegende Windungen sich nie berühren. Abschnitte: Spirale, Blüte (Radius
+  // schwingt in Blättern), Welle (Gefälle wechselt) und Schnecke (wandert nach innen oder außen).
   function generate(s) {
-    seed = s; rng = mulberry(s);
-    theme = THEMES[Math.floor(rng() * THEMES.length)]; palette = makePalette();
-    segs = []; pegs = []; bumpers = []; wheels = [];
-    // Rahmen, Zulauf oben, Sammelrinne unten, Aufzug rechts
-    addSeg(L, 0, L, H, {t: 6}); addSeg(0, 4, W, 4, {draw: false}); addSeg(995, H - 280, 995, H, {draw: false}); addSeg(0, H - 8, W, H - 8, {draw: false});
-    var cEnd = rr(150, 640), cY = 112 + (905 - cEnd) * .16;
-    chute = {x: cEnd, y: cY}; addSeg(905, 112, cEnd, cY);
-    addSeg(RW, 120, RW, H - 150, {t: 6});
-    addSeg(L, H - 170, 995, H - 80);
-    var top = cY + 70, bottom = H - 200, y = top, list = [], prev = null;
-    for (;;) {
-      var rem = bottom - y, opts = TYPES.filter(function (t) { return t.min <= rem && t.id !== prev; });
-      if (!opts.length) break;
-      var t = pick(opts), h = Math.min(rem, rr(t.min, t.max));
-      list.push({t: t, h: h}); y += h + 40; prev = t.id;
+    seed = s; rng = mulberry(s); palette = makePalette();
+    var pts = [], th = 0, r = 18, z = Z0, prev = null, dth = .012;
+    pts.push([th, r, z]); sections = []; var spokeTh = [];
+    function run(sec) {
+      var n = Math.max(8, Math.ceil(sec.turns * 6.2832 / dth)), r0 = r;
+      for (var k = 1; k <= n; k++) {
+        var u = k / n; th += dth;
+        var env = smooth(Math.min(u / .2, (1 - u) / .2));
+        var rb = r0 + (sec.r1 - r0) * smooth(sec.type === "schnecke" || sec.type === "ende" ? u : u / .3);
+        var nr = rb + (sec.type === "bluete" ? sec.A * Math.sin(sec.k * th + sec.ph) * env : 0);
+        var slope = sec.slope * (sec.type === "welle" ? 1 + .8 * Math.sin(sec.k * th + sec.ph) * env : 1);
+        var dsH = Math.hypot(nr * dth, nr - r);
+        z -= Math.max(slope * dsH, PITCH * dth / 6.2832);
+        r = nr; pts.push([th, r, z]);
+      }
     }
-    var extra = Math.max(0, bottom - (y - 40)) / (list.length + 1);
-    y = top + extra;
-    list.forEach(function (s) { s.t.fn(y, s.h); y += s.h + 40 + extra; });
-    applyTheme();
+    function perTurn(sec) { return Math.max(sec.slope * 6.2832 * (r + sec.r1) / 2, PITCH); }
+    var guard = 0;
+    for (;;) {
+      if (guard++ > 30) break;
+      var types = ["spirale", "bluete", "welle", "schnecke"].filter(function (t) { return t !== prev; });
+      var type = types[Math.floor(rng() * types.length)], sec = {type: type, slope: rr(.055, .085), turns: rr(.8, 1.6), k: 3 + Math.floor(rng() * 3), ph: rr(0, 6.28)};
+      if (type === "schnecke") sec.r1 = r > 92 ? rr(50, 64) : rr(108, 128);
+      else if (type === "bluete") { sec.r1 = rr(78, 98); sec.A = rr(18, 28); }
+      else sec.r1 = rr(66, 122);
+      if (!pts[1]) sec.turns = Math.max(sec.turns, 1.1);
+      var remain = z - ZEND - 24;
+      if (remain < PITCH * .5) break;
+      if (sec.turns * perTurn(sec) > remain) { sec.turns = remain / perTurn(sec); if (sec.turns < .5) break; }
+      run(sec); sections.push(type); prev = type;
+    }
+    run({type: "ende", r1: 18, slope: .06, turns: .55});
+    var k = (Z0 - ZEND) / (Z0 - z);
+    pts.forEach(function (p) { p[2] = Z0 - (Z0 - p[2]) * k; });
+    // auf gleichmäßige Abstände entlang der Bahn umrechnen
+    var P = pts.map(function (p) { return [p[1] * Math.cos(p[0]), p[1] * Math.sin(p[0]), p[2], p[0]]; }), cum = [0];
+    for (var i = 1; i < P.length; i++) cum.push(cum[i - 1] + Math.hypot(P[i][0] - P[i - 1][0], P[i][1] - P[i - 1][1], P[i][2] - P[i - 1][2]));
+    LEN = cum[cum.length - 1]; N = Math.floor(LEN / DS) + 1;
+    X = new Float32Array(N); Y = new Float32Array(N); Z = new Float32Array(N); NX = new Float32Array(N); NY = new Float32Array(N);
+    var TH = new Float32Array(N), j = 0;
+    for (i = 0; i < N; i++) {
+      var sp = i * DS; while (j < cum.length - 2 && cum[j + 1] < sp) j++;
+      var f = (sp - cum[j]) / ((cum[j + 1] - cum[j]) || 1); f = f < 0 ? 0 : f > 1 ? 1 : f;
+      X[i] = P[j][0] + (P[j + 1][0] - P[j][0]) * f; Y[i] = P[j][1] + (P[j + 1][1] - P[j][1]) * f; Z[i] = P[j][2] + (P[j + 1][2] - P[j][2]) * f; TH[i] = P[j][3] + (P[j + 1][3] - P[j][3]) * f;
+    }
+    for (i = 0; i < N; i++) {
+      var a = Math.max(0, i - 1), b = Math.min(N - 1, i + 1), tx = X[b] - X[a], ty = Y[b] - Y[a], tl = Math.hypot(tx, ty) || 1;
+      NX[i] = ty / tl; NY[i] = -tx / tl; // zeigt nach außen, weil die Bahn gegen den Uhrzeigersinn läuft
+      if (NX[i] * X[i] + NY[i] * Y[i] < 0) { NX[i] = -NX[i]; NY[i] = -NY[i]; }
+    }
+    LX = new Float32Array(N); LY = new Float32Array(N); RX = new Float32Array(N); RY = new Float32Array(N);
+    for (i = 0; i < N; i++) { LX[i] = X[i] - NX[i] * RAILW; LY[i] = Y[i] - NY[i] * RAILW; RX[i] = X[i] + NX[i] * RAILW; RY[i] = Y[i] + NY[i] * RAILW; }
+    PLX = new Float32Array(N); PLY = new Float32Array(N); PRX = new Float32Array(N); PRY = new Float32Array(N); PD = new Float32Array(N); PF = new Float32Array(N);
+    // Speichen vom Lift zur Bahn, etwa alle 60 Grad
+    spokes = []; var nextTh = 1.2;
+    for (i = 0; i < N - 8; i++) if (TH[i] >= nextTh) { spokes.push(i); nextTh += 2.094; }
+    // Klangstäbe an einigen Stellen außen an der Bahn
+    chimes = []; var nc = 4 + Math.floor(rng() * 3);
+    for (i = 0; i < nc; i++) {
+      var ci = Math.floor(N * (.1 + .8 * (i + rr(.2, .8)) / nc)), c = {i: ci, s: ci * DS, len: rr(18, 30), hit: 0};
+      chimes.push(c);
+    }
+    chimes.sort(function (a, b) { return Z[b.i] - Z[a.i]; }).forEach(function (c, n) { c.note = n; });
     var url = new URL(location.href); url.searchParams.set("bahn", String(s)); history.replaceState(null, "", url);
-    document.getElementById("info").textContent = "Bahn " + s + " · " + theme.name + " · " + list.map(function (s) { return {zigzag: "Rampen", pegs: "Stifte", wheel: "Schaufelrad", bumpers: "Pilze"}[s.t.id]; }).join(", ");
-  }
-  function applyTheme() {
-    var r = document.documentElement.style;
-    r.setProperty("--bg", theme.bg[1]); r.setProperty("--ink", theme.ink); r.setProperty("--muted", theme.muted); r.setProperty("--accent", theme.accent);
-    r.setProperty("--panel", theme.light ? "rgba(255,255,255,.6)" : "rgba(0,0,0,.35)"); r.setProperty("--line", theme.light ? "rgba(0,0,0,.15)" : "rgba(255,255,255,.18)");
-    document.querySelector('meta[name="theme-color"]').content = theme.bg[1];
+    updateInfo();
   }
 
   // ---------- Physik ----------
-  var lastSnd = {};
-  function collideSeg(m, ax, ay, bx, by, t, e, wh) {
-    var abx = bx - ax, aby = by - ay, l2 = abx * abx + aby * aby, u = ((m.x - ax) * abx + (m.y - ay) * aby) / l2;
-    u = u < 0 ? 0 : u > 1 ? 1 : u;
-    var px = ax + abx * u, py = ay + aby * u, dx = m.x - px, dy = m.y - py, d2 = dx * dx + dy * dy, rad = m.r + t;
-    if (d2 >= rad * rad) return;
-    var d = Math.sqrt(d2), nx, ny;
-    if (d < 1e-6) { var l = Math.sqrt(l2); nx = -aby / l; ny = abx / l; if (ny > 0) { nx = -nx; ny = -ny; } } else { nx = dx / d; ny = dy / d; }
-    m.x += nx * (rad - d); m.y += ny * (rad - d);
-    var svx = 0, svy = 0;
-    if (wh) { svx = -wh.w * (py - wh.y); svy = wh.w * (px - wh.x); }
-    var rvx = m.vx - svx, rvy = m.vy - svy, vn = rvx * nx + rvy * ny;
-    if (vn < 0) {
-      rvx -= (1 + e) * vn * nx; rvy -= (1 + e) * vn * ny;
-      var tx = -ny, ty = nx, vt = rvx * tx + rvy * ty, f = wh ? .02 : .0004;
-      rvx -= tx * vt * f; rvy -= ty * vt * f;
-      m.vx = rvx + svx; m.vy = rvy + svy;
-      if (-vn > 260) snd("rail", -vn, m.x);
-    }
-  }
-  function collideCirc(m, c, kind) {
-    var dx = m.x - c.x, dy = m.y - c.y, d2 = dx * dx + dy * dy, rad = m.r + c.r;
-    if (d2 >= rad * rad) return;
-    var d = Math.sqrt(d2) || 1e-6, nx = dx / d, ny = dy / d;
-    m.x = c.x + nx * rad; m.y = c.y + ny * rad;
-    var vn = m.vx * nx + m.vy * ny;
-    if (vn < 0) {
-      m.vx -= (1 + c.e) * vn * nx; m.vy -= (1 + c.e) * vn * ny;
-      if (kind === "bump") { m.vx += nx * c.kick; m.vy += ny * c.kick; c.flash = 1; snd("bump", -vn + 300, c.x); }
-      else if (-vn > 120) { c.glow = 1; snd("peg", -vn, c.x); }
-    }
-  }
+  // Jede Murmel liegt auf zwei Drähten und hat nur eine Lage s entlang der Bahn und ein Tempo v.
+  // Beschleunigung aus dem Gefälle (rollende Kugel auf Schienen), Luft- und Rollwiderstand.
+  // Murmeln stoßen sich entlang der Bahn, am Ende stauen sie sich vor dem Lift.
+  function slopeAt(s) { var i = Math.min(N - 2, Math.max(0, Math.floor(s / DS))); return (Z[i + 1] - Z[i]) / DS; }
+  function onTrack() { return marbles.filter(function (m) { return m.st === "track"; }).sort(function (a, b) { return a.s - b.s; }); }
   function step(dt) {
-    var i, j, k, m, n = marbles.length;
-    for (i = 0; i < wheels.length; i++) {
-      var w = wheels[i]; w.ang += w.w * dt; w.arms.length = 0;
-      for (k = 0; k < w.n; k++) { var a = w.ang + k * 6.2832 / w.n, c = Math.cos(a), s = Math.sin(a); w.arms.push([w.x + c * 12, w.y + s * 12, w.x + c * w.len, w.y + s * w.len]); }
+    var tr = onTrack(), i, m;
+    for (i = 0; i < tr.length; i++) {
+      m = tr[i];
+      var a = -KROLL * G * slopeAt(m.s) - DRAG * m.v;
+      if (Math.abs(m.v) > 2) a -= (m.v > 0 ? 1 : -1) * MU * G; else if (Math.abs(a) < MU * G) { a = 0; m.v *= .5; }
+      m.v += a * dt; m.s += m.v * dt;
+      if (m.s < RM) { m.s = RM; if (m.v < 0) m.v = -m.v * .3; }
+      if (m.s > LEN - RM) { m.s = LEN - RM; if (m.v > 0) { if (m.v > 90) snd("stop", m.v); m.v = -m.v * .15; } }
+      if (!isFinite(m.s) || !isFinite(m.v)) { m.s = LEN - RM; m.v = 0; }
     }
-    for (i = 0; i < n; i++) {
-      m = marbles[i]; if (m.lift) continue;
-      m.vy += G * dt; m.x += m.vx * dt; m.y += m.vy * dt;
-      for (j = 0; j < segs.length; j++) { var s2 = segs[j]; collideSeg(m, s2.ax, s2.ay, s2.bx, s2.by, s2.t, s2.e, null); }
-      for (j = 0; j < wheels.length; j++) {
-        var wh = wheels[j], dx = m.x - wh.x, dy = m.y - wh.y;
-        if (dx * dx + dy * dy > (wh.len + m.r + 6) * (wh.len + m.r + 6)) continue;
-        collideCirc(m, {x: wh.x, y: wh.y, r: 14, e: .3}, "hub");
-        for (k = 0; k < wh.arms.length; k++) { var ar = wh.arms[k]; collideSeg(m, ar[0], ar[1], ar[2], ar[3], 5, .15, wh); }
-      }
-      for (j = 0; j < pegs.length; j++) { var p = pegs[j]; if (Math.abs(p.y - m.y) < 32 && Math.abs(p.x - m.x) < 32) collideCirc(m, p, "peg"); }
-      for (j = 0; j < bumpers.length; j++) collideCirc(m, bumpers[j], "bump");
-    }
-    for (i = 0; i < n; i++) {
-      var a1 = marbles[i]; if (a1.lift) continue;
-      for (j = i + 1; j < n; j++) {
-        var b = marbles[j]; if (b.lift) continue;
-        var ddx = b.x - a1.x, ddy = b.y - a1.y, rs = a1.r + b.r;
-        if (ddx > rs || ddx < -rs || ddy > rs || ddy < -rs) continue;
-        var dd = ddx * ddx + ddy * ddy; if (dd >= rs * rs) continue;
-        var dist = Math.sqrt(dd) || 1e-6, nx = ddx / dist, ny = ddy / dist, pen = rs - dist, ma = a1.r * a1.r, mb = b.r * b.r, tot = ma + mb;
-        a1.x -= nx * pen * mb / tot; a1.y -= ny * pen * mb / tot; b.x += nx * pen * ma / tot; b.y += ny * pen * ma / tot;
-        var vrel = (b.vx - a1.vx) * nx + (b.vy - a1.vy) * ny;
-        if (vrel < 0) { var J = -1.6 * vrel / (1 / ma + 1 / mb); a1.vx -= J / ma * nx; a1.vy -= J / ma * ny; b.vx += J / mb * nx; b.vy += J / mb * ny; if (-vrel > 300) snd("klick", -vrel, a1.x); }
+    for (var pass = 0; pass < 3; pass++) {
+      for (i = 0; i + 1 < tr.length; i++) {
+        var A = tr[i], B = tr[i + 1], gap = B.s - A.s;
+        if (gap >= 2 * RM) continue;
+        var pen = 2 * RM - gap;
+        if (B.s + pen / 2 > LEN - RM) A.s -= pen; else { A.s -= pen / 2; B.s += pen / 2; }
+        if (A.v > B.v) {
+          var rel = A.v - B.v, mean = (A.v + B.v) / 2;
+          A.v = mean - .88 * rel / 2; B.v = mean + .88 * rel / 2;
+          if (rel > 90 && pass === 0) { snd("klick", rel); stats.clicks++; }
+        }
       }
     }
-    for (i = 0; i < n; i++) {
-      m = marbles[i]; if (m.lift) continue;
-      var sp = Math.hypot(m.vx, m.vy); if (sp > 2200) { m.vx *= 2200 / sp; m.vy *= 2200 / sp; }
-      m.rot += m.vx / m.r * dt;
-    }
+    for (i = 0; i < tr.length; i++) tr[i].rot += tr[i].v / RM * dt;
   }
-  function release(m) { m.lift = false; m.x = 885; m.y = 80; m.vx = -120 - Math.random() * 60; m.vy = 0; m.still = 0; m.trail.length = 0; }
-  function freeAtRelease() { return !marbles.some(function (o) { return !o.lift && Math.abs(o.x - 885) < 30 && Math.abs(o.y - 80) < 30; }); }
+  function liftRunning() { return mode === "dauer" || (mode === "hebel" && lever) || (mode === "intervall" && iv.phase === "run"); }
   function frameLogic(dt) {
-    // Aufzug: unten rechts einsammeln, im Rohr nach oben fahren, oben wieder auf den Zulauf setzen.
-    var up = marbles.filter(function (m) { return m.lift; }).sort(function (a, b) { return a.y - b.y; }), prev = null;
-    up.forEach(function (m) {
-      var ty = m.y - 300 * dt;
-      if (prev) ty = Math.max(ty, prev.y + prev.r + m.r + 3);
-      m.y = ty; m.rot += 300 * dt / m.r;
-      if (m.y <= 64 && freeAtRelease()) release(m); else if (m.y < 64) m.y = 64;
-      prev = m;
-    });
+    var run = liftRunning(), speed = LIFT_V * (mode === "hebel" ? 1.3 : 1), up = marbles.filter(function (m) { return m.st === "lift"; }).sort(function (a, b) { return b.z - a.z; });
+    var zIn = ZEND + LIFT, zOut = Z0 + LIFT, tr = onTrack();
+    var startFree = !tr.length || tr[0].s > 2 * RM + 3;
+    for (var i = 0; i < up.length; i++) {
+      var m = up[i];
+      if (run) { var nz = m.z + speed * dt; if (i > 0) nz = Math.min(nz, up[i - 1].z - 2 * RM - 1); m.z = Math.max(m.z, Math.min(nz, zOut)); m.rot += speed * dt / RM; }
+      if (i === 0 && m.z >= zOut - .01 && startFree) { m.st = "track"; m.s = RM + .5; m.v = 70; stats.released++; snd("tick", 200); startFree = false; }
+    }
+    // Einlauf unten: die vorderste Murmel im Stau rollt in den Lift, sobald dort Platz ist
+    var front = tr[tr.length - 1], low = up.length ? up[up.length - 1] : null;
+    if (run && front && front.s >= LEN - RM - 2 && Math.abs(front.v) < 150 && (!low || low.z > zIn + 2 * RM + 1)) {
+      front.st = "lift"; front.z = zIn; stats.lifted++; iv.count++; snd("tock", 300);
+    }
+    if (mode === "intervall") {
+      if (iv.phase === "pause") { iv.t -= dt; if (iv.t <= 0) { iv.phase = "run"; iv.count = 0; iv.run = 0; } }
+      else { iv.run += dt; var lifting = marbles.some(function (m) { return m.st === "lift"; }); if ((iv.count >= marbles.length && !lifting) || iv.run > 90) { iv.phase = "pause"; iv.t = 20; } }
+    }
+    chimes.forEach(function (c) { c.hit = Math.max(0, c.hit - dt * 1.2); });
     marbles.forEach(function (m) {
-      if (m.lift) return;
-      if (m.x > 914 && m.y > H - 160) { m.lift = true; m.x = 953; m.vx = m.vy = 0; stats.lifted++; return; }
-      if (m.y > H + 40 || m.x < -40 || m.x > W + 40 || m.y < -60 || !isFinite(m.x + m.y)) { m.lift = true; m.x = 953; m.y = H - 100; stats.respawned++; return; }
-      var sp = Math.hypot(m.vx, m.vy);
-      if (sp < 25) m.still += dt; else if (sp > 60) m.still = 0;
-      if (m.still > 2.5 && m.still - dt <= 2.5) { m.vx += (Math.random() < .5 ? -1 : 1) * 220; m.vy -= 260; stats.nudged++; }
-      if (m.still > 6) { m.lift = true; m.x = 953; m.y = H - 100; m.still = 0; stats.respawned++; }
-      if (theme.trails) { m.trail.push(m.x, m.y); if (m.trail.length > 24) m.trail.splice(0, 2); }
+      if (m.st === "track") { chimes.forEach(function (c) { if (m.pz < c.s && m.s >= c.s && m.s - m.pz < 40) { c.hit = 1; snd("chime", c.note); stats.chimes++; } }); m.pz = m.s; }
+      else m.pz = 0;
     });
-    if (pending > 0) { spawnT -= dt; if (spawnT <= 0 && freeAtRelease() && marbles.length < MAXM) { var nm = newMarble(885, 80); nm.vx = -150; marbles.push(nm); pending--; spawnT = .22; } }
-    bumpers.forEach(function (b) { b.flash = Math.max(0, b.flash - dt * 3); });
-    pegs.forEach(function (p) { p.glow = Math.max(0, p.glow - dt * 4); });
   }
 
   // ---------- Klang ----------
-  var actx = null, PENTA = [0, 2, 4, 7, 9];
-  function snd(kind, strength, x) {
+  var actx = null, roll = null, PENTA = [0, 2, 4, 7, 9], lastSnd = {};
+  function snd(kind, v) {
     if (!soundOn || !actx) return;
-    var now = actx.currentTime, gap = kind === "peg" ? .05 : kind === "bump" ? .07 : .04;
-    if (now - (lastSnd[kind] || 0) < gap) return; lastSnd[kind] = now;
-    var vol = Math.min(1, strength / 900), o = actx.createOscillator(), g = actx.createGain(), f, dur;
-    if (kind === "peg") { var idx = Math.max(0, Math.min(14, Math.floor((x - L) / PW * 15))); f = 261.6 * Math.pow(2, (Math.floor(idx / 5) * 12 + PENTA[idx % 5]) / 12); o.type = "sine"; dur = .5; vol = .05 + vol * .12; }
-    else if (kind === "bump") { f = 180 + Math.random() * 60; o.type = "triangle"; o.frequency.setValueAtTime(f * 2.2, now); o.frequency.exponentialRampToValueAtTime(f, now + .15); dur = .25; vol = .12; }
-    else if (kind === "klick") { f = 1800 + Math.random() * 900; o.type = "sine"; dur = .05; vol = .03 + vol * .05; }
-    else { f = 140 + Math.random() * 40; o.type = "triangle"; dur = .07; vol = .02 + vol * .05; }
-    if (kind !== "bump") o.frequency.value = f;
+    var now = actx.currentTime, gap = {klick: .03, chime: .02, tock: .05, tick: .05, stop: .06}[kind];
+    if (kind !== "chime" && now - (lastSnd[kind] || 0) < gap) return; lastSnd[kind] = now;
+    var o = actx.createOscillator(), g = actx.createGain(), dur, vol;
+    if (kind === "chime") {
+      var semi = 12 + Math.floor(v / 5) * -12 + PENTA[4 - v % 5]; o.type = "sine"; o.frequency.value = 523.25 * Math.pow(2, semi / 12 - 1); dur = 2.2; vol = .09;
+      var o2 = actx.createOscillator(), g2 = actx.createGain(); o2.type = "sine"; o2.frequency.value = o.frequency.value * 2.76;
+      g2.gain.setValueAtTime(.025, now); g2.gain.exponentialRampToValueAtTime(.0001, now + .6); o2.connect(g2).connect(actx.destination); o2.start(now); o2.stop(now + .65);
+    } else if (kind === "klick") { o.type = "sine"; o.frequency.value = 2600 + Math.random() * 1400; dur = .04; vol = .02 + Math.min(.06, v / 9000); }
+    else if (kind === "tock") { o.type = "triangle"; o.frequency.value = 330; dur = .09; vol = .05; }
+    else if (kind === "tick") { o.type = "sine"; o.frequency.value = 1500; dur = .05; vol = .03; }
+    else { o.type = "sine"; o.frequency.value = 1900 + Math.random() * 500; dur = .06; vol = .04; }
     g.gain.setValueAtTime(vol, now); g.gain.exponentialRampToValueAtTime(.0001, now + dur);
     o.connect(g).connect(actx.destination); o.start(now); o.stop(now + dur + .02);
   }
-
-  // ---------- Zeichnen ----------
-  function toScreen() { ctx.setTransform(dpr * scale, 0, 0, dpr * scale, dpr * ox, dpr * oy); }
-  function railPath(c, s) { c.beginPath(); c.moveTo(s.ax, s.ay); c.lineTo(s.bx, s.by); }
-  function drawStatic() {
-    staticCv.width = cv.width; staticCv.height = cv.height;
-    var c = staticCv.getContext("2d");
-    c.setTransform(1, 0, 0, 1, 0, 0);
-    var g = c.createLinearGradient(0, 0, 0, cv.height); g.addColorStop(0, theme.bg[0]); g.addColorStop(1, theme.bg[1]);
-    c.fillStyle = g; c.fillRect(0, 0, cv.width, cv.height);
-    c.setTransform(dpr * scale, 0, 0, dpr * scale, dpr * ox, dpr * oy);
-    // Punktraster als Untergrund
-    c.fillStyle = theme.dots;
-    for (var y = 20; y < H; y += 40) for (var x = 20 + (y / 40 % 2) * 20; x < W; x += 40) { c.beginPath(); c.arc(x, y, 2.2, 0, 6.28); c.fill(); }
-    c.lineCap = "round";
-    segs.forEach(function (s) { if (!s.draw) return; c.save(); c.translate(3, 5); railPath(c, s); c.strokeStyle = theme.sh; c.lineWidth = s.t * 2; c.stroke(); c.restore(); });
-    if (theme.glow) { c.shadowColor = theme.rail; c.shadowBlur = 14 * scale * dpr; }
-    segs.forEach(function (s) { if (!s.draw) return; railPath(c, s); c.strokeStyle = theme.rail; c.lineWidth = s.t * 2; c.stroke(); });
-    c.shadowBlur = 0;
-    segs.forEach(function (s) {
-      if (!s.draw) return;
-      var dx = s.bx - s.ax, dy = s.by - s.ay, l = Math.hypot(dx, dy) || 1, nx = dy / l, ny = -dx / l; if (ny > 0) { nx = -nx; ny = -ny; }
-      c.beginPath(); c.moveTo(s.ax + nx * s.t * .45, s.ay + ny * s.t * .45); c.lineTo(s.bx + nx * s.t * .45, s.by + ny * s.t * .45);
-      c.strokeStyle = theme.hi; c.globalAlpha = .55; c.lineWidth = s.t * .5; c.stroke(); c.globalAlpha = 1;
-    });
-    pegs.forEach(function (p) {
-      c.fillStyle = theme.sh; c.beginPath(); c.arc(p.x + 2, p.y + 4, p.r, 0, 6.28); c.fill();
-      var gg = c.createRadialGradient(p.x - 2, p.y - 2, 1, p.x, p.y, p.r); gg.addColorStop(0, "#fff"); gg.addColorStop(.35, theme.peg); gg.addColorStop(1, theme.peg);
-      c.fillStyle = gg; c.beginPath(); c.arc(p.x, p.y, p.r, 0, 6.28); c.fill();
-    });
-    // Aufzugrohr (Rückwand)
-    c.fillStyle = theme.glass + ".06)"; roundRect(c, 914, 30, 80, H - 70, 26); c.fill();
+  function startRoll() {
+    // leises Rauschen der rollenden Murmeln auf Stahl, lauter je schneller alles rollt
+    var len = actx.sampleRate * 2, buf = actx.createBuffer(1, len, actx.sampleRate), d = buf.getChannelData(0);
+    for (var i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+    var src = actx.createBufferSource(); src.buffer = buf; src.loop = true;
+    var bp = actx.createBiquadFilter(); bp.type = "bandpass"; bp.frequency.value = 2400; bp.Q.value = .8;
+    var g = actx.createGain(); g.gain.value = 0; src.connect(bp).connect(g).connect(actx.destination); src.start();
+    roll = g;
   }
-  function roundRect(c, x, y, w, h, r) { c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); }
-  function drawMarble(m) {
-    var x = m.x, y = m.y, r = m.r;
-    if (!theme.glow) { ctx.fillStyle = theme.light ? "rgba(60,50,90,.18)" : "rgba(0,0,0,.35)"; ctx.beginPath(); ctx.ellipse(x + 3, y + r * .7, r * .9, r * .45, 0, 0, 6.28); ctx.fill(); }
+  function updateRoll() {
+    if (!roll) return;
+    var sum = 0; if (soundOn && !paused) marbles.forEach(function (m) { if (m.st === "track") sum += Math.abs(m.v); });
+    roll.gain.setTargetAtTime(Math.min(.05, sum / 90000), actx.currentTime, .15);
+  }
+
+  // ---------- Kamera und Zeichnen ----------
+  var dpr = 1, cw = 1, ch = 1, S = 1, cx = 0, cy = 0, cosY = 1, sinY = 0, cosT = 1, sinT = 0, ZC = ZTOP * .5, DCAM = 1500;
+  var pj = [0, 0, 0, 0];
+  function setCam() {
+    cosY = Math.cos(cam.yaw); sinY = Math.sin(cam.yaw); cosT = Math.cos(cam.tilt); sinT = Math.sin(cam.tilt);
+    var hUp = (ZTOP + 14 - ZC) * cosT + 40 * sinT, hDown = ZC * cosT + BASE_R * 1.15 * sinT;
+    S = Math.min((cw * .9) / (BASE_R * 2.2), (ch * .9) / (hUp + hDown)) * cam.zoom;
+    cx = cw / 2; cy = ch / 2 + (hUp - hDown) * S / 2;
+  }
+  function proj(x, y, z) {
+    var xr = x * cosY - y * sinY, yr = x * sinY + y * cosY, dz = z - ZC;
+    var up = dz * cosT + yr * sinT, depth = yr * cosT - dz * sinT, f = DCAM / (DCAM + depth);
+    pj[0] = cx + xr * f * S; pj[1] = cy - up * f * S; pj[2] = depth; pj[3] = f * S; return pj;
+  }
+  function resize() {
+    cw = stage.clientWidth; ch = stage.clientHeight; if (!cw || !ch) return;
+    dpr = Math.min(2, window.devicePixelRatio || 1);
+    cv.width = Math.round(cw * dpr); cv.height = Math.round(ch * dpr);
+  }
+  function ring(z, rad, n, out) { out = out || []; out.length = 0; for (var i = 0; i < n; i++) { var a = i / n * 6.2832, p = proj(Math.cos(a) * rad, Math.sin(a) * rad, z); out.push(p[0], p[1], p[2]); } return out; }
+  var ringA = [], ringB = [];
+  function drawRoom() {
+    var R = RAUM[raum], g = ctx.createLinearGradient(0, 0, 0, ch); g.addColorStop(0, R.bg[0]); g.addColorStop(1, R.bg[1]);
+    ctx.fillStyle = g; ctx.fillRect(0, 0, cw, ch);
+    // weicher Schatten auf dem Tisch
+    var p = proj(0, 0, 0), rx = BASE_R * 1.35 * p[3], ry = rx * sinT * 1.05 + 6;
+    var sg = ctx.createRadialGradient(p[0], p[1] + 6, 0, p[0], p[1] + 6, rx);
+    sg.addColorStop(0, R.floor); sg.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.save(); ctx.translate(p[0], p[1] + 6); ctx.scale(1, ry / rx); ctx.fillStyle = sg; ctx.beginPath(); ctx.arc(0, 0, rx, 0, 6.2832); ctx.fill(); ctx.restore();
+  }
+  function drawBase() {
+    var W = WOODS[wood], n = 72;
+    ring(0, BASE_R, n, ringA); ring(BASE_H, BASE_R - 4, n, ringB);
+    var p0 = proj(0, 0, 0);
+    var sg = ctx.createLinearGradient(p0[0] - BASE_R * p0[3], 0, p0[0] + BASE_R * p0[3], 0);
+    sg.addColorStop(0, W.side[1]); sg.addColorStop(.45, W.side[0]); sg.addColorStop(1, W.side[1]);
+    ctx.fillStyle = sg; ctx.strokeStyle = sg; ctx.lineWidth = 1;
+    for (var i = 0; i < n; i++) {
+      var j = (i + 1) % n; if (ringA[i * 3 + 2] > 0 && ringA[j * 3 + 2] > 0) continue;
+      ctx.beginPath(); ctx.moveTo(ringA[i * 3], ringA[i * 3 + 1]); ctx.lineTo(ringA[j * 3], ringA[j * 3 + 1]); ctx.lineTo(ringB[j * 3], ringB[j * 3 + 1]); ctx.lineTo(ringB[i * 3], ringB[i * 3 + 1]); ctx.closePath(); ctx.fill(); ctx.stroke();
+    }
+    var pt = proj(0, 0, BASE_H), tg = ctx.createLinearGradient(0, pt[1] - BASE_R * pt[3] * sinT, 0, pt[1] + BASE_R * pt[3] * sinT);
+    tg.addColorStop(0, W.top[1]); tg.addColorStop(1, W.top[0]);
+    ctx.fillStyle = tg; ctx.beginPath();
+    for (i = 0; i < n; i++) ctx[i ? "lineTo" : "moveTo"](ringB[i * 3], ringB[i * 3 + 1]);
+    ctx.closePath(); ctx.fill();
+    // Jahresringe und eine gefräste Rinne um den Lift
+    ctx.strokeStyle = W.grain; ctx.lineWidth = 1;
+    for (var rr2 = 26; rr2 < BASE_R - 8; rr2 += 9 + (rr2 % 7)) { ring(BASE_H, rr2, 48, ringA); ctx.beginPath(); for (i = 0; i < 48; i++) ctx[i ? "lineTo" : "moveTo"](ringA[i * 3], ringA[i * 3 + 1]); ctx.closePath(); ctx.stroke(); }
+    ring(BASE_H, 24, 40, ringA); ctx.fillStyle = "rgba(0,0,0,.16)"; ctx.beginPath(); for (i = 0; i < 40; i++) ctx[i ? "lineTo" : "moveTo"](ringA[i * 3], ringA[i * 3 + 1]); ctx.closePath(); ctx.fill();
+    // Kante oben hell
+    ring(BASE_H, BASE_R - 4, n, ringB); ctx.strokeStyle = "rgba(255,255,255,.28)"; ctx.lineWidth = 1.2; ctx.beginPath();
+    var started = false; for (i = 0; i < n; i++) { if (ringB[i * 3 + 2] > 0) { started = false; continue; } ctx[started ? "lineTo" : "moveTo"](ringB[i * 3], ringB[i * 3 + 1]); started = true; } ctx.stroke();
+  }
+  function drawLever() {
+    // Hebel am Sockel: geht nach unten, solange der Lift von Hand läuft
+    var a = 2.4, bx = Math.cos(a) * (BASE_R - 2), by = Math.sin(a) * (BASE_R - 2), down = mode === "hebel" && lever ? 1 : 0;
+    var p1 = proj(bx, by, BASE_H * .55).slice(), ex = Math.cos(a) * (BASE_R + 34), ey = Math.sin(a) * (BASE_R + 34), p2 = proj(ex, ey, BASE_H * .55 + 22 - down * 26).slice();
+    var R = RAUM[raum]; ctx.lineCap = "round";
+    ctx.strokeStyle = R.steelLo; ctx.lineWidth = Math.max(1.5, 3 * p1[3]); ctx.beginPath(); ctx.moveTo(p1[0], p1[1]); ctx.lineTo(p2[0], p2[1]); ctx.stroke();
+    ctx.strokeStyle = R.steel; ctx.lineWidth = Math.max(1, 1.6 * p1[3]); ctx.stroke();
+    var W = WOODS[wood], kg = ctx.createRadialGradient(p2[0] - 3 * p2[3], p2[1] - 3 * p2[3], 1, p2[0], p2[1], 9 * p2[3]);
+    kg.addColorStop(0, W.top[0]); kg.addColorStop(1, W.side[1]); ctx.fillStyle = kg; ctx.beginPath(); ctx.arc(p2[0], p2[1], 8 * p2[3], 0, 6.2832); ctx.fill();
+  }
+  var items = [];
+  function projectTrack() {
+    for (var i = 0; i < N; i++) {
+      var p = proj(LX[i], LY[i], Z[i]); PLX[i] = p[0]; PLY[i] = p[1]; PD[i] = p[2]; PF[i] = p[3];
+      p = proj(RX[i], RY[i], Z[i]); PRX[i] = p[0]; PRY[i] = p[1];
+    }
+  }
+  var PIECE = 4;
+  function drawPiece(k) {
+    var R = RAUM[raum], i0 = k * PIECE, i1 = Math.min(N - 1, i0 + PIECE), f = PF[i0], w = Math.max(1, WIRE * 2 * f), i;
+    ctx.lineWidth = w; ctx.strokeStyle = R.steelLo; ctx.beginPath();
+    ctx.moveTo(PLX[i0], PLY[i0]); for (i = i0 + 1; i <= i1; i++) ctx.lineTo(PLX[i], PLY[i]);
+    ctx.moveTo(PRX[i0], PRY[i0]); for (i = i0 + 1; i <= i1; i++) ctx.lineTo(PRX[i], PRY[i]);
+    ctx.stroke();
+    if (k % 4 === 0) { ctx.lineWidth = Math.max(.8, w * .7); ctx.beginPath(); ctx.moveTo(PLX[i0], PLY[i0] + w * .6); ctx.lineTo(PRX[i0], PRY[i0] + w * .6); ctx.stroke(); }
+    ctx.lineWidth = Math.max(.6, w * .42); ctx.strokeStyle = R.steelHi; ctx.beginPath();
+    var o = w * .28; ctx.moveTo(PLX[i0], PLY[i0] - o); for (i = i0 + 1; i <= i1; i++) ctx.lineTo(PLX[i], PLY[i] - o);
+    ctx.moveTo(PRX[i0], PRY[i0] - o); for (i = i0 + 1; i <= i1; i++) ctx.lineTo(PRX[i], PRY[i] - o);
+    ctx.stroke();
+  }
+  function drawSpoke(i) {
+    var R = RAUM[raum], r0 = Math.hypot(X[i], Y[i]) || 1, ux = X[i] / r0, uy = Y[i] / r0, zz = Z[i] - 1.2;
+    var a = proj(ux * TUBE_R, uy * TUBE_R, zz).slice(), b = proj(LX[i], LY[i], zz);
+    ctx.lineWidth = Math.max(.8, 1.3 * b[3]); ctx.strokeStyle = R.steelLo; ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.stroke();
+    ctx.lineWidth = Math.max(.5, .5 * b[3]); ctx.strokeStyle = R.steelHi; ctx.beginPath(); ctx.moveTo(a[0], a[1] - .5); ctx.lineTo(b[0], b[1] - .5); ctx.stroke();
+  }
+  function drawChime(c) {
+    var i = c.i, ox = X[i] + NX[i] * (RAILW + 6), oy = Y[i] + NY[i] * (RAILW + 6), sw = Math.sin(T * 26 + c.i) * c.hit * 3;
+    var a = proj(RX[i], RY[i], Z[i] - 1).slice(), b = proj(ox, oy, Z[i] - 1).slice(), e = proj(ox + NX[i] * sw, oy + NY[i] * sw, Z[i] - 1 - c.len);
+    ctx.lineCap = "round"; ctx.strokeStyle = RAUM[raum].steelLo; ctx.lineWidth = Math.max(.6, .8 * b[3]);
+    ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.stroke();
+    var bw = Math.max(2, 3.2 * b[3]), g = ctx.createLinearGradient(b[0] - bw, 0, b[0] + bw, 0);
+    g.addColorStop(0, "#8C6A2E"); g.addColorStop(.45, c.hit > .05 ? "#FFF0C0" : "#E8C67A"); g.addColorStop(1, "#7A5A22");
+    ctx.strokeStyle = g; ctx.lineWidth = bw; ctx.beginPath(); ctx.moveTo(b[0], b[1]); ctx.lineTo(e[0], e[1]); ctx.stroke();
+  }
+  function marblePos(m) { if (m.st === "lift") return proj(0, 0, m.z); var t = m.s / DS, i = Math.min(N - 2, Math.floor(t)), f = t - i; return proj(X[i] + (X[i + 1] - X[i]) * f, Y[i] + (Y[i + 1] - Y[i]) * f, Z[i] + (Z[i + 1] - Z[i]) * f + LIFT); }
+  function drawMarble(m, x, y, r) {
     var g;
     if (m.type === "metal") {
       g = ctx.createRadialGradient(x - r * .4, y - r * .4, r * .1, x, y, r); g.addColorStop(0, "#fff"); g.addColorStop(.3, "#C9CED6"); g.addColorStop(.75, "#6E7480"); g.addColorStop(1, "#2E323A");
-      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, 6.28); ctx.fill();
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, 6.2832); ctx.fill();
     } else {
       var glass = m.type === "glass";
       g = ctx.createRadialGradient(x - r * .35, y - r * .4, r * .1, x, y, r);
-      g.addColorStop(0, hsl(m.h, m.s, Math.min(92, m.l + 32), glass ? .55 : 1)); g.addColorStop(.55, hsl(m.h, m.s, m.l, glass ? .4 : 1)); g.addColorStop(1, hsl(m.h, m.s, m.l - 26, glass ? .75 : 1));
-      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, 6.28); ctx.fill();
-      ctx.save(); ctx.beginPath(); ctx.arc(x, y, r * .96, 0, 6.28); ctx.clip(); ctx.translate(x, y); ctx.rotate(m.rot);
-      if (m.type === "auge") {
-        ctx.fillStyle = hsl(m.h2, 90, 55, .95); ctx.beginPath(); ctx.ellipse(0, 0, r * 1.1, r * .28, 0, 0, 6.28); ctx.fill();
-      } else {
-        ctx.strokeStyle = hsl(m.h2, 85, glass ? 70 : 62, glass ? .9 : .8); ctx.lineWidth = r * .32; ctx.lineCap = "round";
-        ctx.beginPath(); ctx.moveTo(-r, -r * .2); ctx.bezierCurveTo(-r * .3, -r * .9, r * .2, r * .6, r, -r * .1); ctx.stroke();
-        ctx.lineWidth = r * .16; ctx.strokeStyle = "rgba(255,255,255,.55)";
-        ctx.beginPath(); ctx.moveTo(-r * .8, r * .5); ctx.bezierCurveTo(-r * .2, -r * .1, r * .3, r * .9, r * .9, r * .45); ctx.stroke();
+      g.addColorStop(0, hsl(m.h, m.sat, Math.min(92, m.lig + 32), glass ? .6 : 1)); g.addColorStop(.55, hsl(m.h, m.sat, m.lig, glass ? .5 : 1)); g.addColorStop(1, hsl(m.h, m.sat, m.lig - 26, glass ? .85 : 1));
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, 6.2832); ctx.fill();
+      if (r > 3) {
+        ctx.save(); ctx.beginPath(); ctx.arc(x, y, r * .96, 0, 6.2832); ctx.clip(); ctx.translate(x, y); ctx.rotate(m.rot);
+        if (m.type === "auge") { ctx.fillStyle = hsl(m.h2, 90, 55, .95); ctx.beginPath(); ctx.ellipse(0, 0, r * 1.1, r * .28, 0, 0, 6.2832); ctx.fill(); }
+        else {
+          ctx.strokeStyle = hsl(m.h2, 85, glass ? 70 : 62, glass ? .9 : .8); ctx.lineWidth = r * .32; ctx.lineCap = "round";
+          ctx.beginPath(); ctx.moveTo(-r, -r * .2); ctx.bezierCurveTo(-r * .3, -r * .9, r * .2, r * .6, r, -r * .1); ctx.stroke();
+          ctx.lineWidth = r * .16; ctx.strokeStyle = "rgba(255,255,255,.55)";
+          ctx.beginPath(); ctx.moveTo(-r * .8, r * .5); ctx.bezierCurveTo(-r * .2, -r * .1, r * .3, r * .9, r * .9, r * .45); ctx.stroke();
+        }
+        ctx.restore();
       }
-      ctx.restore();
     }
-    ctx.fillStyle = "rgba(255,255,255,.85)"; ctx.beginPath(); ctx.ellipse(x - r * .38, y - r * .42, r * .28, r * .18, -.6, 0, 6.28); ctx.fill();
+    ctx.fillStyle = "rgba(255,255,255,.85)"; ctx.beginPath(); ctx.ellipse(x - r * .38, y - r * .42, r * .28, r * .18, -.6, 0, 6.2832); ctx.fill();
+  }
+  function drawTube(liftMarbles) {
+    var R = RAUM[raum], a = proj(0, 0, BASE_H).slice(), b = proj(0, 0, ZTOP + 8).slice(), wa = TUBE_R * a[3], wb = TUBE_R * b[3];
+    ctx.fillStyle = R.glass + (raum === "hell" ? ".22)" : ".06)");
+    ctx.beginPath(); ctx.moveTo(a[0] - wa, a[1]); ctx.lineTo(b[0] - wb, b[1]); ctx.lineTo(b[0] + wb, b[1]); ctx.lineTo(a[0] + wa, a[1]); ctx.closePath(); ctx.fill();
+    // Schubstange hinten im Rohr
+    ctx.strokeStyle = R.steelLo; ctx.globalAlpha = .5; ctx.lineWidth = Math.max(1, 1.2 * a[3]); ctx.beginPath(); ctx.moveTo(a[0] + wa * .55, a[1]); ctx.lineTo(b[0] + wb * .55, b[1]); ctx.stroke(); ctx.globalAlpha = 1;
+    liftMarbles.forEach(function (m) { var p = proj(0, 0, m.z); drawMarble(m, p[0], p[1], RM * p[3]); });
+    ctx.strokeStyle = R.glass + ".55)"; ctx.lineWidth = Math.max(1, 1.1 * a[3]);
+    ctx.beginPath(); ctx.moveTo(a[0] - wa, a[1]); ctx.lineTo(b[0] - wb, b[1]); ctx.moveTo(a[0] + wa, a[1]); ctx.lineTo(b[0] + wb, b[1]); ctx.stroke();
+    ctx.strokeStyle = R.glass + ".7)"; ctx.lineWidth = Math.max(1, 1.6 * a[3]); ctx.beginPath(); ctx.moveTo(a[0] - wa * .55, a[1] - 4); ctx.lineTo(b[0] - wb * .55, b[1] + 4); ctx.stroke();
+    // Kappe oben aus Stahl
+    var rx = (TUBE_R + 1.5) * b[3], ry = Math.max(1.5, rx * sinT), cg = ctx.createLinearGradient(b[0] - rx, 0, b[0] + rx, 0);
+    cg.addColorStop(0, R.steelLo); cg.addColorStop(.4, "#E4E8EC"); cg.addColorStop(1, R.steelLo);
+    ctx.fillStyle = cg; ctx.fillRect(b[0] - rx, b[1] - 5 * b[3], rx * 2, 5 * b[3]);
+    ctx.beginPath(); ctx.ellipse(b[0], b[1] - 5 * b[3], rx, ry, 0, 0, 6.2832); ctx.fill();
   }
   function draw() {
-    ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.drawImage(staticCv, 0, 0);
-    toScreen();
-    // leuchtende Stifte nach einem Treffer
-    pegs.forEach(function (p) { if (p.glow > 0) { ctx.globalAlpha = p.glow; ctx.fillStyle = theme.hi; ctx.beginPath(); ctx.arc(p.x, p.y, p.r + 6 * p.glow, 0, 6.28); ctx.fill(); ctx.globalAlpha = 1; } });
-    bumpers.forEach(function (b) {
-      if (!theme.glow) { ctx.fillStyle = theme.sh; ctx.beginPath(); ctx.arc(b.x + 3, b.y + 6, b.r, 0, 6.28); ctx.fill(); }
-      var rr2 = b.r * (1 + b.flash * .08);
-      if (theme.glow || b.flash > 0) { ctx.shadowColor = theme.bump; ctx.shadowBlur = (theme.glow ? 18 : 0 + 30 * b.flash) * scale * dpr; }
-      var g = ctx.createRadialGradient(b.x - b.r * .3, b.y - b.r * .35, 2, b.x, b.y, rr2);
-      g.addColorStop(0, theme.bumpHi); g.addColorStop(.5 - b.flash * .3, theme.bump); g.addColorStop(1, theme.bump);
-      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(b.x, b.y, rr2, 0, 6.28); ctx.fill(); ctx.shadowBlur = 0;
-      ctx.strokeStyle = theme.hi; ctx.globalAlpha = .5 + b.flash * .5; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(b.x, b.y, rr2 * .62, 0, 6.28); ctx.stroke(); ctx.globalAlpha = 1;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    setCam(); drawRoom(); drawBase(); drawLever();
+    projectTrack();
+    items.length = 0;
+    var np = Math.ceil((N - 1) / PIECE), k;
+    for (k = 0; k < np; k++) { var i0 = k * PIECE, i1 = Math.min(N - 1, i0 + PIECE); items.push({d: (PD[i0] + PD[i1]) / 2, t: 0, k: k}); }
+    spokes.forEach(function (i) { items.push({d: PD[i] * .5 + .01, t: 1, k: i}); });
+    chimes.forEach(function (c) { items.push({d: PD[c.i] + .5, t: 2, c: c}); });
+    var lifted = [];
+    marbles.forEach(function (m) {
+      if (m.st === "lift") { lifted.push(m); return; }
+      var p = marblePos(m); items.push({d: p[2] - .8, t: 3, m: m, x: p[0], y: p[1], r: RM * p[3]});
     });
-    wheels.forEach(function (w) {
-      ctx.lineCap = "round";
-      if (theme.glow) { ctx.shadowColor = theme.wheel; ctx.shadowBlur = 12 * scale * dpr; }
-      w.arms.forEach(function (a) { ctx.strokeStyle = theme.wheel; ctx.lineWidth = 10; ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(a[2], a[3]); ctx.stroke(); });
-      ctx.shadowBlur = 0;
-      ctx.strokeStyle = theme.hi; ctx.globalAlpha = .35; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(w.x, w.y, w.len, 0, 6.28); ctx.stroke(); ctx.globalAlpha = 1;
-      ctx.fillStyle = theme.wheel; ctx.beginPath(); ctx.arc(w.x, w.y, 14, 0, 6.28); ctx.fill();
-      ctx.fillStyle = theme.hi; ctx.beginPath(); ctx.arc(w.x, w.y, 5, 0, 6.28); ctx.fill();
-    });
-    // Förderband im Aufzug
-    ctx.strokeStyle = theme.glass + ".22)"; ctx.lineWidth = 3; ctx.setLineDash([14, 18]); ctx.lineDashOffset = T * 300;
-    ctx.beginPath(); ctx.moveTo(986, H - 50); ctx.lineTo(986, 40); ctx.stroke(); ctx.setLineDash([]);
-    if (theme.trails) marbles.forEach(function (m) {
-      if (m.trail.length < 4) return; ctx.lineCap = "round"; ctx.lineWidth = m.r * 1.1;
-      for (var i = 2; i < m.trail.length; i += 2) { ctx.strokeStyle = hsl(m.h, 100, 60, i / m.trail.length * .35); ctx.beginPath(); ctx.moveTo(m.trail[i - 2], m.trail[i - 1]); ctx.lineTo(m.trail[i], m.trail[i + 1]); ctx.stroke(); }
-    });
-    marbles.forEach(drawMarble);
-    // Glas vorne
-    ctx.strokeStyle = theme.glass + ".35)"; ctx.lineWidth = 3; roundRect(ctx, 914, 30, 80, H - 70, 26); ctx.stroke();
-    ctx.strokeStyle = theme.glass + ".18)"; ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(926, 70); ctx.lineTo(926, H - 90); ctx.stroke();
+    items.push({d: 0, t: 4});
+    items.sort(function (a, b) { return b.d - a.d; });
+    ctx.lineCap = "round"; ctx.lineJoin = "round";
+    for (k = 0; k < items.length; k++) {
+      var it = items[k];
+      if (it.t === 0) drawPiece(it.k);
+      else if (it.t === 1) drawSpoke(it.k);
+      else if (it.t === 2) drawChime(it.c);
+      else if (it.t === 3) drawMarble(it.m, it.x, it.y, it.r);
+      else drawTube(lifted);
+    }
   }
 
-  // ---------- Größe und Ablauf ----------
-  var built = false;
-  function resize() {
-    var cw = stage.clientWidth, ch = stage.clientHeight; if (!cw || !ch) return;
-    dpr = Math.min(2, window.devicePixelRatio || 1);
-    cv.width = Math.round(cw * dpr); cv.height = Math.round(ch * dpr);
-    var nh = Math.round(Math.max(1300, Math.min(2400, W * ch / cw)));
-    if (!built || Math.abs(nh - H) / H > .08) {
-      H = nh; generate(seed || newSeed());
-      marbles = []; pending = target; built = true;
-    }
-    scale = Math.min(cw / W, ch / H); ox = (cw - W * scale) / 2; oy = (ch - H * scale) / 2;
-    drawStatic();
+  // ---------- Ablauf ----------
+  function updateInfo() {
+    var t = "Bahn " + seed + " · " + sections.map(function (s) { return NAMES[s]; }).join(", ") + " · " + (LEN / 1000).toFixed(1).replace(".", ",") + " m";
+    if (mode === "intervall") t += iv.phase === "pause" ? " · nächste Runde in " + Math.ceil(iv.t) + " s" : " · Lift läuft";
+    if (mode === "hebel") t += " · Lift läuft nur mit dem Hebel";
+    var el = document.getElementById("info"); if (el.textContent !== t) el.textContent = t;
   }
+  function fill(n) {
+    // neue Murmeln gleichmäßig auf freie Stellen der Bahn legen
+    for (var k = 0; k < n && marbles.length < MAXM; k++) {
+      var m = newMarble(), tries = 0, s;
+      do { s = RM + Math.random() * (LEN - 2 * RM); tries++; } while (tries < 40 && marbles.some(function (o) { return o.st === "track" && Math.abs(o.s - s) < 3 * RM; }));
+      m.s = s; m.pz = s; marbles.push(m);
+    }
+  }
+  function rebuild(s) { generate(s); marbles = []; iv = {phase: "pause", t: 6, count: 0, run: 0}; fill(target); }
   function newSeed() { var q = new URLSearchParams(location.search).get("bahn"); return q && /^\d{1,9}$/.test(q) ? +q : 1 + Math.floor(Math.random() * 99999); }
 
-  var last = performance.now();
+  var last = performance.now(), infoT = 0;
   function loop(now) {
-    var dt = Math.min(.033, (now - last) / 1000); last = now;
+    var real = Math.min(.05, (now - last) / 1000); last = now;
+    if (spin && cam.idle <= 0 && !drag) cam.yaw += real * .12;
+    cam.idle -= real;
     if (!paused) {
-      dt *= slow ? .35 : 1; T += dt;
-      var n = 10, sd = dt / n;
+      var dt = Math.min(.033, real) * (slow ? .3 : 1); T += dt;
+      var n = 6, sd = dt / n;
       for (var i = 0; i < n; i++) step(sd);
       frameLogic(dt);
     }
+    infoT -= real; if (infoT <= 0) { updateInfo(); updateRoll(); infoT = .25; }
     draw();
     requestAnimationFrame(loop);
   }
 
-  document.getElementById("neu").addEventListener("click", function () {
-    seed = 1 + Math.floor(Math.random() * 99999); generate(seed); drawStatic(); marbles = []; pending = target;
-  });
-  // Murmelanzahl: Regler im Kopf, im Browser gemerkt. Zu viele Murmeln werden entfernt, zuerst die im Aufzug.
+  // ---------- Bedienung ----------
+  document.getElementById("neu").addEventListener("click", function () { rebuild(1 + Math.floor(Math.random() * 99999)); });
   var anz = document.getElementById("anz"), anzv = document.getElementById("anzv");
-  function setTarget(n, fromTap) {
-    target = Math.max(1, Math.min(MAXM, Math.round(n))); anz.value = target; anzv.textContent = target;
-    try { localStorage.setItem("murmelbahn-anzahl", String(target)); } catch (e) {}
-    if (fromTap) return;
-    var have = marbles.length + pending;
-    if (have < target) pending += target - have;
-    else {
-      var extra = have - target, p = Math.min(pending, extra); pending -= p; extra -= p;
-      while (extra-- > 0) { var i = marbles.findIndex(function (m) { return m.lift; }); marbles.splice(i >= 0 ? i : marbles.length - 1, 1); }
+  function setTarget(n) {
+    target = Math.max(1, Math.min(MAXM, Math.round(n))); anz.value = target; anzv.textContent = target; save("anzahl", target);
+    if (marbles.length < target) fill(target - marbles.length);
+    while (marbles.length > target) {
+      // zuerst die wartenden Murmeln vor dem Lift wegnehmen
+      var tr = onTrack(), rm = tr.length ? tr[tr.length - 1] : marbles[marbles.length - 1];
+      marbles.splice(marbles.indexOf(rm), 1);
     }
   }
   anz.max = MAXM; anz.addEventListener("input", function () { setTarget(+anz.value); });
-  setTarget(target, true);
+  var modusBtn = document.getElementById("modus"), hebelBtn = document.getElementById("hebel");
+  function showMode() { modusBtn.textContent = MODES[mode]; hebelBtn.classList.toggle("show", mode === "hebel"); updateInfo(); }
+  modusBtn.addEventListener("click", function () {
+    mode = mode === "dauer" ? "intervall" : mode === "intervall" ? "hebel" : "dauer"; save("modus", mode);
+    if (mode === "intervall") iv = {phase: "pause", t: 8, count: 0, run: 0};
+    lever = false; showMode();
+  });
+  function setLever(on) { lever = on && mode === "hebel"; hebelBtn.classList.toggle("down", lever); }
+  hebelBtn.addEventListener("pointerdown", function (e) { e.preventDefault(); hebelBtn.setPointerCapture(e.pointerId); setLever(true); });
+  ["pointerup", "pointercancel", "lostpointercapture"].forEach(function (ev) { hebelBtn.addEventListener(ev, function () { setLever(false); }); });
+  window.addEventListener("keydown", function (e) { if (e.code === "Space" && mode === "hebel") { e.preventDefault(); setLever(true); } });
+  window.addEventListener("keyup", function (e) { if (e.code === "Space") setLever(false); });
+  var holzBtn = document.getElementById("holz");
+  function showWood() { holzBtn.textContent = "🪵 " + WOODS[wood].name; }
+  holzBtn.addEventListener("click", function () { wood = (wood + 1) % WOODS.length; save("holz", wood); showWood(); });
+  function showRaum() { document.documentElement.setAttribute("data-raum", raum); document.querySelector('meta[name="theme-color"]').content = raum === "hell" ? "#E9E5DE" : "#141210"; }
+  document.getElementById("raum").addEventListener("click", function () { raum = raum === "hell" ? "abend" : "hell"; save("raum", raum); showRaum(); });
+  var drehBtn = document.getElementById("dreh");
+  drehBtn.classList.toggle("on", spin);
+  drehBtn.addEventListener("click", function () { spin = !spin; cam.idle = 0; save("drehen", spin ? 1 : 0); this.classList.toggle("on", spin); });
   document.getElementById("slow").addEventListener("click", function () { slow = !slow; this.classList.toggle("on", slow); });
   document.getElementById("pause").addEventListener("click", function () { paused = !paused; this.textContent = paused ? "▶" : "⏸"; this.classList.toggle("on", paused); });
   document.getElementById("ton").addEventListener("click", function () {
     soundOn = !soundOn; this.textContent = soundOn ? "🔊" : "🔇"; this.classList.toggle("on", soundOn);
-    if (soundOn && !actx) { try { actx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+    if (soundOn && !actx) { try { actx = new (window.AudioContext || window.webkitAudioContext)(); startRoll(); } catch (e) {} }
     if (actx && actx.state === "suspended") actx.resume();
+    updateRoll();
   });
+  // Ziehen dreht und kippt die Skulptur, zwei Finger oder Mausrad zoomen
+  var drag = null, pts = {};
   cv.addEventListener("pointerdown", function (e) {
-    var r = cv.getBoundingClientRect(), x = (e.clientX - r.left - ox) / scale, y = (e.clientY - r.top - oy) / scale;
-    if (x < L + 16 || x > RW - 16 || y < 20 || y > H - 210 || marbles.length >= MAXM) return;
-    marbles.push(newMarble(x, y)); setTarget(marbles.length + pending, true);
-    document.getElementById("toast").classList.add("off");
+    cv.setPointerCapture(e.pointerId); pts[e.pointerId] = {x: e.clientX, y: e.clientY};
+    var ids = Object.keys(pts);
+    if (ids.length === 1) drag = {x: e.clientX, y: e.clientY};
+    else if (ids.length === 2) { var a = pts[ids[0]], b = pts[ids[1]]; drag = {pinch: Math.hypot(a.x - b.x, a.y - b.y), zoom: cam.zoom}; }
+    cv.classList.add("drag"); document.getElementById("toast").classList.add("off");
   });
+  cv.addEventListener("pointermove", function (e) {
+    if (!pts[e.pointerId] || !drag) return;
+    pts[e.pointerId] = {x: e.clientX, y: e.clientY};
+    var ids = Object.keys(pts);
+    if (drag.pinch && ids.length >= 2) { var a = pts[ids[0]], b = pts[ids[1]]; cam.zoom = Math.max(.7, Math.min(2.8, drag.zoom * Math.hypot(a.x - b.x, a.y - b.y) / drag.pinch)); }
+    else if (!drag.pinch) {
+      cam.yaw -= (e.clientX - drag.x) * .008; cam.tilt = Math.max(.1, Math.min(.85, cam.tilt + (e.clientY - drag.y) * .004));
+      drag.x = e.clientX; drag.y = e.clientY;
+    }
+    cam.idle = 4;
+  });
+  function endPtr(e) { delete pts[e.pointerId]; if (!Object.keys(pts).length) { drag = null; cv.classList.remove("drag"); } else if (drag && drag.pinch) drag = null; }
+  cv.addEventListener("pointerup", endPtr); cv.addEventListener("pointercancel", endPtr);
+  cv.addEventListener("wheel", function (e) { e.preventDefault(); cam.zoom = Math.max(.7, Math.min(2.8, cam.zoom * Math.exp(-e.deltaY * .0015))); cam.idle = 3; }, {passive: false});
+  cv.addEventListener("dblclick", function () { cam.zoom = 1; cam.tilt = .36; });
   window.addEventListener("resize", resize);
-  setTimeout(function () { document.getElementById("toast").classList.add("off"); }, 5000);
-  resize();
+  setTimeout(function () { document.getElementById("toast").classList.add("off"); }, 6000);
+
+  showRaum(); showWood(); showMode();
+  resize(); rebuild(newSeed()); anz.value = target; anzv.textContent = target;
   requestAnimationFrame(loop);
-  window.__murmelbahn = {stats: stats, get marbles() { return marbles; }, get segs() { return segs; }, get H() { return H; }, step: step, frameLogic: frameLogic, generate: function (s) { generate(s); drawStatic(); marbles = []; pending = 0; }, add: function (k) { pending += k; }};
+  window.__murmelbahn = {stats: stats, get marbles() { return marbles; }, get len() { return LEN; }, get Z() { return Z; }, get N() { return N; }, step: step, frameLogic: frameLogic, rebuild: rebuild, setMode: function (m) { mode = m; showMode(); }, setLever: function (on) { lever = on; }, cam: cam};
 })();
 </script>
 </body>
