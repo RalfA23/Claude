@@ -6,13 +6,14 @@
 <meta name="robots" content="noindex,nofollow">
 <meta name="theme-color" content="#14232b">
 <title>Gewohnheiten</title>
-<link rel="icon" href="../icon.svg" type="image/svg+xml">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap">
-<link rel="stylesheet" href="../training.css">
-<script src="../../config.js"></script>
+<link rel="stylesheet" href="training.css">
+<script src="../config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="../konto.js"></script>
+<script src="konto.js"></script>
 <script src="logik.js"></script>
 <style>
 :root{--gold:#a8770e}
@@ -80,62 +81,123 @@ details.edit summary{cursor:pointer;padding:12px 0;font-weight:700}
 .tipp{margin-top:14px}
 footer{margin-top:28px;font-size:.8rem;color:var(--muted)}
 @media (max-width:380px){.raster{gap:2px;padding:8px 4px 10px}.raster .dn{font-size:.6rem}}
+
+/* Monatsansicht: ein Kalender pro Gewohnheit */
+.mnav{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:4px 0 12px}
+.mnav h2{font-size:1.4rem;text-align:center}
+.mnav .btn{min-width:44px}
+.mkarte{margin-top:12px}
+.mkopf{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.mkopf .ic{font-size:1.4rem}
+.mkopf b{flex:1;min-width:0}
+.mkopf span{font-size:.85rem;color:var(--muted);text-align:right}
+.kal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.kal .wd{font:700 .72rem var(--body);color:var(--muted);text-align:center;padding-bottom:2px}
+.tag{display:block;width:100%;margin:0;align-self:start;vertical-align:top;position:relative;height:44px;border:0;border-radius:10px;background:transparent;color:var(--fg);cursor:pointer;padding:0;font:600 .78rem var(--body)}
+.tag .n{position:absolute;top:3px;left:0;right:0;text-align:center;color:var(--muted);font-size:.7rem;line-height:1}
+.tag::after{content:"";position:absolute;left:50%;bottom:6px;transform:translateX(-50%);box-sizing:border-box;width:20px;height:20px;border-radius:50%;background:var(--chip)}
+.tag.zukunft{cursor:default}
+.tag.zukunft::after{background:transparent;border:1px solid var(--line)}
+.tag.plan::after{background:transparent;border:2.5px solid var(--k)}
+.tag.plan.vorbei::after{opacity:.55}
+.tag.ruhe::after{width:10px;height:3px;border-radius:2px;background:var(--line);bottom:14px}
+.tag.an::after{background:var(--c);border:0;opacity:1;width:24px;height:24px;bottom:4px}
+.tag.heute{box-shadow:inset 0 0 0 2px var(--fg)}
+.tag.heute .n{color:var(--fg);font-weight:700}
+.tag.leer{visibility:hidden}
+.leerstart{text-align:center;padding:22px 16px}
+.leerstart h2{margin-bottom:6px}
+.leerstart .row{justify-content:center;margin-top:12px}
+.neuform{display:grid;grid-template-columns:3.2em 1fr auto;gap:8px;align-items:center;margin-top:12px;text-align:left}
 </style>
+
 </head>
 <body>
 <div class="wrap">
-  <a class="back" href="../">← Gesundheit</a>
-  <p class="eyebrow">Lebensplattform · Gesundheit</p>
+  <a class="back" href="../">← Portal</a>
+  <p class="eyebrow">Lebensplattform</p>
   <h1>Gewohnheiten</h1>
-  <p class="lede">Jeden Tag ein Punkt für das, was du geschafft hast, und dein Trainingsjahr auf einen Blick. Die Kette sichtbar machen und nie zweimal hintereinander aussetzen.</p>
-  <div class="gate" id="gate" hidden><p>Du bist nicht angemeldet. Die Punkte bleiben nur auf diesem Gerät. Melde dich im <a href="../../">Portal</a> an, dann liegen sie in deinem Konto.</p></div>
+  <p class="lede">Jeden Tag ein Punkt für das, was du geschafft hast. Die Kette sichtbar machen und nie zweimal hintereinander aussetzen.</p>
+  <div class="gate" id="gate" hidden><p>Du bist nicht angemeldet. Die Punkte bleiben nur auf diesem Gerät. Melde dich im <a href="../">Portal</a> an, dann liegen sie in deinem Konto.</p></div>
 
-  <section class="card heute" aria-labelledby="hTitle">
-    <div class="between"><h2 id="hTitle">Heute</h2><span class="muted" id="hDatum"></span></div>
-    <div id="heute"></div>
-    <p class="hint" id="warn" hidden></p>
-  </section>
-  <p class="store" id="store"></p>
-
-  <div class="jahrnav">
-    <button type="button" class="btn" id="prev" aria-label="Voriges Jahr">‹</button>
-    <h2 id="jahrT">–</h2>
-    <button type="button" class="btn" id="next" aria-label="Nächstes Jahr">›</button>
-  </div>
-  <div class="picks" id="picks" role="group" aria-label="Gewohnheit wählen"></div>
-  <div class="stats" id="stats"></div>
-  <div class="raster" id="raster" role="grid" aria-label="Jahresraster"></div>
-  <div class="legende" id="legende"></div>
-  <p class="muted monat" id="planInfo"></p>
-
-  <details class="edit" id="edit">
-    <summary>Gewohnheiten bearbeiten</summary>
-    <div id="eliste"></div>
-    <div class="erow">
-      <input type="text" class="icin" id="neuIc" value="⭐" aria-label="Symbol" maxlength="4">
-      <input type="text" id="neuN" placeholder="Neue Gewohnheit, z. B. Kalt duschen" aria-label="Name der neuen Gewohnheit" maxlength="40">
-      <button type="button" class="btn" id="neu">Hinzufügen</button>
+  <section class="card leerstart" id="leer" hidden>
+    <h2>Deine erste Gewohnheit</h2>
+    <p class="muted">Was willst du jeden Tag schaffen? Trag es ein, zum Beispiel „10 Minuten lesen“ oder „Kalt duschen“.</p>
+    <div class="neuform">
+      <input type="text" class="icin" id="neuIc0" value="⭐" aria-label="Symbol" maxlength="4">
+      <input type="text" id="neuN0" placeholder="Name der Gewohnheit" aria-label="Name der Gewohnheit" maxlength="40">
+      <button type="button" class="btn primary" id="neu0">Anlegen</button>
     </div>
-    <p class="muted tipp">Tipp aus den Produktivikus-Videos: Fang mit einer einzigen Gewohnheit an, mit fester Uhrzeit und festem Ort, und mach jeden geschafften Tag sichtbar. Fällt ein Tag aus, ist das kein Bruch. Nur nie zweimal hintereinander.</p>
-    <p class="muted tipp">Das Training kommt aus deinem Plan auf der Gesundheitsseite (Krafttage pro Woche und Startdatum). Ein Punkt hier hakt den Tag auch dort ab.</p>
-    <p class="row tipp"><button type="button" class="btn small" id="reset">Vorlage wiederherstellen</button></p>
-  </details>
+    <div class="row"><button type="button" class="btn small" id="tr0">🏋️ Training aus deinem Gesundheitsplan dazunehmen</button></div>
+  </section>
 
-  <footer>Gespeichert in deinem Konto: deine Liste unter gesundheit/gw.liste, die Punkte pro Jahr unter gesundheit/gw.&lt;Jahr&gt;. Das Training nutzt dieselben Häkchen wie die Gesundheitsseite (gesundheit/training.&lt;Datum&gt;).</footer>
+  <div id="inhalt">
+    <section class="card heute" aria-labelledby="hTitle">
+      <div class="between"><h2 id="hTitle">Heute</h2><span class="muted" id="hDatum"></span></div>
+      <div id="heute"></div>
+      <p class="hint" id="warn" hidden></p>
+    </section>
+    <p class="store" id="store"></p>
+
+    <div class="tabs" role="tablist">
+      <button role="tab" id="tab-monat" aria-selected="true" aria-controls="view-monat">Monat</button>
+      <button role="tab" id="tab-jahr" aria-selected="false" aria-controls="view-jahr">Jahr</button>
+    </div>
+
+    <section id="view-monat" role="tabpanel" aria-labelledby="tab-monat">
+      <div class="mnav">
+        <button type="button" class="btn" id="mPrev" aria-label="Voriger Monat">‹</button>
+        <h2 id="mTitel">–</h2>
+        <button type="button" class="btn" id="mNext" aria-label="Nächster Monat">›</button>
+      </div>
+      <div id="monate"></div>
+      <div class="legende" id="mLegende"></div>
+    </section>
+
+    <section id="view-jahr" role="tabpanel" aria-labelledby="tab-jahr" hidden>
+      <div class="jahrnav">
+        <button type="button" class="btn" id="prev" aria-label="Voriges Jahr">‹</button>
+        <h2 id="jahrT">–</h2>
+        <button type="button" class="btn" id="next" aria-label="Nächstes Jahr">›</button>
+      </div>
+      <div class="picks" id="picks" role="group" aria-label="Gewohnheit wählen"></div>
+      <div class="stats" id="stats"></div>
+      <div class="raster" id="raster" role="grid" aria-label="Jahresraster"></div>
+      <div class="legende" id="legende"></div>
+      <p class="muted monat" id="planInfo"></p>
+    </section>
+
+    <details class="edit" id="edit">
+      <summary>Gewohnheiten bearbeiten</summary>
+      <div id="eliste"></div>
+      <div class="erow">
+        <input type="text" class="icin" id="neuIc" value="⭐" aria-label="Symbol" maxlength="4">
+        <input type="text" id="neuN" placeholder="Neue Gewohnheit, z. B. Kalt duschen" aria-label="Name der neuen Gewohnheit" maxlength="40">
+        <button type="button" class="btn" id="neu">Hinzufügen</button>
+      </div>
+      <p class="row tipp" id="trRow"><button type="button" class="btn small" id="tr">🏋️ Training aus deinem Gesundheitsplan dazunehmen</button></p>
+      <p class="muted tipp">Tipp aus den Produktivikus-Videos: Fang mit einer einzigen Gewohnheit an, mit fester Uhrzeit und festem Ort, und mach jeden geschafften Tag sichtbar. Fällt ein Tag aus, ist das kein Bruch. Nur nie zweimal hintereinander.</p>
+      <p class="muted tipp">„Training nach Plan“ zeigt die Trainingstage aus deinem Plan unter Gesundheit (Krafttage pro Woche und Startdatum) und hakt den Tag auch dort ab.</p>
+    </details>
+  </div>
+
+  <footer>Gespeichert in deinem Konto: deine Liste unter gewohnheiten/liste, die Punkte pro Jahr unter gewohnheiten/jahr.&lt;Jahr&gt;. Das Training nutzt dieselben Häkchen wie die Gesundheitsseite (gesundheit/training.&lt;Datum&gt;).</footer>
 </div>
 
 <script>
 "use strict";
 const $ = id => document.getElementById(id);
-const {iso, parse, addDays, wdIndex, daysInMonth, ART, planTag, planWoche, istTraining} = GW;
+const {iso, parse, wdIndex, daysInMonth, ART, planTag, planWoche, istTraining} = GW;
 const MON = ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"];
 const MONL = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
 const WDL = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"];
-const TRAIN = "gesundheit/training.", SET = "gesundheit/einstellungen", LISTE = "gesundheit/gw.liste", JAHR = "gesundheit/gw.";
+const TRAIN = "gesundheit/training.", SET = "gesundheit/einstellungen", LISTE = "gewohnheiten/liste", JAHR = "gewohnheiten/jahr.";
 
-let settings = {}, train = {}, liste = null, marks = {}, jahrSicht = new Date().getFullYear(), wahl = "training";
+let settings = {}, train = {}, liste = [], marks = {}, wahl = null;
+const jetzt = new Date();
+let jahrSicht = jetzt.getFullYear(), mJahr = jetzt.getFullYear(), mMon = jetzt.getMonth();
 
-const habits = () => (liste && liste.length ? liste : GW.VORLAGE);
+const habits = () => liste;
 const heute = () => { const n = new Date(); return new Date(n.getFullYear(), n.getMonth(), n.getDate()); };
 function yearDoc(y) { return marks[y] || (marks[y] = {}); }
 function isDone(id, key) {
@@ -191,9 +253,55 @@ function renderHeute() {
   w.textContent = verpasst.length ? "Gestern ausgelassen: " + verpasst.join(", ") + ". Heute nicht zweimal hintereinander." : "";
 }
 
+/* ---------- Monat ---------- */
+function zustand(g, d, h) {
+  const key = iso(d), on = isDone(g.id, key), zuk = d > h, art = g.id === "training" ? planTag(d, settings) : null, cls = [];
+  if (on) cls.push("an");
+  else if (art === "ruhe") cls.push("ruhe");
+  else if (art) { cls.push("plan", "k-" + art); if (!zuk) cls.push("vorbei"); }
+  else if (zuk) cls.push("zukunft");
+  if (key === iso(h)) cls.push("heute");
+  return {key, on, zuk, art, cls};
+}
+function renderMonat() {
+  const h = heute(), wochen = GW.monat(mJahr, mMon), box = $("monate");
+  $("mTitel").textContent = MONL[mMon] + " " + mJahr;
+  box.textContent = "";
+  for (const g of habits()) {
+    const z = zaehlt(g.id), done = k => isDone(g.id, k);
+    const zahl = GW.monatZahlen(done, mJahr, mMon, h, z);
+    const card = document.createElement("section");
+    card.className = "card mkarte c-" + g.f;
+    card.innerHTML = '<div class="mkopf"><span class="ic" aria-hidden="true"></span><b></b><span></span></div><div class="kal"></div>';
+    card.querySelector(".ic").textContent = g.i;
+    card.querySelector("b").textContent = g.n;
+    card.querySelector(".mkopf span:last-child").textContent = zahl.faellig ? zahl.erledigt + " von " + zahl.faellig + (g.id === "training" ? " Einheiten" : " Tagen") : "";
+    const kal = card.querySelector(".kal");
+    for (const w of ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"]) { const d = document.createElement("div"); d.className = "wd"; d.textContent = w; kal.appendChild(d); }
+    for (const woche of wochen) for (const d of woche) {
+      const b = document.createElement("button");
+      b.type = "button"; b.className = "tag";
+      if (!d) { b.classList.add("leer"); b.tabIndex = -1; b.setAttribute("aria-hidden", "true"); kal.appendChild(b); continue; }
+      const s = zustand(g, d, h);
+      b.classList.add(...s.cls);
+      b.innerHTML = '<span class="n"></span>';
+      b.querySelector(".n").textContent = d.getDate();
+      const lab = g.n + ", " + d.getDate() + ". " + MONL[mMon] + (s.art ? ", " + ART[s.art].t : "") + (s.on ? ", erledigt" : "");
+      b.setAttribute("aria-label", lab);
+      if (s.zuk) b.disabled = true; else b.addEventListener("click", () => toggle(g.id, s.key));
+      kal.appendChild(b);
+    }
+    box.appendChild(card);
+  }
+  const hatTr = habits().some(g => g.id === "training");
+  $("mLegende").innerHTML = '<span style="--c:var(--fg)"><i class="voll"></i>geschafft</span>' +
+    (hatTr ? ["kraft", "ausdauer", "intervall", "lang"].map(k => '<span class="k-' + k + '"><i></i>' + ART[k].t + '</span>').join("") + '<span>– Ruhetag</span>' : "");
+}
+
+/* ---------- Jahr ---------- */
 function renderPicks() {
   const box = $("picks"); box.textContent = "";
-  if (!habits().some(g => g.id === wahl)) wahl = habits()[0].id;
+  if (!habits().some(g => g.id === wahl)) wahl = habits().length ? habits()[0].id : null;
   for (const g of habits()) {
     const b = document.createElement("button");
     b.type = "button"; b.className = "c-" + g.f;
@@ -203,9 +311,10 @@ function renderPicks() {
     box.appendChild(b);
   }
 }
-
 function renderJahr() {
-  const y = jahrSicht, h = heute(), g = habits().find(x => x.id === wahl) || habits()[0];
+  const g = habits().find(x => x.id === wahl);
+  if (!g) return;
+  const y = jahrSicht, h = heute();
   const isTr = g.id === "training", z = zaehlt(g.id), done = k => isDone(g.id, k);
   $("jahrT").textContent = y;
   const bis = y < h.getFullYear() ? new Date(y, 11, 31) : h;
@@ -230,36 +339,30 @@ function renderJahr() {
       const b = document.createElement("button");
       b.type = "button"; b.className = "zelle";
       if (day > daysInMonth(y, m)) { b.classList.add("leer"); b.tabIndex = -1; b.setAttribute("aria-hidden", "true"); r.appendChild(b); continue; }
-      const d = new Date(y, m, day), key = iso(d), on = done(key), zuk = d > h;
-      const art = isTr ? planTag(d, settings) : null;
-      if (on) b.classList.add("an");
-      else if (isTr && art === "ruhe") b.classList.add("ruhe");
-      else if (isTr && art) { b.classList.add("plan", "k-" + art); if (!zuk) b.classList.add("vorbei"); }
-      else if (zuk) b.classList.add("zukunft");
-      else b.classList.add("offen");
-      if (key === iso(h)) b.classList.add("heute");
-      let lab = d.getDate() + ". " + MONL[m] + (isTr && art ? ", " + ART[art].t : "") + (on ? ", erledigt" : "");
+      const d = new Date(y, m, day), s = zustand(g, d, h);
+      b.classList.add(...s.cls);
+      if (!s.on && !s.art && !s.zuk) b.classList.add("offen");
+      const lab = d.getDate() + ". " + MONL[m] + (s.art ? ", " + ART[s.art].t : "") + (s.on ? ", erledigt" : "");
       b.setAttribute("aria-label", lab); b.title = WDL[wdIndex(d)].slice(0, 2) + " " + lab;
-      if (zuk) b.disabled = true; else b.addEventListener("click", () => toggle(g.id, key));
+      if (s.zuk) b.disabled = true; else b.addEventListener("click", () => toggle(g.id, s.key));
       r.appendChild(b);
     }
   }
-
   const lg = $("legende");
   if (isTr) {
     lg.innerHTML = '<span class="c-' + g.f + '"><i class="voll"></i>erledigt</span>' +
-      ["kraft", "ausdauer", "intervall", "lang"].map(k => '<span class="k-' + k + '"><i></i>' + ART[k].t + '</span>').join("") +
-      '<span>– Ruhetag</span>';
+      ["kraft", "ausdauer", "intervall", "lang"].map(k => '<span class="k-' + k + '"><i></i>' + ART[k].t + '</span>').join("") + '<span>– Ruhetag</span>';
     const n = planWoche(h, settings);
     $("planInfo").textContent = (settings.freq === "2" ? "2 Krafttage pro Woche" : "3 Krafttage pro Woche") +
       (settings.start ? ", Plan seit " + parse(settings.start).toLocaleDateString("de-DE") + (n !== null && n >= 1 && n <= 12 ? ", jetzt Woche " + n + " von 12" : "") : ", ohne Startdatum") +
-      ". Ändern kannst du das auf der Gesundheitsseite unter „Dein Plan“.";
+      ". Ändern kannst du das unter Gesundheit bei „Dein Plan“.";
   } else {
     lg.innerHTML = '<span class="c-' + g.f + '"><i class="voll"></i>geschafft</span><span style="--k:var(--line)"><i></i>kommt noch</span>';
     $("planInfo").textContent = "Tippe auf einen Tag, um ihn nachträglich abzuhaken.";
   }
 }
 
+/* ---------- Bearbeiten ---------- */
 function renderEdit() {
   const box = $("eliste"); box.textContent = "";
   for (const g of habits()) {
@@ -268,9 +371,12 @@ function renderEdit() {
     const nm = document.createElement("input"); nm.type = "text"; nm.value = g.n; nm.maxLength = 40; nm.setAttribute("aria-label", "Name");
     ic.addEventListener("change", () => upd(g.id, {i: ic.value.trim() || "⭐"}));
     nm.addEventListener("change", () => upd(g.id, {n: nm.value.trim() || g.n}));
-    const del = document.createElement("button"); del.type = "button"; del.className = "btn small";
-    if (g.fest) { del.disabled = true; del.textContent = "fest"; del.title = "Das Training kommt aus deinem Plan"; }
-    else { del.textContent = "Entfernen"; del.addEventListener("click", () => { if (confirmDel(g)) save(habits().filter(x => x.id !== g.id)); }); }
+    const del = document.createElement("button"); del.type = "button"; del.className = "btn small"; del.textContent = "Entfernen";
+    del.addEventListener("click", () => {
+      if (del.dataset.sicher) { save(habits().filter(x => x.id !== g.id)); return; }
+      del.dataset.sicher = "1"; del.textContent = "Sicher?";
+      setTimeout(() => { delete del.dataset.sicher; del.textContent = "Entfernen"; }, 3000);
+    });
     const fb = document.createElement("div"); fb.className = "farben";
     for (const f of GW.FARBEN) {
       const b = document.createElement("button"); b.type = "button"; b.className = "c-" + f;
@@ -278,61 +384,75 @@ function renderEdit() {
       b.addEventListener("click", () => upd(g.id, {f}));
       fb.appendChild(b);
     }
-    row.append(ic, nm, del);
-    const spacer = document.createElement("span");
-    row.append(spacer, fb);
+    row.append(ic, nm, del, document.createElement("span"), fb);
     box.appendChild(row);
   }
-}
-let delArmed = null;
-function confirmDel(g) {
-  // Zweimal tippen statt Browser-Dialog: erst „Sicher?“, dann löschen. Die Punkte bleiben im Jahresdokument.
-  if (delArmed === g.id) { delArmed = null; return true; }
-  delArmed = g.id;
-  const btn = [...$("eliste").querySelectorAll(".erow")][habits().findIndex(x => x.id === g.id)].querySelector(".btn");
-  btn.textContent = "Sicher?";
-  setTimeout(() => { if (delArmed === g.id) { delArmed = null; renderEdit(); } }, 3000);
-  return false;
+  $("trRow").hidden = habits().some(g => g.id === "training");
 }
 function upd(id, patch) { save(habits().map(x => x.id === id ? Object.assign({}, x, patch) : x)); }
-function save(l) { liste = l.map(x => Object.assign({}, x)); render(); renderEdit(); Konto.put(LISTE, {liste}); }
+function save(l) { liste = l.map(x => Object.assign({}, x)); render(); Konto.put(LISTE, {liste}); }
+function neu(nameEl, icEl) {
+  const n = nameEl.value.trim(); if (!n) { nameEl.focus(); return; }
+  const l = habits(), id = GW.neueId(n, l.map(x => x.id));
+  save(l.concat([{id, n, i: icEl.value.trim() || "⭐", f: GW.FARBEN[l.length % GW.FARBEN.length]}]));
+  wahl = id; nameEl.value = ""; render();
+}
+function training() { if (!habits().some(g => g.id === "training")) save(habits().concat([Object.assign({}, GW.TRAINING)])); }
 
-function render() { renderHeute(); renderPicks(); renderJahr(); }
+function render() {
+  const leer = !habits().length;
+  $("leer").hidden = !leer; $("inhalt").hidden = leer;
+  if (leer) return;
+  renderHeute(); renderMonat(); renderPicks(); renderJahr(); renderEdit();
+}
+function show(v) { for (const x of ["monat", "jahr"]) { $("tab-" + x).setAttribute("aria-selected", x === v ? "true" : "false"); $("view-" + x).hidden = x !== v; } }
 
+$("tab-monat").addEventListener("click", () => show("monat"));
+$("tab-jahr").addEventListener("click", () => show("jahr"));
+$("mPrev").addEventListener("click", () => { if (--mMon < 0) { mMon = 11; mJahr--; } renderMonat(); });
+$("mNext").addEventListener("click", () => { if (++mMon > 11) { mMon = 0; mJahr++; } renderMonat(); });
 $("prev").addEventListener("click", () => { jahrSicht--; renderJahr(); });
 $("next").addEventListener("click", () => { jahrSicht++; renderJahr(); });
-$("neu").addEventListener("click", () => {
-  const n = $("neuN").value.trim(); if (!n) { $("neuN").focus(); return; }
-  const l = habits(), id = GW.neueId(n, l.map(x => x.id));
-  const f = GW.FARBEN[l.length % GW.FARBEN.length];
-  save(l.concat([{id, n, i: $("neuIc").value.trim() || "⭐", f}]));
-  wahl = id; $("neuN").value = ""; render();
-});
+$("neu").addEventListener("click", () => neu($("neuN"), $("neuIc")));
+$("neu0").addEventListener("click", () => neu($("neuN0"), $("neuIc0")));
 $("neuN").addEventListener("keydown", e => { if (e.key === "Enter") $("neu").click(); });
-$("reset").addEventListener("click", () => save(GW.VORLAGE));
+$("neuN0").addEventListener("keydown", e => { if (e.key === "Enter") $("neu0").click(); });
+$("tr").addEventListener("click", training);
+$("tr0").addEventListener("click", training);
 Konto.onState(s => { const el = $("store"); el.dataset.state = s; el.textContent = s === "db" ? "Im Konto gespeichert" : "Gerade nur auf diesem Gerät gespeichert"; });
 
 function apply(docs) {
   for (const [p, v] of Object.entries(docs)) {
     if (p === SET) settings = Object.assign({}, v || {});
-    else if (p === LISTE) liste = v && Array.isArray(v.liste) ? v.liste : null;
+    else if (p === LISTE) liste = v && Array.isArray(v.liste) ? v.liste : [];
     else if (p.startsWith(TRAIN)) train[p.slice(TRAIN.length)] = {done: !!(v && v.done)};
     else if (p.startsWith(JAHR) && /^\d{4}$/.test(p.slice(JAHR.length))) marks[p.slice(JAHR.length)] = v || {};
   }
 }
-async function laden() {
-  const [a, b, c] = await Promise.all([Konto.list(SET), Konto.list(TRAIN), Konto.list(JAHR)]);
-  apply(Object.assign({}, a, b, c));
+/* Voreinstellung per Link: #neu=🪵~Holzpuppe|🥋~BCD legt fehlende Gewohnheiten an (Symbol~Name, Symbol optional). */
+function vorlageAusLink() {
+  const m = location.hash.match(/^#neu=(.+)$/);
+  if (!m) return;
+  let l = habits().slice();
+  for (const teil of decodeURIComponent(m[1]).split("|")) {
+    const [a, b] = teil.includes("~") ? teil.split("~") : ["⭐", teil];
+    const n = (b || "").trim().slice(0, 40);
+    if (!n || l.some(g => g.n.toLowerCase() === n.toLowerCase())) continue;
+    l.push({id: GW.neueId(n, l.map(x => x.id)), n, i: (a || "⭐").trim().slice(0, 4) || "⭐", f: GW.FARBEN[l.length % GW.FARBEN.length]});
+  }
+  history.replaceState(null, "", location.pathname);
+  if (l.length !== habits().length) save(l);
 }
-
-if (location.hash === "#training") wahl = "training";
-render(); renderEdit();
+window.addEventListener("hashchange", () => { vorlageAusLink(); render(); });
+if (location.hash === "#jahr") show("jahr");
+$("inhalt").hidden = true;
 (async () => {
   const u = await Konto.init();
   if (!u) $("gate").hidden = false;
-  await laden();
-  if (location.hash.length > 1 && habits().some(g => "#" + g.id === location.hash)) wahl = location.hash.slice(1);
-  render(); renderEdit();
+  const [a, b, c] = await Promise.all([Konto.list(SET), Konto.list(TRAIN), Konto.list("gewohnheiten/")]);
+  apply(Object.assign({}, a, b, c));
+  vorlageAusLink();
+  render();
 })();
 </script>
 </body>

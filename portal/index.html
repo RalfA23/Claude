@@ -169,7 +169,7 @@ dialog::backdrop{background:rgba(0,0,0,.45)}
 <script>
 // Kursliste: neue Kurse hier eintragen. Der Pfad ist relativ zum Portal. Jeder Kurs wird automatisch zu einer Kachel in der Galerie.
 var COURSES = [
-  // Die Portal-Kacheln sind Überpunkte: Lernen, Spiele, Gesundheit, Entspannung, Weltkarte. Unterkurse liegen auf der jeweiligen Seite.
+  // Die Portal-Kacheln sind Überpunkte: Lernen, Spiele, Gesundheit, Entspannung, Gewohnheiten, Weltkarte. Unterkurse liegen auf der jeweiligen Seite.
   // Lernen (lernen/) bündelt Lesetraining, Lesetraining Fortgeschritten, Schachtraining, Sprachen, Bücher, Klavier und Produktivität. Die Kurse behalten ihre Adressen.
   // Früher hatte jeder Kurs eine eigene Kachel: alte Freigaben (lesen, schach, sprachen, …) und Dashboard-Kacheln werden zu „lernen“.
   {id: "lernen", icon: "🎓", title: "Lernen", text: "Lesetraining, Schachtraining, Sprachen, deine Bücher und Klavier an einer Stelle.", href: "lernen/"},
@@ -182,6 +182,8 @@ var COURSES = [
   // Entspannung (entspannung/): Boxatmung und gesprochene Meditationen. Die Kachel zeigt die Meditation des Tages und den heutigen Stand (schach_docs, Pfade entspannung/tag.<datum>).
   {id: "entspannung", icon: "🧘", title: "Entspannung", text: "Boxatmung im Quadrat und gesprochene Meditationen von 3 bis 10 Minuten: Body-Scan, Atem, Dankbarkeit, Schlaf, Fokus, Stress lösen. Jeden Tag eine Meditation des Tages.", href: "entspannung/"},
   // Jedes Konto hat seine eigene Karte (weltkarte/, Orte in schach_docs unter weltkarte/ort.<id>). Die Kachel zeigt, wie viele Orte besucht und geplant sind.
+  // Gewohnheiten (gewohnheiten/): jeden Tag ein Punkt, Monats- und Jahresraster. Jedes Konto trägt seine eigenen Gewohnheiten ein (schach_docs gewohnheiten/liste, gewohnheiten/jahr.<jahr>).
+  {id: "gewohnheiten", icon: "🗓️", title: "Gewohnheiten", text: "Jeden Tag ein Punkt für das, was du geschafft hast. Deine eigenen Gewohnheiten im Monatskalender und im Jahresraster, mit Serien.", href: "gewohnheiten/"},
   {id: "weltkarte", icon: "🗺️", title: "Weltkarte", text: "Alle Orte, an denen du warst und wo du noch hin willst, als Pins auf einer großen Weltkarte. Mit Datum, Notizen und Bildern als Andenken.", href: "weltkarte/"}
 ];
 // Spiele mit eigener Freigabe-Kennung (wie früher ihre Kachel). Jede davon zeigt die Kachel Spiele, die Spiele-Seite blendet die übrigen aus.
@@ -225,7 +227,8 @@ var GEVT = {id: "gevt", icon: "🥋", title: "Ving Tsun Wissen", text: "Frag dei
   var access = null;
   // „sprachen:niederlaendisch“ gibt nur diese Sprache frei, die Kachel Sprachen erscheint trotzdem.
   // „lernen“ gibt alle Lernkurse frei (auch die Kacheln Lektion und Schach-Wertung), „lesen“ zeigt die Kachel Lernen.
-  function allowed(id) { return isAdmin || access === null || id === "gevt" || access.some(function (x) { return x === id || x.indexOf(id + ":") === 0 || courseId(x) === id || (courseId(id) === x && x !== id); }); }
+  // Gewohnheiten darf jedes Konto nutzen, auch mit eingeschränkten Freigaben.
+  function allowed(id) { return isAdmin || access === null || id === "gevt" || id === "gewohnheiten" || access.some(function (x) { return x === id || x.indexOf(id + ":") === 0 || courseId(x) === id || (courseId(id) === x && x !== id); }); }
   async function loadAccess() {
     var ak = "portal-access-" + user.id;
     try { var ad = await sb.from("app_admins").select("user_id").eq("user_id", user.id).maybeSingle(); isAdmin = !ad.error && !!ad.data; } catch (e) {}

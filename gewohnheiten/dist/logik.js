@@ -1,4 +1,4 @@
-/* Gewohnheiten-Tracker mit Jahresplan: Datum, Trainingsplan pro Tag, Serien und Jahreszahlen.
+/* Gewohnheiten-Tracker (Monat und Jahr): Datum, Trainingsplan pro Tag, Serien und Jahreszahlen.
    Reine Logik ohne DOM (Browser und node --test). */
 (function (root) {
   "use strict";
@@ -84,13 +84,8 @@
     return z(g) && !done(iso(g));
   }
 
-  /* Standardvorlage, solange keine eigene Liste gespeichert ist. Training ist fest und kommt aus dem Plan. */
-  const VORLAGE = [
-    {id: "training", n: "Training nach Plan", i: "🏋️", f: "acc", fest: true},
-    {id: "schritte", n: "8.000 Schritte", i: "🚶", f: "ok"},
-    {id: "lesen", n: "10 Minuten lesen", i: "📖", f: "acc2"},
-    {id: "meditation", n: "Meditation oder Boxatmung", i: "🧘", f: "dusk"}
-  ];
+  /* Das Training aus dem Plan der Gesundheitsseite lässt sich als Gewohnheit dazunehmen. */
+  const TRAINING = {id: "training", n: "Training nach Plan", i: "🏋️", f: "acc"};
   const FARBEN = ["acc", "acc2", "ok", "dusk", "gold"];
 
   function neueId(name, vorhanden) {
@@ -103,5 +98,25 @@
     return id;
   }
 
-  root.GW = {pad, iso, parse, addDays, wdIndex, daysInMonth, WOCHE, ART, planTag, planWoche, istTraining, serie, laengsteSerie, jahr, gesternVerpasst, VORLAGE, FARBEN, neueId};
+  /* Monatskalender: Liste von Wochen (Mo–So), leere Felder als null. m = 0..11 */
+  function monat(y, m) {
+    const erste = new Date(y, m, 1), vor = wdIndex(erste), n = daysInMonth(y, m), out = [];
+    let w = new Array(vor).fill(null);
+    for (let t = 1; t <= n; t++) { w.push(new Date(y, m, t)); if (w.length === 7) { out.push(w); w = []; } }
+    if (w.length) { while (w.length < 7) w.push(null); out.push(w); }
+    return out;
+  }
+  /* Monatszahlen bis heute: erledigt und fällig. */
+  function monatZahlen(done, y, m, heute, zaehlt) {
+    const z = zaehlt || (() => true);
+    let erledigt = 0, faellig = 0;
+    for (let t = 1; t <= daysInMonth(y, m); t++) {
+      const d = new Date(y, m, t); if (d > heute) break;
+      if (done(iso(d))) erledigt++;
+      if (z(d)) faellig++;
+    }
+    return {erledigt, faellig, quote: faellig ? Math.min(100, Math.round(erledigt / faellig * 100)) : 0};
+  }
+
+  root.GW = {monat, monatZahlen, pad, iso, parse, addDays, wdIndex, daysInMonth, WOCHE, ART, planTag, planWoche, istTraining, serie, laengsteSerie, jahr, gesternVerpasst, TRAINING, FARBEN, neueId};
 })(typeof window !== "undefined" ? window : globalThis);

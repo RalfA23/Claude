@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import "../src/gewohnheiten/logik.js";
+import "../src/logik.js";
 
 const GW = globalThis.GW;
 const d = s => GW.parse(s);
@@ -40,11 +40,22 @@ test("Jahreszahlen und längste Serie", () => {
   assert.equal(GW.laengsteSerie(k => on.has(k), 2026, d("2026-01-10")), 3);
 });
 
-test("Vorlage und neue IDs", () => {
-  assert.equal(GW.VORLAGE[0].id, "training");
-  for (const g of GW.VORLAGE) assert.ok(GW.FARBEN.includes(g.f), g.id);
-  assert.equal(GW.neueId("Kalt duschen", []), "kalt-duschen");
+test("Training-Eintrag und neue IDs", () => {
+  assert.equal(GW.TRAINING.id, "training");
+  assert.ok(GW.FARBEN.includes(GW.TRAINING.f));
+  assert.equal(GW.neueId("Holzpuppe", []), "holzpuppe");
+  assert.equal(GW.neueId("BCD", []), "bcd");
   assert.equal(GW.neueId("Lesen", ["lesen"]), "lesen-2");
   assert.equal(GW.neueId("Training", []), "training-2");
   assert.equal(GW.neueId("Übungen", []), "uebungen");
+});
+
+test("Monatskalender beginnt am Montag", () => {
+  const w = GW.monat(2026, 10); // November 2026, der 1. ist ein Sonntag
+  assert.equal(w[0].filter(x => x === null).length, 6);
+  assert.equal(w[0][6].getDate(), 1);
+  assert.equal(w.flat().filter(Boolean).length, 30);
+  for (const x of w) assert.equal(x.length, 7);
+  const z = GW.monatZahlen(k => k === "2026-11-02" || k === "2026-11-03", 2026, 10, GW.parse("2026-11-10"));
+  assert.deepEqual(z, {erledigt: 2, faellig: 10, quote: 20});
 });
