@@ -151,10 +151,10 @@ footer{margin-top:28px;font-size:.8rem;color:var(--muted)}
       <p class="hint" id="warn" hidden></p>
     </section>
     <section class="card gevt" id="gevt" hidden aria-labelledby="gvTitle">
-      <h2 id="gvTitle">🥋 GEVT-Aufgabe des Tages</h2>
+      <h2 id="gvTitle">🥋 GEVT-Aufgaben des Tages</h2>
       <div class="gvteil" data-slot="form"></div>
       <div class="gvteil" data-slot="frei"></div>
-      <div class="row"><button type="button" class="btn primary" id="gvDone" aria-pressed="false">Erledigt</button></div>
+      <div class="row"><button type="button" class="btn primary" id="gvDone" aria-pressed="false">Beides erledigt</button></div>
     </section>
     <p class="store" id="store"></p>
 
@@ -483,9 +483,8 @@ function vorlageAusLink() {
   if (l.length !== habits().length) save(l);
 }
 /* ---------- GEVT-Aufgaben des Tages (nur für Konten mit Rolle admin in gevt_members, also Ralf) ----------
-   Eine Aufgabe pro Tag über die Edge Function gevt-ask aus der verschlüsselten Wissensdatenbank (Ralf, 2026-11-16),
-   im Tageswechsel: an geraden Tagen eine Übung aus den Formen (gewohnheiten/gevtf.<datum>),
-   an ungeraden eine Übung oder ein Learning im Themenwechsel (gewohnheiten/gevt.<datum>).
+   Zwei Aufgaben pro Tag über die Edge Function gevt-ask aus der verschlüsselten Wissensdatenbank:
+   eine Übung aus den Formen (gewohnheiten/gevtf.<datum>) und eine Übung oder ein Learning im Themenwechsel (gewohnheiten/gevt.<datum>).
    Erledigt setzt den Punkt bei der Gewohnheit gevt-aufgabe. */
 const GEVT_ID = "gevt-aufgabe";
 const GEVT = {
@@ -501,8 +500,6 @@ function gevtThema(slot, key, extra) {
   const t = GEVT[slot].themen, tag = Math.round(parse(key) / 864e5);
   return t[(((tag + (extra || 0)) % t.length) + t.length) % t.length];
 }
-/* Welche Aufgabe ist heute dran? Tageszahl seit 1970, gerade = Formen. */
-function gevtSlot(key) { return Math.round(parse(key) / 864e5) % 2 ? "frei" : "form"; }
 function gevtSplit(t) {
   let stufe = "";
   const m = t.match(/^\s*STUFE:\s*(.*)\n?/);
@@ -522,9 +519,7 @@ function gevtTeil(slot) {
 }
 function renderGevt() {
   const el = $("gevt"); el.hidden = !gevtAn; if (!gevtAn) return;
-  const heuteSlot = gevtSlot(iso(heute()));
-  for (const x of document.querySelectorAll(".gvteil")) x.hidden = x.dataset.slot !== heuteSlot;
-  for (const slot of [heuteSlot]) {
+  for (const slot of ["form", "frei"]) {
     const d = gevtDaten[slot], t = gevtTeil(slot);
     if (gevtBusy[slot]) { t.querySelector(".neu").disabled = true; continue; }
     t.querySelector(".thema").textContent = d && d.thema ? d.art + " · " + d.thema : "";
@@ -534,8 +529,8 @@ function renderGevt() {
     t.querySelector(".neu").disabled = false;
   }
   const done = isDone(GEVT_ID, iso(heute())), b = $("gvDone");
-  b.setAttribute("aria-pressed", done ? "true" : "false"); b.textContent = done ? "✓ Erledigt" : "Erledigt";
-  b.disabled = !(gevtDaten[heuteSlot] && gevtDaten[heuteSlot].text);
+  b.setAttribute("aria-pressed", done ? "true" : "false"); b.textContent = done ? "✓ Erledigt" : "Beides erledigt";
+  b.disabled = !(gevtDaten.form && gevtDaten.form.text) && !(gevtDaten.frei && gevtDaten.frei.text);
 }
 async function gevtHolen(slot, neu) {
   if (gevtBusy[slot]) return;
@@ -590,8 +585,7 @@ async function gevtStart(docs) {
   const key = iso(heute());
   for (const slot of ["form", "frei"]) gevtDaten[slot] = docs[GEVT[slot].doc + key] || null;
   render();
-  const slot = gevtSlot(key);
-  if (!gevtDaten[slot] || !gevtDaten[slot].text) gevtHolen(slot, false);
+  for (const slot of ["form", "frei"]) if (!gevtDaten[slot] || !gevtDaten[slot].text) gevtHolen(slot, false);
 }
 $("gvDone").addEventListener("click", async () => { await toggle(GEVT_ID, iso(heute())); renderGevt(); });
 
