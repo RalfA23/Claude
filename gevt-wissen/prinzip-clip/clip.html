@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Gleichzeitigkeit – ein Prinzip im Ving Tsun</title>
+<style>html,body{margin:0;height:100%;background:#15131c;overflow:hidden}canvas{display:block;margin:0 auto;height:100vh;aspect-ratio:9/16;max-width:100vw}</style>
+</head><body><canvas id="c" width="1080" height="1920"></canvas>
+<script src="timeline.js"></script>
+<script>
+const W=1080,H=1920,GY=1290,cv=document.getElementById('c'),g=cv.getContext('2d');
+const BG='#f7c53f',BG2='#eeb22a',INK='#1b1a22',RED='#dd2c1c',WH='#fffaf0',GRY='#4a4858';
+const F='"Inter Display","Inter",sans-serif';
+const cl=(x,a=0,b=1)=>Math.max(a,Math.min(b,x)),pr=(t,a,b)=>cl((t-a)/(b-a)),lerp=(a,b,p)=>a+(b-a)*p;
+const eo=x=>1-Math.pow(1-x,3),eio=x=>x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2,back=x=>{const c=2.2;return 1+(c+1)*Math.pow(x-1,3)+c*Math.pow(x-1,2)};
+function rnd(s){let x=Math.sin(s*127.1+311.7)*43758.5453;return x-Math.floor(x)}
+
+// ---------- Figuren ----------
+const P={
+ aIdle:{x:330,lean:20,cr:12,h1:[95,-70],h2:[60,-48]}, aAnt:{x:318,lean:6,cr:26,h1:[55,-58],h2:[62,-50]},
+ aP1b:{x:400,lean:68,cr:26,h1:[236,-138],h2:[55,-52]}, aRet:{x:385,lean:32,cr:16,h1:[82,-66],h2:[66,-52]},
+ aAnt2:{x:378,lean:16,cr:28,h1:[84,-64],h2:[30,-44]}, aP2:{x:412,lean:74,cr:28,h1:[70,-58],h2:[250,-84]},
+ aDef:{x:400,lean:66,cr:26,h1:[232,-158],h2:[55,-52]}, aKo1:{x:392,lean:8,cr:30,h1:[150,-150],h2:[40,10],hx:-30,hy:-6,ko:1},
+ aKo2:{x:262,lean:-84,cr:62,h1:[70,40],h2:[20,60],hx:-34,hy:14,ko:1},
+ hIdle:{x:780,lean:15,cr:15,h1:[142,-22],h2:[82,6]}, hBlock:{x:806,lean:-12,cr:10,h1:[112,-128],h2:[70,0]},
+ hWind:{x:806,lean:-26,cr:22,h1:[100,-96],h2:[-14,-8]}, hKo:{x:888,lean:-82,cr:52,h1:[66,34],h2:[22,54],hx:-34,hy:12,ko:1},
+ hSim:{x:780,lean:50,cr:30,h1:[122,-128],h2:[250,-82]}, hWin:{x:770,lean:6,cr:0,h1:[142,-22],h2:[82,6]}};
+const KEYS=['x','lean','cr','hx','hy','ko'];
+function mixP(a,b,p){const o={};for(const k of KEYS)o[k]=lerp(a[k]||0,b[k]||0,p);for(const k of['h1','h2'])o[k]=[lerp(a[k][0],b[k][0],p),lerp(a[k][1],b[k][1],p)];return o}
+function track(keys,u){if(u<=keys[0][0])return mixP(P[keys[0][1]],P[keys[0][1]],0);for(let i=0;i<keys.length-1;i++){const[a,pa]=keys[i],[b,pb,e]=keys[i+1];if(u<=b){let p=(u-a)/(b-a);p=e==='p'?eo(p):eio(p);return mixP(P[pa],P[pb],p)}}const l=P[keys[keys.length-1][1]];return mixP(l,l,0)}
+function ik(ax,ay,bx,by,l1,l2,bend){let dx=bx-ax,dy=by-ay,d=Math.hypot(dx,dy);const m=l1+l2-2;if(d>m){dx*=m/d;dy*=m/d;d=m}if(d<8)d=8;
+  const a=Math.acos(cl((l1*l1+d*d-l2*l2)/(2*l1*d),-1,1)),b=Math.atan2(dy,dx)+a*bend;return[ax+Math.cos(b)*l1,ay+Math.sin(b)*l1,ax+dx,ay+dy]}
+function limb(pts,c,w){g.strokeStyle=c;g.lineWidth=w;g.lineCap='round';g.lineJoin='round';g.beginPath();g.moveTo(pts[0],pts[1]);for(let i=2;i<pts.length;i+=2)g.lineTo(pts[i],pts[i+1]);g.stroke()}
+function skel(p,f,t,ph){const bob=Math.sin(t*7+ph)*5*(1-(p.ko||0)),hip=[p.x,GY-335+p.cr+bob],sh=[hip[0]+f*p.lean,hip[1]-232+Math.abs(p.lean)*.18];
+  return{hip,sh,head:[sh[0]+f*(14+(p.hx||0)),sh[1]-94+(p.hy||0)],h1:[sh[0]+f*p.h1[0],sh[1]+p.h1[1]],h2:[sh[0]+f*p.h2[0],sh[1]+p.h2[1]],fr:[p.x+f*100,GY],re:[p.x-f*92,GY]}}
+function fig(p,f,col,t,ph,prev,hero){const s=skel(p,f,t,ph),dark=hero?'#a91e12':'#3a3848';
+  // Schatten
+  g.fillStyle='rgba(27,26,34,.16)';g.beginPath();g.ellipse(p.x,GY+14,170,22,0,0,7);g.fill();
+  // Schlagspur
+  if(prev){const q=skel(prev,f,t-.033,ph);for(const k of['h1','h2']){const d=Math.hypot(s[k][0]-q[k][0],s[k][1]-q[k][1]);if(d>22){g.globalAlpha=.55;limb([q[k][0]-(s[k][0]-q[k][0])*1.4,q[k][1]-(s[k][1]-q[k][1])*1.4,s[k][0],s[k][1]],WH,46);g.globalAlpha=1}}}
+  const arm=(h,c)=>{const j=ik(s.sh[0],s.sh[1],h[0],h[1],128,128,f);limb([s.sh[0],s.sh[1],j[0],j[1],j[2],j[3]],c,40);g.fillStyle=c;g.beginPath();g.arc(j[2],j[3],31,0,7);g.fill()};
+  const leg=(ft,c)=>{const j=ik(s.hip[0],s.hip[1],ft[0],ft[1],178,178,-f);limb([s.hip[0],s.hip[1],j[0],j[1],j[2],j[3]-18,j[2]+f*44,j[3]-18],c,44)};
+  arm(s.h2,dark);leg(s.re,dark);limb([s.hip[0],s.hip[1],s.sh[0],s.sh[1]],col,74);leg(s.fr,col);
+  const[hx,hy]=s.head;g.fillStyle=col;g.beginPath();g.arc(hx,hy,60,0,7);g.fill();
+  if(hero){g.strokeStyle=WH;g.lineWidth=16;g.lineCap='butt';g.beginPath();g.arc(hx,hy,60,Math.PI*1.08,Math.PI*1.92);g.stroke();const w=Math.sin(t*9)*10;limb([hx-f*52,hy-28,hx-f*96,hy-18+w],WH,12);limb([hx-f*52,hy-24,hx-f*88,hy+10-w],WH,12)}
+  const ex=hx+f*26,ey=hy-6;if((p.ko||0)>.5){g.strokeStyle=WH;g.lineWidth=7;g.lineCap='round';g.beginPath();g.moveTo(ex-11,ey-11);g.lineTo(ex+11,ey+11);g.moveTo(ex+11,ey-11);g.lineTo(ex-11,ey+11);g.stroke()}
+  else{const bl=((t*.9+ph)%3)<.09;g.fillStyle=WH;g.beginPath();g.ellipse(ex,ey,9,bl?2:11,0,0,7);g.fill()}
+  arm(s.h1,col);return s}
+function burst(x,y,r,lt,word,col=WH){if(lt<0||lt>.9)return;const p=back(pr(lt,0,.16)),a=1-pr(lt,.55,.9);g.save();g.globalAlpha=a;g.translate(x,y);g.rotate(-.18);g.scale(p,p);
+  g.beginPath();for(let i=0;i<24;i++){const rr=i%2?r*.62:r*(.9+.2*rnd(i)),an=i/24*Math.PI*2;g.lineTo(Math.cos(an)*rr,Math.sin(an)*rr)}g.closePath();g.fillStyle=col;g.fill();g.lineWidth=10;g.strokeStyle=INK;g.lineJoin='round';g.stroke();
+  g.font=`900 ${r*.5}px ${F}`;g.textAlign='center';g.textBaseline='middle';g.fillStyle=col===WH?RED:WH;g.fillText(word,0,4);g.restore()}
+function sparks(x,y,lt){if(lt<0||lt>.4)return;const p=eo(pr(lt,0,.4));g.save();g.globalAlpha=1-p;g.strokeStyle=WH;g.lineWidth=9;g.lineCap='round';for(let i=0;i<9;i++){const an=i/9*6.283+.3;g.beginPath();g.moveTo(x+Math.cos(an)*(30+60*p),y+Math.sin(an)*(30+60*p));g.lineTo(x+Math.cos(an)*(55+110*p),y+Math.sin(an)*(55+110*p));g.stroke()}g.restore()}
+function stars(x,y,t,a){if(a<=0)return;g.save();g.globalAlpha=a;g.fillStyle=WH;g.strokeStyle=INK;g.lineWidth=5;for(let i=0;i<3;i++){const an=t*5+i*2.094,sx=x+Math.cos(an)*74,sy=y+Math.sin(an)*20;g.beginPath();for(let k=0;k<10;k++){const r=k%2?9:22,b=k/10*6.283+t*3;g.lineTo(sx+Math.cos(b)*r,sy+Math.sin(b)*r)}g.closePath();g.fill();g.stroke()}g.restore()}
+
+// ---------- Die zwei Abläufe ----------
+const C=CUE,v1=C.v1,v2=C.v2;
+const K1A=[[0,'aIdle'],[v1.blk-.07,'aIdle'],[v1.blk-.035,'aAnt'],[v1.blk,'aP1b','p'],[.4,'aP1b'],[.52,'aRet'],[v1.hit-.1,'aRet'],[v1.hit-.04,'aAnt2'],[v1.hit,'aP2','p'],[1,'aP2']];
+const K1H=[[0,'hIdle'],[v1.blk-.03,'hIdle'],[v1.blk,'hBlock','p'],[.44,'hBlock'],[.66,'hWind'],[v1.hit,'hWind'],[v1.hit+.035,'hKo','p'],[1,'hKo']];
+const K2A=[[0,'aIdle'],[v2.hit-.07,'aIdle'],[v2.hit-.035,'aAnt'],[v2.hit,'aDef','p'],[v2.hit+.06,'aKo1','p'],[v2.ko-.08,'aKo1'],[v2.ko,'aKo2'],[1,'aKo2']];
+const K2H=[[0,'hIdle'],[v2.hit-.04,'hIdle'],[v2.hit,'hSim','p'],[v2.ko-.1,'hSim'],[v2.ko,'hWin'],[1,'hWin']];
+function exchange(kind,u,t,d){const KA=kind==1?K1A:K2A,KH=kind==1?K1H:K2H,du=.033/d;
+  const a=track(KA,u),h=track(KH,u);let sa,sh;
+  if(kind==1){sh=fig(h,-1,RED,t,1.3,track(KH,u-du),1);sa=fig(a,1,INK,t,0,track(KA,u-du))}else{sa=fig(a,1,INK,t,0,track(KA,u-du));sh=fig(h,-1,RED,t,1.3,track(KH,u-du),1)}
+  if(kind==1){sparks(700,sa.sh[1]-130,(u-v1.blk)*d);burst(sh.head[0]-150,sh.head[1]-10,170,(u-v1.hit)*d,'BAM!');stars(sh.head[0],sh.head[1]-84,t,pr(u,v1.hit+.03,v1.hit+.06))}
+  else{sparks(sh.h1[0],sh.h1[1],(u-v2.hit)*d);burst(sa.head[0]+30,sa.head[1]-10,180,(u-v2.hit)*d,'ZACK!');stars(sa.head[0],sa.head[1]-84,t,pr(u,v2.hit+.06,v2.hit+.1))}
+  return{sa,sh}}
+
+// ---------- Schrift ----------
+function tag(s,x,y,size,lt,o={}){if(lt<0)return;const p=back(pr(lt,0,.28));g.save();g.font=`900 ${size}px ${F}`;g.letterSpacing=(-.01*size)+'px';let w=g.measureText(s).width;const mw=o.max||940;let sc=1;if(w+size*.9>mw)sc=mw/(w+size*.9);
+  g.translate(x,y);g.rotate(o.rot||0);g.scale(p*sc,p*sc);const bw=w+size*.9,bh=size*1.5;
+  g.fillStyle=INK;g.beginPath();g.roundRect(-bw/2+10,-bh/2+12,bw,bh,bh*.22);g.fill();
+  g.fillStyle=o.bg||WH;g.beginPath();g.roundRect(-bw/2,-bh/2,bw,bh,bh*.22);g.fill();g.lineWidth=7;g.strokeStyle=INK;g.stroke();
+  g.fillStyle=o.fg||INK;g.textAlign='center';g.textBaseline='middle';g.fillText(s,0,size*.04);g.restore()}
+function big(s,x,y,size,lt,o={}){if(lt<0)return;const p=back(pr(lt,0,.3));g.save();g.font=`900 ${size}px ${F}`;g.letterSpacing=(-.025*size)+'px';const w=g.measureText(s).width,mw=o.max||960,sc=w>mw?mw/w:1;g.translate(x,y);g.rotate(o.rot||0);g.scale(p*sc,p*sc);g.textAlign='center';g.textBaseline='middle';
+  g.fillStyle=INK;g.fillText(s,8,10);g.fillStyle=o.c||WH;g.lineWidth=size*.09;g.strokeStyle=INK;g.lineJoin='round';g.strokeText(s,0,0);g.fillText(s,0,0);g.restore()}
+function badge(n,x,y,lt,col){if(lt<0)return;const p=back(pr(lt,0,.3));g.save();g.translate(x,y);g.scale(p,p);g.fillStyle=INK;g.beginPath();g.arc(8,10,84,0,7);g.fill();g.fillStyle=col;g.beginPath();g.arc(0,0,84,0,7);g.fill();g.lineWidth=8;g.strokeStyle=INK;g.stroke();
+  g.font=`900 110px ${F}`;g.textAlign='center';g.textBaseline='middle';g.fillStyle=WH;g.fillText(n,0,6);g.restore()}
+function mark(ok,x,y,lt){if(lt<0)return;const p=back(pr(lt,0,.3));g.save();g.translate(x,y);g.scale(p,p);g.fillStyle=INK;g.beginPath();g.arc(6,8,62,0,7);g.fill();g.fillStyle=ok?'#1f9d55':RED;g.beginPath();g.arc(0,0,62,0,7);g.fill();g.lineWidth=7;g.strokeStyle=INK;g.stroke();
+  g.strokeStyle=WH;g.lineWidth=16;g.lineCap='round';g.lineJoin='round';g.beginPath();if(ok){g.moveTo(-28,2);g.lineTo(-8,24);g.lineTo(30,-22)}else{g.moveTo(-24,-24);g.lineTo(24,24);g.moveTo(24,-24);g.lineTo(-24,24)}g.stroke();g.restore()}
+function callout(s,x,y,tx,ty,lt){if(lt<0)return;const p=eo(pr(lt,0,.25));g.strokeStyle=INK;g.lineWidth=7;g.lineCap='round';g.beginPath();g.moveTo(x,y);g.lineTo(lerp(x,tx,p),lerp(y,ty,p));g.stroke();g.fillStyle=INK;g.beginPath();g.arc(x,y,12,0,7);g.fill();tag(s,tx,ty,50,lt-.15)}
+function stage(){g.fillStyle=BG;g.fillRect(0,0,W,H);g.fillStyle=BG2;g.fillRect(0,GY-6,W,H);g.fillStyle=INK;g.fillRect(0,GY-6,W,8);
+  g.save();g.globalAlpha=.1;g.fillStyle=WH;for(let i=0;i<12;i++){g.beginPath();g.moveTo(540,700);const a=i/12*6.283;g.arc(540,700,1500,a,a+.13);g.closePath();g.fill()}g.restore()}
+
+const HITS=[];
+const S=[
+(lt,d,t)=>{ // 0 Auftakt
+  fig(P.aIdle,1,INK,t,0);fig(P.hIdle,-1,RED,t,1.3,null,1);
+  tag('EIN PRINZIP IM VING TSUN',540,330,46,lt-.2,{rot:-.03});big('GLEICH-',540,1450,170,lt-.22*d,{rot:-.03});big('ZEITIGKEIT',540,1610,170,lt-.22*d-.12,{rot:-.03,c:RED});
+  if(lt>.6*d){const k=lt-.6*d;big('VS',548,760+Math.sin(t*8)*8,120,k,{c:WH})}},
+(lt,d,t)=>{ // 1 ueblich: erst abwehren, dann schlagen
+  const u=lt/d;tag('ÜBLICH',540,330,60,lt-.1,{rot:-.03,bg:INK,fg:WH});exchange(1,u,t,d);
+  badge('1',400,520,lt-v1.blk*d,GRY);if(u<v1.two+.2)tag('ERST ABWEHREN',540,1470,70,lt-v1.blk*d,{rot:-.02});
+  badge('2',680,520,lt-v1.two*d,GRY);if(u>=v1.two+.2&&u<v1.hit)tag('DANN ZURÜCKSCHLAGEN',540,1470,64,lt-(v1.two+.2)*d+.3,{rot:.02});
+  if(u>v1.gap&&u<v1.hit&&Math.sin(t*16)>-.3)tag('LÜCKE!',560,880,62,lt-v1.gap*d,{bg:RED,fg:WH,rot:-.08});
+  if(u>=v1.hit){tag('ZU SPÄT.',540,1470,96,lt-v1.hit*d-.1,{rot:-.03,bg:RED,fg:WH});tag('2 Bewegungen',540,1640,56,lt-v1.hit*d-.5)}},
+(lt,d,t)=>{ // 2 zurueckspulen
+  const p=eio(pr(lt,.1,d-.25));exchange(1,lerp(.98,.02,p),t,-d*.4);
+  g.fillStyle='rgba(27,26,34,.28)';g.fillRect(0,0,W,H);g.fillStyle='rgba(255,250,240,.16)';for(let i=0;i<9;i++)g.fillRect(0,(rnd(i+Math.floor(t*30))*H),W,6+rnd(i*3)*22);
+  if(Math.sin(t*14)>-.4){g.fillStyle=WH;for(let i=0;i<2;i++){g.beginPath();g.moveTo(470+i*110,440);g.lineTo(570+i*110,370);g.lineTo(570+i*110,510);g.closePath();g.fill()}}
+  big('NOCHMAL.',540,1500,150,lt-.2)},
+(lt,d,t)=>{ // 3 Ving Tsun: beides zugleich
+  const u=lt/d;tag('VING TSUN',540,330,60,lt-.1,{rot:-.03,bg:RED,fg:WH});const e=exchange(2,u,t,d);
+  badge('1',540,520,lt-v2.hit*d,RED);
+  if(u>v2.c1&&u<v2.ko-.1)callout('lenkt ab',e.sh.h1[0],e.sh.h1[1],850,470,lt-v2.c1*d);
+  if(u>v2.c2&&u<v2.ko-.1)callout('trifft',e.sh.h2[0],e.sh.h2[1],210,470,lt-v2.c2*d);
+  if(u<v2.one)tag('ABWEHR + ANGRIFF',540,1470,70,lt-v2.hit*d-.1,{rot:-.02});
+  else{tag('EINE BEWEGUNG.',540,1470,84,lt-v2.one*d,{rot:-.03,bg:RED,fg:WH});tag('Der zweite Schlag kommt nicht mehr',540,1640,46,lt-v2.one*d-.6)}},
+(lt,d,t)=>{ // 4 Vergleich im gleichen Tempo
+  const p=pr(lt,C.race.a*d,C.race.b*d),lane=(y,kind,u,lab,col)=>{g.save();g.translate(540,y);g.scale(.56,.56);g.translate(-540,-GY);
+    g.fillStyle='rgba(255,250,240,.22)';g.beginPath();g.roundRect(-380,430,1840,980,60);g.fill();exchange(kind,u,t,d*.78/(C.race.b-C.race.a)*1);g.restore();tag(lab,300,y-470,44,lt-.15,{bg:col,fg:WH,rot:-.02})};
+  lane(900,1,lerp(.12,.9,p),'ÜBLICH',INK);lane(1560,2,Math.min(1,lerp(.22,1,p)),'VING TSUN',RED);
+  const tA=C.race.a*d,sp=(C.race.b-C.race.a)*d;
+  tag('GLEICHES TEMPO',540,290,54,lt-.1,{rot:-.02});
+  badge('1',900,600,lt-(tA+.115*sp),GRY);g.save();g.translate(0,0);g.restore();
+  mark(false,930,820,lt-(tA+.897*sp)-.1);tag('2 Zeiten',800,960,48,lt-(tA+.897*sp)-.3);
+  mark(true,930,1380,lt-(tA+.115*sp)-.25);tag('1 Zeit',820,1520,48,lt-(tA+.115*sp)-.5,{bg:'#1f9d55',fg:WH});},
+(lt,d,t)=>{ // 5 Schluss: Kettenfauststoesse
+  const k=(t*5.5)%2,a=k<1?eo(k):1-eo(k-1),p={x:540,lean:26,cr:22,h1:[lerp(90,236,a),-40],h2:[lerp(236,90,a),-30]},q={...p,h1:[lerp(90,236,cl(a-.2)),-40],h2:[lerp(236,90,cl(a+.2)),-30]};
+  g.save();g.translate(140,0);fig(p,-1,RED,t,0,q,1);g.restore();
+  big('GLEICH-',540,430,170,lt-.2,{rot:-.03});big('ZEITIGKEIT',540,590,170,lt-.32,{rot:-.03,c:RED});
+  tag('Abwehr und Angriff sind eins.',540,1480,56,lt-.45*d,{rot:-.02});tag('EIN PRINZIP IM VING TSUN',540,1640,40,lt-.45*d-.5,{bg:INK,fg:WH});}
+];
+function render(t){
+  g.setTransform(1,0,0,1,0,0);g.globalAlpha=1;
+  let i=TL.findIndex(c=>t<c.s+c.d);if(i<0)i=TL.length-1;const c=TL[i],lt=t-c.s;
+  // Kamera: Wackeln und Zoom bei Treffern
+  const hits=[TL[1].s+v1.hit*TL[1].d,TL[3].s+v2.hit*TL[3].d];let sh=0,zm=0;for(const h of hits){const dd=t-h;if(dd>=0&&dd<.45)sh=Math.max(sh,(1-dd/.45)**2);if(dd>=-.05&&dd<1.2)zm=Math.max(zm,Math.sin(Math.PI*pr(dd,-.05,1.2))**.5)}
+  const f=Math.floor(t*30);stage();
+  g.translate(540+(rnd(f)-.5)*34*sh,900+(rnd(f+5)-.5)*34*sh);g.scale(1+.07*zm,1+.07*zm);g.translate(-540,-900);
+  S[i](lt,c.d,t);
+  g.setTransform(1,0,0,1,0,0);
+  // Szenenwechsel: Wisch
+  const wi=pr(lt,0,.28);if(i>0&&wi<1){g.fillStyle=INK;g.fillRect(W*eo(wi),0,W,H)}
+  const wo=i<TL.length-1?pr(lt,c.d-.16,c.d):0;if(wo>0){g.fillStyle=INK;g.fillRect(0,0,W*eo(wo),H)}
+  const e=pr(t,DUR-.5,DUR);if(e>0){g.globalAlpha=e;g.fillStyle='#000';g.fillRect(0,0,W,H);g.globalAlpha=1}
+}
+window.render=render;
+if(!location.hash.includes('cap')){const t0=performance.now();(function loop(){render(((performance.now()-t0)/1000)%DUR);requestAnimationFrame(loop)})()}
+</script></body></html>
