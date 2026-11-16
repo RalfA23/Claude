@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
 <meta name="theme-color" content="#0e1a22">
-<title>Essenz zum Abhaken</title>
+<title>Produktivität</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -86,7 +86,8 @@ footer a{color:var(--muted)}
 <div class="wrap">
   <a class="back" href="../lernen/">← Lernen</a>
   <p class="eyebrow">Lebensplattform · Lernen</p>
-  <h1>Essenz zum Abhaken</h1>
+  <h1>Produktivität</h1>
+  <p class="lede" style="color:var(--fg);font-weight:700;margin-top:4px">Kleine Schritte, große Wirkung.</p>
   <p class="lede" id="lede"></p>
 
   <div class="top">
@@ -98,6 +99,12 @@ footer a{color:var(--muted)}
       <h2>Drei für heute</h2>
       <ul class="todos" id="heute"></ul>
     </div>
+  </div>
+
+  <div class="panel neu" style="margin-top:22px">
+    <h2>Gute Gewohnheiten neu aufbauen</h2>
+    <p class="small" style="margin:4px 0 8px">Aus allen Videos zusammengefasst. Hak ab, was du umsetzt.</p>
+    <ul class="todos" id="neu"></ul>
   </div>
 
   <div class="bar" id="chips" role="group" aria-label="Themen"></div>
@@ -183,6 +190,9 @@ footer a{color:var(--muted)}
     $("ring").style.strokeDasharray = C; $("ring").style.strokeDashoffset = C * (1 - done / (total || 1));
     $("pct").textContent = pct + " %"; $("cnt").textContent = done + " von " + total + " To-dos erledigt";
     heute();
+    var gew = DATA.themen.filter(function (t) { return t.id === "gewohnheiten"; })[0];
+    var neu = gew ? gew.kernliste.map(function (x, i) { return {id: "gew." + (i + 1), text: x, video: {title: "Gewohnheiten neu aufbauen"}}; }) : [];
+    $("neu").replaceChildren.apply($("neu"), neu.map(function (x) { return todoRow(x, false); }));
     var q = filt.q.trim().toLowerCase(), list = [], any = false;
     DATA.themen.forEach(function (t) {
       if (filt.thema && filt.thema !== t.id) return;
