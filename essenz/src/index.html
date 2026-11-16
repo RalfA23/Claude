@@ -11,15 +11,15 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
 <style>
-/* Überblick über die Produktivitäts-Hacks aus den Produktivikus-Videos: acht Themen als Karten, je eine kurze Liste. Keine Häkchen, keine Speicherung. */
+/* Überblick der Produktivitäts-Hacks: acht Themen als Karten, je ein Ablaufbild mit drei Schritten. Keine Häkchen, keine Speicherung. */
 :root{
-  --bg:#0e1a22; --surface:#15252f; --fg:#eef6f3; --muted:#9db3b0; --line:#24394a; --accent:#5fd3a7;
+  --bg:#0e1a22; --surface:#15252f; --surface2:#1b3140; --fg:#eef6f3; --muted:#9db3b0; --line:#24394a; --accent:#5fd3a7; --warm:#ffb547;
   --display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif; --body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
   color-scheme:dark;
 }
 *,*::before,*::after{box-sizing:border-box}
 html,body{margin:0}
-body{background:var(--bg);color:var(--fg);font:16px/1.55 var(--body);padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{background:var(--bg);color:var(--fg);font:16px/1.5 var(--body);padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 .wrap{max-width:1000px;margin:0 auto;padding-block:26px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 .back{display:inline-block;color:var(--muted);text-decoration:none;font-size:.9rem;margin-bottom:14px}
 .back:hover{color:var(--fg)}
@@ -28,14 +28,17 @@ h1,h2{font-family:var(--display);margin:0;line-height:1.15;text-wrap:balance}
 h1{font-size:clamp(2rem,6vw,2.8rem);font-weight:800;margin-top:6px}
 h2{font-size:1.2rem;font-weight:800}
 .lede{color:var(--muted);max-width:60ch;margin-top:8px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px;margin-top:24px}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:18px 18px 16px;display:flex;flex-direction:column;gap:10px;min-width:0}
-.card .head{display:flex;align-items:center;gap:10px}
-.card .ico{font-size:1.6rem;line-height:1}
-.card .n{margin-left:auto;font-size:.8rem;color:var(--muted);font-variant-numeric:tabular-nums}
-.card ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px}
-.card li{position:relative;padding-left:20px;font-size:.96rem;line-height:1.45}
-.card li::before{content:"";position:absolute;left:2px;top:.55em;width:8px;height:8px;border-radius:50%;background:var(--accent)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:14px;margin-top:24px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:18px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.head{display:flex;align-items:center;gap:10px}
+.ico{font-size:1.5rem;line-height:1}
+.head h2{font-size:1.05rem}
+.flow{display:flex;align-items:stretch;gap:6px}
+.step{flex:1;min-width:0;background:var(--surface2);border:1px solid var(--line);border-radius:14px;padding:12px 8px;text-align:center;display:flex;flex-direction:column;justify-content:center;gap:4px}
+.step .num{font:800 .75rem var(--display);color:var(--bg);background:var(--accent);width:22px;height:22px;border-radius:50%;display:grid;place-items:center;margin:0 auto}
+.step b{font-weight:700;font-size:.92rem;line-height:1.25;overflow-wrap:anywhere}
+.arr{align-self:center;color:var(--accent);font-size:1.1rem;flex:none}
+.caption{font-size:.86rem;color:var(--muted);margin:0}
 footer{margin-top:34px;color:var(--muted);font-size:.85rem}
 footer a{color:var(--muted)}
 </style>
@@ -45,7 +48,7 @@ footer a{color:var(--muted)}
   <a class="back" href="../lernen/">← Lernen</a>
   <p class="eyebrow">Lebensplattform · Lernen</p>
   <h1>Produktivität</h1>
-  <p class="lede">Die wichtigsten Hacks aus den Produktivikus-Videos, nach acht Themen geordnet. Ein Überblick statt Liste zum Abarbeiten.</p>
+  <p class="lede">Die wichtigsten Hacks aus den Produktivikus-Videos, nach acht Themen. Pro Thema ein Ablauf in drei Schritten.</p>
   <div class="grid" id="grid"></div>
   <footer>Quelle: <a href="https://www.youtube.com/@Produktivikus" target="_blank" rel="noopener">Produktivikus</a> und die Artikel auf <a href="https://produktivikus.de/" target="_blank" rel="noopener">produktivikus.de</a>. Stand 16.11.2026.</footer>
 </div>
@@ -53,20 +56,37 @@ footer a{color:var(--muted)}
 /*DATEN*/
 (function () {
   "use strict";
+  // Drei Schritte je Thema, kurz gefasst aus den Hacks des Themas (Reihenfolge: Start, Mitte, Ziel).
+  var FLOW = {
+    handeln: ["Winzig anfangen", "Wenn-dann-Plan", "Einfach machen"],
+    gewohnheiten: ["Mini-Start", "Fester Ort & Zeit", "Nie zweimal aussetzen"],
+    fokus: ["Handy weg", "Eine Aufgabe", "60–90 Min Block"],
+    energie: ["Fester Schlaf", "Tageslicht am Morgen", "Bildschirm aus"],
+    kopf: ["Pause atmen", "Gedanken beobachten", "Freundlich zu dir"],
+    menschen: ["Kurz & neutral", "Klare Grenze", "Nein sagen"],
+    glueck: ["Dankbar sein", "Echt verbinden", "Freude planen"],
+    einfach: ["Erst fragen", "Aufräumen", "Top drei"]
+  };
   var grid = document.getElementById("grid");
   DATA.themen.forEach(function (t) {
     var card = document.createElement("article");
     card.className = "card";
-    var head = document.createElement("div");
-    head.className = "head";
-    head.innerHTML = "";
+    var head = document.createElement("div"); head.className = "head";
     var ico = document.createElement("span"); ico.className = "ico"; ico.setAttribute("aria-hidden", "true"); ico.textContent = t.icon;
     var h = document.createElement("h2"); h.textContent = t.title;
-    var n = document.createElement("span"); n.className = "n"; n.textContent = "Top 3";
-    head.appendChild(ico); head.appendChild(h); head.appendChild(n);
-    var ul = document.createElement("ul");
-    (t.kernliste || []).slice(0, 3).forEach(function (x) { var li = document.createElement("li"); li.textContent = x; ul.appendChild(li); });
-    card.appendChild(head); card.appendChild(ul);
+    head.appendChild(ico); head.appendChild(h);
+    var flow = document.createElement("div"); flow.className = "flow";
+    var steps = FLOW[t.id] || [];
+    steps.forEach(function (s, i) {
+      if (i > 0) { var a = document.createElement("span"); a.className = "arr"; a.setAttribute("aria-hidden", "true"); a.textContent = "→"; flow.appendChild(a); }
+      var box = document.createElement("div"); box.className = "step";
+      var n = document.createElement("span"); n.className = "num"; n.textContent = String(i + 1);
+      var b = document.createElement("b"); b.textContent = s;
+      box.appendChild(n); box.appendChild(b); flow.appendChild(box);
+    });
+    var cap = document.createElement("p"); cap.className = "caption";
+    cap.textContent = (t.kernliste || []).length + " Hacks in diesem Thema";
+    card.appendChild(head); card.appendChild(flow); card.appendChild(cap);
     grid.appendChild(card);
   });
 })();
