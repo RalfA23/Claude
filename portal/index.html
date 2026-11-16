@@ -170,7 +170,7 @@ dialog::backdrop{background:rgba(0,0,0,.45)}
 // Kursliste: neue Kurse hier eintragen. Der Pfad ist relativ zum Portal. Jeder Kurs wird automatisch zu einer Kachel in der Galerie.
 var COURSES = [
   // Die Portal-Kacheln sind Überpunkte: Lernen, Spiele, Gesundheit, Entspannung, Weltkarte. Unterkurse liegen auf der jeweiligen Seite.
-  // Lernen (lernen/) bündelt Lesetraining, Lesetraining Fortgeschritten, Schachtraining, Sprachen, Bücher und Klavier. Die Kurse behalten ihre Adressen.
+  // Lernen (lernen/) bündelt Lesetraining, Lesetraining Fortgeschritten, Schachtraining, Sprachen, Bücher, Klavier und Essenz. Die Kurse behalten ihre Adressen.
   // Früher hatte jeder Kurs eine eigene Kachel: alte Freigaben (lesen, schach, sprachen, …) und Dashboard-Kacheln werden zu „lernen“.
   {id: "lernen", icon: "🎓", title: "Lernen", text: "Lesetraining, Schachtraining, Sprachen, deine Bücher und Klavier an einer Stelle.", href: "lernen/"},
   // Spiele (spiele/) bündelt Hundeleben, Flipper, Götterquiz, Wortwürfel, Poker, Murmelbahn und Vestaboard. Die Spiele behalten ihre Adressen.
@@ -187,7 +187,7 @@ var COURSES = [
 // Spiele mit eigener Freigabe-Kennung (wie früher ihre Kachel). Jede davon zeigt die Kachel Spiele, die Spiele-Seite blendet die übrigen aus.
 var GAME_IDS = ["hund", "flipper", "quiz", "wortwuerfel", "poker", "murmelbahn", "vestaboard"];
 // Lernkurse mit eigener Freigabe-Kennung, dazu sprachen:<ordner>. Jede davon zeigt die Kachel Lernen, die Lernen-Seite blendet die übrigen aus.
-var LERN_IDS = ["lesen", "lesen-fortgeschritten", "schach", "sprachen", "buecher", "klavier"];
+var LERN_IDS = ["lesen", "lesen-fortgeschritten", "schach", "sprachen", "buecher", "klavier", "essenz"];
 function courseId(x) { return x === "huberman" ? "gesundheit" : GAME_IDS.indexOf(x) >= 0 ? "spiele" : LERN_IDS.indexOf(x) >= 0 || x.indexOf("sprachen:") === 0 ? "lernen" : x; }
 // Nur für einzeln freigeschaltete Konten sichtbar (Zeile in gevt_members). Ohne Freigabe taucht die Kachel nicht auf.
 var GEVT = {id: "gevt", icon: "🥋", title: "Ving Tsun Wissen", text: "Frag deine GEVT-Wissensdatenbank: Göksels Lehre und deine Notizen getrennt, mit Grad und Quellen.", href: "gevt/"};
@@ -796,6 +796,7 @@ var GEVT = {id: "gevt", icon: "🥋", title: "Ving Tsun Wissen", text: "Frag dei
     {id: "schach", icon: "♞", title: "Nur Schachtraining"},
     {id: "buecher", icon: "📚", title: "Nur Bücher"},
     {id: "klavier", icon: "🎹", title: "Nur Klavier"},
+    {id: "essenz", icon: "✅", title: "Nur Essenz zum Abhaken"},
     {id: "sprachen", icon: "🗣️", title: "Alle Sprachen"},
     {id: "sprachen:niederlaendisch", icon: "🇳🇱", title: "Nur Niederländisch"},
     {id: "sprachen:japanisch", icon: "🇯🇵", title: "Nur Japanisch"},
