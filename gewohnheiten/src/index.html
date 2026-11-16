@@ -114,6 +114,10 @@ footer{margin-top:28px;font-size:.8rem;color:var(--muted)}
 .gevt .text{white-space:pre-wrap;margin:6px 0 10px;line-height:1.55}
 .gevt .src{font-size:.8rem;color:var(--muted);white-space:pre-wrap;margin-bottom:10px}
 .gevt .thema{font-size:.85rem;color:var(--muted)}
+.gvteil{border-top:1px solid var(--line);margin-top:10px;padding-top:10px}
+.gvteil h3{font-size:1rem}
+.gevt > .row{margin-top:16px;border-top:1px solid var(--line);padding-top:14px}
+.gvteil .between{align-items:center}
 </style>
 
 </head>
@@ -143,11 +147,10 @@ footer{margin-top:28px;font-size:.8rem;color:var(--muted)}
       <p class="hint" id="warn" hidden></p>
     </section>
     <section class="card gevt" id="gevt" hidden aria-labelledby="gvTitle">
-      <div class="between"><h2 id="gvTitle">🥋 GEVT-Aufgabe des Tages</h2><span class="thema" id="gvThema"></span></div>
-      <span class="stufe" id="gvStufe" hidden></span>
-      <p class="text" id="gvText">Ich suche dir eine Aufgabe aus deiner Wissensdatenbank …</p>
-      <p class="src" id="gvSrc" hidden></p>
-      <div class="row"><button type="button" class="btn primary" id="gvDone" aria-pressed="false">Erledigt</button><button type="button" class="btn small" id="gvNeu">Andere Aufgabe</button></div>
+      <h2 id="gvTitle">🥋 GEVT-Aufgaben des Tages</h2>
+      <div class="gvteil" data-slot="form"></div>
+      <div class="gvteil" data-slot="frei"></div>
+      <div class="row"><button type="button" class="btn primary" id="gvDone" aria-pressed="false">Beides erledigt</button></div>
     </section>
     <p class="store" id="store"></p>
 
@@ -193,7 +196,7 @@ footer{margin-top:28px;font-size:.8rem;color:var(--muted)}
     </details>
   </div>
 
-  <footer>Gespeichert in deinem Konto: deine Liste unter gewohnheiten/liste, die Punkte pro Jahr unter gewohnheiten/jahr.&lt;Jahr&gt;. Das Training nutzt dieselben Häkchen wie die Gesundheitsseite (gesundheit/training.&lt;Datum&gt;). Die GEVT-Aufgabe (nur für dich) liegt unter gewohnheiten/gevt.&lt;Datum&gt;.</footer>
+  <footer>Gespeichert in deinem Konto: deine Liste unter gewohnheiten/liste, die Punkte pro Jahr unter gewohnheiten/jahr.&lt;Jahr&gt;. Das Training nutzt dieselben Häkchen wie die Gesundheitsseite (gesundheit/training.&lt;Datum&gt;). Die GEVT-Aufgaben (nur für dich) liegen unter gewohnheiten/gevtf.&lt;Datum&gt; (Formen) und gewohnheiten/gevt.&lt;Datum&gt;.</footer>
 </div>
 
 <script>
@@ -455,20 +458,23 @@ function vorlageAusLink() {
   history.replaceState(null, "", location.pathname);
   if (l.length !== habits().length) save(l);
 }
-/* ---------- GEVT-Aufgabe des Tages (nur für Konten mit Rolle admin in gevt_members, also Ralf) ----------
-   Die Aufgabe kommt über die Edge Function gevt-ask aus der verschlüsselten Wissensdatenbank.
-   Pro Tag einmal erzeugt und unter gewohnheiten/gevt.<datum> gespeichert. Erledigt setzt den Punkt bei der Gewohnheit gevt-aufgabe. */
-const GEVT_ID = "gevt-aufgabe", GEVT_DOC = "gewohnheiten/gevt.";
-const GEVT_THEMEN = [
-  ["Übung", "Siu Nim Tau"], ["Learning", "Prinzipien und Konzepte"], ["Übung", "Holzpuppe"], ["Übung", "Chum Kiu"],
-  ["Learning", "eine Erkenntnis aus meinen Notizbüchern"], ["Übung", "Chi Sao"], ["Übung", "Stand, Struktur und Schrittarbeit"],
-  ["Übung", "Biu Tze"], ["Learning", "eine Korrektur, die Sifu Göksel oft gibt"], ["Übung", "Lat Sao und Partnerdrills"],
-  ["Übung", "Fauststöße und Kettenfauststoß"], ["Learning", "Masterclass"]
-];
-let gevtAn = false, gevt = null, gevtBusy = false;
-function gevtThema(key, extra) {
-  const tag = Math.round(parse(key) / 864e5);
-  return GEVT_THEMEN[((tag + (extra || 0)) % GEVT_THEMEN.length + GEVT_THEMEN.length) % GEVT_THEMEN.length];
+/* ---------- GEVT-Aufgaben des Tages (nur für Konten mit Rolle admin in gevt_members, also Ralf) ----------
+   Zwei Aufgaben pro Tag über die Edge Function gevt-ask aus der verschlüsselten Wissensdatenbank:
+   eine Übung aus den Formen (gewohnheiten/gevtf.<datum>) und eine Übung oder ein Learning im Themenwechsel (gewohnheiten/gevt.<datum>).
+   Erledigt setzt den Punkt bei der Gewohnheit gevt-aufgabe. */
+const GEVT_ID = "gevt-aufgabe";
+const GEVT = {
+  form: {doc: "gewohnheiten/gevtf.", titel: "Aus den Formen", themen: [["Form", "Siu Nim Tau"], ["Form", "Chum Kiu"], ["Form", "Biu Tze"], ["Form", "Holzpuppenform"]]},
+  frei: {doc: "gewohnheiten/gevt.", titel: "Übung oder Learning", themen: [
+    ["Learning", "Prinzipien und Konzepte"], ["Übung", "Chi Sao"], ["Learning", "eine Erkenntnis aus meinen Notizbüchern"],
+    ["Übung", "Stand, Struktur und Schrittarbeit"], ["Learning", "eine Korrektur, die Sifu Göksel oft gibt"], ["Übung", "Lat Sao und Partnerdrills"],
+    ["Übung", "Fauststöße und Kettenfauststoß"], ["Learning", "Masterclass"]]}
+};
+let gevtAn = false;
+const gevtDaten = {form: null, frei: null}, gevtBusy = {form: false, frei: false};
+function gevtThema(slot, key, extra) {
+  const t = GEVT[slot].themen, tag = Math.round(parse(key) / 864e5);
+  return t[(((tag + (extra || 0)) % t.length) + t.length) % t.length];
 }
 function gevtSplit(t) {
   let stufe = "";
@@ -477,27 +483,45 @@ function gevtSplit(t) {
   const i = t.search(/^\s*QUELLEN:?\s*$/m);
   return i < 0 ? {stufe, text: t.trim(), quellen: ""} : {stufe, text: t.slice(0, i).trim(), quellen: t.slice(i).replace(/^\s*QUELLEN:?\s*$/m, "").trim()};
 }
+const ohneFett = t => t.replace(/\*\*(.+?)\*\*/g, "$1");
+function gevtTeil(slot) {
+  const el = document.querySelector('.gvteil[data-slot="' + slot + '"]');
+  if (!el.firstChild) {
+    el.innerHTML = '<div class="between"><h3></h3><span class="thema"></span></div><span class="stufe" hidden></span><p class="text"></p><p class="src" hidden></p><button type="button" class="btn small neu">Andere Aufgabe</button>';
+    el.querySelector("h3").textContent = GEVT[slot].titel;
+    el.querySelector(".neu").addEventListener("click", () => gevtHolen(slot, true));
+  }
+  return el;
+}
 function renderGevt() {
   const el = $("gevt"); el.hidden = !gevtAn; if (!gevtAn) return;
-  const key = iso(heute()), done = isDone(GEVT_ID, key);
-  $("gvThema").textContent = gevt && gevt.thema ? gevt.art + " · " + gevt.thema : "";
-  $("gvStufe").hidden = !(gevt && gevt.stufe); $("gvStufe").textContent = gevt && gevt.stufe || "";
-  if (gevt && gevt.text) $("gvText").textContent = gevt.text.replace(/\*\*(.+?)\*\*/g, "$1");
-  $("gvSrc").hidden = !(gevt && gevt.quellen); $("gvSrc").textContent = gevt && gevt.quellen ? "Quellen:\n" + gevt.quellen : "";
-  const b = $("gvDone"); b.setAttribute("aria-pressed", done ? "true" : "false"); b.textContent = done ? "✓ Erledigt" : "Erledigt";
-  b.disabled = !(gevt && gevt.text); $("gvNeu").disabled = gevtBusy;
+  for (const slot of ["form", "frei"]) {
+    const d = gevtDaten[slot], t = gevtTeil(slot);
+    if (gevtBusy[slot]) { t.querySelector(".neu").disabled = true; continue; }
+    t.querySelector(".thema").textContent = d && d.thema ? d.art + " · " + d.thema : "";
+    const st = t.querySelector(".stufe"); st.hidden = !(d && d.stufe); st.textContent = d && d.stufe || "";
+    t.querySelector(".text").textContent = d && d.text ? ohneFett(d.text) : "Ich suche dir eine Aufgabe aus deiner Wissensdatenbank …";
+    const sr = t.querySelector(".src"); sr.hidden = !(d && d.quellen); sr.textContent = d && d.quellen ? "Quellen:\n" + d.quellen : "";
+    t.querySelector(".neu").disabled = false;
+  }
+  const done = isDone(GEVT_ID, iso(heute())), b = $("gvDone");
+  b.setAttribute("aria-pressed", done ? "true" : "false"); b.textContent = done ? "✓ Erledigt" : "Beides erledigt";
+  b.disabled = !(gevtDaten.form && gevtDaten.form.text) && !(gevtDaten.frei && gevtDaten.frei.text);
 }
-async function gevtHolen(neu) {
-  if (gevtBusy) return;
-  const key = iso(heute()), c = window.SR_CONFIG || {}, sb = Konto.sb;
-  gevtBusy = true;
-  const versuch = neu ? ((gevt && gevt.versuch) || 0) + 1 : 0;
-  const [art, thema] = gevtThema(key, versuch * 5);
-  $("gvText").textContent = "Ich suche dir eine Aufgabe aus deiner Wissensdatenbank …"; $("gvSrc").hidden = true; $("gvStufe").hidden = true;
-  $("gvThema").textContent = art + " · " + thema; $("gvNeu").disabled = true;
+async function gevtHolen(slot, neu) {
+  if (gevtBusy[slot]) return;
+  const key = iso(heute()), c = window.SR_CONFIG || {}, sb = Konto.sb, alt = gevtDaten[slot], t = gevtTeil(slot);
+  gevtBusy[slot] = true;
+  const versuch = neu ? ((alt && alt.versuch) || 0) + 1 : 0;
+  const [art, thema] = gevtThema(slot, key, slot === "form" ? versuch : versuch * 5);
+  t.querySelector(".text").textContent = "Ich suche dir eine Aufgabe aus deiner Wissensdatenbank …";
+  t.querySelector(".src").hidden = true; t.querySelector(".stufe").hidden = true;
+  t.querySelector(".thema").textContent = art + " · " + thema; t.querySelector(".neu").disabled = true;
   try {
     const s = await sb.auth.getSession(), tok = s.data.session && s.data.session.access_token;
-    const frage = art === "Übung"
+    const frage = art === "Form"
+      ? "Stell mir für heute eine Übung aus der Form " + thema + " aus meiner Wissensdatenbank: einen bestimmten Abschnitt oder eine Bewegung der Form, die ich heute gezielt übe. Sag kurz, was genau ich mache, wie oft, und worauf ich laut Sifu Göksel oder meinen Notizen besonders achte."
+      : art === "Übung"
       ? "Stell mir für heute eine konkrete Übungsaufgabe zum Thema " + thema + " aus meiner Wissensdatenbank: eine Übung oder ein Drill, den ich heute allein üben kann. Sag kurz, was ich mache, wie lange oder wie oft, und worauf ich besonders achte."
       : "Such mir für heute ein Learning zum Thema " + thema + " aus meiner Wissensdatenbank heraus und mach daraus eine kleine Aufgabe für heute: worüber ich nachdenke oder was ich im Training bewusst umsetze.";
     const r = await fetch(c.supabaseUrl + "/functions/v1/gevt-ask", {method: "POST", headers: {"Content-Type": "application/json", Authorization: "Bearer " + tok, apikey: c.supabaseAnonKey}, body: JSON.stringify({action: "ask", frage, verlauf: []})});
@@ -511,17 +535,21 @@ async function gevtHolen(neu) {
       while ((nl = buf.indexOf("\n")) >= 0) {
         const line = buf.slice(0, nl); buf = buf.slice(nl + 1); if (!line.trim()) continue;
         const ev = JSON.parse(line);
-        if (ev.d) { answer += ev.d; $("gvText").textContent = gevtSplit(answer).text.replace(/\*\*(.+?)\*\*/g, "$1"); }
+        if (ev.d) { answer += ev.d; t.querySelector(".text").textContent = ohneFett(gevtSplit(answer).text); }
         if (ev.fehler) throw new Error(ev.fehler);
       }
     }
     if (!answer.trim()) throw new Error("leer");
-    gevt = Object.assign({art, thema, versuch, erstellt: new Date().toISOString()}, gevtSplit(answer));
-    Konto.put(GEVT_DOC + key, gevt);
-    if (!habits().some(g => g.id === GEVT_ID)) save(habits().concat([{id: GEVT_ID, n: "GEVT-Aufgabe", i: "🥋", f: "dusk"}]));
+    gevtDaten[slot] = Object.assign({art, thema, versuch, erstellt: new Date().toISOString()}, gevtSplit(answer));
+    Konto.put(GEVT[slot].doc + key, gevtDaten[slot]);
+    if (!habits().some(g => g.id === GEVT_ID)) save(habits().concat([{id: GEVT_ID, n: "GEVT-Aufgaben", i: "🥋", f: "dusk"}]));
   } catch (e) {
-    $("gvText").textContent = "Die Aufgabe ließ sich gerade nicht holen. Versuch es mit „Andere Aufgabe“ noch einmal.";
-  } finally { gevtBusy = false; renderGevt(); }
+    gevtDaten[slot] = alt && alt.text ? alt : null;
+    gevtBusy[slot] = false; renderGevt();
+    t.querySelector(".text").textContent = "Die Aufgabe ließ sich gerade nicht holen. Versuch es mit „Andere Aufgabe“ noch einmal.";
+    return;
+  }
+  gevtBusy[slot] = false; renderGevt();
 }
 async function gevtStart(docs) {
   const sb = Konto.sb; if (!sb || !Konto.user) return;
@@ -531,12 +559,11 @@ async function gevtStart(docs) {
   } catch (e) { gevtAn = false; }
   if (!gevtAn) return;
   const key = iso(heute());
-  gevt = docs[GEVT_DOC + key] || null;
+  for (const slot of ["form", "frei"]) gevtDaten[slot] = docs[GEVT[slot].doc + key] || null;
   render();
-  if (!gevt || !gevt.text) gevtHolen(false);
+  for (const slot of ["form", "frei"]) if (!gevtDaten[slot] || !gevtDaten[slot].text) gevtHolen(slot, false);
 }
 $("gvDone").addEventListener("click", async () => { await toggle(GEVT_ID, iso(heute())); renderGevt(); });
-$("gvNeu").addEventListener("click", () => gevtHolen(true));
 
 window.addEventListener("hashchange", () => { vorlageAusLink(); render(); });
 if (location.hash === "#jahr") show("jahr");
