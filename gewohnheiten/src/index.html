@@ -118,6 +118,10 @@ footer{margin-top:28px;font-size:.8rem;color:var(--muted)}
 .gvteil h3{font-size:1rem}
 .gevt > .row{margin-top:16px;border-top:1px solid var(--line);padding-top:14px}
 .gvteil .between{align-items:center}
+.uhr ol{padding-left:1.2em;line-height:1.6;margin:8px 0}
+.uhr code{font-size:.85em;word-break:break-all;background:color-mix(in srgb,var(--line) 45%,transparent);padding:1px 5px;border-radius:5px}
+.uhr .key{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0}
+.uhr .key code{flex:1;min-width:0;padding:8px}
 </style>
 
 </head>
@@ -194,9 +198,29 @@ footer{margin-top:28px;font-size:.8rem;color:var(--muted)}
       <p class="muted tipp">Tipp aus den Produktivikus-Videos: Fang mit einer einzigen Gewohnheit an, mit fester Uhrzeit und festem Ort, und mach jeden geschafften Tag sichtbar. Fällt ein Tag aus, ist das kein Bruch. Nur nie zweimal hintereinander.</p>
       <p class="muted tipp">„Training nach Plan“ zeigt die Trainingstage aus deinem Plan unter Gesundheit (Krafttage pro Woche und Startdatum) und hakt den Tag auch dort ab.</p>
     </details>
+
+    <details class="edit uhr" id="uhr">
+      <summary>⌚ Auf der Apple Watch abhaken</summary>
+      <p class="muted">Auf der Uhr läuft keine Webseite. Ein Kurzbefehl macht es trotzdem: Auf der Uhr tippst du ihn an, wählst die Gewohnheit und der Punkt für heute ist gesetzt. Einmal am iPhone einrichten, etwa fünf Minuten.</p>
+      <div class="row"><button type="button" class="btn primary" id="uhrNeu">Uhr-Schlüssel erzeugen</button></div>
+      <p class="hint" id="uhrMsg" hidden></p>
+      <div id="uhrKey" hidden>
+        <div class="key"><code id="uhrK"></code><button type="button" class="btn small" id="uhrCopy">Kopieren</button></div>
+        <p class="muted">Der Schlüssel öffnet nur das Abhaken deiner Gewohnheiten. Wer ihn hat, kann bei dir Punkte setzen, also nicht weitergeben. Neu erzeugen macht den alten ungültig.</p>
+      </div>
+      <ol>
+        <li>Am iPhone die App <b>Kurzbefehle</b> öffnen, oben <b>+</b>, Name „Gewohnheit abhaken“.</li>
+        <li>Aktion <b>Inhalte von URL abrufen</b>. URL: <code class="uhrUrl"></code><br>Pfeil aufklappen: Methode <b>POST</b>, Haupttext <b>JSON</b>, Feld hinzufügen: Text, Schlüssel <code>k</code>, Wert = dein Uhr-Schlüssel.</li>
+        <li>Aktion <b>Aus Liste auswählen</b>. Sie nimmt automatisch das Ergebnis von Schritt 2.</li>
+        <li>Noch einmal <b>Inhalte von URL abrufen</b>, gleiche URL, POST, JSON mit <code>k</code> = Schlüssel und einem zweiten Textfeld <code>h</code> = Variable <b>Ausgewähltes Objekt</b>.</li>
+        <li>Aktion <b>Ergebnis anzeigen</b>.</li>
+        <li>Unten auf <b>ⓘ</b> und <b>Auf Apple Watch anzeigen</b> einschalten. Fertig.</li>
+      </ol>
+      <p class="muted">Auf der Uhr: App Kurzbefehle öffnen oder die Komplikation „Kurzbefehle“ aufs Zifferblatt legen. Mit Siri geht es auch: „Gewohnheit abhaken“. Die Seite hier zeigt den Punkt, sobald du sie wieder öffnest.</p>
+    </details>
   </div>
 
-  <footer>Gespeichert in deinem Konto: deine Liste unter gewohnheiten/liste, die Punkte pro Jahr unter gewohnheiten/jahr.&lt;Jahr&gt;. Das Training nutzt dieselben Häkchen wie die Gesundheitsseite (gesundheit/training.&lt;Datum&gt;). Die GEVT-Aufgaben (nur für dich) liegen unter gewohnheiten/gevtf.&lt;Datum&gt; (Formen) und gewohnheiten/gevt.&lt;Datum&gt;.</footer>
+  <footer>Gespeichert in deinem Konto: deine Liste unter gewohnheiten/liste, die Punkte pro Jahr unter gewohnheiten/jahr.&lt;Jahr&gt;. Das Training nutzt dieselben Häkchen wie die Gesundheitsseite (gesundheit/training.&lt;Datum&gt;). Der Uhr-Schlüssel liegt nur als Prüfsumme unter gewohnheiten/uhr. Die GEVT-Aufgaben (nur für dich) liegen unter gewohnheiten/gevtf.&lt;Datum&gt; (Formen) und gewohnheiten/gevt.&lt;Datum&gt;.</footer>
 </div>
 
 <script>
@@ -564,6 +588,37 @@ async function gevtStart(docs) {
   for (const slot of ["form", "frei"]) if (!gevtDaten[slot] || !gevtDaten[slot].text) gevtHolen(slot, false);
 }
 $("gvDone").addEventListener("click", async () => { await toggle(GEVT_ID, iso(heute())); renderGevt(); });
+
+/* ---------- Apple Watch: Uhr-Schlüssel für den Kurzbefehl (Edge Function gewohnheiten-uhr) ---------- */
+const UHR_FN = () => ((window.SR_CONFIG || {}).supabaseUrl || "") + "/functions/v1/gewohnheiten-uhr";
+for (const el of document.querySelectorAll(".uhrUrl")) el.textContent = UHR_FN();
+function uhrMsg(t) { const el = $("uhrMsg"); el.hidden = !t; el.textContent = t || ""; }
+$("uhrNeu").addEventListener("click", async () => {
+  const sb = Konto.sb, c = window.SR_CONFIG || {};
+  if (!sb || !Konto.user) { uhrMsg("Dafür musst du im Portal angemeldet sein."); return; }
+  $("uhrNeu").disabled = true; uhrMsg("Erzeuge Schlüssel …");
+  try {
+    const s = await sb.auth.getSession(), tok = s.data.session && s.data.session.access_token;
+    const r = await fetch(UHR_FN(), {method: "POST", headers: {"Content-Type": "application/json", Authorization: "Bearer " + tok, apikey: c.supabaseAnonKey}, body: JSON.stringify({action: "schluessel"})});
+    const j = await r.json();
+    if (!r.ok || !j.schluessel) throw new Error(j.error || r.status);
+    $("uhrK").textContent = j.schluessel; $("uhrKey").hidden = false;
+    uhrMsg("Neuer Schlüssel. Jetzt kopieren und in den Kurzbefehl einsetzen, er wird nur einmal angezeigt.");
+  } catch (e) { uhrMsg("Hat nicht geklappt (" + e.message + "). Später noch einmal versuchen."); }
+  $("uhrNeu").disabled = false;
+});
+$("uhrCopy").addEventListener("click", async () => {
+  try { await navigator.clipboard.writeText($("uhrK").textContent); $("uhrCopy").textContent = "Kopiert ✓"; }
+  catch (e) { const r = document.createRange(); r.selectNodeContents($("uhrK")); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); }
+});
+/* Punkte von der Uhr übernehmen, wenn die Seite wieder in den Vordergrund kommt. */
+let zuletzt = Date.now();
+document.addEventListener("visibilitychange", async () => {
+  if (document.hidden || Date.now() - zuletzt < 5000) return;
+  zuletzt = Date.now();
+  const [b, c] = await Promise.all([Konto.list(TRAIN), Konto.list("gewohnheiten/")]);
+  apply(Object.assign({}, b, c)); render();
+});
 
 window.addEventListener("hashchange", () => { vorlageAusLink(); render(); });
 if (location.hash === "#jahr") show("jahr");
