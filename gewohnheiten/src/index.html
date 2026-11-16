@@ -116,7 +116,9 @@ footer{margin-top:28px;font-size:.8rem;color:var(--muted)}
 .gevt .thema{font-size:.85rem;color:var(--muted)}
 .gvteil{border-top:1px solid var(--line);margin-top:10px;padding-top:10px}
 .gvteil h3{font-size:1rem}
-.gevt > .row{margin-top:16px;border-top:1px solid var(--line);padding-top:14px}
+.gvteil .kopf{display:flex;align-items:center;gap:12px}
+.gvteil .kopf > div{flex:1;min-width:0}
+.gvteil .kopf .thema{display:block}
 .gvteil .between{align-items:center}
 .uhr ol{padding-left:1.2em;line-height:1.6;margin:8px 0}
 .uhr code{font-size:.85em;word-break:break-all;background:color-mix(in srgb,var(--line) 45%,transparent);padding:1px 5px;border-radius:5px}
@@ -154,7 +156,6 @@ footer{margin-top:28px;font-size:.8rem;color:var(--muted)}
       <h2 id="gvTitle">🥋 GEVT-Aufgaben des Tages</h2>
       <div class="gvteil" data-slot="form"></div>
       <div class="gvteil" data-slot="frei"></div>
-      <div class="row"><button type="button" class="btn primary" id="gvDone" aria-pressed="false">Beides erledigt</button></div>
     </section>
     <p class="store" id="store"></p>
 
@@ -485,8 +486,9 @@ function vorlageAusLink() {
 /* ---------- GEVT-Aufgaben des Tages (nur für Konten mit Rolle admin in gevt_members, also Ralf) ----------
    Zwei Aufgaben pro Tag über die Edge Function gevt-ask aus der verschlüsselten Wissensdatenbank:
    eine Übung aus den Formen (gewohnheiten/gevtf.<datum>) und eine Übung oder ein Learning im Themenwechsel (gewohnheiten/gevt.<datum>).
-   Erledigt setzt den Punkt bei der Gewohnheit gevt-aufgabe. */
-const GEVT_ID = "gevt-aufgabe";
+   Jede Aufgabe hat ihren eigenen Haken: Form → Gewohnheit gevt-form, Übung/Learning → gevt-aufgabe. */
+/* Jede der zwei Aufgaben hat ihren eigenen Haken und ihre eigene Gewohnheit. */
+const GEVT_HABIT = {form: {id: "gevt-form", n: "GEVT-Form", i: "🥋", f: "dusk"}, frei: {id: "gevt-aufgabe", n: "GEVT-Aufgabe", i: "📜", f: "gold"}};
 const GEVT = {
   form: {doc: "gewohnheiten/gevtf.", titel: "Aus den Formen", themen: [["Form", "Siu Nim Tau"], ["Form", "Chum Kiu"], ["Form", "Biu Tze"], ["Form", "Holzpuppenform"]]},
   frei: {doc: "gewohnheiten/gevt.", titel: "Übung oder Learning", themen: [
@@ -511,8 +513,9 @@ const ohneFett = t => t.replace(/\*\*(.+?)\*\*/g, "$1");
 function gevtTeil(slot) {
   const el = document.querySelector('.gvteil[data-slot="' + slot + '"]');
   if (!el.firstChild) {
-    el.innerHTML = '<div class="between"><h3></h3><span class="thema"></span></div><span class="stufe" hidden></span><p class="text"></p><p class="src" hidden></p><button type="button" class="btn small neu">Andere Aufgabe</button>';
+    el.innerHTML = '<div class="kopf"><div><h3></h3><span class="thema"></span></div><button type="button" class="tick c-' + GEVT_HABIT[slot].f + '" aria-pressed="false"></button></div><span class="stufe" hidden></span><p class="text"></p><p class="src" hidden></p><button type="button" class="btn small neu">Andere Aufgabe</button>';
     el.querySelector("h3").textContent = GEVT[slot].titel;
+    el.querySelector(".tick").addEventListener("click", async () => { gevtHabits(); await toggle(GEVT_HABIT[slot].id, iso(heute())); renderGevt(); });
     el.querySelector(".neu").addEventListener("click", () => gevtHolen(slot, true));
   }
   return el;
@@ -528,9 +531,15 @@ function renderGevt() {
     const sr = t.querySelector(".src"); sr.hidden = !(d && d.quellen); sr.textContent = d && d.quellen ? "Quellen:\n" + d.quellen : "";
     t.querySelector(".neu").disabled = false;
   }
-  const done = isDone(GEVT_ID, iso(heute())), b = $("gvDone");
-  b.setAttribute("aria-pressed", done ? "true" : "false"); b.textContent = done ? "✓ Erledigt" : "Beides erledigt";
-  b.disabled = !(gevtDaten.form && gevtDaten.form.text) && !(gevtDaten.frei && gevtDaten.frei.text);
+  for (const slot of ["form", "frei"]) {
+    const done = isDone(GEVT_HABIT[slot].id, iso(heute())), b = gevtTeil(slot).querySelector(".tick");
+    b.setAttribute("aria-pressed", done ? "true" : "false"); b.textContent = done ? "✓" : "";
+    b.setAttribute("aria-label", GEVT[slot].titel + (done ? " erledigt, zurücknehmen" : " heute abhaken"));
+  }
+}
+function gevtHabits() {
+  const fehlt = ["form", "frei"].map(x => GEVT_HABIT[x]).filter(h => !habits().some(g => g.id === h.id));
+  if (fehlt.length) save(habits().concat(fehlt.map(h => Object.assign({}, h))));
 }
 async function gevtHolen(slot, neu) {
   if (gevtBusy[slot]) return;
@@ -566,7 +575,7 @@ async function gevtHolen(slot, neu) {
     if (!answer.trim()) throw new Error("leer");
     gevtDaten[slot] = Object.assign({art, thema, versuch, erstellt: new Date().toISOString()}, gevtSplit(answer));
     Konto.put(GEVT[slot].doc + key, gevtDaten[slot]);
-    if (!habits().some(g => g.id === GEVT_ID)) save(habits().concat([{id: GEVT_ID, n: "GEVT-Aufgaben", i: "🥋", f: "dusk"}]));
+    gevtHabits();
   } catch (e) {
     gevtDaten[slot] = alt && alt.text ? alt : null;
     gevtBusy[slot] = false; renderGevt();
@@ -587,7 +596,6 @@ async function gevtStart(docs) {
   render();
   for (const slot of ["form", "frei"]) if (!gevtDaten[slot] || !gevtDaten[slot].text) gevtHolen(slot, false);
 }
-$("gvDone").addEventListener("click", async () => { await toggle(GEVT_ID, iso(heute())); renderGevt(); });
 
 /* ---------- Apple Watch: Uhr-Schlüssel für den Kurzbefehl (Edge Function gewohnheiten-uhr) ---------- */
 const UHR_FN = () => ((window.SR_CONFIG || {}).supabaseUrl || "") + "/functions/v1/gewohnheiten-uhr";
@@ -632,6 +640,13 @@ $("inhalt").hidden = true;
   render();
   gevtStart(c);
 })();
+/* Beim Zurückkehren zur Seite neu laden, damit Punkte von der Uhr oder einem anderen Gerät sofort zu sehen sind. */
+document.addEventListener("visibilitychange", async () => {
+  if (document.visibilityState !== "visible" || !Konto.user) return;
+  const [b, c] = await Promise.all([Konto.list(TRAIN), Konto.list(JAHR)]);
+  apply(Object.assign({}, b, c));
+  render();
+});
 </script>
 </body>
 </html>
