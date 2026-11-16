@@ -109,6 +109,11 @@ footer{margin-top:28px;font-size:.8rem;color:var(--muted)}
 .leerstart h2{margin-bottom:6px}
 .leerstart .row{justify-content:center;margin-top:12px}
 .neuform{display:grid;grid-template-columns:3.2em 1fr auto;gap:8px;align-items:center;margin-top:12px;text-align:left}
+.gevt{margin-top:14px;border-color:color-mix(in srgb,var(--dusk) 45%,var(--line))}
+.gevt .stufe{display:inline-block;font-size:.75rem;font-weight:700;border-radius:6px;padding:2px 8px;background:color-mix(in srgb,var(--dusk) 15%,transparent);color:var(--dusk);margin:6px 0}
+.gevt .text{white-space:pre-wrap;margin:6px 0 10px;line-height:1.55}
+.gevt .src{font-size:.8rem;color:var(--muted);white-space:pre-wrap;margin-bottom:10px}
+.gevt .thema{font-size:.85rem;color:var(--muted)}
 </style>
 
 </head>
@@ -136,6 +141,13 @@ footer{margin-top:28px;font-size:.8rem;color:var(--muted)}
       <div class="between"><h2 id="hTitle">Heute</h2><span class="muted" id="hDatum"></span></div>
       <div id="heute"></div>
       <p class="hint" id="warn" hidden></p>
+    </section>
+    <section class="card gevt" id="gevt" hidden aria-labelledby="gvTitle">
+      <div class="between"><h2 id="gvTitle">🥋 GEVT-Aufgabe des Tages</h2><span class="thema" id="gvThema"></span></div>
+      <span class="stufe" id="gvStufe" hidden></span>
+      <p class="text" id="gvText">Ich suche dir eine Aufgabe aus deiner Wissensdatenbank …</p>
+      <p class="src" id="gvSrc" hidden></p>
+      <div class="row"><button type="button" class="btn primary" id="gvDone" aria-pressed="false">Erledigt</button><button type="button" class="btn small" id="gvNeu">Andere Aufgabe</button></div>
     </section>
     <p class="store" id="store"></p>
 
@@ -181,7 +193,7 @@ footer{margin-top:28px;font-size:.8rem;color:var(--muted)}
     </details>
   </div>
 
-  <footer>Gespeichert in deinem Konto: deine Liste unter gewohnheiten/liste, die Punkte pro Jahr unter gewohnheiten/jahr.&lt;Jahr&gt;. Das Training nutzt dieselben Häkchen wie die Gesundheitsseite (gesundheit/training.&lt;Datum&gt;).</footer>
+  <footer>Gespeichert in deinem Konto: deine Liste unter gewohnheiten/liste, die Punkte pro Jahr unter gewohnheiten/jahr.&lt;Jahr&gt;. Das Training nutzt dieselben Häkchen wie die Gesundheitsseite (gesundheit/training.&lt;Datum&gt;). Die GEVT-Aufgabe (nur für dich) liegt unter gewohnheiten/gevt.&lt;Datum&gt;.</footer>
 </div>
 
 <script>
@@ -400,10 +412,10 @@ function neu(nameEl, icEl) {
 function training() { if (!habits().some(g => g.id === "training")) save(habits().concat([Object.assign({}, GW.TRAINING)])); }
 
 function render() {
-  const leer = !habits().length;
+  const leer = !habits().length && !gevtAn;
   $("leer").hidden = !leer; $("inhalt").hidden = leer;
   if (leer) return;
-  renderHeute(); renderMonat(); renderPicks(); renderJahr(); renderEdit();
+  renderHeute(); renderMonat(); renderPicks(); renderJahr(); renderEdit(); renderGevt();
 }
 function show(v) { for (const x of ["monat", "jahr"]) { $("tab-" + x).setAttribute("aria-selected", x === v ? "true" : "false"); $("view-" + x).hidden = x !== v; } }
 
@@ -443,6 +455,89 @@ function vorlageAusLink() {
   history.replaceState(null, "", location.pathname);
   if (l.length !== habits().length) save(l);
 }
+/* ---------- GEVT-Aufgabe des Tages (nur für Konten mit Rolle admin in gevt_members, also Ralf) ----------
+   Die Aufgabe kommt über die Edge Function gevt-ask aus der verschlüsselten Wissensdatenbank.
+   Pro Tag einmal erzeugt und unter gewohnheiten/gevt.<datum> gespeichert. Erledigt setzt den Punkt bei der Gewohnheit gevt-aufgabe. */
+const GEVT_ID = "gevt-aufgabe", GEVT_DOC = "gewohnheiten/gevt.";
+const GEVT_THEMEN = [
+  ["Übung", "Siu Nim Tau"], ["Learning", "Prinzipien und Konzepte"], ["Übung", "Holzpuppe"], ["Übung", "Chum Kiu"],
+  ["Learning", "eine Erkenntnis aus meinen Notizbüchern"], ["Übung", "Chi Sao"], ["Übung", "Stand, Struktur und Schrittarbeit"],
+  ["Übung", "Biu Tze"], ["Learning", "eine Korrektur, die Sifu Göksel oft gibt"], ["Übung", "Lat Sao und Partnerdrills"],
+  ["Übung", "Fauststöße und Kettenfauststoß"], ["Learning", "Masterclass"]
+];
+let gevtAn = false, gevt = null, gevtBusy = false;
+function gevtThema(key, extra) {
+  const tag = Math.round(parse(key) / 864e5);
+  return GEVT_THEMEN[((tag + (extra || 0)) % GEVT_THEMEN.length + GEVT_THEMEN.length) % GEVT_THEMEN.length];
+}
+function gevtSplit(t) {
+  let stufe = "";
+  const m = t.match(/^\s*STUFE:\s*(.*)\n?/);
+  if (m) { stufe = m[1].trim(); t = t.slice(m[0].length); }
+  const i = t.search(/^\s*QUELLEN:?\s*$/m);
+  return i < 0 ? {stufe, text: t.trim(), quellen: ""} : {stufe, text: t.slice(0, i).trim(), quellen: t.slice(i).replace(/^\s*QUELLEN:?\s*$/m, "").trim()};
+}
+function renderGevt() {
+  const el = $("gevt"); el.hidden = !gevtAn; if (!gevtAn) return;
+  const key = iso(heute()), done = isDone(GEVT_ID, key);
+  $("gvThema").textContent = gevt && gevt.thema ? gevt.art + " · " + gevt.thema : "";
+  $("gvStufe").hidden = !(gevt && gevt.stufe); $("gvStufe").textContent = gevt && gevt.stufe || "";
+  if (gevt && gevt.text) $("gvText").textContent = gevt.text.replace(/\*\*(.+?)\*\*/g, "$1");
+  $("gvSrc").hidden = !(gevt && gevt.quellen); $("gvSrc").textContent = gevt && gevt.quellen ? "Quellen:\n" + gevt.quellen : "";
+  const b = $("gvDone"); b.setAttribute("aria-pressed", done ? "true" : "false"); b.textContent = done ? "✓ Erledigt" : "Erledigt";
+  b.disabled = !(gevt && gevt.text); $("gvNeu").disabled = gevtBusy;
+}
+async function gevtHolen(neu) {
+  if (gevtBusy) return;
+  const key = iso(heute()), c = window.SR_CONFIG || {}, sb = Konto.sb;
+  gevtBusy = true;
+  const versuch = neu ? ((gevt && gevt.versuch) || 0) + 1 : 0;
+  const [art, thema] = gevtThema(key, versuch * 5);
+  $("gvText").textContent = "Ich suche dir eine Aufgabe aus deiner Wissensdatenbank …"; $("gvSrc").hidden = true; $("gvStufe").hidden = true;
+  $("gvThema").textContent = art + " · " + thema; $("gvNeu").disabled = true;
+  try {
+    const s = await sb.auth.getSession(), tok = s.data.session && s.data.session.access_token;
+    const frage = art === "Übung"
+      ? "Stell mir für heute eine konkrete Übungsaufgabe zum Thema " + thema + " aus meiner Wissensdatenbank: eine Übung oder ein Drill, den ich heute allein üben kann. Sag kurz, was ich mache, wie lange oder wie oft, und worauf ich besonders achte."
+      : "Such mir für heute ein Learning zum Thema " + thema + " aus meiner Wissensdatenbank heraus und mach daraus eine kleine Aufgabe für heute: worüber ich nachdenke oder was ich im Training bewusst umsetze.";
+    const r = await fetch(c.supabaseUrl + "/functions/v1/gevt-ask", {method: "POST", headers: {"Content-Type": "application/json", Authorization: "Bearer " + tok, apikey: c.supabaseAnonKey}, body: JSON.stringify({action: "ask", frage, verlauf: []})});
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    const reader = r.body.getReader(), dec = new TextDecoder();
+    let buf = "", answer = "";
+    for (;;) {
+      const x = await reader.read(); if (x.done) break;
+      buf += dec.decode(x.value, {stream: true});
+      let nl;
+      while ((nl = buf.indexOf("\n")) >= 0) {
+        const line = buf.slice(0, nl); buf = buf.slice(nl + 1); if (!line.trim()) continue;
+        const ev = JSON.parse(line);
+        if (ev.d) { answer += ev.d; $("gvText").textContent = gevtSplit(answer).text.replace(/\*\*(.+?)\*\*/g, "$1"); }
+        if (ev.fehler) throw new Error(ev.fehler);
+      }
+    }
+    if (!answer.trim()) throw new Error("leer");
+    gevt = Object.assign({art, thema, versuch, erstellt: new Date().toISOString()}, gevtSplit(answer));
+    Konto.put(GEVT_DOC + key, gevt);
+    if (!habits().some(g => g.id === GEVT_ID)) save(habits().concat([{id: GEVT_ID, n: "GEVT-Aufgabe", i: "🥋", f: "dusk"}]));
+  } catch (e) {
+    $("gvText").textContent = "Die Aufgabe ließ sich gerade nicht holen. Versuch es mit „Andere Aufgabe“ noch einmal.";
+  } finally { gevtBusy = false; renderGevt(); }
+}
+async function gevtStart(docs) {
+  const sb = Konto.sb; if (!sb || !Konto.user) return;
+  try {
+    const r = await sb.from("gevt_members").select("role").eq("user_id", Konto.user.id).maybeSingle();
+    gevtAn = !!(r.data && r.data.role === "admin");
+  } catch (e) { gevtAn = false; }
+  if (!gevtAn) return;
+  const key = iso(heute());
+  gevt = docs[GEVT_DOC + key] || null;
+  render();
+  if (!gevt || !gevt.text) gevtHolen(false);
+}
+$("gvDone").addEventListener("click", async () => { await toggle(GEVT_ID, iso(heute())); renderGevt(); });
+$("gvNeu").addEventListener("click", () => gevtHolen(true));
+
 window.addEventListener("hashchange", () => { vorlageAusLink(); render(); });
 if (location.hash === "#jahr") show("jahr");
 $("inhalt").hidden = true;
@@ -453,6 +548,7 @@ $("inhalt").hidden = true;
   apply(Object.assign({}, a, b, c));
   vorlageAusLink();
   render();
+  gevtStart(c);
 })();
 </script>
 </body>
