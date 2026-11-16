@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0e1a22">
+<title>Essenz zum Abhaken</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<script src="../config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<style>
+/* Die Kernaussagen der Produktivikus-Videos als Abhakliste: oben Fortschritt und drei To-dos für heute, darunter Themen mit je einer Karte pro Video. Häkchen im Konto (schach_docs essenz/haken), sonst auf dem Gerät. */
+:root{
+  --bg:#0e1a22; --surface:#15252f; --surface2:#1b2f3b; --fg:#eef6f3; --muted:#9db3b0; --line:#24394a; --accent:#5fd3a7; --hot:#ffb547;
+  --display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif; --body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--fg);font:16px/1.55 var(--body);padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+.wrap{max-width:860px;margin:0 auto;padding-block:26px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.back{display:inline-block;color:var(--muted);text-decoration:none;font-size:.9rem;margin-bottom:14px}
+.back:hover{color:var(--fg)}
+.eyebrow{font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700;margin:0}
+h1,h2,h3{font-family:var(--display);margin:0;line-height:1.15;text-wrap:balance}
+h1{font-size:clamp(2rem,6vw,2.8rem);font-weight:800}
+h2{font-size:1.3rem;font-weight:800}
+h3{font-size:1.05rem;font-weight:800}
+p{margin:0}
+.lede{color:var(--muted);max-width:62ch;margin-top:8px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:16px}
+.top{display:grid;gap:14px;margin-top:22px}
+@media (min-width:720px){.top{grid-template-columns:240px 1fr}}
+.prog{display:flex;align-items:center;gap:16px}
+.ring{width:92px;height:92px;flex:none}
+.ring circle{fill:none;stroke-width:9}
+.ring .bg{stroke:var(--line)}
+.ring .fg{stroke:var(--accent);stroke-linecap:round;transition:stroke-dashoffset .4s}
+.big{font:800 1.6rem var(--display);font-variant-numeric:tabular-nums}
+.small{color:var(--muted);font-size:.88rem}
+.store{color:var(--muted);font-size:.8rem;margin-top:6px}
+.heute h2{font-size:1.05rem;margin-bottom:8px}
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:26px 0 12px}
+.chip{font:700 .85rem var(--body);padding:7px 12px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--fg);cursor:pointer;min-height:36px}
+.chip[aria-pressed=true]{background:var(--accent);color:#06221a;border-color:var(--accent)}
+.search{flex:1 1 180px;min-width:0;font:inherit;padding:8px 12px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--fg);min-height:38px}
+.tog{display:flex;align-items:center;gap:6px;font-size:.88rem;color:var(--muted);cursor:pointer}
+.thema{margin-top:26px}
+.thema-h{display:flex;align-items:baseline;gap:10px;margin-bottom:10px}
+.thema-h .small{margin-left:auto;font-variant-numeric:tabular-nums}
+.video{background:var(--surface);border:1px solid var(--line);border-radius:16px;margin-bottom:10px;overflow:hidden}
+.video.fertig{border-color:#2f6b57}
+.video summary{list-style:none;cursor:pointer;padding:13px 16px;display:flex;gap:12px;align-items:center}
+.video summary::-webkit-details-marker{display:none}
+.video summary .t{flex:1;min-width:0}
+.video summary .t b{display:block;font-weight:700;line-height:1.3}
+.video summary .t span{display:block;color:var(--muted);font-size:.88rem;margin-top:2px}
+.count{flex:none;font-size:.82rem;font-variant-numeric:tabular-nums;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:2px 9px}
+.video.fertig .count{color:#06221a;background:var(--accent);border-color:var(--accent)}
+.video .inner{padding:0 16px 14px}
+.kern{color:var(--muted);font-size:.93rem;margin-bottom:8px}
+ul.todos{list-style:none;margin:0;padding:0}
+.todo{display:flex;gap:10px;align-items:flex-start;padding:8px 6px;border-radius:10px;cursor:pointer}
+.todo:hover{background:var(--surface2)}
+.todo input{appearance:none;-webkit-appearance:none;flex:none;width:22px;height:22px;border:2px solid var(--muted);border-radius:7px;margin:1px 0 0;display:grid;place-items:center;cursor:pointer;background:transparent}
+.todo input:checked{background:var(--accent);border-color:var(--accent)}
+.todo input:checked::after{content:"";width:6px;height:11px;border:solid #06221a;border-width:0 3px 3px 0;transform:rotate(45deg) translate(-1px,-1px)}
+.todo input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.todo.done span{color:var(--muted);text-decoration:line-through;text-decoration-color:rgba(157,179,176,.5)}
+.todo .wann{font-size:.75rem;color:var(--muted);margin-left:auto;flex:none;padding-left:8px;text-decoration:none}
+.links{margin-top:8px;font-size:.88rem}
+.links a{color:var(--accent)}
+.empty{color:var(--muted);background:var(--surface);border:1px dashed var(--line);border-radius:14px;padding:16px;margin-top:20px}
+footer{margin-top:40px;color:var(--muted);font-size:.85rem}
+footer a{color:var(--muted)}
+.btn{font:700 .88rem var(--body);padding:8px 14px;border-radius:12px;border:1px solid var(--line);background:transparent;color:var(--fg);cursor:pointer}
+.btn:hover{border-color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="../lernen/">← Lernen</a>
+  <p class="eyebrow">Lebensplattform · Lernen</p>
+  <h1>Essenz zum Abhaken</h1>
+  <p class="lede" id="lede"></p>
+
+  <div class="top">
+    <div class="panel prog">
+      <svg class="ring" viewBox="0 0 100 100" aria-hidden="true"><circle class="bg" cx="50" cy="50" r="42"/><circle class="fg" id="ring" cx="50" cy="50" r="42" transform="rotate(-90 50 50)"/></svg>
+      <div><div class="big" id="pct">0 %</div><div class="small" id="cnt"></div><div class="store" id="store"></div></div>
+    </div>
+    <div class="panel heute">
+      <h2>Drei für heute</h2>
+      <ul class="todos" id="heute"></ul>
+    </div>
+  </div>
+
+  <div class="bar" id="chips" role="group" aria-label="Themen"></div>
+  <div class="bar" style="margin-top:0">
+    <input class="search" id="q" type="search" placeholder="Suchen, z. B. Schlaf, Handy, Gewohnheit" aria-label="Suchen">
+    <label class="tog"><input type="checkbox" id="offen"> nur Offenes</label>
+  </div>
+  <div id="list"></div>
+  <p class="empty" id="none" hidden>Nichts gefunden.</p>
+  <footer id="foot"></footer>
+</div>
+<script>
+/*DATEN*/
+(function () {
+  "use strict";
+  var $ = function (id) { return document.getElementById(id); };
+  function el(tag, attrs, kids) {
+    var d = document.createElement(tag);
+    for (var k in attrs || {}) { if (k === "text") d.textContent = attrs[k]; else if (k === "class") d.className = attrs[k]; else d.setAttribute(k, attrs[k]); }
+    (kids || []).forEach(function (c) { if (c != null) d.appendChild(typeof c === "string" ? document.createTextNode(c) : c); });
+    return d;
+  }
+  var pad = function (n) { return String(n).padStart(2, "0"); };
+  var today = function () { var d = new Date(); return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); };
+  var fmt = function (iso) { var p = (iso || "").split("-"); return p.length === 3 ? +p[2] + "." + +p[1] + "." : ""; };
+
+  // Alle To-dos mit stabiler ID: <video-id>.<nummer>
+  var ALL = [];
+  DATA.themen.forEach(function (t) { t.videos.forEach(function (v) { v.todos.forEach(function (x, i) { ALL.push({id: v.id + "." + (i + 1), text: x, video: v, thema: t}); }); }); });
+  var nVideos = DATA.themen.reduce(function (a, t) { return a + t.videos.length; }, 0);
+
+  $("lede").textContent = "Die Kernaussagen aus " + nVideos + " Videos von Produktivikus als To-do-Liste, nach Themen sortiert. Hak ab, was du umgesetzt hast. Jede Karte führt zum ausführlichen Artikel.";
+  $("foot").replaceChildren("Quelle: YouTube-Kanal ", el("a", {href: "https://www.youtube.com/@Produktivikus", target: "_blank", rel: "noopener", text: "Produktivikus"}), " und die gleichnamigen Artikel auf ", el("a", {href: "https://produktivikus.de/", target: "_blank", rel: "noopener", text: "produktivikus.de"}), ". Stand " + fmt(DATA.stand) + DATA.stand.slice(0, 4) + ". " + (DATA.hinweis || ""));
+
+  /* ---------- Speichern: im Konto (schach_docs essenz/haken), sonst nur auf dem Gerät ---------- */
+  var PATH = "essenz/haken", sb = null, user = null, haken = {};
+  var lkey = function () { return "essenz-" + (user ? user.id : "anon") + "-haken"; };
+  function loadLocal() { try { haken = JSON.parse(localStorage.getItem(lkey()) || "{}") || {}; } catch (e) { haken = {}; } }
+  function saveLocal() { try { localStorage.setItem(lkey(), JSON.stringify(haken)); } catch (e) {} }
+  function setStore(s) { $("store").textContent = s === "db" ? "Im Konto gespeichert" : s === "error" ? "Gerade nur auf diesem Gerät gespeichert" : s === "anon" ? "Nicht angemeldet: nur auf diesem Gerät" : ""; }
+  var timer = 0;
+  function save() {
+    saveLocal();
+    if (!sb || !user) return;
+    clearTimeout(timer);
+    timer = setTimeout(async function () {
+      try { var r = await sb.from("schach_docs").upsert({user_id: user.id, path: PATH, data: haken, updated_at: new Date().toISOString()}); if (r.error) throw r.error; setStore("db"); } catch (e) { setStore("error"); }
+    }, 500);
+  }
+  function toggle(id, on) { if (on) haken[id] = today(); else delete haken[id]; save(); render(); }
+
+  /* ---------- Anzeige ---------- */
+  var filt = {thema: "", q: "", offen: false};
+  function todoRow(item, withVideo) {
+    var done = !!haken[item.id];
+    var cb = el("input", {type: "checkbox", "aria-label": item.text});
+    cb.checked = done;
+    cb.addEventListener("change", function () { toggle(item.id, cb.checked); });
+    var kids = [cb, el("span", {}, [item.text, withVideo ? el("span", {class: "small", text: " · " + item.video.title}) : null])];
+    if (done && !withVideo) kids.push(el("span", {class: "wann", text: fmt(haken[item.id])}));
+    var li = el("li", {class: "todo" + (done ? " done" : "")}, kids);
+    li.addEventListener("click", function (e) { if (e.target !== cb && !(e.target.closest && e.target.closest("a"))) { cb.checked = !cb.checked; toggle(item.id, cb.checked); } });
+    return li;
+  }
+  // Drei offene To-dos für heute: jeden Tag eine andere, feste Auswahl aus verschiedenen Videos.
+  function heute() {
+    var open = ALL.filter(function (x) { return !haken[x.id]; });
+    var seed = today().split("-").reduce(function (a, b) { return a * 37 + +b; }, 7), pick = [], seen = {};
+    for (var i = 0; i < open.length * 3 && pick.length < 3; i++) {
+      seed = (seed * 1103515245 + 12345) % 2147483648;
+      var x = open[seed % open.length];
+      if (!seen[x.video.id]) { seen[x.video.id] = 1; pick.push(x); }
+    }
+    // Heute abgehakte bleiben sichtbar, damit der Haken nicht sofort verschwindet.
+    var doneToday = ALL.filter(function (x) { return haken[x.id] === today(); }).slice(0, 3);
+    var rows = doneToday.concat(pick).slice(0, Math.max(3, doneToday.length));
+    $("heute").replaceChildren.apply($("heute"), rows.length ? rows.map(function (x) { return todoRow(x, true); }) : [el("li", {class: "small", text: "Alles abgehakt. Stark!"})]);
+  }
+  var openCards = {};
+  function render() {
+    var total = ALL.length, done = ALL.filter(function (x) { return haken[x.id]; }).length, pct = total ? Math.round(done / total * 100) : 0;
+    var C = 2 * Math.PI * 42;
+    $("ring").style.strokeDasharray = C; $("ring").style.strokeDashoffset = C * (1 - done / (total || 1));
+    $("pct").textContent = pct + " %"; $("cnt").textContent = done + " von " + total + " To-dos erledigt";
+    heute();
+    var q = filt.q.trim().toLowerCase(), list = [], any = false;
+    DATA.themen.forEach(function (t) {
+      if (filt.thema && filt.thema !== t.id) return;
+      var tTotal = 0, tDone = 0;
+      t.videos.forEach(function (v) { v.todos.forEach(function (x, i) { tTotal++; if (haken[v.id + "." + (i + 1)]) tDone++; }); });
+      var cards = [];
+      t.videos.forEach(function (v) {
+        var items = v.todos.map(function (x, i) { return {id: v.id + "." + (i + 1), text: x, video: v, thema: t}; });
+        var hit = !q || (v.title + " " + v.kern + " " + v.todos.join(" ")).toLowerCase().indexOf(q) >= 0;
+        var vDone = items.filter(function (x) { return haken[x.id]; }).length;
+        if (!hit || (filt.offen && vDone === items.length)) return;
+        var shown = filt.offen ? items.filter(function (x) { return !haken[x.id]; }) : items;
+        var det = el("details", {class: "video" + (vDone === items.length ? " fertig" : "")}, [
+          el("summary", {}, [el("div", {class: "t"}, [el("b", {text: v.title})]), el("span", {class: "count", text: vDone + "/" + items.length})]),
+          el("div", {class: "inner"}, [
+            el("p", {class: "kern", text: v.kern}),
+            el("ul", {class: "todos"}, shown.map(function (x) { return todoRow(x, false); })),
+            el("p", {class: "links"}, [el("a", {href: v.url, target: "_blank", rel: "noopener", text: "Ganzen Artikel lesen ↗"})])
+          ])
+        ]);
+        if (openCards[v.id] || (q && hit)) det.open = true;
+        det.addEventListener("toggle", function () { openCards[v.id] = det.open; });
+        cards.push(det);
+      });
+      if (!cards.length) return;
+      any = true;
+      list.push(el("section", {class: "thema"}, [el("div", {class: "thema-h"}, [el("h2", {text: t.icon + " " + t.title}), el("span", {class: "small", text: tDone + "/" + tTotal})])].concat(cards)));
+    });
+    $("list").replaceChildren.apply($("list"), list);
+    $("none").hidden = any;
+  }
+  function chips() {
+    var opts = [{id: "", title: "Alle", icon: ""}].concat(DATA.themen);
+    $("chips").replaceChildren.apply($("chips"), opts.map(function (t) {
+      var b = el("button", {class: "chip", type: "button", "aria-pressed": String(filt.thema === t.id), text: (t.icon ? t.icon + " " : "") + (t.kurz || t.title)});
+      b.addEventListener("click", function () { filt.thema = t.id; chips(); render(); });
+      return b;
+    }));
+  }
+  $("q").addEventListener("input", function () { filt.q = this.value; render(); });
+  $("offen").addEventListener("change", function () { filt.offen = this.checked; render(); });
+
+  loadLocal(); chips(); render();
+  (async function () {
+    var c = window.SR_CONFIG || {};
+    try {
+      if (!c.supabaseUrl || !window.supabase) throw new Error("ohne Konfiguration");
+      sb = window.supabase.createClient(c.supabaseUrl, c.supabaseAnonKey);
+      var s = await sb.auth.getSession();
+      user = s.data.session ? s.data.session.user : null;
+    } catch (e) { user = null; }
+    if (!user) { setStore("anon"); return; }
+    var local = haken; loadLocal();
+    // Häkchen von vor der Anmeldung (anon) mitnehmen
+    for (var k in local) if (!haken[k]) haken[k] = local[k];
+    try {
+      var r = await sb.from("schach_docs").select("data").eq("user_id", user.id).eq("path", PATH).maybeSingle();
+      if (r.error) throw r.error;
+      var remote = (r.data && r.data.data) || {}, changed = false;
+      for (var id in haken) if (!remote[id]) { remote[id] = haken[id]; changed = true; }
+      haken = remote; saveLocal(); render(); setStore("db");
+      if (changed) save();
+    } catch (e) { render(); setStore("error"); }
+  })();
+})();
+</script>
+</body>
+</html>
