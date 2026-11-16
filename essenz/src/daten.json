@@ -142,7 +142,15 @@
      ]
     }
    ],
-   "kurz": "Handeln"
+   "kurz": "Handeln",
+   "kernliste": [
+    "Mach den ersten Schritt lächerlich klein: Dokument öffnen, Laufschuhe anziehen, ein Satz.",
+    "Schreib Wenn-dann-Pläne mit Auslöser, Handlung und Ort, etwa: Wenn ich heimkomme, ziehe ich die Laufschuhe an.",
+    "Benenne das Gefühl hinter dem Aufschieben, zum Beispiel Angst oder Überforderung, statt dich faul zu nennen.",
+    "Hör auf zu recherchieren und zu planen: mach heute eine unperfekte, sichtbare Handlung.",
+    "Nimm dir pro Tag nur eine schwierige Aufgabe vor und gib ihr eine knappe Deadline.",
+    "Hör an einer Stelle auf, an der du den nächsten Schritt kennst, und notier ihn."
+   ]
   },
   {
    "id": "gewohnheiten",
@@ -359,7 +367,16 @@
      ]
     }
    ],
-   "kurz": "Gewohnheiten"
+   "kurz": "Gewohnheiten",
+   "kernliste": [
+    "Konzentrier dich auf eine einzige Gewohnheit, mit fester Uhrzeit und festem Ort.",
+    "Leg eine Minimalversion für schlechte Tage fest.",
+    "Setz nie zweimal hintereinander aus.",
+    "Mach jeden geschafften Tag sichtbar, etwa mit einem Kreuz im Kalender.",
+    "Gestalte deine Umgebung: Gutes griffbereit hinlegen, Ablenkung umständlich machen.",
+    "Häng die neue Gewohnheit an eine bestehende und sag dir, wer du sein willst, nicht was du versuchst.",
+    "Nimm dir einmal pro Woche 20 Minuten für einen kurzen Rückblick."
+   ]
   },
   {
    "id": "fokus",
@@ -584,7 +601,16 @@
      ]
     }
    ],
-   "kurz": "Fokus"
+   "kurz": "Fokus",
+   "kernliste": [
+    "Leg das Handy bei wichtiger Arbeit und nachts in einen anderen Raum.",
+    "Verbring die erste Stunde nach dem Aufwachen ohne Handy, Nachrichten und Social Media.",
+    "Blocke täglich 60 bis 90 Minuten, am besten vormittags, für deine wichtigste Aufgabe.",
+    "Schalte Benachrichtigungen aus und lösche oder begrenze Feed- und Kurzvideo-Apps.",
+    "Plane den nächsten Tag am Vorabend mit drei Kernaufgaben.",
+    "Geh täglich ohne Handy und Kopfhörer spazieren und lass die Gedanken laufen.",
+    "Halte nach Videos, Büchern oder Artikeln fest, was du gelernt hast, und setz eine Sache um."
+   ]
   },
   {
    "id": "energie",
@@ -740,7 +766,15 @@
      ]
     }
    ],
-   "kurz": "Energie"
+   "kurz": "Energie",
+   "kernliste": [
+    "Geh jeden Tag etwa zur gleichen Zeit ins Bett und plane rund sieben Stunden Schlaf.",
+    "Hol dir morgens Tageslicht, bevor du zum Handy greifst.",
+    "Bleib die letzte Stunde vor dem Schlafen bildschirmfrei und schreib kreisende Gedanken auf.",
+    "Mach während der Arbeit regelmäßig Mikropausen und geh kurz, wenn die Konzentration nachlässt.",
+    "Notier, was dir Energie gibt und was sie nimmt, und halbiere den größten Energieräuber.",
+    "Plane echte Ruhe ohne schlechtes Gewissen ein, etwa einen planlosen Abend ohne Telefon."
+   ]
   },
   {
    "id": "kopf",
@@ -1019,7 +1053,16 @@
      ]
     }
    ],
-   "kurz": "Gelassenheit"
+   "kurz": "Gelassenheit",
+   "kernliste": [
+    "Nimm dir vor jeder Reaktion drei Atemzüge oder ein paar Sekunden Pause.",
+    "Beobachte Sorgengedanken, statt sie zu glauben, und hol dich über Atem und Sinne zurück.",
+    "Sprich mit dir so freundlich wie mit einem guten Freund.",
+    "Miss dich an deinen eigenen Zielen, nicht an den Ergebnissen anderer.",
+    "Sei regelmäßig bewusst allein und still, ohne Handy und ohne Serie.",
+    "Mach aus einer Beschwerde eine klare Bitte oder erzähl abends die schöne Geschichte des Tages.",
+    "Streich, was du nur für Bestätigung oder Likes tust."
+   ]
   },
   {
    "id": "menschen",
@@ -1261,7 +1304,16 @@
      ]
     }
    ],
-   "kurz": "Menschen"
+   "kurz": "Menschen",
+   "kernliste": [
+    "Halte vor jeder Zusage kurz inne und sag ruhig „Das passt für mich nicht“, ohne lange Rechtfertigung.",
+    "Reagier auf Provokationen kurz, neutral und ohne dich zu rechtfertigen.",
+    "Zieh schon bei kleinen Respektlosigkeiten eine klare Grenze.",
+    "Hör wirklich zu: offene Fragen stellen, nicht unterbrechen, Namen merken.",
+    "Verbring weniger Zeit mit Menschen, die dich leer machen, und mehr mit denen, die dich inspirieren.",
+    "Erzähl Persönliches und große Pläne erst, wenn du dir sicher bist.",
+    "Steh aufrecht, halte Blickkontakt, sprich langsamer und halte Pausen aus."
+   ]
   },
   {
    "id": "glueck",
@@ -1386,7 +1438,15 @@
      ]
     }
    ],
-   "kurz": "Glück"
+   "kurz": "Glück",
+   "kernliste": [
+    "Schreib täglich drei konkrete Dinge auf, für die du dankbar bist.",
+    "Führ jeden Tag ein echtes Gespräch oder schick einem Menschen ein ehrliches Dankeschön.",
+    "Plane regelmäßig etwas Kleines ein, auf das du dich freuen kannst.",
+    "Verbring rund zwei Stunden pro Woche in der Natur und beweg dich täglich.",
+    "Pflege ein Hobby mit den Händen oder ein altes Hobby, ganz ohne Leistungsanspruch.",
+    "Bleib bei guten Momenten ein paar Sekunden länger und bewerte sie erst hinterher."
+   ]
   },
   {
    "id": "einfach",
@@ -1544,7 +1604,16 @@
      ]
     }
    ],
-   "kurz": "Einfach leben"
+   "kurz": "Einfach leben",
+   "kernliste": [
+    "Frag vor jedem Kauf: Brauche ich das, oder will ich es nur?",
+    "Räum jeden Abend zehn Minuten auf und gib Schlüsseln und Post einen festen Platz.",
+    "Schreib alle Vorhaben auf und verfolge nur die drei wichtigsten.",
+    "Sag öfter Nein, damit Platz für ein bewusstes Ja bleibt.",
+    "Mach einmal im Monat einen kurzen Lebensrückblick: Spielst du dein eigenes Spiel?",
+    "Gib dein Geld lieber für Erlebnisse und Lernen aus als für Status.",
+    "Schlaf eine Nacht über große Entscheidungen."
+   ]
   }
  ]
 }

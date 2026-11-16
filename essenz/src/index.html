@@ -101,6 +101,12 @@ footer a{color:var(--muted)}
     </div>
   </div>
 
+  <div class="panel neu" style="margin-top:22px">
+    <h2>Gute Gewohnheiten neu aufbauen</h2>
+    <p class="small" style="margin:4px 0 8px">Aus allen Videos zusammengefasst. Hak ab, was du umsetzt.</p>
+    <ul class="todos" id="neu"></ul>
+  </div>
+
   <div class="bar" id="chips" role="group" aria-label="Themen"></div>
   <div class="bar" style="margin-top:0">
     <input class="search" id="q" type="search" placeholder="Suchen, z. B. Schlaf, Handy, Gewohnheit" aria-label="Suchen">
@@ -184,6 +190,9 @@ footer a{color:var(--muted)}
     $("ring").style.strokeDasharray = C; $("ring").style.strokeDashoffset = C * (1 - done / (total || 1));
     $("pct").textContent = pct + " %"; $("cnt").textContent = done + " von " + total + " To-dos erledigt";
     heute();
+    var gew = DATA.themen.filter(function (t) { return t.id === "gewohnheiten"; })[0];
+    var neu = gew ? gew.kernliste.map(function (x, i) { return {id: "gew." + (i + 1), text: x, video: {title: "Gewohnheiten neu aufbauen"}}; }) : [];
+    $("neu").replaceChildren.apply($("neu"), neu.map(function (x) { return todoRow(x, false); }));
     var q = filt.q.trim().toLowerCase(), list = [], any = false;
     DATA.themen.forEach(function (t) {
       if (filt.thema && filt.thema !== t.id) return;
