@@ -39,6 +39,13 @@ h2{font-size:1.2rem;font-weight:800}
 .step b{font-weight:700;font-size:.92rem;line-height:1.25;overflow-wrap:anywhere}
 .arr{align-self:center;color:var(--accent);font-size:1.1rem;flex:none}
 .caption{font-size:.86rem;color:var(--muted);margin:0}
+.more{margin-top:auto;align-self:flex-start;font:700 .85rem var(--body);padding:7px 13px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--fg);cursor:pointer}
+.more:hover{border-color:var(--muted)}
+.more[aria-expanded=true]{background:var(--accent);color:#06221a;border-color:var(--accent)}
+.all{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--line);padding-top:12px}
+.all[hidden]{display:none}
+.all li{position:relative;padding-left:18px;font-size:.94rem;line-height:1.45}
+.all li::before{content:"";position:absolute;left:2px;top:.6em;width:6px;height:6px;border-radius:50%;background:var(--accent)}
 footer{margin-top:34px;color:var(--muted);font-size:.85rem}
 footer a{color:var(--muted)}
 </style>
@@ -86,7 +93,17 @@ footer a{color:var(--muted)}
     });
     var cap = document.createElement("p"); cap.className = "caption";
     cap.textContent = (t.kernliste || []).length + " Hacks in diesem Thema";
-    card.appendChild(head); card.appendChild(flow); card.appendChild(cap);
+    var btn = document.createElement("button"); btn.type = "button"; btn.className = "more";
+    btn.setAttribute("aria-expanded", "false"); btn.textContent = "Alle Hacks zeigen";
+    var all = document.createElement("ul"); all.className = "all"; all.hidden = true;
+    (t.kernliste || []).forEach(function (x) { var li = document.createElement("li"); li.textContent = x; all.appendChild(li); });
+    btn.addEventListener("click", function () {
+      var open = all.hidden;
+      all.hidden = !open;
+      btn.setAttribute("aria-expanded", String(open));
+      btn.textContent = open ? "Weniger anzeigen" : "Alle Hacks zeigen";
+    });
+    card.appendChild(head); card.appendChild(flow); card.appendChild(cap); card.appendChild(btn); card.appendChild(all);
     grid.appendChild(card);
   });
 })();
