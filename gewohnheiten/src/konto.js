@@ -20,6 +20,7 @@
 
   const Konto = {
     get user() { return user; },
+    get sb() { return sb; },
     onState(fn) { onState = fn; },
     async init() {
       const c = window.SR_CONFIG || {};
