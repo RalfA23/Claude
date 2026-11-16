@@ -151,10 +151,10 @@ footer{margin-top:28px;font-size:.8rem;color:var(--muted)}
       <p class="hint" id="warn" hidden></p>
     </section>
     <section class="card gevt" id="gevt" hidden aria-labelledby="gvTitle">
-      <h2 id="gvTitle">🥋 GEVT-Aufgaben des Tages</h2>
+      <h2 id="gvTitle">🥋 GEVT-Aufgabe des Tages</h2>
       <div class="gvteil" data-slot="form"></div>
       <div class="gvteil" data-slot="frei"></div>
-      <div class="row"><button type="button" class="btn primary" id="gvDone" aria-pressed="false">Beides erledigt</button></div>
+      <div class="row"><button type="button" class="btn primary" id="gvDone" aria-pressed="false">Erledigt</button></div>
     </section>
     <p class="store" id="store"></p>
 
@@ -208,14 +208,14 @@ footer{margin-top:28px;font-size:.8rem;color:var(--muted)}
         <div class="key"><code id="uhrK"></code><button type="button" class="btn small" id="uhrCopy">Kopieren</button></div>
         <p class="muted">Der Schlüssel öffnet nur das Abhaken deiner Gewohnheiten. Wer ihn hat, kann bei dir Punkte setzen, also nicht weitergeben. Neu erzeugen macht den alten ungültig.</p>
       </div>
+      <p><b>Einfach, wenn du nur eine Gewohnheit hast:</b></p>
       <ol>
         <li>Am iPhone die App <b>Kurzbefehle</b> öffnen, oben <b>+</b>, Name „Gewohnheit abhaken“.</li>
-        <li>Aktion <b>Inhalte von URL abrufen</b>. URL: <code class="uhrUrl"></code><br>Pfeil aufklappen: Methode <b>POST</b>, Haupttext <b>JSON</b>, Feld hinzufügen: Text, Schlüssel <code>k</code>, Wert = dein Uhr-Schlüssel.</li>
-        <li>Aktion <b>Aus Liste auswählen</b>. Sie nimmt automatisch das Ergebnis von Schritt 2.</li>
-        <li>Noch einmal <b>Inhalte von URL abrufen</b>, gleiche URL, POST, JSON mit <code>k</code> = Schlüssel und einem zweiten Textfeld <code>h</code> = Variable <b>Ausgewähltes Objekt</b>.</li>
+        <li>Aktion <b>Inhalte von URL abrufen</b>. URL: <code class="uhrUrl" data-zusatz="?abhaken=1"></code><br>Pfeil aufklappen: Methode <b>POST</b>, Haupttext <b>JSON</b>, Feld hinzufügen: Text, Schlüssel <code>k</code>, Wert = dein Uhr-Schlüssel.</li>
         <li>Aktion <b>Ergebnis anzeigen</b>.</li>
-        <li>Unten auf <b>ⓘ</b> und <b>Auf Apple Watch anzeigen</b> einschalten. Fertig.</li>
+        <li>Unten auf <b>ⓘ</b> und <b>Auf Apple Watch anzeigen</b> einschalten. Fertig: ein Tipp auf der Uhr hakt den Tag ab.</li>
       </ol>
+      <p><b>Mit Auswahl, wenn du mehrere Gewohnheiten hast:</b> URL ohne „?abhaken=1“, danach <b>Aus Liste auswählen</b> (heißt manchmal „Choose from List“), dann noch einmal <b>Inhalte von URL abrufen</b> mit <code>k</code> und einem zweiten Textfeld <code>h</code> = <b>Ausgewähltes Objekt</b>, zum Schluss <b>Ergebnis anzeigen</b>.</p>
       <p class="muted">Auf der Uhr: App Kurzbefehle öffnen oder die Komplikation „Kurzbefehle“ aufs Zifferblatt legen. Mit Siri geht es auch: „Gewohnheit abhaken“. Die Seite hier zeigt den Punkt, sobald du sie wieder öffnest.</p>
     </details>
   </div>
@@ -483,8 +483,9 @@ function vorlageAusLink() {
   if (l.length !== habits().length) save(l);
 }
 /* ---------- GEVT-Aufgaben des Tages (nur für Konten mit Rolle admin in gevt_members, also Ralf) ----------
-   Zwei Aufgaben pro Tag über die Edge Function gevt-ask aus der verschlüsselten Wissensdatenbank:
-   eine Übung aus den Formen (gewohnheiten/gevtf.<datum>) und eine Übung oder ein Learning im Themenwechsel (gewohnheiten/gevt.<datum>).
+   Eine Aufgabe pro Tag über die Edge Function gevt-ask aus der verschlüsselten Wissensdatenbank (Ralf, 2026-11-16),
+   im Tageswechsel: an geraden Tagen eine Übung aus den Formen (gewohnheiten/gevtf.<datum>),
+   an ungeraden eine Übung oder ein Learning im Themenwechsel (gewohnheiten/gevt.<datum>).
    Erledigt setzt den Punkt bei der Gewohnheit gevt-aufgabe. */
 const GEVT_ID = "gevt-aufgabe";
 const GEVT = {
@@ -500,6 +501,8 @@ function gevtThema(slot, key, extra) {
   const t = GEVT[slot].themen, tag = Math.round(parse(key) / 864e5);
   return t[(((tag + (extra || 0)) % t.length) + t.length) % t.length];
 }
+/* Welche Aufgabe ist heute dran? Tageszahl seit 1970, gerade = Formen. */
+function gevtSlot(key) { return Math.round(parse(key) / 864e5) % 2 ? "frei" : "form"; }
 function gevtSplit(t) {
   let stufe = "";
   const m = t.match(/^\s*STUFE:\s*(.*)\n?/);
@@ -519,7 +522,9 @@ function gevtTeil(slot) {
 }
 function renderGevt() {
   const el = $("gevt"); el.hidden = !gevtAn; if (!gevtAn) return;
-  for (const slot of ["form", "frei"]) {
+  const heuteSlot = gevtSlot(iso(heute()));
+  for (const x of document.querySelectorAll(".gvteil")) x.hidden = x.dataset.slot !== heuteSlot;
+  for (const slot of [heuteSlot]) {
     const d = gevtDaten[slot], t = gevtTeil(slot);
     if (gevtBusy[slot]) { t.querySelector(".neu").disabled = true; continue; }
     t.querySelector(".thema").textContent = d && d.thema ? d.art + " · " + d.thema : "";
@@ -529,8 +534,8 @@ function renderGevt() {
     t.querySelector(".neu").disabled = false;
   }
   const done = isDone(GEVT_ID, iso(heute())), b = $("gvDone");
-  b.setAttribute("aria-pressed", done ? "true" : "false"); b.textContent = done ? "✓ Erledigt" : "Beides erledigt";
-  b.disabled = !(gevtDaten.form && gevtDaten.form.text) && !(gevtDaten.frei && gevtDaten.frei.text);
+  b.setAttribute("aria-pressed", done ? "true" : "false"); b.textContent = done ? "✓ Erledigt" : "Erledigt";
+  b.disabled = !(gevtDaten[heuteSlot] && gevtDaten[heuteSlot].text);
 }
 async function gevtHolen(slot, neu) {
   if (gevtBusy[slot]) return;
@@ -585,13 +590,14 @@ async function gevtStart(docs) {
   const key = iso(heute());
   for (const slot of ["form", "frei"]) gevtDaten[slot] = docs[GEVT[slot].doc + key] || null;
   render();
-  for (const slot of ["form", "frei"]) if (!gevtDaten[slot] || !gevtDaten[slot].text) gevtHolen(slot, false);
+  const slot = gevtSlot(key);
+  if (!gevtDaten[slot] || !gevtDaten[slot].text) gevtHolen(slot, false);
 }
 $("gvDone").addEventListener("click", async () => { await toggle(GEVT_ID, iso(heute())); renderGevt(); });
 
 /* ---------- Apple Watch: Uhr-Schlüssel für den Kurzbefehl (Edge Function gewohnheiten-uhr) ---------- */
 const UHR_FN = () => ((window.SR_CONFIG || {}).supabaseUrl || "") + "/functions/v1/gewohnheiten-uhr";
-for (const el of document.querySelectorAll(".uhrUrl")) el.textContent = UHR_FN();
+for (const el of document.querySelectorAll(".uhrUrl")) el.textContent = UHR_FN() + (el.dataset.zusatz || "");
 function uhrMsg(t) { const el = $("uhrMsg"); el.hidden = !t; el.textContent = t || ""; }
 $("uhrNeu").addEventListener("click", async () => {
   const sb = Konto.sb, c = window.SR_CONFIG || {};

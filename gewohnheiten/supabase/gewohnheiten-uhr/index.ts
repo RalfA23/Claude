@@ -4,6 +4,9 @@
 //        gespeichert wird nur sein SHA-256 in schach_docs gewohnheiten/uhr. Ein neuer Schlüssel macht den alten ungültig.
 //   POST {k}       -> ["🪵 Holzpuppe", ...]  heute noch offene Gewohnheiten (für „Aus Liste auswählen“)
 //   POST {k, h}    -> "✓ Holzpuppe ist für heute abgehakt."  h = Eintrag aus der Liste oder Name
+//   ?abhaken=1 (oder abhaken im JSON) ohne h -> hakt die einzige offene Gewohnheit direkt ab. So reicht auf der Uhr
+//        eine einzige Aktion „Inhalte von URL abrufen“. Sind mehrere offen, kommt die Liste als Text zurück.
+//   k, h und abhaken gehen auch als URL-Parameter (GET oder POST).
 // Daten wie auf /gewohnheiten/: gewohnheiten/liste, gewohnheiten/jahr.<yyyy> {id:{"MM-DD":1}}, Training: gesundheit/training.<datum>.
 // „Heute“ ist der Tag in Europe/Berlin. Deploy mit verify_jwt false (eigene Prüfung über Schlüssel bzw. Login).
 import { createClient } from "npm:@supabase/supabase-js@2";
@@ -36,8 +39,10 @@ type G = { id: string; n: string; i?: string };
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
-  if (req.method !== "POST") return text("Bitte POST verwenden.", 405);
-  const body = await req.json().catch(() => ({}));
+  if (req.method !== "POST" && req.method !== "GET") return text("Bitte GET oder POST verwenden.", 405);
+  const q = new URL(req.url).searchParams;
+  const body: Record<string, any> = req.method === "POST" ? await req.json().catch(() => ({})) : {};
+  for (const n of ["k", "h", "abhaken"]) if (body[n] === undefined && q.has(n)) body[n] = q.get(n);
   const admin = createClient(URL_, SERVICE, { auth: { persistSession: false } });
 
   // Neuer Schlüssel, nur mit Login von der Webseite.
@@ -69,7 +74,15 @@ Deno.serve(async (req) => {
   const erledigt = (g: G) => g.id === "training" ? !!by[TRAIN + tag]?.done : !!jahr[g.id]?.[md];
   const label = (g: G) => ((g.i ? g.i + " " : "") + g.n).trim();
 
-  const h = typeof body.h === "string" ? body.h : "";
+  let h = typeof body.h === "string" ? body.h : "";
+  const abhaken = body.abhaken !== undefined && body.abhaken !== false && body.abhaken !== "0" && body.abhaken !== "";
+  if (!h && abhaken) {
+    const offen = liste.filter((g) => !erledigt(g));
+    if (!liste.length) return text("Du hast noch keine Gewohnheiten angelegt.");
+    if (!offen.length) return text("Heute ist schon alles abgehakt. Stark!");
+    if (offen.length > 1) return text("Mehrere offen: " + offen.map((g) => g.n).join(", ") + ". Nimm den Kurzbefehl mit Liste.");
+    h = label(offen[0]);
+  }
   if (!h) {
     const offen = liste.filter((g) => !erledigt(g)).map(label);
     return json(offen.length ? offen : [FERTIG]);
