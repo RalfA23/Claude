@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Klebende Arme – Mission 01</title>
+<style>html,body{margin:0;height:100%;background:#000;overflow:hidden}canvas{display:block;margin:0 auto;height:100vh;aspect-ratio:9/16;max-width:100vw}</style>
+</head><body><canvas id="c" width="1080" height="1920"></canvas>
+<script src="timeline.js"></script>
+<script>
+// Eigener Stil: Missionskarten, Radar-Karte, Anspannungs-Sterne, Ergebnis-Banner.
+const W=1080,H=1920,cv=document.getElementById('c'),g=cv.getContext('2d');
+const Y='#ffd21f',K='#0b0b0d',WH='#ffffff',RD='#e8321e',GN='#38d46b',GR='#2a2d35',BL='#3ea8ff';
+const F='"Inter Display","Inter",sans-serif';
+const cl=(x,a=0,b=1)=>Math.max(a,Math.min(b,x)),pr=(t,a,b)=>cl((t-a)/(b-a)),lerp=(a,b,p)=>a+(b-a)*p;
+const eo=x=>1-Math.pow(1-x,3),back=x=>{const c=1.9;return 1+(c+1)*Math.pow(x-1,3)+c*Math.pow(x-1,2)};
+function rnd(s){let x=Math.sin(s*127.1+311.7)*43758.5453;return x-Math.floor(x)}
+const C=CUE;
+function txt(s,x,y,size,o={}){g.save();g.font=`${o.w||900} ${size}px ${F}`;g.letterSpacing=(o.ls??-.01)*size+'px';let sc=1;const m=g.measureText(s).width;if(m>(o.max||940))sc=(o.max||940)/m;
+  g.translate(x,y);g.rotate(o.rot||0);g.scale(sc*(o.s??1),sc*(o.s??1));g.textAlign=o.al||'center';g.textBaseline='middle';g.globalAlpha=cl(o.a??1);
+  if(o.stroke){g.lineJoin='round';g.lineWidth=size*.16;g.strokeStyle=o.stroke;g.strokeText(s,0,0)}g.fillStyle=o.c||Y;g.fillText(s,0,0);g.restore()}
+function pop(s,x,y,size,lt,o={}){if(lt<0)return;const p=back(pr(lt,0,.25));txt(s,x,y,size,{...o,s:p*(o.s??1)})}
+function label(s,x,y,lt,o={}){if(lt<0)return;const p=eo(pr(lt,0,.25));g.save();g.font=`900 ${o.size||48}px ${F}`;const w=g.measureText(s).width+60,h=(o.size||48)*1.7;
+  g.globalAlpha=p;g.translate(x,y);g.scale(p,p);g.fillStyle=K;g.fillRect(-w/2+10,-h/2+10,w,h);g.fillStyle=o.bg||Y;g.fillRect(-w/2,-h/2,w,h);
+  g.fillStyle=o.c||K;g.textAlign='center';g.textBaseline='middle';g.fillText(s,0,2);g.restore()}
+// Missionskarte: Schwarzer Balken, gelber Titel
+function card(num,title,lt){if(lt<0)return;const p=eo(pr(lt,0,.35));g.save();g.globalAlpha=p;g.fillStyle=K;g.fillRect(0,250,W*p,300);g.fillStyle=Y;g.fillRect(0,250,20*p,300);g.restore();
+  if(p>.7){txt(num,90,320,46,{al:'left',c:Y,w:800,ls:.15,a:(p-.7)/.3});txt(title,90,440,108,{al:'left',c:WH,max:960,a:(p-.7)/.3})}}
+// Radar-Karte unten links
+function radar(t,ax){g.save();g.translate(80,1500);g.beginPath();g.arc(0,0,190,0,7);g.clip();g.fillStyle='#0f2a1d';g.fillRect(-200,-200,400,400);
+  g.strokeStyle='rgba(56,212,107,.25)';g.lineWidth=2;for(let i=-200;i<=200;i+=40){g.beginPath();g.moveTo(i,-200);g.lineTo(i,200);g.stroke();g.beginPath();g.moveTo(-200,i);g.lineTo(200,i);g.stroke()}
+  g.fillStyle=WH;g.beginPath();g.moveTo(0,-30);g.lineTo(22,24);g.lineTo(0,12);g.lineTo(-22,24);g.closePath();g.fill();
+  const r=(t*1.2)%1;g.strokeStyle=`rgba(56,212,107,${1-r})`;g.lineWidth=4;g.beginPath();g.arc(0,0,r*190,0,7);g.stroke();g.restore();
+  g.save();g.strokeStyle=K;g.lineWidth=12;g.beginPath();g.arc(80,1500,190,0,7);g.stroke();g.restore()}
+// Sterne (Anspannung)
+function stars(n,t){for(let i=0;i<5;i++){const on=i<n,x=760+i*68,y=330,k=on?1:.25;g.save();g.translate(x,y);g.rotate(on?Math.sin(t*6+i)*.12:0);g.beginPath();
+  for(let j=0;j<10;j++){const r=j%2?16:40,a=j/10*6.283-Math.PI/2;g.lineTo(Math.cos(a)*r,Math.sin(a)*r)}g.closePath();g.fillStyle=on?RD:GR;g.globalAlpha=k;g.fill();g.lineWidth=6;g.strokeStyle=K;g.stroke();g.restore()}}
+// Figuren: Draufsicht, zwei Arme
+function fighter(cx,cy,col,hl,hr,a=1){g.save();g.globalAlpha=a;g.fillStyle=col;g.strokeStyle=K;g.lineWidth=8;g.beginPath();g.arc(cx,cy,110,0,7);g.fill();g.stroke();
+  g.fillStyle=K;g.beginPath();g.arc(cx,cy-40,24,0,7);g.fill();
+  for(const[h,s]of[[hl,-1],[hr,1]]){const sx=cx+s*96,sy=cy+30;g.strokeStyle=col;g.lineWidth=40;g.lineCap='round';g.beginPath();g.moveTo(sx,sy);g.lineTo(h[0],h[1]);g.stroke();g.strokeStyle=K;g.lineWidth=6;g.beginPath();g.moveTo(sx,sy);g.lineTo(h[0],h[1]);g.stroke();g.fillStyle=WH;g.beginPath();g.arc(h[0],h[1],26,0,7);g.fill();g.strokeStyle=K;g.lineWidth=6;g.stroke()}
+  g.restore()}
+const PL=[540,1140],OP=[540,660];
+function pose(t,stiff,contact,push){const j=stiff*Math.sin(t*38)*10,jx=stiff*Math.cos(t*31)*10;
+  const C=[contact[0]+jx,contact[1]+j];const pl=[C[0]-40,C[1]],pr2=[C[0]+40,C[1]+(stiff>.5?14:0)];
+  const op=[C[0]+38,C[1]-(push||0)*0+4],opL=[C[0]-44,C[1]-6];return{C,pl,pr:pr2,op,opL}}
+
+const S=[
+(lt,d,t)=>{ // 0 Missionskarte
+  card('MISSION 01','KLEBENDE ARME',lt-.2);radar(t,0);fighter(540,1140,'#2a2d35',[450,1170],[630,1170],.6);fighter(540,660,'#2a2d35',[450,630],[630,630],.6);
+  label('CHI SAO',540,1000,lt-.8,{size:110,bg:Y,c:K})},
+(lt,d,t)=>{ // 1 Kontakt
+  const ps=pose(t,.2,[540,900]);card('MISSION 01','KLEBENDE ARME',1);radar(t,0);
+  fighter(540,660,RD,[ps.opL[0],ps.opL[1]],[ps.op[0],ps.op[1]],1);fighter(540,1140,Y,ps.pl,ps.pr,1);
+  const k=eo(pr(lt,0,.5));g.save();g.globalAlpha=k*(.5+.5*Math.sin(t*5));g.strokeStyle=BL;g.lineWidth=8;g.beginPath();g.arc(540,900,70+30*Math.sin(t*4),0,7);g.stroke();g.restore();
+  label('KONTAKT',540,930,lt-.2,{size:44,bg:BL,c:WH});stars(0,t);
+  txt('Du fühlst den Druck, bevor du ihn siehst.',540,1560,46,{c:WH,w:600,max:920,a:pr(lt,.5,.9),ls:0})},
+(lt,d,t)=>{ // 2 Anspannung
+  const st=eo(pr(lt,C.stiff.up*d,C.stiff.hi*d)),ps=pose(t,st,[540,900]);card('MISSION 01','KLEBENDE ARME',1);radar(t,0);
+  fighter(540,660,RD,[ps.opL[0],ps.opL[1]],[ps.op[0],ps.op[1]]);fighter(540,1140,st>.5?RD:Y,ps.pl,ps.pr);
+  stars(Math.round(st*5),t);
+  if(st>.85){g.save();g.globalAlpha=.4+.6*Math.abs(Math.sin(t*12));g.fillStyle=RD;g.fillRect(0,0,W,H);g.restore()}
+  label(st>.85?'VERSPANNT!':'ANGESPANNT',540,1000,lt-.1,{size:76,bg:st>.85?RD:Y,c:st>.85?WH:K});
+  txt('Du wirst sichtbar.',540,1560,52,{c:WH,w:800,a:pr(lt,.6,1)})},
+(lt,d,t)=>{ // 3 Locker, weiterleiten
+  const u=lt/d,relax=1-eo(pr(u,C.stiff.down,C.stiff.down+.2)),pu=eo(pr(u,C.push.in,C.push.out)),ps=pose(t,relax*.1+.1,[540,900+pu*120,]);
+  card('MISSION 01','KLEBENDE ARME',1);radar(t,0);
+  const oppX=540,oppY=660+pu*40;fighter(oppX,oppY,RD,[ps.opL[0],ps.opL[1]+(oppY-660)],[ps.op[0],ps.op[1]+(oppY-660)]);fighter(540,1140,Y,ps.pl,ps.pr);
+  stars(Math.round((1-relax)*5),t);
+  if(u>C.push.in){const a=eo(pr(u,C.push.in,C.push.in+.15));g.save();g.globalAlpha=a;g.strokeStyle=GN;g.lineWidth=14;g.lineCap='round';g.beginPath();g.moveTo(540,700);g.lineTo(540,1000);g.stroke();
+    g.fillStyle=GN;g.beginPath();g.moveTo(540,1040);g.lineTo(510,990);g.lineTo(570,990);g.closePath();g.fill();g.restore();label('WEITERLEITEN',540,1080,lt-C.push.in*d,{size:52,bg:GN,c:K})}
+  txt('Locker bleiben. Nicht dagegen, sondern mit.',540,1560,46,{c:WH,w:700,a:pr(lt,.2,.8),max:920})},
+(lt,d,t)=>{ // 4 Ergebnis-Balken
+  const p=eo(pr(lt,C.res.bar*d,C.res.full*d));card('MISSION 01','KLEBENDE ARME',1);radar(t,0);
+  fighter(540,660,RD,[480,630],[600,630]);fighter(540,1140,GN,[500,1160],[580,1160]);
+  g.save();g.fillStyle=K;g.fillRect(140,820,800,90);g.fillStyle=GN;g.fillRect(150,830,780*p,70);g.restore();
+  txt('KONTROLLE '+Math.round(100*p)+' %',540,780,70,{c:WH,stroke:K,ls:0});
+  txt('Keine Kraft gegen Kraft.',540,1560,48,{c:WH,w:800,a:pr(lt,.2,.6)});stars(0,t)},
+(lt,d,t)=>{ // 5 Banner
+  const k=pr(lt,0,.3);g.save();g.globalAlpha=k;g.fillStyle=Y;g.fillRect(0,640,W,520);g.restore();
+  pop('MISSION',540,760,120,lt-.1,{c:K});pop('BESTANDEN',540,920,170,lt-.2,{c:K});
+  txt('KLEBENDE ARME · VING TSUN',540,1290,56,{c:WH,stroke:K,a:pr(lt,.8,1.2),ls:.02});
+  txt('Ist in deiner Hand, nicht in deiner Kraft.',540,1400,46,{c:WH,w:700,a:pr(lt,1.4,1.9),ls:0,max:940})}
+];
+function render(t){
+  g.setTransform(1,0,0,1,0,0);g.globalAlpha=1;g.fillStyle=GR;g.fillRect(0,0,W,H);
+  g.fillStyle='#22262e';for(let x=-200;x<W+400;x+=160){g.beginPath();g.moveTo(x,0);g.lineTo(x+60,0);g.lineTo(x+60-500,H);g.lineTo(x-500,H);g.closePath();g.fill()}
+  g.fillStyle='#1c1f26';g.fillRect(0,1700,W,220);g.fillStyle=Y;for(let x=0;x<W;x+=180){g.fillRect((x+t*120)%W,1790,90,18)}
+  let i=TL.findIndex(c=>t<c.s+c.d);if(i<0)i=TL.length-1;const c=TL[i],lt=t-c.s,f=Math.floor(t*30);
+  const hitT=TL[2].s+C.stiff.hi*TL[2].d;let sh=0;const dd=t-hitT;if(dd>=0&&dd<.35)sh=(1-dd/.35)**2;
+  g.save();g.translate((rnd(f)-.5)*30*sh,(rnd(f+4)-.5)*30*sh);S[i](lt,c.d,t);g.restore();
+  // Wechsel: Schwarzer Wisch
+  const wi=pr(lt,0,.2);if(i>0&&wi<1){g.fillStyle=K;g.globalAlpha=1-wi;g.fillRect(0,0,W,H);g.globalAlpha=1}
+  const wo=i<TL.length-1?pr(lt,c.d-.15,c.d):0;if(wo>0){g.fillStyle=K;g.globalAlpha=wo;g.fillRect(0,0,W,H);g.globalAlpha=1}
+  const e=pr(t,DUR-.5,DUR);if(e>0){g.globalAlpha=e;g.fillStyle='#000';g.fillRect(0,0,W,H);g.globalAlpha=1}
+}
+window.render=render;
+if(!location.hash.includes('cap')){const t0=performance.now();(function loop(){render(((performance.now()-t0)/1000)%DUR);requestAnimationFrame(loop)})()}
+</script></body></html>
