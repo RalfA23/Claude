@@ -86,6 +86,14 @@ test("GEVT: Statistik zählt nur abgehakte Tage, Rotation nimmt das Seltenste", 
   assert.equal(GW.gevtNaechstes("form", st2, 0), "Siu Nim Tau");
 });
 
+test("GEVT: höchstens 10, nur Übungen allein, frühere Aufgaben ohne heute", () => {
+  for (const b of GW.GEVT_REIHE) assert.ok(GW.GEVT_BEREICHE[b].max <= 10, b);
+  for (const t of GW.GEVT_BEREICHE.frei.themen) assert.ok(!/Chi Sao|Lat Sao|Partner/.test(t), t);
+  for (let i = 0; i < 50; i++) { const w = GW.wuerfel(GW.GEVT_BEREICHE.frei.min, GW.GEVT_BEREICHE.frei.max); assert.ok(w >= 3 && w <= 10); }
+  const docs = {"2026-11-17": {frei: {aufgabe: "A"}}, "2026-11-18": {frei: {aufgabe: "B"}}, "2026-11-19": {frei: {aufgabe: "C"}}};
+  assert.deepEqual(GW.gevtFrueher(docs, "frei", "2026-11-19"), ["B", "A"]);
+});
+
 test("GEVT: Antwort in Aufgabe und Erläuterung zerlegen", () => {
   const z = GW.gevtZerlegen("STUFE: Grad 1 · Siu Nim Tau\nAUFGABE: Ersten Satz ganz langsam, Ellbogen in der Mitte.\n\nGöksel sagt, der Ellbogen bleibt **eine Faust** vom Körper.\n\nQUELLEN:\nG: Lehrplan Grad 1");
   assert.equal(z.stufe, "Grad 1 · Siu Nim Tau");
