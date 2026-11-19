@@ -86,6 +86,14 @@ test("GEVT: Statistik zählt nur abgehakte Tage, Rotation nimmt das Seltenste", 
   assert.equal(GW.gevtNaechstes("form", st2, 0), "Siu Nim Tau");
 });
 
+test("GEVT: Nachdenken ist eigene Rubrik, Training hat Holzpuppe", () => {
+  assert.deepEqual(GW.GEVT_REIHE, ["form", "puppe", "frei"]);
+  assert.ok(GW.GEVT_ALLE.includes("denk"));
+  const st = GW.gevtStatistik({"2026-11-18": {form: {thema: "Chum Kiu", anzahl: 2}, denk: {thema: "Mittellinie", anzahl: 5}}}, (d, b) => b === "denk");
+  assert.equal(st.form["Chum Kiu"], undefined);
+  assert.equal(st.denk["Mittellinie"].tage, 1);
+});
+
 test("GEVT: höchstens 10, nur Übungen allein, frühere Aufgaben ohne heute", () => {
   for (const b of GW.GEVT_REIHE) assert.ok(GW.GEVT_BEREICHE[b].max <= 10, b);
   for (const t of GW.GEVT_BEREICHE.frei.themen) assert.ok(!/Chi Sao|Lat Sao|Partner/.test(t), t);
