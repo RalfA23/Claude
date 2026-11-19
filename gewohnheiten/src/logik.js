@@ -118,5 +118,60 @@
     return {erledigt, faellig, quote: faellig ? Math.min(100, Math.round(erledigt / faellig * 100)) : 0};
   }
 
-  root.GW = {monat, monatZahlen, pad, iso, parse, addDays, wdIndex, daysInMonth, WOCHE, ART, planTag, planWoche, istTraining, serie, laengsteSerie, jahr, gesternVerpasst, TRAINING, FARBEN, neueId};
+  /* ---------- GEVT-Tagesaufgaben: drei Bereiche, Anzahl per Würfel, Wiederholung über die Statistik ----------
+     form: rollierend durch die Formen, Anzahl = Durchgänge.
+     denk: Nachdenk-Aufgabe zu einem Prinzip, Anzahl = Minuten.
+     frei: Übung aus Notizen, Masterclass und Videos, Anzahl = Wiederholungen. */
+  const GEVT_BEREICHE = {
+    form: {titel: "Form", icon: "🥋", einheit: ["Durchgang", "Durchgänge"], min: 2, max: 6,
+      themen: ["Siu Nim Tau", "Chum Kiu", "Biu Tze", "Holzpuppenform"]},
+    denk: {titel: "Nachdenken · Prinzip", icon: "💭", einheit: ["Minute", "Minuten"], min: 5, max: 15,
+      themen: ["Mittellinie", "Entspannung und Lockerheit", "Struktur und Erdung", "Ökonomie der Bewegung", "Vorwärtsdruck", "Kleben und Folgen", "Gleichzeitig angreifen und abwehren", "Timing und Distanz", "Ellbogenposition", "Kraft aus dem Boden"]},
+    frei: {titel: "Aus deinen Notizen und Videos", icon: "📜", einheit: ["Wiederholung", "Wiederholungen"], min: 10, max: 30,
+      themen: ["Chi Sao", "Lat Sao und Partnerdrills", "Stand und Schrittarbeit", "Fauststöße und Kettenfauststoß", "Bong Sao, Tan Sao und Fook Sao", "eine Übung aus der Masterclass", "eine Übung aus einem YouTube-Video von Sifu Göksel", "eine Übung aus meinen Notizbüchern", "eine Korrektur, die Sifu Göksel oft gibt", "Tritte"]}
+  };
+  const GEVT_REIHE = ["form", "denk", "frei"];
+  const einheit = (b, n) => GEVT_BEREICHE[b].einheit[n === 1 ? 0 : 1];
+  function wuerfel(min, max, rnd) { const r = (rnd || Math.random)(); return min + Math.floor(r * (max - min + 1)); }
+
+  /* Statistik aus allen Tagesdokumenten: nur Tage, die abgehakt sind, zählen.
+     docs = {datum: {form: {thema, anzahl}, …}}, erledigt(datum) -> bool.
+     Ergebnis: {bereich: {thema: {tage, summe, zuletzt}}} */
+  function gevtStatistik(docs, erledigt) {
+    const out = {}; for (const b of GEVT_REIHE) out[b] = {};
+    for (const [datum, doc] of Object.entries(docs || {})) {
+      if (!doc || !erledigt(datum)) continue;
+      for (const b of GEVT_REIHE) {
+        const a = doc[b]; if (!a || !a.thema) continue;
+        const z = out[b][a.thema] || (out[b][a.thema] = {tage: 0, summe: 0, zuletzt: ""});
+        z.tage++; z.summe += Number(a.anzahl) || 0;
+        if (datum > z.zuletzt) z.zuletzt = datum;
+      }
+    }
+    return out;
+  }
+  /* Nächstes Thema: am seltensten geübt, bei Gleichstand am längsten her, dann Reihenfolge der Liste.
+     So kommt jedes Thema regelmäßig wieder (rollierend). versuch > 0 nimmt das nächste in dieser Reihenfolge. */
+  function gevtNaechstes(b, stat, versuch) {
+    const t = GEVT_BEREICHE[b].themen, st = (stat && stat[b]) || {};
+    const sortiert = t.map((x, i) => ({x, i, n: (st[x] || {}).tage || 0, z: (st[x] || {}).zuletzt || ""}))
+      .sort((a, c) => a.n - c.n || (a.z < c.z ? -1 : a.z > c.z ? 1 : 0) || a.i - c.i);
+    return sortiert[(versuch || 0) % sortiert.length].x;
+  }
+  /* Antwort der Wissensdatenbank zerlegen: STUFE-Zeile, AUFGABE-Zeile, Erläuterung, QUELLEN. */
+  function gevtZerlegen(t) {
+    let stufe = "", aufgabe = "";
+    const m = t.match(/^\s*STUFE:\s*(.*)\n?/);
+    if (m) { stufe = m[1].trim(); t = t.slice(m[0].length); }
+    const q = t.search(/^\s*QUELLEN:?\s*$/m);
+    let quellen = "";
+    if (q >= 0) { quellen = t.slice(q).replace(/^\s*QUELLEN:?\s*$/m, "").trim(); t = t.slice(0, q); }
+    const a = t.match(/^\s*\**AUFGABE:?\**:?\s*(.+)$/mi);
+    if (a) { aufgabe = a[1].replace(/\*\*/g, "").trim(); t = t.replace(a[0], ""); }
+    let erklaerung = t.replace(/^\s*\**ERL(Ä|AE)UTERUNG:?\**:?\s*/mi, "").trim();
+    if (!aufgabe) { const satz = erklaerung.match(/^[^.!?\n]+[.!?]?/); aufgabe = satz ? satz[0].replace(/\*\*/g, "").trim() : ""; }
+    return {stufe, aufgabe, erklaerung, quellen};
+  }
+
+  root.GW = {GEVT_BEREICHE, GEVT_REIHE, einheit, wuerfel, gevtStatistik, gevtNaechstes, gevtZerlegen, monat, monatZahlen, pad, iso, parse, addDays, wdIndex, daysInMonth, WOCHE, ART, planTag, planWoche, istTraining, serie, laengsteSerie, jahr, gesternVerpasst, TRAINING, FARBEN, neueId};
 })(typeof window !== "undefined" ? window : globalThis);

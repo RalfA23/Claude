@@ -59,3 +59,39 @@ test("Monatskalender beginnt am Montag", () => {
   const z = GW.monatZahlen(k => k === "2026-11-02" || k === "2026-11-03", 2026, 10, GW.parse("2026-11-10"));
   assert.deepEqual(z, {erledigt: 2, faellig: 10, quote: 20});
 });
+
+test("GEVT: Würfel bleibt im Bereich", () => {
+  assert.equal(GW.wuerfel(2, 6, () => 0), 2);
+  assert.equal(GW.wuerfel(2, 6, () => 0.9999), 6);
+  for (let i = 0; i < 200; i++) { const n = GW.wuerfel(5, 15); assert.ok(n >= 5 && n <= 15); }
+  assert.equal(GW.einheit("form", 1), "Durchgang");
+  assert.equal(GW.einheit("denk", 7), "Minuten");
+});
+
+test("GEVT: Statistik zählt nur abgehakte Tage, Rotation nimmt das Seltenste", () => {
+  const docs = {
+    "2026-11-17": {form: {thema: "Siu Nim Tau", anzahl: 3}, denk: {thema: "Mittellinie", anzahl: 10}},
+    "2026-11-18": {form: {thema: "Chum Kiu", anzahl: 4}},
+    "2026-11-19": {form: {thema: "Biu Tze", anzahl: 5}}
+  };
+  const st = GW.gevtStatistik(docs, d => d !== "2026-11-19");
+  assert.deepEqual(st.form["Siu Nim Tau"], {tage: 1, summe: 3, zuletzt: "2026-11-17"});
+  assert.equal(st.form["Biu Tze"], undefined);
+  assert.equal(GW.gevtNaechstes("form", st, 0), "Biu Tze");
+  assert.equal(GW.gevtNaechstes("form", st, 1), "Holzpuppenform");
+  assert.equal(GW.gevtNaechstes("form", st, 2), "Siu Nim Tau");
+  assert.equal(GW.gevtNaechstes("denk", st, 0), "Entspannung und Lockerheit");
+  // Alle gleich oft: der am längsten zurückliegende kommt zuerst
+  const st2 = {form: {"Siu Nim Tau": {tage: 1, zuletzt: "2026-11-10"}, "Chum Kiu": {tage: 1, zuletzt: "2026-11-12"}, "Biu Tze": {tage: 1, zuletzt: "2026-11-11"}, "Holzpuppenform": {tage: 1, zuletzt: "2026-11-13"}}};
+  assert.equal(GW.gevtNaechstes("form", st2, 0), "Siu Nim Tau");
+});
+
+test("GEVT: Antwort in Aufgabe und Erläuterung zerlegen", () => {
+  const z = GW.gevtZerlegen("STUFE: Grad 1 · Siu Nim Tau\nAUFGABE: Ersten Satz ganz langsam, Ellbogen in der Mitte.\n\nGöksel sagt, der Ellbogen bleibt **eine Faust** vom Körper.\n\nQUELLEN:\nG: Lehrplan Grad 1");
+  assert.equal(z.stufe, "Grad 1 · Siu Nim Tau");
+  assert.equal(z.aufgabe, "Ersten Satz ganz langsam, Ellbogen in der Mitte.");
+  assert.ok(z.erklaerung.startsWith("Göksel sagt"));
+  assert.equal(z.quellen, "G: Lehrplan Grad 1");
+  const ohne = GW.gevtZerlegen("Übe heute den Tan Sao. Achte auf den Ellbogen.");
+  assert.equal(ohne.aufgabe, "Übe heute den Tan Sao.");
+});
