@@ -243,7 +243,7 @@ textarea.own{width:100%;min-height:140px;padding:10px;border-radius:8px;border:1
 <!--DATA-->
 <script>
 "use strict";
-/* Fortgeschrittenen-Kurs: gleiche App, aufgerufen mit ?kurs=fortgeschritten. Daten in src/advanced-data.js und src/recht-data.js. */
+/* Fortgeschrittenen-Kurs: gleiche App, aufgerufen mit ?kurs=fortgeschritten. Daten in src/advanced-data.js, src/recht-data.js und src/ki-data.js. */
 const ADV = /[?&]kurs=fortgeschritten\b/.test(location.search) && !!window.ADVDATA;
 const ADVT = ADV ? window.ADVDATA.texts : [];
 /* ============ TEXTE ============ */
@@ -647,7 +647,7 @@ const wordsOf = t => t.paras.join(" ").split(/\s+/).filter(Boolean).length;
 const nf = n => Math.round(n).toLocaleString("de-DE");
 function hash(s){ let x=2166136261; for(const c of s){ x^=c.charCodeAt(0); x=Math.imul(x,16777619);} return x>>>0; }
 function shuffled(arr, seed){ const a=arr.slice(); let s=seed||1; for(let i=a.length-1;i>0;i--){ s=(Math.imul(s,1103515245)+12345)>>>0; const j=s%(i+1); [a[i],a[j]]=[a[j],a[i]]; } return a; }
-/* Wissenspakete: im Grundkurs alle Pakete mit course "basic", im Fortgeschrittenen-Kurs das Fachmodul Recht. NERD ist das gerade geöffnete Paket. */
+/* Wissenspakete: im Grundkurs alle Pakete mit course "basic", im Fortgeschrittenen-Kurs die Fachmodule Recht und KI. NERD ist das gerade geöffnete Paket. */
 const PACKS=(window.PACKS||[]).filter(p=>ADV?p.course==="adv":p.course!=="adv").sort((a,b)=>(a.order||9)-(b.order||9));
 PACKS.forEach(p=>p.texts.forEach(t=>{ t.pk=p.id; }));
 const PACKTEXTS=PACKS.flatMap(p=>p.texts);
@@ -1571,7 +1571,7 @@ function nerdDone(t,c){
     h("p",{class:"eyebrow"},old?"Sticker verbessert":"Neuer Sticker"),
     (()=>{ const s=sticker(t,"div"); s.classList.add("big","pop"); return s; })(),
     h("p",{style:"text-align:center;margin:0"},`${right} von ${t.qs.length} richtig · `+(xp?`+${xp} Punkte`:"keine neuen Punkte, du hattest schon so viele Sterne")),
-    t.ref?h("p",{class:"muted",style:"margin:0;text-align:center;font-size:.85rem"},"Rechtsgrundlage: "+t.ref):null,
+    t.ref?h("p",{class:"muted",style:"margin:0;text-align:center;font-size:.85rem"},(NERD.refLabel||"Rechtsgrundlage")+": "+t.ref):null,
     rk0!==rk1.name?h("p",{class:"notice",style:"border-left-color:var(--good)"},`Neuer Rang: ${rk1.icon} ${rk1.name}`):null,
     done?h("p",{class:"notice",style:"border-left-color:var(--good)"},"Das Album ist komplett."):null,
     fresh.length?h("div",{class:"badges"},fresh.map(b=>h("div",{class:"badge on"},h("b",{text:"Neu: "+b.name}),h("span",{text:b.desc})))):null,
