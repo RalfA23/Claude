@@ -114,16 +114,26 @@ footer{margin-top:28px;font-size:.8rem;color:var(--muted)}
 .gevt .text{white-space:pre-wrap;margin:6px 0 10px;line-height:1.55}
 .gevt .src{font-size:.8rem;color:var(--muted);white-space:pre-wrap;margin-bottom:10px}
 .gevt .thema{font-size:.85rem;color:var(--muted)}
-.gvteil{border-top:1px solid var(--line);margin-top:10px;padding-top:10px}
-.gvteil h3{font-size:1rem}
-.gvteil .kopf{display:flex;align-items:center;gap:12px}
-.gvteil .kopf > div{flex:1;min-width:0}
-.gvteil .kopf .thema{display:block}
-.gvteil .between{align-items:center}
-.uhr ol{padding-left:1.2em;line-height:1.6;margin:8px 0}
-.uhr code{font-size:.85em;word-break:break-all;background:color-mix(in srgb,var(--line) 45%,transparent);padding:1px 5px;border-radius:5px}
-.uhr .key{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0}
-.uhr .key code{flex:1;min-width:0;padding:8px}
+.gv3{border-top:1px solid var(--line);margin-top:12px;padding-top:12px}
+.gv3 .kopf{display:flex;justify-content:space-between;gap:10px;align-items:baseline;font-size:.8rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.gv3 .kopf span:last-child{text-transform:none;letter-spacing:0;font-weight:400;text-align:right}
+.gv3 .auf{display:flex;gap:12px;align-items:center;margin-top:6px}
+.gv3 .auf p{flex:1;min-width:0;font-weight:700;font-size:1.05rem;line-height:1.4}
+.gv3 .zahl{flex:none;min-width:84px;text-align:center;border-radius:12px;padding:6px 8px;background:color-mix(in srgb,var(--dusk) 14%,transparent);color:var(--dusk);line-height:1.1}
+.gv3 .zahl b{display:block;font-family:var(--display);font-size:1.6rem}
+.gv3 .zahl small{font-size:.72rem;font-weight:700}
+.gv3 .wurf{flex:none;min-width:84px}
+.gv3 details{margin-top:6px}
+.gv3 details summary{cursor:pointer;color:var(--acc2);font-size:.88rem;font-weight:700;padding:4px 0}
+.gv3 .erk{white-space:pre-wrap;line-height:1.55;margin:6px 0}
+.gvdone{margin-top:16px;min-height:52px;font-size:1.05rem}
+.gvdone[aria-pressed="true"]{background:var(--ok);border-color:var(--ok);color:#fff}
+.gvstat{margin-top:14px;font-size:.9rem}
+.gvstat summary{cursor:pointer;font-weight:700;padding:6px 0}
+.gvstat h4{margin:10px 0 4px;font-size:.85rem;color:var(--muted)}
+.gvstat table{width:100%;border-collapse:collapse;table-layout:fixed}
+.gvstat td{padding:4px 0;border-bottom:1px solid var(--line);vertical-align:top}
+.gvstat td.n{text-align:right;font-variant-numeric:tabular-nums;padding-left:8px;width:52%;color:var(--muted)}
 </style>
 
 </head>
@@ -153,9 +163,12 @@ footer{margin-top:28px;font-size:.8rem;color:var(--muted)}
       <p class="hint" id="warn" hidden></p>
     </section>
     <section class="card gevt" id="gevt" hidden aria-labelledby="gvTitle">
-      <h2 id="gvTitle">🥋 GEVT-Aufgaben des Tages</h2>
-      <div class="gvteil" data-slot="form"></div>
-      <div class="gvteil" data-slot="frei"></div>
+      <div class="between"><h2 id="gvTitle">🥋 GEVT heute</h2><span class="thema" id="gvStand"></span></div>
+      <div class="gv3" data-b="form"></div>
+      <div class="gv3" data-b="denk"></div>
+      <div class="gv3" data-b="frei"></div>
+      <button type="button" class="btn primary wide gvdone" id="gvDone" aria-pressed="false">Alle drei erledigt</button>
+      <details class="gvstat"><summary>📈 Wiederholungen bisher</summary><div id="gvStat"></div></details>
     </section>
     <p class="store" id="store"></p>
 
@@ -221,7 +234,7 @@ footer{margin-top:28px;font-size:.8rem;color:var(--muted)}
     </details>
   </div>
 
-  <footer>Gespeichert in deinem Konto: deine Liste unter gewohnheiten/liste, die Punkte pro Jahr unter gewohnheiten/jahr.&lt;Jahr&gt;. Das Training nutzt dieselben Häkchen wie die Gesundheitsseite (gesundheit/training.&lt;Datum&gt;). Der Uhr-Schlüssel liegt nur als Prüfsumme unter gewohnheiten/uhr. Die GEVT-Aufgaben (nur für dich) liegen unter gewohnheiten/gevtf.&lt;Datum&gt; (Formen) und gewohnheiten/gevt.&lt;Datum&gt;.</footer>
+  <footer>Gespeichert in deinem Konto: deine Liste unter gewohnheiten/liste, die Punkte pro Jahr unter gewohnheiten/jahr.&lt;Jahr&gt;. Das Training nutzt dieselben Häkchen wie die Gesundheitsseite (gesundheit/training.&lt;Datum&gt;). Der Uhr-Schlüssel liegt nur als Prüfsumme unter gewohnheiten/uhr. Die GEVT-Aufgaben (nur für dich) liegen unter gewohnheiten/gevt3.&lt;Datum&gt; mit Thema und gewürfelter Anzahl, daraus kommt die Zählung.</footer>
 </div>
 
 <script>
@@ -483,81 +496,97 @@ function vorlageAusLink() {
   history.replaceState(null, "", location.pathname);
   if (l.length !== habits().length) save(l);
 }
-/* ---------- GEVT-Aufgaben des Tages (nur für Konten mit Rolle admin in gevt_members, also Ralf) ----------
-   Zwei Aufgaben pro Tag über die Edge Function gevt-ask aus der verschlüsselten Wissensdatenbank:
-   eine Übung aus den Formen (gewohnheiten/gevtf.<datum>) und eine Übung oder ein Learning im Themenwechsel (gewohnheiten/gevt.<datum>).
-   Jede Aufgabe hat ihren eigenen Haken: Form → Gewohnheit gevt-form, Übung/Learning → gevt-aufgabe. */
-/* Jede der zwei Aufgaben hat ihren eigenen Haken und ihre eigene Gewohnheit. */
-const GEVT_HABIT = {form: {id: "gevt-form", n: "GEVT-Form", i: "🥋", f: "dusk"}, frei: {id: "gevt-aufgabe", n: "GEVT-Aufgabe", i: "📜", f: "gold"}};
-const GEVT = {
-  form: {doc: "gewohnheiten/gevtf.", titel: "Aus den Formen", themen: [["Form", "Siu Nim Tau"], ["Form", "Chum Kiu"], ["Form", "Biu Tze"], ["Form", "Holzpuppenform"]]},
-  frei: {doc: "gewohnheiten/gevt.", titel: "Übung oder Learning", themen: [
-    ["Learning", "Prinzipien und Konzepte"], ["Übung", "Chi Sao"], ["Learning", "eine Erkenntnis aus meinen Notizbüchern"],
-    ["Übung", "Stand, Struktur und Schrittarbeit"], ["Learning", "eine Korrektur, die Sifu Göksel oft gibt"], ["Übung", "Lat Sao und Partnerdrills"],
-    ["Übung", "Fauststöße und Kettenfauststoß"], ["Learning", "Masterclass"]]}
-};
-let gevtAn = false;
-const gevtDaten = {form: null, frei: null}, gevtBusy = {form: false, frei: false};
-function gevtThema(slot, key, extra) {
-  const t = GEVT[slot].themen, tag = Math.round(parse(key) / 864e5);
-  return t[(((tag + (extra || 0)) % t.length) + t.length) % t.length];
+/* ---------- GEVT heute (nur für Konten mit Rolle admin in gevt_members, also Ralf) ----------
+   Ralf (2026-11-19): drei Aufgaben pro Tag aus verschiedenen Bereichen (Form, Nachdenken über ein Prinzip, eine Übung
+   aus Notizen/Masterclass/Videos), ein einziger Haken, Aufgabe oben, Erläuterung zum Ausklappen, Anzahl per Würfel,
+   Wiederholung durch Rotation (seltenstes Thema zuerst) und Zählung. Texte kommen über die Edge Function gevt-ask.
+   Tagesdokument gewohnheiten/gevt3.<datum> = {form|denk|frei: {thema, aufgabe, erklaerung, stufe, quellen, anzahl, versuch}}.
+   Der Haken ist die Gewohnheit gevt-aufgabe (auch per Uhr). */
+const GEVT_ID = "gevt-aufgabe", GEVT3 = "gewohnheiten/gevt3.", GB = GW.GEVT_BEREICHE, GR = GW.GEVT_REIHE;
+let gevtAn = false, gevtTag = {};
+const gevtDocs = {}, gevtBusy = {};
+const ohneFett = t => String(t || "").replace(/\*\*(.+?)\*\*/g, "$1");
+const gevtStat = () => GW.gevtStatistik(gevtDocs, d => isDone(GEVT_ID, d));
+function gevtSpeichern() { const key = iso(heute()); gevtDocs[key] = gevtTag; Konto.put(GEVT3 + key, gevtTag); }
+function gevtListe() {
+  // Ein Haken für alle drei: gevt-aufgabe bleibt, gevt-form (alter zweiter Haken) fällt aus der Liste, die Punkte bleiben gespeichert.
+  let l = habits().filter(g => g.id !== "gevt-form"), geaendert = l.length !== habits().length;
+  if (!l.some(g => g.id === GEVT_ID)) { l = l.concat([{id: GEVT_ID, n: "GEVT-Aufgaben", i: "🥋", f: "dusk"}]); geaendert = true; }
+  if (geaendert) save(l);
 }
-function gevtSplit(t) {
-  let stufe = "";
-  const m = t.match(/^\s*STUFE:\s*(.*)\n?/);
-  if (m) { stufe = m[1].trim(); t = t.slice(m[0].length); }
-  const i = t.search(/^\s*QUELLEN:?\s*$/m);
-  return i < 0 ? {stufe, text: t.trim(), quellen: ""} : {stufe, text: t.slice(0, i).trim(), quellen: t.slice(i).replace(/^\s*QUELLEN:?\s*$/m, "").trim()};
+function gevtFrage(b, thema) {
+  const form = " Antworte so: Nach der STUFE-Zeile eine Zeile, die mit „AUFGABE:“ beginnt, höchstens 15 Wörter, ohne Anzahl (die würfle ich selbst). Danach die Erläuterung in 60 bis 120 Wörtern, dann QUELLEN.";
+  if (b === "form") return "Gib mir für heute eine Aufgabe zur Form " + thema + " aus meiner Wissensdatenbank: einen bestimmten Abschnitt oder Punkt, auf den ich beim Durchlaufen der Form heute besonders achte." + form;
+  if (b === "denk") return "Gib mir für heute eine Nachdenk-Aufgabe zum Prinzip „" + thema + "“ aus meiner Wissensdatenbank: eine Frage oder einen Gedanken von Sifu Göksel oder aus meinen Notizen, über den ich heute ein paar Minuten nachdenke." + form;
+  return "Such aus meiner Wissensdatenbank (Notizen, Masterclass, Videos) eine Übung zum Thema " + thema + ", die ich heute allein machen kann." + form;
 }
-const ohneFett = t => t.replace(/\*\*(.+?)\*\*/g, "$1");
-function gevtTeil(slot) {
-  const el = document.querySelector('.gvteil[data-slot="' + slot + '"]');
+function gevtTeil(b) {
+  const el = document.querySelector('.gv3[data-b="' + b + '"]');
   if (!el.firstChild) {
-    el.innerHTML = '<div class="kopf"><div><h3></h3><span class="thema"></span></div><button type="button" class="tick c-' + GEVT_HABIT[slot].f + '" aria-pressed="false"></button></div><span class="stufe" hidden></span><p class="text"></p><p class="src" hidden></p><button type="button" class="btn small neu">Andere Aufgabe</button>';
-    el.querySelector("h3").textContent = GEVT[slot].titel;
-    el.querySelector(".tick").addEventListener("click", async () => { gevtHabits(); await toggle(GEVT_HABIT[slot].id, iso(heute())); renderGevt(); });
-    el.querySelector(".neu").addEventListener("click", () => gevtHolen(slot, true));
+    el.innerHTML = '<div class="kopf"><span></span><span class="th"></span></div><div class="auf"><p></p><div class="zahl" hidden><b></b><small></small></div><button type="button" class="btn wurf">🎲 Anzahl</button></div>' +
+      '<details><summary>Erläuterung</summary><span class="stufe" hidden></span><p class="erk"></p><p class="src" hidden></p><button type="button" class="btn small neu">Andere Aufgabe</button></details>';
+    el.querySelector(".kopf span").textContent = GB[b].icon + " " + GB[b].titel;
+    el.querySelector(".wurf").addEventListener("click", () => { gevtWurf(b); gevtSpeichern(); renderGevt(); });
+    el.querySelector(".neu").addEventListener("click", () => gevtHolen(b, true));
   }
   return el;
 }
+function gevtWurf(b) {
+  const a = gevtTag[b] || (gevtTag[b] = {});
+  if (!a.anzahl) a.anzahl = GW.wuerfel(GB[b].min, GB[b].max);
+}
 function renderGevt() {
   const el = $("gevt"); el.hidden = !gevtAn; if (!gevtAn) return;
-  for (const slot of ["form", "frei"]) {
-    const d = gevtDaten[slot], t = gevtTeil(slot);
-    if (gevtBusy[slot]) { t.querySelector(".neu").disabled = true; continue; }
-    t.querySelector(".thema").textContent = d && d.thema ? d.art + " · " + d.thema : "";
-    const st = t.querySelector(".stufe"); st.hidden = !(d && d.stufe); st.textContent = d && d.stufe || "";
-    t.querySelector(".text").textContent = d && d.text ? ohneFett(d.text) : "Ich suche dir eine Aufgabe aus deiner Wissensdatenbank …";
-    const sr = t.querySelector(".src"); sr.hidden = !(d && d.quellen); sr.textContent = d && d.quellen ? "Quellen:\n" + d.quellen : "";
+  const st = gevtStat();
+  for (const b of GR) {
+    const a = gevtTag[b] || {}, t = gevtTeil(b), z = a.thema && st[b][a.thema], heuteKey = iso(heute());
+    const vorher = z ? z.tage - (z.zuletzt === heuteKey ? 1 : 0) : 0;
+    t.querySelector(".th").textContent = a.thema ? a.thema + (vorher ? " · " + (vorher + 1) + ". Mal" : " · zum ersten Mal") : "";
+    if (gevtBusy[b]) { t.querySelector(".neu").disabled = true; continue; }
+    t.querySelector(".auf p").textContent = a.aufgabe ? ohneFett(a.aufgabe) : a.fehler ? "Ließ sich gerade nicht holen. Unter Erläuterung „Andere Aufgabe“ tippen." : "Ich suche dir eine Aufgabe aus deiner Wissensdatenbank …";
+    const zahl = t.querySelector(".zahl"), wurf = t.querySelector(".wurf");
+    zahl.hidden = !a.anzahl; wurf.hidden = !!a.anzahl;
+    if (a.anzahl) { zahl.querySelector("b").textContent = a.anzahl; zahl.querySelector("small").textContent = GW.einheit(b, a.anzahl); }
+    const sf = t.querySelector(".stufe"); sf.hidden = !a.stufe; sf.textContent = a.stufe || "";
+    t.querySelector(".erk").textContent = ohneFett(a.erklaerung || "");
+    const sr = t.querySelector(".src"); sr.hidden = !a.quellen; sr.textContent = a.quellen ? "Quellen:\n" + a.quellen : "";
     t.querySelector(".neu").disabled = false;
   }
-  for (const slot of ["form", "frei"]) {
-    const done = isDone(GEVT_HABIT[slot].id, iso(heute())), b = gevtTeil(slot).querySelector(".tick");
-    b.setAttribute("aria-pressed", done ? "true" : "false"); b.textContent = done ? "✓" : "";
-    b.setAttribute("aria-label", GEVT[slot].titel + (done ? " erledigt, zurücknehmen" : " heute abhaken"));
+  const done = isDone(GEVT_ID, iso(heute())), btn = $("gvDone");
+  btn.setAttribute("aria-pressed", done ? "true" : "false");
+  btn.textContent = done ? "✓ Heute erledigt" : "Alle drei erledigt";
+  btn.title = done ? "Nochmal tippen nimmt den Haken zurück" : "";
+  const s = GW.serie(k => isDone(GEVT_ID, k), heute());
+  $("gvStand").textContent = s ? "🔥 " + s + (s === 1 ? " Tag" : " Tage") : "";
+  renderGevtStat(st);
+}
+function renderGevtStat(st) {
+  const box = $("gvStat"); box.textContent = "";
+  for (const b of GR) {
+    const h = document.createElement("h4"); h.textContent = GB[b].icon + " " + GB[b].titel; box.appendChild(h);
+    const tab = document.createElement("table");
+    for (const thema of GB[b].themen) {
+      const z = st[b][thema], tr = document.createElement("tr");
+      tr.innerHTML = '<td></td><td class="n"></td>';
+      tr.children[0].textContent = thema;
+      tr.children[1].textContent = z ? z.tage + "×, " + z.summe + " " + GW.einheit(b, z.summe) + ", zuletzt " + parse(z.zuletzt).toLocaleDateString("de-DE", {day: "numeric", month: "numeric"}) : "noch nie";
+      tab.appendChild(tr);
+    }
+    box.appendChild(tab);
   }
 }
-function gevtHabits() {
-  const fehlt = ["form", "frei"].map(x => GEVT_HABIT[x]).filter(h => !habits().some(g => g.id === h.id));
-  if (fehlt.length) save(habits().concat(fehlt.map(h => Object.assign({}, h))));
-}
-async function gevtHolen(slot, neu) {
-  if (gevtBusy[slot]) return;
-  const key = iso(heute()), c = window.SR_CONFIG || {}, sb = Konto.sb, alt = gevtDaten[slot], t = gevtTeil(slot);
-  gevtBusy[slot] = true;
-  const versuch = neu ? ((alt && alt.versuch) || 0) + 1 : 0;
-  const [art, thema] = gevtThema(slot, key, slot === "form" ? versuch : versuch * 5);
-  t.querySelector(".text").textContent = "Ich suche dir eine Aufgabe aus deiner Wissensdatenbank …";
-  t.querySelector(".src").hidden = true; t.querySelector(".stufe").hidden = true;
-  t.querySelector(".thema").textContent = art + " · " + thema; t.querySelector(".neu").disabled = true;
+async function gevtHolen(b, neu) {
+  if (gevtBusy[b]) return;
+  const c = window.SR_CONFIG || {}, sb = Konto.sb, alt = gevtTag[b] || {}, t = gevtTeil(b);
+  const versuch = neu ? (alt.versuch || 0) + 1 : 0, thema = GW.gevtNaechstes(b, gevtStat(), versuch);
+  gevtBusy[b] = true;
+  gevtTag[b] = {thema, versuch, anzahl: alt.anzahl || 0};
+  t.querySelector(".th").textContent = thema;
+  t.querySelector(".auf p").textContent = "Ich suche dir eine Aufgabe aus deiner Wissensdatenbank …";
+  t.querySelector(".neu").disabled = true;
   try {
     const s = await sb.auth.getSession(), tok = s.data.session && s.data.session.access_token;
-    const frage = art === "Form"
-      ? "Stell mir für heute eine Übung aus der Form " + thema + " aus meiner Wissensdatenbank: einen bestimmten Abschnitt oder eine Bewegung der Form, die ich heute gezielt übe. Sag kurz, was genau ich mache, wie oft, und worauf ich laut Sifu Göksel oder meinen Notizen besonders achte."
-      : art === "Übung"
-      ? "Stell mir für heute eine konkrete Übungsaufgabe zum Thema " + thema + " aus meiner Wissensdatenbank: eine Übung oder ein Drill, den ich heute allein üben kann. Sag kurz, was ich mache, wie lange oder wie oft, und worauf ich besonders achte."
-      : "Such mir für heute ein Learning zum Thema " + thema + " aus meiner Wissensdatenbank heraus und mach daraus eine kleine Aufgabe für heute: worüber ich nachdenke oder was ich im Training bewusst umsetze.";
-    const r = await fetch(c.supabaseUrl + "/functions/v1/gevt-ask", {method: "POST", headers: {"Content-Type": "application/json", Authorization: "Bearer " + tok, apikey: c.supabaseAnonKey}, body: JSON.stringify({action: "ask", frage, verlauf: []})});
+    const r = await fetch(c.supabaseUrl + "/functions/v1/gevt-ask", {method: "POST", headers: {"Content-Type": "application/json", Authorization: "Bearer " + tok, apikey: c.supabaseAnonKey}, body: JSON.stringify({action: "ask", frage: gevtFrage(b, thema), verlauf: []})});
     if (!r.ok) throw new Error("HTTP " + r.status);
     const reader = r.body.getReader(), dec = new TextDecoder();
     let buf = "", answer = "";
@@ -568,22 +597,26 @@ async function gevtHolen(slot, neu) {
       while ((nl = buf.indexOf("\n")) >= 0) {
         const line = buf.slice(0, nl); buf = buf.slice(nl + 1); if (!line.trim()) continue;
         const ev = JSON.parse(line);
-        if (ev.d) { answer += ev.d; t.querySelector(".text").textContent = ohneFett(gevtSplit(answer).text); }
+        if (ev.d) answer += ev.d;
         if (ev.fehler) throw new Error(ev.fehler);
       }
     }
     if (!answer.trim()) throw new Error("leer");
-    gevtDaten[slot] = Object.assign({art, thema, versuch, erstellt: new Date().toISOString()}, gevtSplit(answer));
-    Konto.put(GEVT[slot].doc + key, gevtDaten[slot]);
-    gevtHabits();
+    Object.assign(gevtTag[b], GW.gevtZerlegen(answer), {erstellt: new Date().toISOString()});
   } catch (e) {
-    gevtDaten[slot] = alt && alt.text ? alt : null;
-    gevtBusy[slot] = false; renderGevt();
-    t.querySelector(".text").textContent = "Die Aufgabe ließ sich gerade nicht holen. Versuch es mit „Andere Aufgabe“ noch einmal.";
-    return;
+    gevtTag[b] = alt.aufgabe ? alt : {thema, versuch, anzahl: alt.anzahl || 0, fehler: true};
   }
-  gevtBusy[slot] = false; renderGevt();
+  gevtBusy[b] = false;
+  if (!gevtTag[b].fehler) gevtSpeichern();
+  renderGevt();
 }
+$("gvDone").addEventListener("click", async () => {
+  gevtListe();
+  const key = iso(heute());
+  if (!isDone(GEVT_ID, key)) { for (const b of GR) if (gevtTag[b] && gevtTag[b].thema) gevtWurf(b); gevtSpeichern(); }
+  await toggle(GEVT_ID, key);
+  renderGevt();
+});
 async function gevtStart(docs) {
   const sb = Konto.sb; if (!sb || !Konto.user) return;
   try {
@@ -591,10 +624,12 @@ async function gevtStart(docs) {
     gevtAn = !!(r.data && r.data.role === "admin");
   } catch (e) { gevtAn = false; }
   if (!gevtAn) return;
+  for (const [p, v] of Object.entries(docs)) if (p.startsWith(GEVT3) && v) gevtDocs[p.slice(GEVT3.length)] = v;
   const key = iso(heute());
-  for (const slot of ["form", "frei"]) gevtDaten[slot] = docs[GEVT[slot].doc + key] || null;
+  gevtTag = Object.assign({}, gevtDocs[key] || {});
+  gevtListe();
   render();
-  for (const slot of ["form", "frei"]) if (!gevtDaten[slot] || !gevtDaten[slot].text) gevtHolen(slot, false);
+  for (const b of GR) if (!gevtTag[b] || !gevtTag[b].aufgabe) await gevtHolen(b, false);
 }
 
 /* ---------- Apple Watch: Uhr-Schlüssel für den Kurzbefehl (Edge Function gewohnheiten-uhr) ---------- */
