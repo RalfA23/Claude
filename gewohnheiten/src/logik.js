@@ -127,10 +127,12 @@
       themen: ["Siu Nim Tau", "Chum Kiu", "Biu Tze", "Holzpuppenform"]},
     denk: {titel: "Nachdenken · Prinzip", icon: "💭", einheit: ["Minute", "Minuten"], min: 3, max: 10,
       themen: ["Mittellinie", "Entspannung und Lockerheit", "Struktur und Erdung", "Ökonomie der Bewegung", "Vorwärtsdruck", "Kleben und Folgen", "Gleichzeitig angreifen und abwehren", "Timing und Distanz", "Ellbogenposition", "Kraft aus dem Boden"]},
+    puppe: {titel: "Holzpuppe", icon: "🪵", einheit: ["Wiederholung", "Wiederholungen"], min: 3, max: 10,
+      themen: ["Tan Sao und Fook Sao an der Puppe", "Bong Sao und Lap Sao an der Puppe", "Pak Sao und Fauststoß an der Puppe", "Gaan Sao an der Puppe", "Tritte an der Puppe", "Schrittarbeit um die Puppe", "ein Abschnitt der Holzpuppenform", "eine Holzpuppenübung aus der Masterclass", "eine Holzpuppenübung aus meinen Notizbüchern"]},
     frei: {titel: "Allein üben", icon: "📜", einheit: ["Wiederholung", "Wiederholungen"], min: 3, max: 10,
       themen: ["Kettenfauststoß", "Stand (Yee Jee Kim Yeung Ma)", "Drehen im Stand", "Schrittarbeit", "Tan Sao, Bong Sao und Fook Sao in der Luft", "Pak Sao und Lap Sao als Schattenübung", "Ellbogenschläge", "Tritte", "Fauststoß am Wandsack", "eine Übung aus der Masterclass für allein", "eine Übung aus einem YouTube-Video von Sifu Göksel für allein", "eine Übung aus meinen Notizbüchern für allein"]}
   };
-  const GEVT_REIHE = ["form", "denk", "frei"];
+  const GEVT_REIHE = ["form", "puppe", "frei"], GEVT_ALLE = GEVT_REIHE.concat(["denk"]);  // denk ist eine eigene Rubrik mit eigenem Haken
   const einheit = (b, n) => GEVT_BEREICHE[b].einheit[n === 1 ? 0 : 1];
   function wuerfel(min, max, rnd) { const r = (rnd || Math.random)(); return min + Math.floor(r * (max - min + 1)); }
 
@@ -138,11 +140,11 @@
      docs = {datum: {form: {thema, anzahl}, …}}, erledigt(datum) -> bool.
      Ergebnis: {bereich: {thema: {tage, summe, zuletzt}}} */
   function gevtStatistik(docs, erledigt) {
-    const out = {}; for (const b of GEVT_REIHE) out[b] = {};
+    const out = {}; for (const b of GEVT_ALLE) out[b] = {};
     for (const [datum, doc] of Object.entries(docs || {})) {
-      if (!doc || !erledigt(datum)) continue;
-      for (const b of GEVT_REIHE) {
-        const a = doc[b]; if (!a || !a.thema) continue;
+      if (!doc) continue;
+      for (const b of GEVT_ALLE) {
+        const a = doc[b]; if (!a || !a.thema || !erledigt(datum, b)) continue;
         const z = out[b][a.thema] || (out[b][a.thema] = {tage: 0, summe: 0, zuletzt: ""});
         z.tage++; z.summe += Number(a.anzahl) || 0;
         if (datum > z.zuletzt) z.zuletzt = datum;
@@ -179,5 +181,5 @@
     return {stufe, aufgabe, erklaerung, quellen};
   }
 
-  root.GW = {GEVT_BEREICHE, GEVT_REIHE, einheit, wuerfel, gevtStatistik, gevtNaechstes, gevtFrueher, gevtZerlegen, monat, monatZahlen, pad, iso, parse, addDays, wdIndex, daysInMonth, WOCHE, ART, planTag, planWoche, istTraining, serie, laengsteSerie, jahr, gesternVerpasst, TRAINING, FARBEN, neueId};
+  root.GW = {GEVT_BEREICHE, GEVT_REIHE, GEVT_ALLE, einheit, wuerfel, gevtStatistik, gevtNaechstes, gevtFrueher, gevtZerlegen, monat, monatZahlen, pad, iso, parse, addDays, wdIndex, daysInMonth, WOCHE, ART, planTag, planWoche, istTraining, serie, laengsteSerie, jahr, gesternVerpasst, TRAINING, FARBEN, neueId};
 })(typeof window !== "undefined" ? window : globalThis);
