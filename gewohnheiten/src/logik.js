@@ -125,10 +125,10 @@
   const GEVT_BEREICHE = {
     form: {titel: "Form", icon: "🥋", einheit: ["Durchgang", "Durchgänge"], min: 2, max: 6,
       themen: ["Siu Nim Tau", "Chum Kiu", "Biu Tze", "Holzpuppenform"]},
-    denk: {titel: "Nachdenken · Prinzip", icon: "💭", einheit: ["Minute", "Minuten"], min: 5, max: 15,
+    denk: {titel: "Nachdenken · Prinzip", icon: "💭", einheit: ["Minute", "Minuten"], min: 3, max: 10,
       themen: ["Mittellinie", "Entspannung und Lockerheit", "Struktur und Erdung", "Ökonomie der Bewegung", "Vorwärtsdruck", "Kleben und Folgen", "Gleichzeitig angreifen und abwehren", "Timing und Distanz", "Ellbogenposition", "Kraft aus dem Boden"]},
-    frei: {titel: "Aus deinen Notizen und Videos", icon: "📜", einheit: ["Wiederholung", "Wiederholungen"], min: 10, max: 30,
-      themen: ["Chi Sao", "Lat Sao und Partnerdrills", "Stand und Schrittarbeit", "Fauststöße und Kettenfauststoß", "Bong Sao, Tan Sao und Fook Sao", "eine Übung aus der Masterclass", "eine Übung aus einem YouTube-Video von Sifu Göksel", "eine Übung aus meinen Notizbüchern", "eine Korrektur, die Sifu Göksel oft gibt", "Tritte"]}
+    frei: {titel: "Allein üben", icon: "📜", einheit: ["Wiederholung", "Wiederholungen"], min: 3, max: 10,
+      themen: ["Kettenfauststoß", "Stand (Yee Jee Kim Yeung Ma)", "Drehen im Stand", "Schrittarbeit", "Tan Sao, Bong Sao und Fook Sao in der Luft", "Pak Sao und Lap Sao als Schattenübung", "Ellbogenschläge", "Tritte", "Fauststoß am Wandsack", "eine Übung aus der Masterclass für allein", "eine Übung aus einem YouTube-Video von Sifu Göksel für allein", "eine Übung aus meinen Notizbüchern für allein"]}
   };
   const GEVT_REIHE = ["form", "denk", "frei"];
   const einheit = (b, n) => GEVT_BEREICHE[b].einheit[n === 1 ? 0 : 1];
@@ -159,6 +159,12 @@
     return sortiert[(versuch || 0) % sortiert.length].x;
   }
   /* Antwort der Wissensdatenbank zerlegen: STUFE-Zeile, AUFGABE-Zeile, Erläuterung, QUELLEN. */
+  /* Frühere Aufgaben eines Bereichs (neueste zuerst, ohne heute), damit die Wissensdatenbank nichts wiederholt. */
+  function gevtFrueher(docs, b, heute, n) {
+    return Object.keys(docs || {}).filter(d => d < heute && docs[d] && docs[d][b] && docs[d][b].aufgabe)
+      .sort().reverse().slice(0, n || 12).map(d => docs[d][b].aufgabe);
+  }
+
   function gevtZerlegen(t) {
     let stufe = "", aufgabe = "";
     const m = t.match(/^\s*STUFE:\s*(.*)\n?/);
@@ -173,5 +179,5 @@
     return {stufe, aufgabe, erklaerung, quellen};
   }
 
-  root.GW = {GEVT_BEREICHE, GEVT_REIHE, einheit, wuerfel, gevtStatistik, gevtNaechstes, gevtZerlegen, monat, monatZahlen, pad, iso, parse, addDays, wdIndex, daysInMonth, WOCHE, ART, planTag, planWoche, istTraining, serie, laengsteSerie, jahr, gesternVerpasst, TRAINING, FARBEN, neueId};
+  root.GW = {GEVT_BEREICHE, GEVT_REIHE, einheit, wuerfel, gevtStatistik, gevtNaechstes, gevtFrueher, gevtZerlegen, monat, monatZahlen, pad, iso, parse, addDays, wdIndex, daysInMonth, WOCHE, ART, planTag, planWoche, istTraining, serie, laengsteSerie, jahr, gesternVerpasst, TRAINING, FARBEN, neueId};
 })(typeof window !== "undefined" ? window : globalThis);

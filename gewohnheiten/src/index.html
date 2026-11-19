@@ -515,10 +515,15 @@ function gevtListe() {
   if (geaendert) save(l);
 }
 function gevtFrage(b, thema) {
-  const form = " Antworte so: Nach der STUFE-Zeile eine Zeile, die mit „AUFGABE:“ beginnt, höchstens 15 Wörter, ohne Anzahl (die würfle ich selbst). Danach die Erläuterung in 60 bis 120 Wörtern, dann QUELLEN.";
-  if (b === "form") return "Gib mir für heute eine Aufgabe zur Form " + thema + " aus meiner Wissensdatenbank: einen bestimmten Abschnitt oder Punkt, auf den ich beim Durchlaufen der Form heute besonders achte." + form;
-  if (b === "denk") return "Gib mir für heute eine Nachdenk-Aufgabe zum Prinzip „" + thema + "“ aus meiner Wissensdatenbank: eine Frage oder einen Gedanken von Sifu Göksel oder aus meinen Notizen, über den ich heute ein paar Minuten nachdenke." + form;
-  return "Such aus meiner Wissensdatenbank (Notizen, Masterclass, Videos) eine Übung zum Thema " + thema + ", die ich heute allein machen kann." + form;
+  const form = " Antworte so: Nach der STUFE-Zeile eine Zeile, die mit „AUFGABE:“ beginnt, höchstens 15 Wörter, ohne Anzahl (die würfle ich selbst). Danach die Erläuterung in 60 bis 120 Wörtern, die die Aufgabe nicht noch einmal wiederholt, dann QUELLEN.";
+  // Keine Doppelungen: die anderen Aufgaben von heute und die letzten Aufgaben dieses Bereichs mitschicken.
+  const heuteAndere = GR.filter(x => x !== b && gevtTag[x] && gevtTag[x].aufgabe).map(x => gevtTag[x].aufgabe);
+  const frueher = GW.gevtFrueher(gevtDocs, b, iso(heute()), 12).concat(gevtTag[b] && gevtTag[b].vorher || []);
+  const nicht = heuteAndere.concat(frueher);
+  const ohne = nicht.length ? " Wichtig: etwas anderes als diese bisherigen Aufgaben, weder dieselbe Übung noch derselbe Punkt: " + nicht.map(x => "„" + ohneFett(x) + "“").join("; ") + "." : "";
+  if (b === "form") return "Gib mir für heute eine Aufgabe zur Form " + thema + " aus meiner Wissensdatenbank: einen bestimmten Abschnitt oder Punkt, auf den ich beim Durchlaufen der Form heute besonders achte." + ohne + form;
+  if (b === "denk") return "Gib mir für heute eine Nachdenk-Aufgabe zum Prinzip „" + thema + "“ aus meiner Wissensdatenbank: eine Frage oder einen Gedanken von Sifu Göksel oder aus meinen Notizen, über den ich heute ein paar Minuten nachdenke." + ohne + form;
+  return "Such aus meiner Wissensdatenbank (Notizen, Masterclass, Videos) eine Übung zum Thema " + thema + ", die ich heute allein ohne Partner machen kann, also in der Luft, im Stand, mit Schritten oder am Wandsack. Keine Partnerübung, kein Chi Sao, kein Lat Sao. Die Übung muss sich zählen lassen, höchstens 10 Wiederholungen." + ohne + form;
 }
 function gevtTeil(b) {
   const el = document.querySelector('.gv3[data-b="' + b + '"]');
@@ -578,9 +583,9 @@ function renderGevtStat(st) {
 async function gevtHolen(b, neu) {
   if (gevtBusy[b]) return;
   const c = window.SR_CONFIG || {}, sb = Konto.sb, alt = gevtTag[b] || {}, t = gevtTeil(b);
-  const versuch = neu ? (alt.versuch || 0) + 1 : 0, thema = GW.gevtNaechstes(b, gevtStat(), versuch);
+  const versuch = neu ? (alt.versuch || 0) + 1 : 0, thema = GW.gevtNaechstes(b, GW.gevtStatistik(gevtDocs, d => d !== iso(heute())), versuch);
   gevtBusy[b] = true;
-  gevtTag[b] = {thema, versuch, anzahl: alt.anzahl || 0};
+  gevtTag[b] = {thema, versuch, anzahl: alt.anzahl || 0, vorher: (alt.vorher || []).concat(alt.aufgabe ? [alt.aufgabe] : []).slice(-5)};
   t.querySelector(".th").textContent = thema;
   t.querySelector(".auf p").textContent = "Ich suche dir eine Aufgabe aus deiner Wissensdatenbank …";
   t.querySelector(".neu").disabled = true;
@@ -629,7 +634,15 @@ async function gevtStart(docs) {
   gevtTag = Object.assign({}, gevtDocs[key] || {});
   gevtListe();
   render();
-  for (const b of GR) if (!gevtTag[b] || !gevtTag[b].aufgabe) await gevtHolen(b, false);
+  // Alte Tage mit zu großer Anzahl oder einem Thema, das es nicht mehr gibt (z. B. Partnerübung), werden angepasst.
+  let neuHolen = [];
+  for (const b of GR) {
+    const a = gevtTag[b]; if (!a) continue;
+    if (a.anzahl > GB[b].max) { a.anzahl = GB[b].max; gevtSpeichern(); }
+    if (a.thema && !GB[b].themen.includes(a.thema) && !isDone(GEVT_ID, key)) neuHolen.push(b);
+  }
+  render();
+  for (const b of GR) if (!gevtTag[b] || !gevtTag[b].aufgabe || neuHolen.includes(b)) await gevtHolen(b, false);
 }
 
 /* ---------- Apple Watch: Uhr-Schlüssel für den Kurzbefehl (Edge Function gewohnheiten-uhr) ---------- */
