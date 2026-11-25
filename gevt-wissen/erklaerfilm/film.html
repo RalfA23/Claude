@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ving Tsun kurz erklärt</title>
+<style>html,body{margin:0;height:100%;background:#1a1714;overflow:hidden}canvas{display:block;margin:0 auto;height:100vh;aspect-ratio:9/16;max-width:100vw}</style>
+</head><body><canvas id="c" width="1080" height="1920"></canvas>
+<script src="timeline.js"></script>
+<script>
+const W=1080,H=1920,cv=document.getElementById('c'),g=cv.getContext('2d');
+const BG='#efe8da',INK='#17130f',RED='#c8201a',DIM='#7b7468',RULE='#cdc3af';
+const F='"Inter Display","Inter",sans-serif';
+const cl=(x,a=0,b=1)=>Math.max(a,Math.min(b,x)),pr=(t,a,b)=>cl((t-a)/(b-a));
+const eo=x=>1-Math.pow(1-x,4),eio=x=>x<.5?8*x*x*x*x:1-Math.pow(-2*x+2,4)/2,lerp=(a,b,p)=>a+(b-a)*p;
+function rnd(s){let x=Math.sin(s*127.1+311.7)*43758.5453;return x-Math.floor(x)}
+function txt(s,x,y,size,o={}){g.save();const set=()=>{g.font=`${o.w||900} ${size}px ${F}`;g.letterSpacing=(o.ls??-0.02)*size+'px'};set();
+  const m=g.measureText(s).width,mw=o.max||920;if(m>mw){size*=mw/m;set()}
+  g.textAlign=o.al||'center';g.textBaseline='middle';g.globalAlpha=cl(o.a??1);g.fillStyle=o.c||INK;g.fillText(s,x,y);const w=g.measureText(s).width;g.restore();return w}
+// weiches Einblenden von unten
+function up(s,x,y,size,lt,o={}){if(lt<0)return 0;const p=eo(pr(lt,0,.45));return txt(s,x,y+lerp(34,0,p),size,{...o,a:p*(o.a??1)})}
+function line(x1,y1,x2,y2,c,w,a=1,dash){g.save();g.globalAlpha=cl(a);g.strokeStyle=c;g.lineWidth=w;g.lineCap='round';if(dash)g.setLineDash(dash);g.beginPath();g.moveTo(x1,y1);g.lineTo(x2,y2);g.stroke();g.restore()}
+function circ(x,y,r,c,o={}){if(r<=0)return;g.save();g.globalAlpha=cl(o.a??1);g.beginPath();g.arc(x,y,r,0,7);if(o.stroke){g.strokeStyle=c;g.lineWidth=o.stroke;g.stroke()}else{g.fillStyle=c;g.fill()}g.restore()}
+function rect(x,y,w,h,c,a=1,r=0){g.save();g.globalAlpha=cl(a);g.fillStyle=c;g.beginPath();g.roundRect(x,y,w,h,r);g.fill();g.restore()}
+function pill(s,cx,y,lt,o={}){if(lt<0)return;const p=eo(pr(lt,0,.4));g.save();g.font=`700 40px ${F}`;const w=g.measureText(s).width+64;g.restore();
+  g.save();g.globalAlpha=p;g.strokeStyle=o.c||INK;g.lineWidth=3;g.beginPath();g.roundRect(cx-w/2,y-38+lerp(20,0,p),w,76,38);if(o.fill){g.fillStyle=o.fill;g.fill()}g.stroke();g.restore();
+  txt(s,cx,y+2+lerp(20,0,p),40,{w:700,ls:0,a:p,c:o.fill?BG:(o.c||INK)})}
+function seal(x,y,r,p=1){circ(x,y,r*eo(p),RED);line(x,y-r*.62*p,x,y+r*.62*p,BG,r*.09,p)}
+function head(n,title,lt){const p=eo(pr(lt,0,.5));txt(n,80,330,150,{al:'left',c:RED,a:p,ls:-.04});txt(title,290,340,74,{al:'left',a:p,max:710});rect(80,430,920*p,4,INK)}
+
+const S=[
+(lt,d)=>{ // 0 Intro
+  seal(540,640,150,pr(lt,.1,.7));
+  up('VING TSUN',540,960,210,lt-.4);up('kurz erklärt',540,1100,58,lt-.9,{w:500,ls:0,c:DIM});
+  pill('Kung Fu',250,1330,lt-.2*d);pill('Südchina',540,1330,lt-.3*d);pill('kurze Distanz',850,1330,lt-.46*d,{fill:RED,c:RED});},
+(lt,d)=>{ // 1 Herkunft
+  head('01','HERKUNFT',lt);
+  const N=[[.02,'LEGENDE','Von einer Frau entwickelt'],[.25,'STRUKTUR','statt Muskelkraft'],[.5,'1950','Ip Man lehrt in Hongkong'],[.83,'BRUCE LEE','sein berühmtester Schüler']];
+  line(150,600,150,600+eio(pr(lt,0,.86*d))*800,INK,4);
+  N.forEach(([c,a,b],i)=>{const y=640+i*240,l=lt-c*d;if(l<0)return;circ(150,y,22*eo(pr(l,0,.3)),i>=2?RED:INK);up(a,230,y-10,92,l,{al:'left',c:i>=2?RED:INK,max:780});up(b,232,y+66,44,l-.12,{al:'left',w:500,ls:0,c:DIM,max:780})});},
+(lt,d)=>{ // 2 Zentrallinie
+  head('02','ZENTRALLINIE',lt);
+  const a=eo(pr(lt,.2,.7));circ(540,640,74,INK,{stroke:6,a});circ(540,1280,74,INK,{a});
+  txt('GEGNER',680,640,36,{al:'left',w:700,ls:.14,c:DIM,a});txt('DU',680,1280,36,{al:'left',w:700,ls:.14,c:DIM,a});
+  const p=eio(pr(lt,.16*d,.16*d+.8));if(p>0){line(540,1206,540,lerp(1206,714,p),RED,12);}
+  const q=eio(pr(lt,.56*d,.56*d+.9));if(q>0){g.save();g.strokeStyle=DIM;g.lineWidth=6;g.setLineDash([18,16]);g.beginPath();for(let i=0;i<=40*q;i++){const u=i/40,x=540-420*Math.sin(Math.PI*u)*.95-0,y=lerp(1206,714,u);i?g.lineTo(x,y):g.moveTo(x,y)}g.stroke();g.restore();
+    up('Umweg',200,1140,40,lt-.56*d-.5,{w:600,ls:0,c:DIM});up('Gerade',640,960,44,lt-.56*d-.9,{al:'left',w:800,ls:0,c:RED})}
+  up('Wer die Mitte besetzt,',540,1500,58,lt-.78*d,{w:800});up('ist zuerst da.',540,1575,58,lt-.78*d-.15,{w:800,c:RED});},
+(lt,d)=>{ // 3 Gleichzeitigkeit
+  head('03','GLEICHZEITIGKEIT',lt);
+  const bar=(x,y,w,c,s,l)=>{if(l<0)return;const p=eio(pr(l,0,.6));rect(x,y,w*p,96,c,1,10);txt(s,x+28,y+50,40,{al:'left',w:700,ls:0,c:BG,a:pr(l,.3,.6)})};
+  let l=lt-.2*d;up('NACHEINANDER',80,600,36,l,{al:'left',w:700,ls:.14,c:DIM});bar(80,650,450,DIM,'Abwehr',l-.1);bar(550,650,450,DIM,'Angriff',l-.7);up('2 Zeiten',1000,810,54,l-1.3,{al:'right',c:DIM});
+  l=lt-.55*d;up('GLEICHZEITIG',80,1000,36,l,{al:'left',w:700,ls:.14,c:RED});bar(80,1050,450,RED,'Abwehr',l-.1);bar(80,1160,450,INK,'Angriff',l-.1);up('1 Zeit',530,1320,54,l-.7,{al:'right',c:RED});
+  if(l>0){line(540,560,540,1400,INK,2,.5*pr(l,0,.4),[8,10])}
+  up('Eine Bewegung.',540,1540,84,lt-.82*d);},
+(lt,d)=>{ // 4 System
+  head('04','DAS SYSTEM',lt);
+  [[.2,'Siu Nim Tao','die kleine Idee'],[.36,'Chum Kiu','das Suchen der Brücke'],[.56,'Biu Jee','die stoßenden Finger']].forEach(([c,a,b],i)=>{const l=lt-c*d,y=520+i*190;if(l<0)return;const p=eo(pr(l,0,.45));
+    rect(80,y+lerp(30,0,p),920,160,'#e4dccb',p,16);circ(170,y+80,46,RED,{a:p});txt(String(i+1),170,y+82,52,{c:BG,a:p});
+    txt(a,250,y+58,62,{al:'left',a:p,ls:-.01});txt(b,252,y+116,38,{al:'left',w:500,ls:0,c:DIM,a:p})});
+  const ic=(cx,l,s,draw)=>{if(l<0)return;const p=eo(pr(l,0,.45));g.save();g.globalAlpha=p;g.translate(cx,1300+lerp(30,0,p));g.strokeStyle=INK;g.fillStyle=INK;g.lineWidth=12;g.lineCap='round';draw();g.restore();up(s,cx,1510,38,l,{w:700,ls:0,max:300})};
+  ic(220,lt-.72*d,'Holzpuppe',()=>{g.fillRect(-28,-150,56,300);const L=(a,b,c,e)=>{g.beginPath();g.moveTo(a,b);g.lineTo(c,e);g.stroke()};L(-28,-90,-120,-120);L(28,-90,120,-120);L(0,-20,0,-20);g.strokeStyle=RED;L(-28,-10,-110,10);g.strokeStyle=INK;L(28,70,90,100);L(90,100,90,150)});
+  ic(540,lt-.82*d,'Langstock',()=>{g.beginPath();g.moveTo(-130,140);g.lineTo(130,-150);g.stroke();g.fillStyle=RED;g.beginPath();g.arc(130,-150,12,0,7);g.fill()});
+  ic(860,lt-.9*d,'Doppelmesser',()=>{for(const s of[-1,1]){g.save();g.translate(s*45,0);g.rotate(s*.28);g.lineWidth=26;g.beginPath();g.moveTo(0,-150);g.lineTo(0,40);g.stroke();g.strokeStyle=RED;g.lineWidth=12;g.beginPath();g.moveTo(-34,52);g.lineTo(34,52);g.stroke();g.strokeStyle=INK;g.lineWidth=16;g.beginPath();g.moveTo(0,60);g.lineTo(0,140);g.stroke();g.restore()}});},
+(lt,d)=>{ // 5 Chi Sao
+  head('05','CHI SAO',lt);
+  const a=eo(pr(lt,.2,.7)),ph=lt*2.6,s=Math.sin(ph),y1=760+110*s,y2=980-110*s;
+  const arm=(sx,sy,ex,ey,k,c)=>{g.save();g.globalAlpha=a;g.strokeStyle=c;g.lineWidth=22;g.lineCap='round';g.lineJoin='round';g.beginPath();g.moveTo(sx,sy);g.quadraticCurveTo((sx+ex)/2,(sy+ey)/2+k,ex,ey);g.stroke();g.restore()};
+  arm(250,800,540,y1,-70,INK);arm(250,940,540,y2,70,INK);arm(830,800,540,y1,-70,RED);arm(830,940,540,y2,70,RED);
+  circ(220,870,92,INK,{a});circ(860,870,92,RED,{a});circ(540,y1,20,BG,{a});circ(540,y2,20,BG,{a});
+  circ(540,y1,20+((lt*1.3)%1)*46,INK,{stroke:3,a:a*(1-((lt*1.3)%1))});
+  up('„Klebende Arme“',540,1230,84,lt-.3*d);
+  pill('ständiger Kontakt',540,1400,lt-.42*d);pill('Druck fühlen',300,1510,lt-.6*d);pill('sofort reagieren',720,1510,lt-.76*d,{fill:RED,c:RED});},
+(lt,d)=>{ // 6 GEVT
+  head('06','DIE METHODE',lt);
+  seal(540,640,96,pr(lt,.2,.7));up('G.E. VING TSUN',540,840,124,lt-.3);up('Sifu Göksel Erdogan · Stuttgart',540,935,46,lt-.6,{w:600,ls:.02,c:RED});
+  const row=(y,s,l)=>{if(l<0)return;rect(110,y-14,28,28,RED,eo(pr(l,0,.3)));up(s,170,y,52,l,{al:'left',w:800,ls:-.005,max:820})};
+  row(1090,'Prinzipien statt Techniksammlung',lt-.38*d);row(1190,'Logisch und physikalisch erklärt',lt-.58*d);
+  const l=lt-.78*d;if(l>0){for(let i=0;i<8;i++){const p=eo(pr(l,i*.09,i*.09+.4)),h=(30+i*24)*p;rect(110+i*110,1520-h,90,h,i==7?RED:INK,1,6);txt(String(i+1),155+i*110,1556,32,{w:700,c:DIM,a:p})}
+    up('8 Grade durch das ganze System',540,1640,46,l-.5,{w:600,ls:0,c:DIM})}},
+(lt,d)=>{ // 7 Schluss
+  up('VING TSUN',540,660,70,lt-.2,{ls:.2,c:DIM});
+  up('NICHT',540,860,190,lt-.36*d);up('NACHMACHEN.',540,1030,140,lt-.36*d-.1);const p=eio(pr(lt,.62*d,.62*d+.3));rect(70,935,940*p,20,RED);
+  up('VERSTEHEN.',540,1250,180,lt-.66*d,{c:RED});
+  seal(540,1500,56,pr(lt,.8*d,.8*d+.5));up('G.E. Ving Tsun · Sifu Göksel Erdogan',540,1610,38,lt-.8*d-.2,{w:600,ls:.02});}
+];
+function render(t){
+  g.setTransform(1,0,0,1,0,0);g.globalAlpha=1;g.fillStyle=BG;g.fillRect(0,0,W,H);
+  let i=TL.findIndex(c=>t<c.s+c.d);if(i<0)i=TL.length-1;const c=TL[i],lt=t-c.s;
+  S[i](lt,c.d);
+  // weicher Kapitelwechsel
+  const fo=Math.max(1-pr(lt,0,.3),i<TL.length-1?pr(lt,c.d-.25,c.d):0);if(fo>0){g.globalAlpha=fo;g.fillStyle=BG;g.fillRect(0,440,W,H)}
+  g.globalAlpha=1;
+  // Kapitel-Fortschritt
+  const n=TL.length,gw=(920-(n-1)*10)/n;TL.forEach((k,j)=>{const x=80+j*(gw+10);rect(x,190,gw,8,RULE,1,4);const p=pr(t,k.s,k.s+k.d);if(p>0)rect(x,190,gw*p,8,j==i?RED:INK,1,4)});
+  // Papierkorn + Rand
+  g.fillStyle=INK;for(let j=0;j<2600;j++){g.globalAlpha=.05*rnd(j*3.1);g.fillRect(rnd(j*1.7)*W,rnd(j*2.3)*H,2,2)}
+  g.globalAlpha=1;const v=g.createRadialGradient(540,960,600,540,960,1250);v.addColorStop(0,'rgba(60,40,10,0)');v.addColorStop(1,'rgba(60,40,10,.16)');g.fillStyle=v;g.fillRect(0,0,W,H);
+  const e=pr(t,DUR-.6,DUR);if(e>0){g.globalAlpha=e;g.fillStyle='#000';g.fillRect(0,0,W,H);g.globalAlpha=1}
+}
+window.render=render;
+if(!location.hash.includes('cap')){const t0=performance.now();(function loop(){render(((performance.now()-t0)/1000)%DUR);requestAnimationFrame(loop)})()}
+</script></body></html>
