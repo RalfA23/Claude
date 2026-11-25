@@ -175,6 +175,11 @@ footer{margin-top:28px;font-size:.8rem;color:var(--muted)}
       <div class="gv3" data-b="denk"></div>
       <button type="button" class="btn primary wide gvdone" id="gdDone" aria-pressed="false">Nachgedacht</button>
     </section>
+    <section class="card gevt" id="gevtMesser" hidden aria-labelledby="gmTitle">
+      <div class="between"><h2 id="gmTitle">🔪 Doppelmesser heute</h2><span class="thema" id="gmStand"></span></div>
+      <div class="gv3" data-b="messer"></div>
+      <button type="button" class="btn primary wide gvdone" id="gmDone" aria-pressed="false">Doppelmesser erledigt</button>
+    </section>
     <p class="store" id="store"></p>
 
     <div class="tabs" role="tablist">
@@ -507,9 +512,9 @@ function vorlageAusLink() {
    aus Notizen/Masterclass/Videos), ein einziger Haken, Aufgabe oben, Erläuterung zum Ausklappen, Anzahl per Würfel,
    Wiederholung durch Rotation (seltenstes Thema zuerst) und Zählung. Texte kommen über die Edge Function gevt-ask.
    Tagesdokument gewohnheiten/gevt3.<datum> = {form|denk|frei: {thema, aufgabe, erklaerung, stufe, quellen, anzahl, versuch}}.
-   Der Haken ist die Gewohnheit gevt-aufgabe (auch per Uhr). */
-const GEVT_ID = "gevt-aufgabe", DENK_ID = "gevt-denk", GEVT3 = "gewohnheiten/gevt3.", GB = GW.GEVT_BEREICHE, GR = GW.GEVT_REIHE, GA = GW.GEVT_ALLE;
-const hakenId = b => b === "denk" ? DENK_ID : GEVT_ID;
+   Der Haken ist die Gewohnheit gevt-aufgabe (auch per Uhr). Doppelmesser (seit 2026-11-25) hat eine eigene Karte mit Haken gevt-messer. */
+const GEVT_ID = "gevt-aufgabe", DENK_ID = "gevt-denk", MESSER_ID = "gevt-messer", GEVT3 = "gewohnheiten/gevt3.", GB = GW.GEVT_BEREICHE, GR = GW.GEVT_REIHE, GA = GW.GEVT_ALLE;
+const hakenId = b => b === "denk" ? DENK_ID : b === "messer" ? MESSER_ID : GEVT_ID;
 let gevtAn = false, gevtTag = {};
 const gevtDocs = {}, gevtBusy = {};
 const ohneFett = t => String(t || "").replace(/\*\*(.+?)\*\*/g, "$1");
@@ -521,6 +526,7 @@ function gevtListe() {
   let l = habits().filter(g => g.id !== "gevt-form"), geaendert = l.length !== habits().length;
   if (!l.some(g => g.id === GEVT_ID)) { l = l.concat([{id: GEVT_ID, n: "GEVT-Aufgaben", i: "🥋", f: "dusk"}]); geaendert = true; }
   if (!l.some(g => g.id === DENK_ID)) { l = l.concat([{id: DENK_ID, n: "Nachdenken", i: "💭", f: "gold"}]); geaendert = true; }
+  if (!l.some(g => g.id === MESSER_ID)) { l = l.concat([{id: MESSER_ID, n: "Doppelmesser", i: "🔪", f: "dusk"}]); geaendert = true; }
   if (geaendert) save(l);
 }
 function gevtFrage(b, thema) {
@@ -532,6 +538,7 @@ function gevtFrage(b, thema) {
   const ohne = nicht.length ? " Wichtig: etwas anderes als diese bisherigen Aufgaben, weder dieselbe Übung noch derselbe Punkt: " + nicht.map(x => "„" + ohneFett(x) + "“").join("; ") + "." : "";
   if (b === "form") return "Gib mir für heute eine Aufgabe zur Form " + thema + " aus meiner Wissensdatenbank: einen bestimmten Abschnitt oder Punkt, auf den ich beim Durchlaufen der Form heute besonders achte." + ohne + form;
   if (b === "denk") return "Gib mir für heute eine Nachdenk-Aufgabe zum Prinzip „" + thema + "“ aus meiner Wissensdatenbank: eine Frage oder einen Gedanken von Sifu Göksel oder aus meinen Notizen, über den ich heute ein paar Minuten nachdenke." + ohne + form;
+  if (b === "messer") return "Such aus meiner Wissensdatenbank (Notizen, Masterclass, Videos) eine Übung mit dem Doppelmesser (Baat Jaam Dao) zum Thema " + thema + ", die ich heute allein mache. Die Übung muss sich zählen lassen, höchstens 10 Wiederholungen." + ohne + form;
   if (b === "puppe") return "Such aus meiner Wissensdatenbank (Notizen, Masterclass, Videos) eine Übung an der Holzpuppe zum Thema " + thema + ", die ich heute allein an meiner Holzpuppe mache. Die Übung muss sich zählen lassen, höchstens 10 Wiederholungen." + ohne + form;
   return "Such aus meiner Wissensdatenbank (Notizen, Masterclass, Videos) eine Übung zum Thema " + thema + ", die ich heute allein ohne Partner machen kann, also in der Luft, im Stand, mit Schritten oder am Wandsack. Keine Partnerübung, kein Chi Sao, kein Lat Sao. Die Übung muss sich zählen lassen, höchstens 10 Wiederholungen." + ohne + form;
 }
@@ -551,7 +558,7 @@ function gevtWurf(b) {
   if (!a.anzahl) a.anzahl = GW.wuerfel(GB[b].min, GB[b].max);
 }
 function renderGevt() {
-  const el = $("gevt"); el.hidden = !gevtAn; $("gevtDenk").hidden = !gevtAn; if (!gevtAn) return;
+  const el = $("gevt"); el.hidden = !gevtAn; $("gevtDenk").hidden = !gevtAn; $("gevtMesser").hidden = !gevtAn; if (!gevtAn) return;
   const st = gevtStat();
   for (const b of GA) {
     const a = gevtTag[b] || {}, t = gevtTeil(b), z = a.thema && st[b][a.thema], heuteKey = iso(heute());
@@ -579,6 +586,12 @@ function renderGevt() {
   db.title = dd ? "Nochmal tippen nimmt den Haken zurück" : "";
   const sd = GW.serie(k => isDone(DENK_ID, k), heute());
   $("gdStand").textContent = sd ? "🔥 " + sd + (sd === 1 ? " Tag" : " Tage") : "";
+  const md = isDone(MESSER_ID, iso(heute())), mb = $("gmDone");
+  mb.setAttribute("aria-pressed", md ? "true" : "false");
+  mb.textContent = md ? "✓ Heute geübt" : "Doppelmesser erledigt";
+  mb.title = md ? "Nochmal tippen nimmt den Haken zurück" : "";
+  const sm = GW.serie(k => isDone(MESSER_ID, k), heute());
+  $("gmStand").textContent = sm ? "🔥 " + sm + (sm === 1 ? " Tag" : " Tage") : "";
   renderGevtStat(st);
 }
 function renderGevtStat(st) {
@@ -643,6 +656,13 @@ $("gdDone").addEventListener("click", async () => {
   const key = iso(heute());
   if (!isDone(DENK_ID, key) && gevtTag.denk && gevtTag.denk.thema) { gevtWurf("denk"); gevtSpeichern(); }
   await toggle(DENK_ID, key);
+  renderGevt();
+});
+$("gmDone").addEventListener("click", async () => {
+  gevtListe();
+  const key = iso(heute());
+  if (!isDone(MESSER_ID, key) && gevtTag.messer && gevtTag.messer.thema) { gevtWurf("messer"); gevtSpeichern(); }
+  await toggle(MESSER_ID, key);
   renderGevt();
 });
 async function gevtStart(docs) {

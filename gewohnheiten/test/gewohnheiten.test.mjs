@@ -111,3 +111,13 @@ test("GEVT: Antwort in Aufgabe und Erläuterung zerlegen", () => {
   const ohne = GW.gevtZerlegen("Übe heute den Tan Sao. Achte auf den Ellbogen.");
   assert.equal(ohne.aufgabe, "Übe heute den Tan Sao.");
 });
+
+test("GEVT: Doppelmesser ist eigene Rubrik mit eigenem Haken", () => {
+  assert.ok(GW.GEVT_ALLE.includes("messer"));
+  assert.ok(!GW.GEVT_REIHE.includes("messer"));
+  const m = GW.GEVT_BEREICHE.messer;
+  assert.ok(m.max <= 10 && m.min >= 1 && m.themen.length > 5);
+  const st = GW.gevtStatistik({"2026-11-25": {messer: {thema: m.themen[0], anzahl: 4}}}, (d, b) => b === "messer");
+  assert.deepEqual(st.messer[m.themen[0]], {tage: 1, summe: 4, zuletzt: "2026-11-25"});
+  assert.equal(GW.gevtNaechstes("messer", st, 0), m.themen[1]);
+});
