@@ -134,9 +134,9 @@
   };
   /* Doppelmesser (Baat Jaam Dao): eigene Karte mit eigenem Haken gevt-messer (Ralf, 2026-11-25). */
   /* Doppelmesser (Baat Jaam Dao): eigene Karte mit eigenem Haken gevt-messer (Ralf, 2026-11-25).
-     Inhalt sind die 8 Solodrills: jeden Tag ein Drill als Schwerpunkt, die Erläuterung listet alle 8 aus der Wissensdatenbank. */
+     Inhalt sind die 8 Solodrills, so wie Ralf sie korrigiert hat (2026-11-25): jeden Tag ein Drill als Schwerpunkt, die Erläuterung zeigt immer alle 8. */
   GEVT_BEREICHE.messer = {titel: "Doppelmesser · 8 Solodrills", icon: "🔪", einheit: ["Wiederholung", "Wiederholungen"], min: 3, max: 10,
-    themen: ["Solodrill 1", "Solodrill 2", "Solodrill 3", "Solodrill 4", "Solodrill 5", "Solodrill 6", "Solodrill 7", "Solodrill 8"]};
+    themen: ["Drill 1: Päh, links und rechts", "Drill 2: Gap oder Päh, Chi, Päh", "Drill 3: Kwan Dao und Tan Dao", "Drill 4: Cham, Chi (horizontal), Tong, Hong (im Sei Ping Ma), Deng", "Drill 5: Cham, Gap, Biu, Biu, Päh", "Drill 6: Chi, Jut, Deng", "Drill 7: Kwan, Man", "Drill 8: alles zusammen"]};
   const GEVT_REIHE = ["form", "puppe", "frei"], GEVT_ALLE = GEVT_REIHE.concat(["denk", "messer"]);  // denk und messer sind eigene Rubriken mit eigenem Haken
   const einheit = (b, n) => GEVT_BEREICHE[b].einheit[n === 1 ? 0 : 1];
   function wuerfel(min, max, rnd) { const r = (rnd || Math.random)(); return min + Math.floor(r * (max - min + 1)); }
