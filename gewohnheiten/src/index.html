@@ -179,7 +179,7 @@ footer{margin-top:28px;font-size:.8rem;color:var(--muted)}
       <button type="button" class="btn primary wide gvdone" id="gdDone" aria-pressed="false">Nachgedacht</button>
     </section>
     <section class="card gevt" id="gevtMesser" hidden aria-labelledby="gmTitle">
-      <div class="between"><h2 id="gmTitle">🔪 Doppelmesser heute</h2><span class="thema" id="gmStand"></span></div>
+      <div class="between"><h2 id="gmTitle">🔪 Doppelmesser heute · 8 Solodrills</h2><span class="thema" id="gmStand"></span></div>
       <div class="gv3" data-b="messer"></div>
       <details class="gvinfo" id="gmInfo"><summary>📋 Erläuterung und Solo-Drills</summary>
         <div class="text" id="gmInfoText"></div>
@@ -547,7 +547,8 @@ function gevtFrage(b, thema) {
   const ohne = nicht.length ? " Wichtig: etwas anderes als diese bisherigen Aufgaben, weder dieselbe Übung noch derselbe Punkt: " + nicht.map(x => "„" + ohneFett(x) + "“").join("; ") + "." : "";
   if (b === "form") return "Gib mir für heute eine Aufgabe zur Form " + thema + " aus meiner Wissensdatenbank: einen bestimmten Abschnitt oder Punkt, auf den ich beim Durchlaufen der Form heute besonders achte." + ohne + form;
   if (b === "denk") return "Gib mir für heute eine Nachdenk-Aufgabe zum Prinzip „" + thema + "“ aus meiner Wissensdatenbank: eine Frage oder einen Gedanken von Sifu Göksel oder aus meinen Notizen, über den ich heute ein paar Minuten nachdenke." + ohne + form;
-  if (b === "messer") return "Such aus meiner Wissensdatenbank (Notizen, Masterclass, Videos) eine Übung mit dem Doppelmesser (Baat Jaam Dao) zum Thema " + thema + ", die ich heute allein mache. Die Übung muss sich zählen lassen, höchstens 10 Wiederholungen." + ohne + form;
+  if (b === "messer") return "Nimm aus meiner Wissensdatenbank (Notizen, Masterclass, Videos) die 8 Solodrills mit dem Doppelmesser (Baat Jaam Dao). Heute ist " + thema + " der Schwerpunkt: gib mir dazu einen bestimmten Punkt, auf den ich heute besonders achte, allein ohne Partner." +
+    " Antworte so: Nach der STUFE-Zeile eine Zeile, die mit „AUFGABE:“ beginnt, höchstens 15 Wörter, mit dem Namen von " + thema + ", ohne Anzahl (die würfle ich selbst). Danach die Erläuterung: zwei, drei Sätze zum Schwerpunkt, dann alle 8 Solodrills als nummerierte Liste 1. bis 8., je Drill Name und ein kurzer Satz, nur so, wie sie in der Wissensdatenbank stehen. Fehlt ein Drill dort, schreib bei ihm „steht nicht in der Wissensdatenbank“, erfinde nichts. Dann QUELLEN." + (nicht.length ? " Der Punkt soll ein anderer sein als bisher: " + nicht.map(x => "„" + ohneFett(x) + "“").join("; ") + "." : "");
   if (b === "puppe") return "Such aus meiner Wissensdatenbank (Notizen, Masterclass, Videos) eine Übung an der Holzpuppe zum Thema " + thema + ", die ich heute allein an meiner Holzpuppe mache. Die Übung muss sich zählen lassen, höchstens 10 Wiederholungen." + ohne + form;
   return "Such aus meiner Wissensdatenbank (Notizen, Masterclass, Videos) eine Übung zum Thema " + thema + ", die ich heute allein ohne Partner machen kann, also in der Luft, im Stand, mit Schritten oder am Wandsack. Keine Partnerübung, kein Chi Sao, kein Lat Sao. Die Übung muss sich zählen lassen, höchstens 10 Wiederholungen." + ohne + form;
 }

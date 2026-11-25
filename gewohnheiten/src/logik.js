@@ -133,8 +133,10 @@
       themen: ["Kettenfauststoß", "Stand (Yee Jee Kim Yeung Ma)", "Drehen im Stand", "Schrittarbeit", "Tan Sao, Bong Sao und Fook Sao in der Luft", "Pak Sao und Lap Sao als Schattenübung", "Ellbogenschläge", "Tritte", "Fauststoß am Wandsack", "eine Übung aus der Masterclass für allein", "eine Übung aus einem YouTube-Video von Sifu Göksel für allein", "eine Übung aus meinen Notizbüchern für allein"]}
   };
   /* Doppelmesser (Baat Jaam Dao): eigene Karte mit eigenem Haken gevt-messer (Ralf, 2026-11-25). */
-  GEVT_BEREICHE.messer = {titel: "Doppelmesser", icon: "🔪", einheit: ["Wiederholung", "Wiederholungen"], min: 3, max: 10,
-    themen: ["Erster Abschnitt der Doppelmesserform", "Zweiter Abschnitt der Doppelmesserform", "Dritter Abschnitt der Doppelmesserform", "Vierter Abschnitt der Doppelmesserform", "Doppelmesserform komplett", "Schrittarbeit mit den Messern", "Grundschnitte und Stiche", "Abwehrtechniken mit den Messern", "Griff, Handgelenk und Messerwechsel", "eine Doppelmesserübung aus der Masterclass", "eine Doppelmesserübung aus meinen Notizbüchern"]};
+  /* Doppelmesser (Baat Jaam Dao): eigene Karte mit eigenem Haken gevt-messer (Ralf, 2026-11-25).
+     Inhalt sind die 8 Solodrills: jeden Tag ein Drill als Schwerpunkt, die Erläuterung listet alle 8 aus der Wissensdatenbank. */
+  GEVT_BEREICHE.messer = {titel: "Doppelmesser · 8 Solodrills", icon: "🔪", einheit: ["Wiederholung", "Wiederholungen"], min: 3, max: 10,
+    themen: ["Solodrill 1", "Solodrill 2", "Solodrill 3", "Solodrill 4", "Solodrill 5", "Solodrill 6", "Solodrill 7", "Solodrill 8"]};
   const GEVT_REIHE = ["form", "puppe", "frei"], GEVT_ALLE = GEVT_REIHE.concat(["denk", "messer"]);  // denk und messer sind eigene Rubriken mit eigenem Haken
   const einheit = (b, n) => GEVT_BEREICHE[b].einheit[n === 1 ? 0 : 1];
   function wuerfel(min, max, rnd) { const r = (rnd || Math.random)(); return min + Math.floor(r * (max - min + 1)); }
