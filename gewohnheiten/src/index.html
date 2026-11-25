@@ -126,6 +126,9 @@ footer{margin-top:28px;font-size:.8rem;color:var(--muted)}
 .gv3 details{margin-top:6px}
 .gv3 details summary{cursor:pointer;color:var(--acc2);font-size:.88rem;font-weight:700;padding:4px 0}
 .gv3 .erk{white-space:pre-wrap;line-height:1.55;margin:6px 0}
+.gvinfo{margin-top:12px;border-top:1px solid var(--line);padding-top:8px}
+.gvinfo summary{cursor:pointer;color:var(--acc2);font-size:.88rem;font-weight:700;padding:4px 0}
+.gvinfo textarea{width:100%;font:inherit;line-height:1.5;padding:8px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--fg);margin:6px 0}
 .gvdone{margin-top:16px;min-height:52px;font-size:1.05rem}
 .gvdone[aria-pressed="true"]{background:var(--ok);border-color:var(--ok);color:#fff}
 .gvstat{margin-top:14px;font-size:.9rem}
@@ -178,6 +181,12 @@ footer{margin-top:28px;font-size:.8rem;color:var(--muted)}
     <section class="card gevt" id="gevtMesser" hidden aria-labelledby="gmTitle">
       <div class="between"><h2 id="gmTitle">🔪 Doppelmesser heute</h2><span class="thema" id="gmStand"></span></div>
       <div class="gv3" data-b="messer"></div>
+      <details class="gvinfo" id="gmInfo"><summary>📋 Erläuterung und Solo-Drills</summary>
+        <div class="text" id="gmInfoText"></div>
+        <div id="gmInfoForm" hidden><textarea id="gmInfoTa" rows="16" aria-label="Erläuterung und Solo-Drills"></textarea>
+          <div class="row"><button type="button" class="btn small primary" id="gmInfoSave">Speichern</button><button type="button" class="btn small" id="gmInfoAbbr">Abbrechen</button></div></div>
+        <button type="button" class="btn small" id="gmInfoEdit">Bearbeiten</button>
+      </details>
       <button type="button" class="btn primary wide gvdone" id="gmDone" aria-pressed="false">Doppelmesser erledigt</button>
     </section>
     <p class="store" id="store"></p>
@@ -665,6 +674,24 @@ $("gmDone").addEventListener("click", async () => {
   await toggle(MESSER_ID, key);
   renderGevt();
 });
+/* Erläuterung und Solo-Drills zum Doppelmesser (Ralf, 2026-11-25): fester Text, nicht von der Wissensdatenbank erzeugt.
+   Der Inhalt liegt nur im Konto (gewohnheiten/gevt-messer-info = {text, stand}), nie im öffentlichen Repo; in der Karte bearbeitbar. */
+const MESSER_INFO = "gewohnheiten/gevt-messer-info";
+let messerInfo = null;
+function renderMesserInfo() {
+  const t = messerInfo && messerInfo.text;
+  $("gmInfoText").textContent = t || "Noch keine Erläuterung eingetragen. Über „Bearbeiten“ eintragen.";
+  $("gmInfoText").hidden = !$("gmInfoForm").hidden;
+}
+$("gmInfoEdit").addEventListener("click", () => {
+  $("gmInfoTa").value = (messerInfo && messerInfo.text) || ""; $("gmInfoForm").hidden = false; $("gmInfoEdit").hidden = true; renderMesserInfo(); $("gmInfoTa").focus();
+});
+function messerInfoZu() { $("gmInfoForm").hidden = true; $("gmInfoEdit").hidden = false; renderMesserInfo(); }
+$("gmInfoAbbr").addEventListener("click", messerInfoZu);
+$("gmInfoSave").addEventListener("click", async () => {
+  messerInfo = {text: $("gmInfoTa").value.trim(), stand: new Date().toISOString()};
+  messerInfoZu(); await Konto.put(MESSER_INFO, messerInfo);
+});
 async function gevtStart(docs) {
   const sb = Konto.sb; if (!sb || !Konto.user) return;
   try {
@@ -673,6 +700,7 @@ async function gevtStart(docs) {
   } catch (e) { gevtAn = false; }
   if (!gevtAn) return;
   for (const [p, v] of Object.entries(docs)) if (p.startsWith(GEVT3) && v) gevtDocs[p.slice(GEVT3.length)] = v;
+  messerInfo = docs[MESSER_INFO] || null; renderMesserInfo();
   const key = iso(heute());
   gevtTag = Object.assign({}, gevtDocs[key] || {});
   gevtListe();
