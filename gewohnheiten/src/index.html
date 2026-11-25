@@ -126,6 +126,9 @@ footer{margin-top:28px;font-size:.8rem;color:var(--muted)}
 .gv3 details{margin-top:6px}
 .gv3 details summary{cursor:pointer;color:var(--acc2);font-size:.88rem;font-weight:700;padding:4px 0}
 .gv3 .erk{white-space:pre-wrap;line-height:1.55;margin:6px 0}
+.gv3 .drillsKopf{font-weight:700;margin:10px 0 2px}
+.gv3 .drills{margin:0 0 8px;padding-left:1.4em;line-height:1.55}
+.gv3 .drills li.heute{font-weight:700;color:var(--dusk)}
 .gvinfo{margin-top:12px;border-top:1px solid var(--line);padding-top:8px}
 .gvinfo summary{cursor:pointer;color:var(--acc2);font-size:.88rem;font-weight:700;padding:4px 0}
 .gvinfo textarea{width:100%;font:inherit;line-height:1.5;padding:8px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--fg);margin:6px 0}
@@ -547,8 +550,8 @@ function gevtFrage(b, thema) {
   const ohne = nicht.length ? " Wichtig: etwas anderes als diese bisherigen Aufgaben, weder dieselbe Übung noch derselbe Punkt: " + nicht.map(x => "„" + ohneFett(x) + "“").join("; ") + "." : "";
   if (b === "form") return "Gib mir für heute eine Aufgabe zur Form " + thema + " aus meiner Wissensdatenbank: einen bestimmten Abschnitt oder Punkt, auf den ich beim Durchlaufen der Form heute besonders achte." + ohne + form;
   if (b === "denk") return "Gib mir für heute eine Nachdenk-Aufgabe zum Prinzip „" + thema + "“ aus meiner Wissensdatenbank: eine Frage oder einen Gedanken von Sifu Göksel oder aus meinen Notizen, über den ich heute ein paar Minuten nachdenke." + ohne + form;
-  if (b === "messer") return "Nimm aus meiner Wissensdatenbank (Notizen, Masterclass, Videos) die 8 Solodrills mit dem Doppelmesser (Baat Jaam Dao). Heute ist " + thema + " der Schwerpunkt: gib mir dazu einen bestimmten Punkt, auf den ich heute besonders achte, allein ohne Partner." +
-    " Antworte so: Nach der STUFE-Zeile eine Zeile, die mit „AUFGABE:“ beginnt, höchstens 15 Wörter, mit dem Namen von " + thema + ", ohne Anzahl (die würfle ich selbst). Danach die Erläuterung: zwei, drei Sätze zum Schwerpunkt, dann alle 8 Solodrills als nummerierte Liste 1. bis 8., je Drill Name und ein kurzer Satz, nur so, wie sie in der Wissensdatenbank stehen. Fehlt ein Drill dort, schreib bei ihm „steht nicht in der Wissensdatenbank“, erfinde nichts. Dann QUELLEN." + (nicht.length ? " Der Punkt soll ein anderer sein als bisher: " + nicht.map(x => "„" + ohneFett(x) + "“").join("; ") + "." : "");
+  if (b === "messer") return "Ich übe mit dem Doppelmesser (Baat Jaam Dao) diese 8 Solodrills: " + GB.messer.themen.join("; ") + ". Heute ist " + thema + " der Schwerpunkt. Gib mir aus meiner Wissensdatenbank (Notizen, Masterclass, Videos) einen bestimmten Punkt, auf den ich bei diesem Drill heute besonders achte, allein ohne Partner. Nimm die Namen der Drills genau so, wie sie hier stehen." + ohne +
+    " Antworte so: Nach der STUFE-Zeile eine Zeile, die mit „AUFGABE:“ beginnt, höchstens 15 Wörter, ohne Anzahl (die würfle ich selbst). Danach die Erläuterung in 60 bis 120 Wörtern zu diesem Drill, die die Aufgabe nicht noch einmal wiederholt und keine Liste der Drills enthält (die zeige ich selbst), dann QUELLEN.";
   if (b === "puppe") return "Such aus meiner Wissensdatenbank (Notizen, Masterclass, Videos) eine Übung an der Holzpuppe zum Thema " + thema + ", die ich heute allein an meiner Holzpuppe mache. Die Übung muss sich zählen lassen, höchstens 10 Wiederholungen." + ohne + form;
   return "Such aus meiner Wissensdatenbank (Notizen, Masterclass, Videos) eine Übung zum Thema " + thema + ", die ich heute allein ohne Partner machen kann, also in der Luft, im Stand, mit Schritten oder am Wandsack. Keine Partnerübung, kein Chi Sao, kein Lat Sao. Die Übung muss sich zählen lassen, höchstens 10 Wiederholungen." + ohne + form;
 }
@@ -558,6 +561,12 @@ function gevtTeil(b) {
     el.innerHTML = '<div class="kopf"><span></span><span class="th"></span></div><div class="auf"><p></p><div class="zahl" hidden><b></b><small></small></div><button type="button" class="btn wurf">🎲 Anzahl</button></div>' +
       '<details><summary>Erläuterung</summary><span class="stufe" hidden></span><p class="erk"></p><p class="src" hidden></p><button type="button" class="btn small neu">Andere Aufgabe</button></details>';
     el.querySelector(".kopf span").textContent = GB[b].icon + " " + GB[b].titel;
+    if (b === "messer") {  // Die 8 Solodrills stehen fest (Ralfs Korrektur) und erscheinen immer in der Erläuterung, der heutige hervorgehoben.
+      const ol = document.createElement("ol"); ol.className = "drills";
+      for (const d of GB.messer.themen) { const li = document.createElement("li"); li.textContent = d.replace(/^Drill \d+: /, ""); li.dataset.t = d; ol.appendChild(li); }
+      const h = document.createElement("p"); h.className = "drillsKopf"; h.textContent = "Die 8 Solodrills";
+      el.querySelector(".erk").after(h, ol);
+    }
     el.querySelector(".wurf").addEventListener("click", () => { gevtWurf(b); gevtSpeichern(); renderGevt(); });
     el.querySelector(".neu").addEventListener("click", () => gevtHolen(b, true));
   }
@@ -579,6 +588,7 @@ function renderGevt() {
     const zahl = t.querySelector(".zahl"), wurf = t.querySelector(".wurf");
     zahl.hidden = !a.anzahl; wurf.hidden = !!a.anzahl;
     if (a.anzahl) { zahl.querySelector("b").textContent = a.anzahl; zahl.querySelector("small").textContent = GW.einheit(b, a.anzahl); }
+    for (const li of t.querySelectorAll(".drills li")) li.classList.toggle("heute", li.dataset.t === a.thema);
     const sf = t.querySelector(".stufe"); sf.hidden = !a.stufe; sf.textContent = a.stufe || "";
     t.querySelector(".erk").textContent = ohneFett(a.erklaerung || "");
     const sr = t.querySelector(".src"); sr.hidden = !a.quellen; sr.textContent = a.quellen ? "Quellen:\n" + a.quellen : "";
